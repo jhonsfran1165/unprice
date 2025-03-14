@@ -25,6 +25,12 @@ export const metricSchema = z.discriminatedUnion("metric", [
     latency: z.number(),
   }),
   z.object({
+    metric: z.literal("metric.cache.size"),
+    name: z.string(),
+    tier: z.literal("memory"),
+    size: z.number(),
+  }),
+  z.object({
     metric: z.literal("metric.feature.verification"),
     valid: z.boolean(),
     code: z.string(),
@@ -69,7 +75,7 @@ export const metricSchema = z.discriminatedUnion("metric", [
     query: z.enum(["reportUsageFeature", "createUsageFeature"]),
     duration: z.number(),
     service: z.string(),
-  }),
+  })
 ])
 
 export type Metric = z.infer<typeof metricSchema>

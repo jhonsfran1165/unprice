@@ -108,6 +108,5 @@
   },
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"
-  },
-  "CodeGPT.apiKey": "Ollama"
+  }
 }

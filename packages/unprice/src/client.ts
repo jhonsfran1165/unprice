@@ -60,27 +60,27 @@ export type UnpriceOptions = {
 type ApiRequest = {
   path: string[]
 } & (
-  | {
+    | {
       method: "GET"
       body?: never
       query?: Record<string, string | number | boolean | null>
     }
-  | {
+    | {
       method: "POST"
       body?: unknown
       query?: never
     }
-)
+  )
 
 type Result<R> =
   | {
-      result: R
-      error?: never
-    }
+    result: R
+    error?: never
+  }
   | {
-      result?: never
-      error: ErrorResponse["error"]
-    }
+    result?: never
+    error: ErrorResponse["error"]
+  }
 
 export class Unprice {
   private readonly baseUrl: string
@@ -120,7 +120,7 @@ export class Unprice {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${this.token}`,
-      "x-trpc-source": "sdk", // TODO: add version here
+      "unprice-request-source": "sdk", // TODO: add version here
     }
     if (this.telemetry?.sdkVersions) {
       headers["Unprice-Telemetry-SDK"] = this.telemetry.sdkVersions.join(",")
@@ -165,7 +165,7 @@ export class Unprice {
         return null // set `res` to `null`
       })
 
-      if (res?.ok) {
+      if (res && res.status >= 200 && res.status <= 299) {
         const response = (await res.json()) as Result<{
           data: SuperJSONResult
         }>
@@ -176,19 +176,20 @@ export class Unprice {
         return { result: result as TResult }
       }
 
-      const backoff = this.retry.backoff(i)
+      // 400-499 -> client error, retries are futile
+      if (res && res.status >= 400 && res.status <= 499) {
+        return (await res.json()) as ErrorResponse;
+      }
+
+      const backoff = this.retry.backoff(i);
 
       console.debug(
-        "attempt %d of %d to reach %s failed, retrying in %d ms: %s",
-        i + 1,
-        this.retry.attempts + 1,
-        url,
-        backoff,
-        // @ts-expect-error I don't understand why `err` is `never`
-        err?.message
-      )
+        `attempt ${i + 1} of ${this.retry.attempts + 1
+        } to reach ${url} failed, retrying in ${backoff} ms: status=${res?.status
+        } | ${res?.headers.get("unprice-request-id")}`,
+      );
 
-      await new Promise((r) => setTimeout(r, backoff))
+      await new Promise((r) => setTimeout(r, backoff));
     }
 
     if (res) {

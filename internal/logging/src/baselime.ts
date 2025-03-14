@@ -1,5 +1,5 @@
 import { BaselimeLogger } from "@baselime/edge-logger"
-import { Log } from "@unprice/logs"
+import { Log, type LogSchema } from "@unprice/logs"
 import type { Fields, Logger } from "./interface"
 
 interface Context {
@@ -10,6 +10,8 @@ export class BaseLimeLogger implements Logger {
   private requestId: string
   private readonly client: BaselimeLogger
   private readonly defaultFields?: Fields
+  private readonly environment: LogSchema["environment"]
+  private readonly application: LogSchema["application"]
 
   constructor(opts: {
     requestId: string
@@ -22,9 +24,13 @@ export class BaseLimeLogger implements Logger {
     dataset: string
     flushAfterMs?: number
     flushAfterLogs?: number
+    environment: LogSchema["environment"]
+    application: LogSchema["application"]
   }) {
     this.requestId = opts.requestId
     this.defaultFields = opts?.defaultFields ?? {}
+    this.environment = opts.environment
+    this.application = opts.application
 
     this.client = new BaselimeLogger({
       apiKey: opts.apiKey,
@@ -46,6 +52,8 @@ export class BaseLimeLogger implements Logger {
       time: Date.now(),
       level,
       message,
+      environment: this.environment,
+      application: this.application,
     }).toString()
   }
 

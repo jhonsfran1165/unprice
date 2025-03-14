@@ -64,7 +64,6 @@ export const featureVerificationSchemaV1 = z.object({
   requestId: z.string(),
   workspaceId: z.string(),
   metadata: nullableJsonToString.default(null),
-  __tb__deployment: z.string().optional(),
 })
 
 export const featureUsageSchemaV1 = z.object({

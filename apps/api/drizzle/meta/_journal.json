@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1741886499623,
+      "tag": "0000_oval_warhawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1741886697711,
+      "tag": "0001_warm_cloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1741886744262,
+      "tag": "0002_remarkable_lockheed",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1741886844728,
+      "tag": "0003_steady_king_bedlam",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1741945289584,
+      "tag": "0004_skinny_supreme_intelligence",
+      "breakpoints": true
+    }
+  ]
+}

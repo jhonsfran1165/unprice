@@ -1,0 +1,1 @@
+CREATE INDEX `key_id_index` ON `usage_records` (`key_id`);

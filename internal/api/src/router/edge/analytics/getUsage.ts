@@ -5,8 +5,8 @@ import { protectedApiOrActiveProjectProcedure } from "#trpc"
 export const getUsage = protectedApiOrActiveProjectProcedure
   .input(
     z.object({
-      start: z.number().optional(),
-      end: z.number().optional(),
+      start: z.number(),
+      end: z.number(),
     })
   )
   .output(
@@ -29,7 +29,7 @@ export const getUsage = protectedApiOrActiveProjectProcedure
     const project = opts.ctx.project
 
     const data = await opts.ctx.analytics
-      .getFeaturesUsage({
+      .getFeaturesUsagePeriod({
         projectId: project.id,
         start: opts.input.start,
         end: opts.input.end,
