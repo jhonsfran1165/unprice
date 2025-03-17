@@ -12,7 +12,7 @@ import {
 import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
-import { cuid, timestamps } from "../utils/fields.sql"
+import { cuid, timestamps } from "../utils/fields"
 import { projectID } from "../utils/sql"
 import type {
   invoiceMetadataSchema,

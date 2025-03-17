@@ -2,16 +2,17 @@ import GitHub from "@auth/core/providers/github"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import type { NextAuthConfig } from "next-auth"
 
-import { and, db, eq, sql } from "@unprice/db"
-import { workspacesByUserPrepared } from "@unprice/db/queries"
+import { and, eq, sql } from "@unprice/db"
+import { createWorkspacesByUserQuery } from "@unprice/db/queries"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import type { WorkspacesJWTPayload } from "@unprice/db/validators"
+import { db } from "./db"
 
 const useSecureCookies = process.env.VERCEL_ENV === "production"
 const log = console // TODO: create a logger for this
 
-export const authConfig = {
+export const authConfig: NextAuthConfig = {
   trustHost: Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
   logger: {
     debug: (message, metadata) => log.debug(message, { metadata }),
@@ -155,7 +156,7 @@ export const authConfig = {
           return token
         }
 
-        const userWithWorkspaces = await workspacesByUserPrepared.execute({
+        const userWithWorkspaces = await createWorkspacesByUserQuery(db).execute({
           userId,
         })
 

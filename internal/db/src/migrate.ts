@@ -1,11 +1,20 @@
 import { eq } from "drizzle-orm"
-import { db } from "."
+import { createConnection } from "./index"
 import * as schema from "./schema"
 import { newId } from "./utils"
 
 import { migrate } from "drizzle-orm/neon-serverless/migrator"
+import { env } from "../env.mjs"
 
 async function main() {
+  const db = createConnection({
+    env: env.NODE_ENV,
+    primaryDatabaseUrl: env.DATABASE_URL,
+    read1DatabaseUrl: env.DATABASE_URL,
+    read2DatabaseUrl: env.DATABASE_URL,
+    logger: env.DRIZZLE_LOG,
+  })
+
   await migrate(db, { migrationsFolder: "src/migrations" })
 
   const start = Date.now()

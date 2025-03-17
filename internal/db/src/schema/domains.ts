@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm"
 import { boolean, foreignKey, index, text } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { id, timestamps, workspaceID } from "../utils/fields.sql"
+import { id, timestamps, workspaceID } from "../utils/fields"
 import { workspaces } from "./workspaces"
 
 export const domains = pgTableProject(

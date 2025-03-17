@@ -1,4 +1,4 @@
-import { db, eq } from "@unprice/db"
+import { eq } from "@unprice/db"
 import { subscriptions } from "@unprice/db/schema"
 import type { Customer, Subscription, SubscriptionStatus } from "@unprice/db/validators"
 import { Err, Ok, type Result } from "@unprice/error"
@@ -15,6 +15,7 @@ import {
   setup,
 } from "xstate"
 import { UnPriceMachineError } from "#services/machine/errors"
+import { db } from "#utils/db"
 
 import { logTransition, sendCustomerNotification, updateSubscription } from "./actions"
 import {

@@ -89,7 +89,7 @@
     "ssr-only-secrets": "^0.1.2",
     "superjson": "2.2.1",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.23.8",
+    "zod": "^3.24.2,",
     "zod-validation-error": "^3.3.1"
   },
   "overrides": {

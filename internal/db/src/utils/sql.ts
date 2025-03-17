@@ -1,5 +1,5 @@
 import { projects } from "../schema/projects"
-import { cuid } from "./fields.sql"
+import { cuid } from "./fields"
 
 // for rest of tables
 export const projectID = {

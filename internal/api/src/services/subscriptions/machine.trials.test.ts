@@ -1,10 +1,11 @@
-import { type Database, db } from "@unprice/db"
+import type { Database } from "@unprice/db"
 import { invoices, subscriptions } from "@unprice/db/schema"
 import type { Customer, Subscription, SubscriptionPhaseExtended } from "@unprice/db/validators"
 import { Ok } from "@unprice/error"
 import type { ConsoleLogger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { db } from "#utils/db"
 import { SubscriptionMachine } from "./machine"
 
 // Mock environment variables

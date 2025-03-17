@@ -1,8 +1,9 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
-import { and, db, eq } from "@unprice/db"
+import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
+import { db } from "~/lib/db"
 import { ratelimitOrThrow } from "~/lib/ratelimit"
 import { api } from "~/trpc/server"
 

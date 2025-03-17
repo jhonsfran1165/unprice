@@ -1,0 +1,18 @@
+{
+  "extends": "@unprice/tsconfig/base.json",
+  "compilerOptions": {
+    /* Specify what module code is generated. */
+    "module": "esnext",
+    /* Specify how TypeScript looks up a file from a given module specifier. */
+    "moduleResolution": "bundler",
+    /* Specify type package names to be included without being referenced in a source file. */
+    "types": ["@cloudflare/workers-types/2023-07-01"],
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"]
+    }
+  },
+  "include": ["drizzle.config.ts", "src"],
+  "exclude": ["node_modules", ".wrangler", "dist", ".turbo"]
+}

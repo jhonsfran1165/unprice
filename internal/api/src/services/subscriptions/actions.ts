@@ -1,8 +1,9 @@
-import { and, db, eq } from "@unprice/db"
+import { and, eq } from "@unprice/db"
 import { subscriptions } from "@unprice/db/schema"
 import type { Subscription } from "@unprice/db/validators"
 import type { Logger } from "@unprice/logging"
 import { env } from "#env.mjs"
+import { db } from "#utils/db"
 import type { SubscriptionContext, SubscriptionEvent } from "./types"
 
 /**

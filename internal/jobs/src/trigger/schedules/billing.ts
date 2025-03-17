@@ -1,5 +1,5 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
-import { db } from "@unprice/db"
+import { db } from "../../db"
 import { billingTask } from "../tasks/billing"
 import { finilizeTask } from "../tasks/finilize"
 

@@ -1,4 +1,4 @@
-import { and, db, eq } from "@unprice/db"
+import { and, eq } from "@unprice/db"
 import { invoices } from "@unprice/db/schema"
 import { AesGCM } from "@unprice/db/utils"
 import {
@@ -16,6 +16,7 @@ import { Err, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { env } from "#env.mjs"
+import { db } from "#utils/db"
 import { PaymentProviderService } from "../payment-provider"
 import { UnPriceSubscriptionError } from "./errors"
 

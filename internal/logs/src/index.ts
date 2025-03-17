@@ -1,5 +1,5 @@
-import { metricSchema } from "@unprice/metrics";
-import { z } from "zod";
+import { metricSchema } from "@unprice/metrics"
+import { z } from "zod"
 
 export const logContext = z.object({
   requestId: z.string(),
@@ -13,7 +13,7 @@ export const logSchema = z.discriminatedUnion("type", [
     time: z.number(),
     message: z.string(),
     context: z.record(z.any()).optional(),
-    environment: z.enum(["development", "preview", "test", "production"]).default("development"),
+    environment: z.enum(["development", "test", "production"]).default("development"),
     application: z.string(),
   }),
   z.object({
@@ -21,13 +21,12 @@ export const logSchema = z.discriminatedUnion("type", [
     requestId: z.string(),
     time: z.number(),
     metric: metricSchema,
-    environment: z.enum(["development", "preview", "test", "production"]).default("development"),
+    environment: z.enum(["development", "test", "production"]).default("development"),
     application: z.string(),
   }),
 ])
 
-
-export type LogSchema = z.infer<typeof logSchema>;
+export type LogSchema = z.infer<typeof logSchema>
 
 export class Log<TLog extends LogSchema = LogSchema> {
   public readonly log: TLog

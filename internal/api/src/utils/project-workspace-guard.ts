@@ -1,9 +1,10 @@
 import { TRPCError } from "@trpc/server"
 
-import { projectWorkspaceGuardPrepared } from "@unprice/db/queries"
 import type { ProjectExtended, User, WorkspaceRole } from "@unprice/db/validators"
 
+import { createProjectWorkspaceGuardQuery } from "@unprice/db/queries"
 import type { Context } from "#trpc"
+import { db } from "./db"
 
 interface ProjectGuardType {
   project: ProjectExtended
@@ -40,7 +41,7 @@ export const projectWorkspaceGuard = async ({
   // we execute this in a prepared statement to improve performance
   // INFO: keep in mind that this executes outside of the context of trpc
   // apart from checking the project is part of the workspace, we also check if the user has access to the workspace
-  const data = await projectWorkspaceGuardPrepared
+  const data = await createProjectWorkspaceGuardQuery(db)
     .execute({
       projectId: projectId,
       projectSlug: projectSlug,

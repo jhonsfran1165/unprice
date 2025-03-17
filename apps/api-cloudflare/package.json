@@ -1,0 +1,37 @@
+{
+  "name": "@unprice/api-cloudflare",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "sh dev.sh",
+    "dev:wrangler": "wrangler dev",
+    "start": "wrangler dev",
+    "cf-typegen": "wrangler types",
+    "db:generate": "drizzle-kit generate",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250311.0",
+    "@unprice/tsconfig": "workspace:^",
+    "drizzle-kit": "^0.30.5",
+    "typescript": "^5.3.3",
+    "wrangler": "^4.0.0"
+  },
+  "dependencies": {
+    "@chronark/zod-bird": "^0.3.10",
+    "@hono/zod-openapi": "^0.19.2",
+    "@neondatabase/serverless": "^0.10.4",
+    "@unkey/cache": "^1.5.0",
+    "@unprice/db": "workspace:^",
+    "@unprice/error": "workspace:^",
+    "@unprice/id": "workspace:^",
+    "@unprice/logging": "workspace:^",
+    "@unprice/logs": "workspace:^",
+    "@unprice/metrics": "workspace:^",
+    "@unprice/tinybird": "workspace:^",
+    "drizzle-orm": "^0.40.0",
+    "hono": "^4.7.4",
+    "hono-party": "^0.0.6",
+    "partyserver": "^0.0.65",
+    "zod": "^3.24.2"
+  }
+}

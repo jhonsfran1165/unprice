@@ -2,7 +2,7 @@ import { type Dinero, multiply, toSnapshot, transformScale, up } from "dinero.js
 
 export * from "./utils/_table"
 export * from "./utils/aesGcm"
-export * from "./utils/base64"
+export * from "./utils/hash"
 export * from "./utils/constants"
 export * from "./utils/id"
 export * from "./utils/pagination"
@@ -54,21 +54,6 @@ export const slugify = (str: string, forDisplayingInput?: boolean) => {
     .replace(/-+/g, "-") // Replace consecutive dashes with a single dash
 
   return forDisplayingInput ? s : s.replace(/-+$/, "").replace(/\.*$/, "") // Remove dashes and period from end
-}
-
-export async function hashStringSHA256(str: string) {
-  // Encode the string into bytes
-  const encoder = new TextEncoder()
-  const data = encoder.encode(str)
-
-  // Hash the data with SHA-256
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
-
-  // Convert the buffer to a hexadecimal string
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-
-  return hashHex
 }
 
 // return the price to stripe money format cents

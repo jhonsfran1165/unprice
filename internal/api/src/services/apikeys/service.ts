@@ -1,6 +1,7 @@
 import { type Database, eq } from "@unprice/db"
-import { apiKeyPrepared } from "@unprice/db/queries"
 import * as schema from "@unprice/db/schema"
+
+import { createApiKeyQuery } from "@unprice/db/queries"
 import { hashStringSHA256 } from "@unprice/db/utils"
 import type { ApiKeyExtended } from "@unprice/db/validators"
 import { Err, type FetchError, Ok, type Result } from "@unprice/error"
@@ -9,7 +10,6 @@ import type { Analytics } from "@unprice/tinybird"
 import type { Cache } from "#services/cache"
 import type { Metrics } from "#services/metrics"
 import { UnPriceApiKeyError } from "./errors"
-
 export class ApiKeysService {
   private readonly cache: Cache
   private readonly db: Database
@@ -39,16 +39,16 @@ export class ApiKeysService {
   }): Promise<Result<ApiKeyExtended, UnPriceApiKeyError | FetchError>> {
     const apiKeyHash = await hashStringSHA256(opts.key)
     const res = await this.cache.apiKeyByHash.swr(apiKeyHash, async () => {
-      return await apiKeyPrepared.execute({
-        apikey: opts.key,
+      return await createApiKeyQuery(this.db).execute({
+        hash: apiKeyHash,
       })
     })
 
     // cache miss, get from db
     if (!res.val) {
-      const apikey = await apiKeyPrepared
+      const apikey = await createApiKeyQuery(this.db)
         .execute({
-          apikey: opts.key,
+          hash: apiKeyHash,
         })
         .then((r) => r)
         .catch((e) => {

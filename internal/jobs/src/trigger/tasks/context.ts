@@ -1,8 +1,8 @@
 import { CacheService } from "@unprice/api/services/cache"
 import { NoopMetrics } from "@unprice/api/services/metrics"
-import { db } from "@unprice/db"
 import { ConsoleLogger } from "@unprice/logging"
 import { Analytics } from "@unprice/tinybird"
+import { db } from "../../db"
 import { env } from "../../env.mjs"
 
 export const createContext = async ({
@@ -37,12 +37,15 @@ export const createContext = async ({
 
   const logger = new ConsoleLogger({
     requestId: taskId,
+    environment: env.NODE_ENV,
+    application: "jobs",
     defaultFields: {
       ...defaultFields,
       subscriptionId,
       projectId,
       api: "jobs.subscription.cancel",
       phaseId,
+      requestId: taskId,
     },
   })
 

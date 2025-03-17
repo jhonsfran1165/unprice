@@ -39,7 +39,7 @@
     "base-x": "^4.0.0",
     "date-fns": "^3.3.1",
     "dinero.js": "2.0.0-alpha.14",
-    "drizzle-orm": "^0.38.2",
+    "drizzle-orm": "^0.40.0",
     "drizzle-zod": "^0.5.1",
     "random-word-slugs": "^0.1.7",
     "zod": "^3.23.8",

@@ -5,7 +5,7 @@ export const env = createEnv({
   shared: {
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
-    DRIZZLE_LOG: z.string().default("false"),
+    DRIZZLE_LOG: z.string().transform((val) => val === "true"),
   },
   server: {
     DATABASE_URL: z.string().min(1).url(),

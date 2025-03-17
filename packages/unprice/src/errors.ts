@@ -10,7 +10,7 @@ export interface components {
         code: "BAD_REQUEST"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unkey.dev/docs/api-reference/errors/code/BAD_REQUEST
+         * @example https://unprice.dev/docs/api-reference/errors/code/BAD_REQUEST
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -32,7 +32,7 @@ export interface components {
         code: "UNAUTHORIZED"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unkey.dev/docs/api-reference/errors/code/UNAUTHORIZED
+         * @example https://unprice.dev/docs/api-reference/errors/code/UNAUTHORIZED
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -54,7 +54,7 @@ export interface components {
         code: "FORBIDDEN"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unkey.dev/docs/api-reference/errors/code/FORBIDDEN
+         * @example https://unprice.dev/docs/api-reference/errors/code/FORBIDDEN
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -76,7 +76,7 @@ export interface components {
         code: "NOT_FOUND"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unkey.dev/docs/api-reference/errors/code/NOT_FOUND
+         * @example https://unprice.dev/docs/api-reference/errors/code/NOT_FOUND
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -98,7 +98,7 @@ export interface components {
         code: "CONFLICT"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unkey.dev/docs/api-reference/errors/code/CONFLICT
+         * @example https://unprice.dev/docs/api-reference/errors/code/CONFLICT
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -120,7 +120,7 @@ export interface components {
         code: "TOO_MANY_REQUESTS"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unkey.dev/docs/api-reference/errors/code/TOO_MANY_REQUESTS
+         * @example https://unprice.dev/docs/api-reference/errors/code/TOO_MANY_REQUESTS
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -142,7 +142,7 @@ export interface components {
         code: "INTERNAL_SERVER_ERROR"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unkey.dev/docs/api-reference/errors/code/INTERNAL_SERVER_ERROR
+         * @example https://unprice.dev/docs/api-reference/errors/code/INTERNAL_SERVER_ERROR
          */
         docs: string
         /** @description A human readable explanation of what went wrong */

@@ -2,8 +2,9 @@ import { TRPCError } from "@trpc/server"
 
 import type { User, Workspace, WorkspaceRole } from "@unprice/db/validators"
 
-import { workspaceGuardPrepared } from "@unprice/db/queries"
+import { createWorkspaceGuardQuery } from "@unprice/db/queries"
 import type { Context } from "#trpc"
+import { db } from "./db"
 
 interface WorkspaceGuardType {
   workspace: Workspace
@@ -36,7 +37,7 @@ export const workspaceGuard = async ({
     })
   }
 
-  const data = await workspaceGuardPrepared
+  const data = await createWorkspaceGuardQuery(db)
     .execute({
       workspaceId,
       workspaceSlug,

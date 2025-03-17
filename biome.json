@@ -7,23 +7,6 @@
     "enabled": true,
     "clientKind": "git"
   },
-  "organizeImports": {
-    "enabled": true,
-    "ignore": [
-      ".vitest",
-      "node_modules",
-      ".next",
-      "dist",
-      "./internal/api/src/openapi.d.ts",
-      ".wrangler",
-      ".react-email",
-      ".contentlayer",
-      ".nitro",
-      ".output",
-      "./internal/db/src/migrations",
-      "./internal/jobs/.trigger"
-    ]
-  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -69,7 +52,8 @@
       ".nitro",
       ".output",
       "./internal/db/src/migrations",
-      "./internal/jobs/.trigger"
+      "./internal/jobs/.trigger",
+      "./apps/api/drizzle/migrations"
     ]
   },
   "formatter": {
@@ -91,7 +75,26 @@
       ".nitro",
       ".output",
       "./internal/db/src/migrations",
-      "./internal/jobs/.trigger"
+      "./internal/jobs/.trigger",
+      "./apps/api/drizzle/migrations"
+    ]
+  },
+  "organizeImports": {
+    "enabled": true,
+    "ignore": [
+      ".vitest",
+      "node_modules",
+      ".next",
+      "dist",
+      "./internal/api/src/openapi.d.ts",
+      ".wrangler",
+      ".react-email",
+      ".contentlayer",
+      ".nitro",
+      ".output",
+      "./internal/db/src/migrations",
+      "./internal/jobs/.trigger",
+      "./apps/api/drizzle/migrations"
     ]
   },
   "javascript": {

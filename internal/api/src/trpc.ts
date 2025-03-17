@@ -2,10 +2,6 @@ import { tracing } from "@baselime/trpc-opentelemetry-middleware"
 import type { Session } from "@unprice/auth/server"
 import "server-only"
 
-import { env } from "#env.mjs"
-import type { CacheNamespaces } from "#services/cache"
-import { CacheService } from "#services/cache"
-import { LogdrainMetrics, type Metrics, NoopMetrics } from "#services/metrics"
 import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import type { MwFn } from "@trpc-limiter/core"
 import { createTRPCStoreLimiter } from "@trpc-limiter/memory"
@@ -15,7 +11,7 @@ import type { Cache as C } from "@unkey/cache"
 import type { NextAuthRequest } from "@unprice/auth"
 import { auth } from "@unprice/auth/server"
 import { COOKIES_APP } from "@unprice/config"
-import { type Database, type TransactionDatabase, db } from "@unprice/db"
+import type { Database, TransactionDatabase } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
 import { BaseLimeLogger, ConsoleLogger, type Logger } from "@unprice/logging"
 import { Analytics } from "@unprice/tinybird"
@@ -23,9 +19,14 @@ import { Ratelimit } from "@upstash/ratelimit"
 import { waitUntil } from "@vercel/functions"
 import { ZodError } from "zod"
 import { fromZodError } from "zod-validation-error"
+import { env } from "#env.mjs"
+import type { CacheNamespaces } from "#services/cache"
+import { CacheService } from "#services/cache"
+import { LogdrainMetrics, type Metrics, NoopMetrics } from "#services/metrics"
 import { transformer } from "./transformer"
 import { projectWorkspaceGuard } from "./utils"
 import { apikeyGuard } from "./utils/apikey-guard"
+import { db } from "./utils/db"
 import { RATE_LIMIT_WINDOW, redis } from "./utils/upstash"
 import { workspaceGuard } from "./utils/workspace-guard"
 
@@ -107,28 +108,28 @@ export const createTRPCContext = async (opts: {
 
   const logger = env.EMIT_METRICS_LOGS
     ? new BaseLimeLogger({
-      apiKey: env.BASELIME_APIKEY,
-      requestId,
-      defaultFields: { userId, region, country, source, ip, pathname, userAgent },
-      namespace: "unprice-api",
-      dataset: "unprice-api",
-      service: "api", // default service name
-      flushAfterMs: 3000, // flush after 3 secs
-      ctx: {
-        waitUntil, // flush will be executed as a background task
-      },
-      environment: env.NODE_ENV,
-      application: "api",
-    })
+        apiKey: env.BASELIME_APIKEY,
+        requestId,
+        defaultFields: { userId, region, country, source, ip, pathname, userAgent },
+        namespace: "unprice-api",
+        dataset: "unprice-api",
+        service: "api", // default service name
+        flushAfterMs: 3000, // flush after 3 secs
+        ctx: {
+          waitUntil, // flush will be executed as a background task
+        },
+        environment: env.NODE_ENV,
+        application: "api",
+      })
     : new ConsoleLogger({
-      requestId,
-      environment: env.NODE_ENV,
-      application: "api",
-      defaultFields: { userId, region, country, source, ip, pathname },
-    })
+        requestId,
+        environment: env.NODE_ENV,
+        application: "api",
+        defaultFields: { userId, region, country, source, ip, pathname },
+      })
 
   const metrics: Metrics = env.EMIT_METRICS_LOGS
-    ? new LogdrainMetrics({ requestId, logger })
+    ? new LogdrainMetrics({ requestId, logger, environment: env.NODE_ENV, application: "api" })
     : new NoopMetrics()
 
   const cacheService = new CacheService(

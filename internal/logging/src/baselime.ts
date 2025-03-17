@@ -34,7 +34,11 @@ export class BaseLimeLogger implements Logger {
 
     this.client = new BaselimeLogger({
       apiKey: opts.apiKey,
-      ctx: opts.ctx,
+      ctx: {
+        waitUntil: opts.ctx.waitUntil,
+        passThroughOnException: () => {},
+        props: {},
+      },
       requestId: opts.requestId,
       dataset: opts.dataset,
       isLocalDev: opts.isLocalDev ?? false,

@@ -1,14 +1,14 @@
 import { and, eq } from "@unprice/db"
 
+import { customerEntitlements, customerSessions, customers } from "@unprice/db/schema"
+import { AesGCM, newId } from "@unprice/db/utils"
+import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
+import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import { env } from "#env.mjs"
 import type { CacheNamespaces } from "#services/cache"
 import { PaymentProviderService } from "#services/payment-provider"
 import { SubscriptionService } from "#services/subscriptions"
 import type { Context } from "#trpc"
-import { customerEntitlements, customerSessions, customers } from "@unprice/db/schema"
-import { AesGCM, newId } from "@unprice/db/utils"
-import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
-import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
 import { getEntitlementByDateQuery, getEntitlementsByDateQuery } from "./queries"
@@ -235,39 +235,39 @@ export class CustomerService {
     // get usage for the period from the analytics service
     const totalUsage = isAll
       ? await this.ctx.analytics
-        .getFeaturesUsageTotal({
-          customerId: opts.customerId,
-          entitlementId: entitlement.id,
-          projectId: entitlement.projectId,
-        })
-        .then((usage) => usage.data[0])
-        .catch((error) => {
-          this.ctx.logger.error("Error getting getFeaturesUsage all", {
-            error: JSON.stringify(error.message),
+          .getFeaturesUsageTotal({
             customerId: opts.customerId,
             entitlementId: entitlement.id,
             projectId: entitlement.projectId,
           })
+          .then((usage) => usage.data[0])
+          .catch((error) => {
+            this.ctx.logger.error("Error getting getFeaturesUsage all", {
+              error: JSON.stringify(error.message),
+              customerId: opts.customerId,
+              entitlementId: entitlement.id,
+              projectId: entitlement.projectId,
+            })
 
-          return null
-        })
+            return null
+          })
       : await this.ctx.analytics
-        .getFeaturesUsagePeriod({
-          customerId: opts.customerId,
-          entitlementId: entitlement.id,
-          start: activeSubscription.currentCycleStartAt,
-          end: activeSubscription.currentCycleEndAt,
-        })
-        .then((usage) => usage.data[0])
-        .catch((error) => {
-          this.ctx.logger.error("Error getting getFeaturesUsage", {
-            error: JSON.stringify(error.message),
+          .getFeaturesUsagePeriod({
             customerId: opts.customerId,
             entitlementId: entitlement.id,
+            start: activeSubscription.currentCycleStartAt,
+            end: activeSubscription.currentCycleEndAt,
           })
+          .then((usage) => usage.data[0])
+          .catch((error) => {
+            this.ctx.logger.error("Error getting getFeaturesUsage", {
+              error: JSON.stringify(error.message),
+              customerId: opts.customerId,
+              entitlementId: entitlement.id,
+            })
 
-          return null
-        })
+            return null
+          })
 
     if (!totalUsage) {
       return

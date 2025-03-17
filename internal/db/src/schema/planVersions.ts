@@ -11,7 +11,7 @@ import {
 } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { cuid, timestamps } from "../utils/fields.sql"
+import { cuid, timestamps } from "../utils/fields"
 import { projectID } from "../utils/sql"
 import type { BillingConfig, PlanVersionMetadata } from "../validators/planVersions"
 import { users } from "./auth"

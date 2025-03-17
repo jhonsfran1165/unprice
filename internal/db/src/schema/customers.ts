@@ -16,7 +16,7 @@ import type { z } from "zod"
 import { pgTableProject } from "../utils/_table"
 import { projectID } from "../utils/sql"
 
-import { cuid, id, timestamps } from "../utils/fields.sql"
+import { cuid, id, timestamps } from "../utils/fields"
 import type {
   customerCreditMetadataSchema,
   customerMetadataSchema,

@@ -2,7 +2,7 @@ import { eq, relations } from "drizzle-orm"
 import { bigint, boolean, foreignKey, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { cuid, id, timestamps, workspaceID } from "../utils/fields.sql"
+import { cuid, id, timestamps, workspaceID } from "../utils/fields"
 import { users } from "./auth"
 import { teamRolesEnum } from "./enums"
 import { projects } from "./projects"

@@ -75,7 +75,7 @@ export const metricSchema = z.discriminatedUnion("metric", [
     query: z.enum(["reportUsageFeature", "createUsageFeature"]),
     duration: z.number(),
     service: z.string(),
-  })
+  }),
 ])
 
 export type Metric = z.infer<typeof metricSchema>

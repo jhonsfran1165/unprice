@@ -60,27 +60,27 @@ export type UnpriceOptions = {
 type ApiRequest = {
   path: string[]
 } & (
-    | {
+  | {
       method: "GET"
       body?: never
       query?: Record<string, string | number | boolean | null>
     }
-    | {
+  | {
       method: "POST"
       body?: unknown
       query?: never
     }
-  )
+)
 
 type Result<R> =
   | {
-    result: R
-    error?: never
-  }
+      result: R
+      error?: never
+    }
   | {
-    result?: never
-    error: ErrorResponse["error"]
-  }
+      result?: never
+      error: ErrorResponse["error"]
+    }
 
 export class Unprice {
   private readonly baseUrl: string
@@ -178,18 +178,20 @@ export class Unprice {
 
       // 400-499 -> client error, retries are futile
       if (res && res.status >= 400 && res.status <= 499) {
-        return (await res.json()) as ErrorResponse;
+        return (await res.json()) as ErrorResponse
       }
 
-      const backoff = this.retry.backoff(i);
+      const backoff = this.retry.backoff(i)
 
       console.debug(
-        `attempt ${i + 1} of ${this.retry.attempts + 1
-        } to reach ${url} failed, retrying in ${backoff} ms: status=${res?.status
-        } | ${res?.headers.get("unprice-request-id")}`,
-      );
+        `attempt ${i + 1} of ${
+          this.retry.attempts + 1
+        } to reach ${url} failed, retrying in ${backoff} ms: status=${
+          res?.status
+        } | ${res?.headers.get("unprice-request-id")}`
+      )
 
-      await new Promise((r) => setTimeout(r, backoff));
+      await new Promise((r) => setTimeout(r, backoff))
     }
 
     if (res) {

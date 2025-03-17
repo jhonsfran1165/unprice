@@ -3,26 +3,16 @@
   "globalEnv": ["NODE_ENV", "VERCEL_ENV"],
   "globalPassThroughEnv": [
     "SKIP_ENV_VALIDATION",
-    "BASELIME_APIKEY",
-    "TRIGGER_SECRET_KEY",
-    "UPSTASH_REDIS_REST_TOKEN",
-    "UPSTASH_REDIS_REST_URL",
-    "VERCEL_PROJECT_UNPRICE_ID",
-    "VERCEL_TEAM_ID",
-    "VERCEL_TOKEN",
-    "TINYBIRD_TOKEN",
-    "RESEND_API_KEY",
-    "TINYBIRD_URL",
     "EMIT_METRICS_LOGS",
     "TRPC_LOGGER",
-    "DRIZZLE_LOG",
-    "NEXT_PUBLIC_APP_DOMAIN",
-    "NEXT_PUBLIC_VERCEL_ENV",
-    "COOKIE_ENCRYPTION_KEY"
+    "DRIZZLE_LOG"
   ],
   "tasks": {
+    "install": {
+      "outputs": ["node_modules/**", "pnpm-lock.yaml", "yarn.lock"]
+    },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["fmt", "^build"],
       "outputs": [
         "app/nextjs/.next/**",
         "!app/nextjs/.next/cache/**",
@@ -56,6 +46,7 @@
       "cache": false
     },
     "dev": {
+      "cache": false,
       "env": [
         "NEXT_PUBLIC_*",
         "!NEXT_PUBLIC_VERCEL_*",
@@ -68,10 +59,26 @@
         "AUTH_REDIRECT_PROXY_URL",
         "ENCRYPTION_KEY",
         "VERCEL_ENV",
-        "NODE_ENV"
-      ],
-      "persistent": true,
-      "cache": false
+        "NODE_ENV",
+        "RESEND_API_KEY",
+        "EMIT_METRICS_LOGS",
+        "NEXT_PUBLIC_APP_DOMAIN",
+        "NEXT_PUBLIC_VERCEL_ENV",
+        "COOKIE_ENCRYPTION_KEY",
+        "ENCRYPTION_KEY",
+        "CLOUDFLARE_API_KEY",
+        "CLOUDFLARE_ZONE_ID",
+        "BASELIME_APIKEY",
+        "TRIGGER_SECRET_KEY",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "UPSTASH_REDIS_REST_URL",
+        "VERCEL_PROJECT_UNPRICE_ID",
+        "VERCEL_TEAM_ID",
+        "VERCEL_TOKEN",
+        "TINYBIRD_TOKEN",
+        "RESEND_API_KEY",
+        "TINYBIRD_URL"
+      ]
     },
     "test": {
       "cache": false

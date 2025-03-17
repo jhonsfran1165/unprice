@@ -7,12 +7,18 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     VERCEL_PROJECT_UNPRICE_ID: z.string(),
+    DRIZZLE_LOG: z.string().transform((v) => {
+      return v === "true"
+    }),
     VERCEL_TEAM_ID: z.string(),
     VERCEL_TOKEN: z.string(),
     TINYBIRD_TOKEN: z.string(),
     TINYBIRD_URL: z.string(),
     BASELIME_APIKEY: z.string(),
     ENCRYPTION_KEY: z.string(),
+    DATABASE_URL: z.string().min(1).url(),
+    DATABASE_READ1_URL: z.string().optional(),
+    DATABASE_READ2_URL: z.string().optional(),
     EMIT_METRICS_LOGS: z
       .string()
       .optional()
@@ -34,6 +40,7 @@ export const env = createEnv({
   experimental__runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     VERCEL_ENV: process.env.VERCEL_ENV,
+    DRIZZLE_LOG: process.env.DRIZZLE_LOG,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
 })

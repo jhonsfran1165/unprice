@@ -1,13 +1,13 @@
-import { afterEach, beforeEach, describe } from "node:test";
-import { expect, test, vi } from "vitest";
-import { newId } from "./generate";
+import { afterEach, beforeEach, describe } from "node:test"
+import { expect, test, vi } from "vitest"
+import { newId } from "./generate"
 
 beforeEach(() => {
-  vi.useFakeTimers();
-});
+  vi.useFakeTimers()
+})
 afterEach(() => {
-  vi.useRealTimers();
-});
+  vi.useRealTimers()
+})
 describe("ids are k-sorted by time", () => {
   const testCases = [
     {
@@ -18,20 +18,20 @@ describe("ids are k-sorted by time", () => {
       k: 10,
       n: 10_000,
     },
-  ];
+  ]
 
   for (const tc of testCases) {
     test(`k: ${tc.k}, n: ${tc.n}`, () => {
       const ids = new Array(tc.n).fill(null).map((_, i) => {
-        vi.setSystemTime(new Date(i * 10000));
+        vi.setSystemTime(new Date(i * 10000))
 
-        return newId("test");
-      });
-      const sorted = [...ids].sort();
-
+        return newId("test")
+      })
+      const sorted = [...ids].sort()
       for (let i = 0; i < ids.length; i++) {
-        expect(Math.abs(ids.indexOf(sorted[i]) - i)).toBeLessThanOrEqual(tc.k);
+        const sortedId = sorted[i] as `test_${string}`
+        expect(Math.abs(ids.indexOf(sortedId) - i)).toBeLessThanOrEqual(tc.k)
       }
-    });
+    })
   }
-});
+})
