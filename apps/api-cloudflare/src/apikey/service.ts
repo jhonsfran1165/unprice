@@ -200,7 +200,6 @@ export class ApiKeysService {
 
       c.set("workspaceId", result.val.project.workspaceId)
       c.set("projectId", result.val.project.id)
-      c.set("unpriceCustomerId", result.val.project.workspace.unPriceCustomerId)
 
       return Ok(apiKey)
     } catch (e) {

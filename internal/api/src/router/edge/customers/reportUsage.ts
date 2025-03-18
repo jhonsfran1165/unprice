@@ -53,6 +53,7 @@ export const reportUsage = protectedApiOrActiveWorkspaceProcedure
       ctx: opts.ctx,
       // TODO: testing delete this line
       now: Date.now(),
+      idempotenceKey,
     })
 
     // cache the result

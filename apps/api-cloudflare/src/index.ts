@@ -10,6 +10,7 @@ import { init } from "~/middleware/init"
 export { DurableObjectUsagelimiter } from "~/usagelimit/do"
 
 import { registerTest } from "~/routes/test"
+import { registerReportUsage } from "./routes/customer/reportUsage"
 
 const app = newApp()
 
@@ -61,6 +62,8 @@ app.use(
 
 // Register routes
 registerTest(app)
+// TODO: add versioning to the routes
+registerReportUsage(app)
 
 // Export handler
 const handler = {

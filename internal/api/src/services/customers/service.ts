@@ -689,6 +689,7 @@ export class CustomerService {
     featureSlug: string
     date: number
     usage: number
+    idempotenceKey: string
   }): Promise<Result<{ success: boolean; message?: string }, UnPriceCustomerError | FetchError>> {
     try {
       const { customerId, featureSlug, usage, date } = opts
@@ -748,6 +749,7 @@ export class CustomerService {
           // report the usage to analytics db
           this.ctx.analytics
             .ingestFeaturesUsage({
+              idempotenceKey: opts.idempotenceKey,
               planVersionFeatureId: entitlement.featurePlanVersionId,
               subscriptionItemId: entitlement.subscriptionItemId,
               projectId: entitlement.projectId,

@@ -52,6 +52,7 @@ export const remove = protectedProjectProcedure
         usage: -1, // the deleted feature
         ctx: opts.ctx,
         isInternal: project.workspace.isInternal,
+        idempotenceKey: opts.ctx.requestId,
       })
     )
 

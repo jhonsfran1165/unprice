@@ -12,6 +12,7 @@ import type {
   RevalidateRequest,
   UsageLimiter,
 } from "./interface"
+import { isValidEntitlement } from "./util"
 
 export class DurableUsageLimiter implements UsageLimiter {
   private readonly namespace: DurableObjectNamespace<DurableObjectUsagelimiter>
@@ -178,7 +179,12 @@ export class DurableUsageLimiter implements UsageLimiter {
       )
 
       if (err) {
-        return { valid: false }
+        return { valid: false, message: err.message }
+      }
+
+      // validate entitlement dates
+      if (!isValidEntitlement(entitlement, data.date)) {
+        return { valid: false, message: "entitlement dates are invalid, please contact support." }
       }
 
       const threshold = 80 // notify when the usage is 80% or more
@@ -211,14 +217,32 @@ export class DurableUsageLimiter implements UsageLimiter {
         }
       }
 
+      const durableObjectFeatureId = this.getDurableCustomerFeatureId(
+        data.customerId,
+        data.featureSlug
+      )
+
+      const durableObject = this.getStub(durableObjectFeatureId)
+
       // broadcast the usage to the project and the customer if any user is connected
       this.waitUntil(
         Promise.all([
           // TODO: send the usage to the analytics
           // TODO: broadcast the usage to the project and the customer if any user is connected
           // report the usage to analytics db
+          // TODO: add notification to email, slack?
+          notifyUsage &&
+            durableObject.broadcast(
+              JSON.stringify({
+                customerId: data.customerId,
+                featureSlug: data.featureSlug,
+                usage: data.usage,
+                date: data.date,
+              })
+            ),
           this.analytics
             .ingestFeaturesUsage({
+              idempotenceKey: data.idempotenceKey,
               planVersionFeatureId: entitlement.featurePlanVersionId,
               subscriptionItemId: entitlement.subscriptionItemId,
               projectId: entitlement.projectId,
@@ -255,7 +279,7 @@ export class DurableUsageLimiter implements UsageLimiter {
         ])
       )
 
-      return { valid: true, message }
+      return { valid: true, message, remaining: limit ? limit - currentUsage : undefined }
     } catch (e) {
       console.error("usagelimit failed", {
         customerId: data.customerId,

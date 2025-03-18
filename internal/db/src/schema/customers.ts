@@ -76,14 +76,14 @@ export const customerEntitlements = pgTableProject(
     ...projectID,
     ...timestamps,
     customerId: cuid("customer_id").notNull(),
+    // featurePlanVersionId is the id of the feature plan version that the customer is entitled to
+    featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
     // subscriptionItemId is the id of the subscription item that the customer is entitled to
     subscriptionItemId: cuid("subscription_item_id"),
     // subscriptionPhaseId is the id of the subscription phase that the customer is entitled to
     subscriptionPhaseId: cuid("subscription_phase_id"),
     // subscriptionId is the id of the subscription that the customer is entitled to
     subscriptionId: cuid("subscription_id"),
-    // featurePlanVersionId is the id of the feature plan version that the customer is entitled to
-    featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
 
     // ****************** defaults from plan version features ******************
     // These fields are duplicate but help us to improve the performance when checking the usage

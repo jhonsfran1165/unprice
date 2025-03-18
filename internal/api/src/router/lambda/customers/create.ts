@@ -83,6 +83,7 @@ export const create = protectedApiOrActiveProjectProcedure
         usage: 1, // the new customer
         ctx: opts.ctx,
         isInternal: project.workspace.isInternal,
+        idempotenceKey: opts.ctx.requestId,
       })
     )
 

@@ -8,6 +8,7 @@ export const reportUsageSchema = z.object({
   ttl: z.number().optional(),
   timestamp: z.number().optional(),
   projectId: z.string(),
+  date: z.number(),
 })
 
 export type ReportUsageRequest = z.infer<typeof reportUsageSchema>
@@ -15,6 +16,7 @@ export type ReportUsageRequest = z.infer<typeof reportUsageSchema>
 export const reportUsageResponseSchema = z.object({
   valid: z.boolean(),
   message: z.string().optional(),
+  remaining: z.number().optional(),
 })
 export type ReportUsageResponse = z.infer<typeof reportUsageResponseSchema>
 

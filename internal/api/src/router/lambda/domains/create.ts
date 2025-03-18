@@ -98,6 +98,7 @@ export const create = protectedWorkspaceProcedure
         usage: 1, // the new domain
         ctx: opts.ctx,
         isInternal: workspace.isInternal,
+        idempotenceKey: opts.ctx.requestId,
       })
     )
 

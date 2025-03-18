@@ -86,6 +86,7 @@ export const create = protectedProjectProcedure
         usage: 1, // the new project
         ctx: opts.ctx,
         isInternal: project.workspace.isInternal,
+        idempotenceKey: opts.ctx.requestId,
       })
     )
 

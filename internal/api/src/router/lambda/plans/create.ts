@@ -112,6 +112,7 @@ export const create = protectedProjectProcedure
         usage: 1, // the new plan
         ctx: opts.ctx,
         isInternal: workspace.isInternal,
+        idempotenceKey: opts.ctx.requestId,
       })
     )
 

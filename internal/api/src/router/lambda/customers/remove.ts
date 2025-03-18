@@ -64,6 +64,7 @@ export const remove = protectedApiOrActiveProjectProcedure
         usage: -1, // the deleted project
         ctx: opts.ctx,
         isInternal: project.workspace.isInternal,
+        idempotenceKey: opts.ctx.requestId,
       })
     )
 

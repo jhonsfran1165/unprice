@@ -85,6 +85,7 @@ export const remove = protectedWorkspaceProcedure
         usage: -1, // the deleted project
         ctx: opts.ctx,
         isInternal: workspace.isInternal,
+        idempotenceKey: opts.ctx.requestId,
       })
     )
     return {

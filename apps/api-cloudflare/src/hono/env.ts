@@ -27,7 +27,6 @@ export type HonoEnv = {
     requestStartedAt: number
     workspaceId?: string
     projectId?: string
-    unpriceCustomerId?: string
     services: ServiceContext
     /**
      * IP address or region information

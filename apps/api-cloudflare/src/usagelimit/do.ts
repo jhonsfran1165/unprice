@@ -6,13 +6,8 @@ import type { CustomerEntitlement } from "@unprice/db/validators"
 import { Analytics } from "@unprice/tinybird"
 
 export class DurableObjectUsagelimiter extends Server {
-  private entitlement: CustomerEntitlement
-  private revalidateUntil = 0
-  private revalidationRetries = 0
-  private currentUsage: number
-  private accumulatedUsage: number
-  private initialized = false
   private analytics: Analytics
+  private state: DurableObjectState
 
   static options = {
     hibernate: true, // hibernate the do when idle
@@ -21,9 +16,7 @@ export class DurableObjectUsagelimiter extends Server {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env)
 
-    this.entitlement = {} as CustomerEntitlement
-    this.currentUsage = 0
-    this.accumulatedUsage = 0
+    this.state = ctx
 
     this.analytics = new Analytics({
       emit: env.EMIT_METRICS_LOGS,
@@ -59,6 +52,39 @@ export class DurableObjectUsagelimiter extends Server {
     return true
   }
 
+  async setUsage(usage: number, type: "current" | "accumulated") {
+    if (type === "current") {
+      this.state.storage.put("currentUsage", usage)
+    } else {
+      this.state.storage.put("accumulatedUsage", usage)
+    }
+  }
+
+  async getUsage(type: "current" | "accumulated") {
+    if (type === "current") {
+      return (await this.state.storage.get("currentUsage")) as number
+    }
+
+    return (await this.state.storage.get("accumulatedUsage")) as number
+  }
+
+  async incrementUsage(usage: number, type: "current" | "accumulated") {
+    if (type === "current") {
+      const currentUsage = await this.getUsage("current")
+      this.state.storage.put("currentUsage", currentUsage + usage)
+    } else {
+      const accumulatedUsage = await this.getUsage("accumulated")
+      this.state.storage.put("accumulatedUsage", accumulatedUsage + usage)
+    }
+  }
+
+  async setEntitlement(entitlement: CustomerEntitlement) {
+    this.state.storage.put("entitlement", entitlement)
+  }
+
+  async getEntitlement() {
+    return (await this.state.storage.get("entitlement")) as CustomerEntitlement
+  }
   // this validation should happen in the client so the durable object is not responsible for it
   // also we avoid calling the DO for every entitlement but still we need to validate the entitlement
   async startup({
@@ -66,6 +92,13 @@ export class DurableObjectUsagelimiter extends Server {
   }: {
     entitlement: CustomerEntitlement
   }) {
+    const featureType = entitlement.featureType
+
+    // flat features shouldn't be used with usage limit
+    if (featureType === "flat") {
+      return
+    }
+
     // block concurrency while initializing
     this.ctx.blockConcurrencyWhile(async () => {
       try {
@@ -78,7 +111,9 @@ export class DurableObjectUsagelimiter extends Server {
           return
         }
 
-        if (this.initialized) {
+        const initialized = (await this.state.storage.get("initialized")) as boolean
+
+        if (initialized) {
           return
         }
 
@@ -102,21 +137,21 @@ export class DurableObjectUsagelimiter extends Server {
             })
 
           if (!totalUsage) {
-            this.currentUsage = 0
+            await this.setUsage(0, "current")
           } else {
             const usage =
               (totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage] as number) ?? 0
-            this.currentUsage = usage
+            await this.setUsage(usage, "current")
           }
 
-          this.accumulatedUsage = 0
+          await this.setUsage(0, "accumulated")
         } else {
           // get the total usage and the usage for the current cycle when the entitlement is accumulated
           const [totalAccumulatedUsage, totalUsage] = await Promise.all([
             this.analytics
               .getFeaturesUsageTotal({
-                customerId: this.entitlement.customerId,
-                projectId: this.entitlement.projectId,
+                customerId: entitlement.customerId,
+                projectId: entitlement.projectId,
                 entitlementId: entitlement.id,
               })
               .then((usage) => usage.data[0])
@@ -144,33 +179,31 @@ export class DurableObjectUsagelimiter extends Server {
           ])
 
           if (!totalUsage) {
-            this.currentUsage = 0
+            await this.setUsage(0, "current")
           } else {
             const usage =
               (totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage] as number) ?? 0
-            this.currentUsage = usage
+            await this.setUsage(usage, "current")
           }
 
           if (!totalAccumulatedUsage) {
-            this.accumulatedUsage = 0
+            await this.setUsage(0, "accumulated")
           } else {
             const usage =
               (totalAccumulatedUsage[
                 entitlement.aggregationMethod as keyof typeof totalAccumulatedUsage
               ] as number) ?? 0
-            this.accumulatedUsage = usage
+            await this.setUsage(usage, "accumulated")
           }
-
-          this.currentUsage = 0
         }
 
         // grace period is in days, so we need to convert it to milliseconds
         const gracePeriodInMs = entitlement.gracePeriod * 24 * 60 * 60 * 1000
         const endOfCycle = currentCycleEndAt + gracePeriodInMs
 
-        this.initialized = true
-        this.entitlement = entitlement
-        this.revalidateUntil = endOfCycle
+        await this.state.storage.put("initialized", true)
+        await this.state.storage.put("entitlement", entitlement)
+        await this.state.storage.put("revalidateUntil", endOfCycle)
 
         // get the alarm
         const alarm = await this.ctx.storage.getAlarm()
@@ -184,7 +217,7 @@ export class DurableObjectUsagelimiter extends Server {
         }
       } catch (error) {
         console.error("error initializing", error)
-        this.initialized = false
+        await this.state.storage.put("initialized", false)
       }
     })
   }
@@ -200,14 +233,16 @@ export class DurableObjectUsagelimiter extends Server {
   // websocket message handler
   async onMessage(conn: Connection, message: string) {
     const { type, profile } = JSON.parse(message)
+    const currentUsage = await this.getUsage("current")
+    const accumulatedUsage = await this.getUsage("accumulated")
 
     switch (type) {
       case "get":
         conn.send(
           JSON.stringify({
             type: "profile",
-            data: this.currentUsage,
-            usage: this.accumulatedUsage,
+            data: currentUsage,
+            usage: accumulatedUsage,
           })
         )
         break
@@ -217,7 +252,7 @@ export class DurableObjectUsagelimiter extends Server {
           JSON.stringify({
             type: "profile_updated",
             profile: profile,
-            usage: this.currentUsage,
+            usage: currentUsage,
           })
         )
         break
@@ -227,10 +262,10 @@ export class DurableObjectUsagelimiter extends Server {
   // revalidate if needed
   async revalidate(): Promise<void> {
     // add bd call for getting the entitlement
-    this.entitlement = this.entitlement
+    const entitlement = await this.getEntitlement()
 
     // validate the entitlement
-    const isValid = await this.isValidEntitlement(this.entitlement)
+    const isValid = await this.isValidEntitlement(entitlement)
 
     if (!isValid) {
       // log error
@@ -239,29 +274,35 @@ export class DurableObjectUsagelimiter extends Server {
       // set another alarm to revalidate in 1 hour
       this.ctx.storage.setAlarm(Date.now() + 1000 * 60 * 60 * 1)
       // add a retry
-      this.revalidationRetries++
+      const retries = (await this.state.storage.get("revalidationRetries")) as number | 0
+      await this.state.storage.put("revalidationRetries", retries + 1)
 
       return
     }
 
-    this.initialized = false
-    this.startup({ entitlement: this.entitlement })
+    const initialized = (await this.state.storage.get("initialized")) as boolean
+    if (!initialized) {
+      await this.startup({ entitlement })
+    }
   }
 
   async onAlarm(): Promise<void> {
-    if (!this.initialized) {
+    const initialized = (await this.state.storage.get("initialized")) as boolean
+    if (!initialized) {
       return
     }
 
     // avoid infinite retries
-    if (this.revalidationRetries > 50) {
+    const retries = (await this.state.storage.get("revalidationRetries")) as number | 0
+    if (retries > 50) {
       // log error
       console.error("error revalidating", "retries limit reached")
 
       return
     }
 
-    if (this.revalidateUntil < Date.now()) {
+    const revalidateUntil = (await this.state.storage.get("revalidateUntil")) as number
+    if (revalidateUntil < Date.now()) {
       // on alarm revalidate the entitlement
       await this.revalidate()
     }

@@ -66,6 +66,7 @@ export const featureVerificationSchemaV1 = z.object({
 })
 
 export const featureUsageSchemaV1 = z.object({
+  idempotenceKey: z.string(),
   subscriptionItemId: z.string().nullable(),
   subscriptionPhaseId: z.string().nullable(),
   subscriptionId: z.string().nullable(),

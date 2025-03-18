@@ -7,25 +7,27 @@ import { keyAuth } from "~/auth/key"
 import { openApiErrorResponses } from "~/errors/openapi-responses"
 import type { App } from "~/hono/app"
 
-const tags = ["Tasks"]
+const tags = ["customer"]
 
-export const reportUsage = createRoute({
+export const route = createRoute({
   path: "/customer/{customerId}/reportUsage",
+  operationId: "customer.reportUsage",
   method: "post",
   tags,
   request: {
     params: z.object({
       customerId: z.string().openapi({
         description: "The customer ID",
-        example: "123",
+        example: "cus_1GTzSGrapiBW1QwCL3Fc",
+        param: {
+          name: "customerId",
+          in: "path",
+          example: "cus_1GTzSGrapiBW1QwCL3Fc",
+        },
       }),
     }),
     body: jsonContentRequired(
       z.object({
-        customerId: z.string().openapi({
-          description: "The customer ID",
-          example: "123",
-        }),
         featureSlug: z.string().openapi({
           description: "The feature slug",
           example: "feature-1",
@@ -45,9 +47,10 @@ export const reportUsage = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
-        success: z.boolean(),
+        valid: z.boolean(),
         message: z.string().optional(),
         cacheHit: z.boolean().optional(),
+        remaining: z.number().optional(),
       }),
       "The result of the report usage"
     ),
@@ -55,44 +58,78 @@ export const reportUsage = createRoute({
   },
 })
 
-export type ReportUsageRequest = z.infer<typeof reportUsage.request.params>
+export type ReportUsageRequest = z.infer<typeof route.request.params>
 export type ReportUsageResponse = z.infer<
-  (typeof reportUsage.responses)[200]["content"]["application/json"]["schema"]
+  (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >
 
 export const registerReportUsage = (app: App) =>
-  app.openapi(reportUsage, async (c) => {
-    const { customerId, featureSlug, usage, idempotenceKey } = c.req.valid("json")
-    const { usagelimit } = c.get("services")
+  app.openapi(route, async (c) => {
+    const { customerId } = c.req.valid("param")
+    const { featureSlug, usage, idempotenceKey } = c.req.valid("json")
+    const { usagelimit, cache } = c.get("services")
 
     // validate the request
     const key = await keyAuth(c)
 
-    // get the customer feature either from cache or db
-    const customer = await c.cache.customerById.get(customerId)
-
-    // validate usage from do
-
-    // report usage to tinybird
-
-    // return the result
-
-    if (!data) {
+    if (!key) {
       return c.json(
         {
-          success: false,
-          message: "Invalid API key",
+          error: {
+            message: "Invalid API key",
+            docs: "https://docs.unprice.dev/reference/post_customer-customer-id-report-usage",
+            requestId: c.get("requestId"),
+          },
         },
         HttpStatusCodes.UNAUTHORIZED
       )
     }
 
-    const result = await reportUsageFeature({
+    // check if the usage has been reported before
+    const cacheHit = await cache.idempotentRequestUsageByHash.get(
+      `idempotenceKey:${idempotenceKey}`
+    )
+
+    console.log("cacheHit", cacheHit)
+
+    if (cacheHit.val) {
+      return c.json(
+        {
+          valid: cacheHit.val?.access,
+          message: cacheHit.val?.message,
+          cacheHit: true,
+        },
+        HttpStatusCodes.OK
+      )
+    }
+
+    // validate usage from db
+    const result = await usagelimit.reportUsage({
       customerId,
       featureSlug,
       usage,
+      date: Date.now(),
       idempotenceKey,
+      projectId: key.projectId,
     })
+
+    // this will be executed after the response is sent
+    // could be inconsistent data if the same request is made multiple times too fast
+    // the durable object has a Map to set cache in memory
+    // either way events are deduplicated by the analytics db
+    c.executionCtx.waitUntil(
+      cache.idempotentRequestUsageByHash.set(
+        `idempotenceKey:${idempotenceKey}`,
+        {
+          access: result.valid,
+          message: result.message,
+        },
+        {
+          fresh: 1000 * 60, // 1 minute
+          stale: 1000 * 60, // delete after 1 minutes
+        }
+      )
+    )
 
     return c.json(result, HttpStatusCodes.OK)
   })

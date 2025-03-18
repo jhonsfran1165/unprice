@@ -71,6 +71,7 @@ export const reportUsageFeature = async ({
   usage,
   ctx,
   isInternal,
+  idempotenceKey,
   now = Date.now(),
 }: {
   customerId: string
@@ -78,6 +79,7 @@ export const reportUsageFeature = async ({
   usage: number
   ctx: Context
   isInternal?: boolean
+  idempotenceKey: string
   now?: number
 }) => {
   // if the feature is internal, we don't need to report usage
@@ -94,6 +96,7 @@ export const reportUsageFeature = async ({
     featureSlug,
     usage,
     date: now,
+    idempotenceKey,
   })
 
   if (err) {

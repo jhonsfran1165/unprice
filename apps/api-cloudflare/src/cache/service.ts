@@ -65,6 +65,10 @@ export function initCache(c: Context<HonoEnv>, metrics: Metrics): C<CacheNamespa
       c.executionCtx,
       defaultOpts
     ),
+    idempotentRequestUsageByHash: new Namespace<CacheNamespaces["idempotentRequestUsageByHash"]>(
+      c.executionCtx,
+      defaultOpts
+    ),
   })
 }
 

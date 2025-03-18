@@ -60,7 +60,6 @@ export function init(): MiddlewareHandler<HonoEnv> {
       requestId,
       application: "api",
       environment: c.env.ENV,
-      defaultFields: { environment: c.env.ENV },
     })
 
     const metrics: Metrics = c.env.EMIT_METRICS_LOGS
