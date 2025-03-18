@@ -1,27 +1,18 @@
 import { type Connection, Server } from "partyserver"
 
-import { type DrizzleSqliteDODatabase, drizzle } from "drizzle-orm/durable-sqlite"
-import { migrate } from "drizzle-orm/durable-sqlite/migrator"
-import migrations from "~/drizzle/migrations"
-
 import type { Env } from "~/env"
-import type { LimitRequest, LimitResponse } from "./interface"
 
+import type { CustomerEntitlement } from "@unprice/db/validators"
 import { Analytics } from "@unprice/tinybird"
-import { inArray, sql } from "drizzle-orm"
-import { usageRecords } from "~/db/schema"
-
-type Usage = Record<string, number>
 
 export class DurableObjectUsagelimiter extends Server {
-  private lastBroadcastTime = 0
-  private lastRevalidate = 0
-  private usage: Usage = {}
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  private db: DrizzleSqliteDODatabase<any>
+  private entitlement: CustomerEntitlement
+  private revalidateUntil = 0
+  private revalidationRetries = 0
+  private currentUsage: number
+  private accumulatedUsage: number
+  private initialized = false
   private analytics: Analytics
-  private readonly TTL = 1000 * 10 // 10 secs
-  private readonly DEBOUNCE_DELAY = 1000 // Minimum time between broadcasts
 
   static options = {
     hibernate: true, // hibernate the do when idle
@@ -30,99 +21,172 @@ export class DurableObjectUsagelimiter extends Server {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env)
 
-    this.db = drizzle(ctx.storage, { logger: false })
+    this.entitlement = {} as CustomerEntitlement
+    this.currentUsage = 0
+    this.accumulatedUsage = 0
+
     this.analytics = new Analytics({
       emit: env.EMIT_METRICS_LOGS,
       tinybirdToken: env.TINYBIRD_TOKEN,
       tinybirdUrl: env.TINYBIRD_URL,
     })
-
-    // block concurrency while initializing
-    this.ctx.blockConcurrencyWhile(async () => {
-      // migrate first
-      await this._migrate()
-      // set initial usage
-      try {
-        const usage = await this.db
-          .select({
-            customerId: usageRecords.customerId,
-            featureSlug: usageRecords.featureSlug,
-            sum: sql<number>`sum(${usageRecords.usage})`,
-          })
-          .from(usageRecords)
-          .groupBy(usageRecords.customerId, usageRecords.featureSlug)
-
-        this.usage = usage.reduce((acc, curr) => {
-          acc[curr.featureSlug] = curr.sum ?? 0
-          return acc
-        }, {} as Usage)
-      } catch (e) {
-        console.error("error getting usage", e)
-        this.usage = {}
-      }
-    })
   }
 
-  async _migrate() {
-    migrate(this.db, migrations)
-  }
-
-  async getInitialUsageTinybird() {
-    await this.db
-      .select()
-      .from(usageRecords)
-      .where(sql`timestamp > ${Date.now() - this.TTL}`)
-  }
-
-  async reportUsage(req: LimitRequest): Promise<LimitResponse> {
-    // get the alarm
-    const alarm = await this.ctx.storage.getAlarm()
-
-    // if there is no alarm set one given the ttl header
-    if (!alarm) {
-      const ttl = req.ttl || this.TTL
-
-      if (ttl > 0) {
-        this.ctx.storage.setAlarm(Date.now() + ttl)
-      }
-    }
-
-    // insert usage into db
-    await this.db.insert(usageRecords).values({
-      customerId: req.customerId,
-      featureSlug: req.featureSlug,
-      usage: req.usage,
-      timestamp: Date.now(),
-    })
-
-    // update usage
-    if (!this.usage[req.featureSlug] && this.usage[req.featureSlug] !== undefined) {
-      this.usage[req.featureSlug] = req.usage
-    } else {
-      this.usage[req.featureSlug] = req.usage
-    }
-
+  async isValidEntitlement(entitlement: CustomerEntitlement) {
+    const gracePeriod = entitlement.gracePeriod
+    const currentCycleEndAt = entitlement.currentCycleEndAt
+    const currentCycleStartAt = entitlement.currentCycleStartAt
+    const featureType = entitlement.featureType
     const now = Date.now()
 
-    // Only broadcast if enough time has passed since last broadcast
-    if (now - this.lastBroadcastTime >= this.DEBOUNCE_DELAY) {
-      this.broadcast(
-        JSON.stringify({
-          customerId: req.customerId,
-          featureSlug: req.featureSlug,
-          usage: req.usage,
-          timestamp: now,
-        })
-      )
-      this.lastBroadcastTime = now
+    // validate feature type
+    // flat features shouldn't be used with usage limit
+    if (featureType === "flat") {
+      return
     }
 
-    // return usage
-    return {
-      valid: true,
-      remaining: 100,
-      usage: this.usage,
+    // validate is the billing cycle is active, add the grace period to the end of the cycle
+    // grace period is in days, so we need to convert it to milliseconds
+    const gracePeriodInMs = gracePeriod * 24 * 60 * 60 * 1000
+    const endOfCycle = currentCycleEndAt + gracePeriodInMs
+
+    if (now < currentCycleStartAt || now > endOfCycle) {
+      // TODO: log this error
+      console.error("error getting usage", "billing cycle not active")
+      return false
     }
+
+    return true
+  }
+
+  // this validation should happen in the client so the durable object is not responsible for it
+  // also we avoid calling the DO for every entitlement but still we need to validate the entitlement
+  async startup({
+    entitlement,
+  }: {
+    entitlement: CustomerEntitlement
+  }) {
+    // block concurrency while initializing
+    this.ctx.blockConcurrencyWhile(async () => {
+      try {
+        const currentCycleEndAt = entitlement.currentCycleEndAt
+        const currentCycleStartAt = entitlement.currentCycleStartAt
+
+        const isValid = await this.isValidEntitlement(entitlement)
+
+        if (!isValid) {
+          return
+        }
+
+        if (this.initialized) {
+          return
+        }
+
+        const isAccumulated = entitlement.aggregationMethod.endsWith("_all")
+
+        if (!isAccumulated) {
+          const totalUsage = await this.analytics
+            .getFeaturesUsagePeriod({
+              customerId: entitlement.customerId,
+              entitlementId: entitlement.id,
+              projectId: entitlement.projectId,
+              start: currentCycleStartAt,
+              end: Date.now(), // get the usage for the current cycle
+            })
+            .then((usage) => usage.data[0])
+            .catch((error) => {
+              // TODO: log this error
+              console.error("error getting usage", error)
+
+              return null
+            })
+
+          if (!totalUsage) {
+            this.currentUsage = 0
+          } else {
+            const usage =
+              (totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage] as number) ?? 0
+            this.currentUsage = usage
+          }
+
+          this.accumulatedUsage = 0
+        } else {
+          // get the total usage and the usage for the current cycle when the entitlement is accumulated
+          const [totalAccumulatedUsage, totalUsage] = await Promise.all([
+            this.analytics
+              .getFeaturesUsageTotal({
+                customerId: this.entitlement.customerId,
+                projectId: this.entitlement.projectId,
+                entitlementId: entitlement.id,
+              })
+              .then((usage) => usage.data[0])
+              .catch((error) => {
+                // TODO: log this error
+                console.error("error getting usage", error)
+
+                return null
+              }),
+            this.analytics
+              .getFeaturesUsagePeriod({
+                customerId: entitlement.customerId,
+                entitlementId: entitlement.id,
+                projectId: entitlement.projectId,
+                start: currentCycleStartAt,
+                end: Date.now(), // get the usage for the current cycle
+              })
+              .then((usage) => usage.data[0])
+              .catch((error) => {
+                // TODO: log this error
+                console.error("error getting usage", error)
+
+                return null
+              }),
+          ])
+
+          if (!totalUsage) {
+            this.currentUsage = 0
+          } else {
+            const usage =
+              (totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage] as number) ?? 0
+            this.currentUsage = usage
+          }
+
+          if (!totalAccumulatedUsage) {
+            this.accumulatedUsage = 0
+          } else {
+            const usage =
+              (totalAccumulatedUsage[
+                entitlement.aggregationMethod as keyof typeof totalAccumulatedUsage
+              ] as number) ?? 0
+            this.accumulatedUsage = usage
+          }
+
+          this.currentUsage = 0
+        }
+
+        // grace period is in days, so we need to convert it to milliseconds
+        const gracePeriodInMs = entitlement.gracePeriod * 24 * 60 * 60 * 1000
+        const endOfCycle = currentCycleEndAt + gracePeriodInMs
+
+        this.initialized = true
+        this.entitlement = entitlement
+        this.revalidateUntil = endOfCycle
+
+        // get the alarm
+        const alarm = await this.ctx.storage.getAlarm()
+
+        // set an alarm to revalidate the entitlement on the end of the cycle
+        if (!alarm) {
+          if (currentCycleEndAt > 0) {
+            // set an alarm 1 hour after the end of the cycle to revalidate the entitlement
+            this.ctx.storage.setAlarm(currentCycleEndAt + 1000 * 60 * 60 * 1)
+          }
+        }
+      } catch (error) {
+        console.error("error initializing", error)
+        this.initialized = false
+      }
+    })
   }
 
   onStart(): void | Promise<void> {
@@ -131,58 +195,6 @@ export class DurableObjectUsagelimiter extends Server {
 
   onConnect(): void | Promise<void> {
     console.info("onConnect")
-  }
-
-  async sendToTinybird() {
-    // Process events in batches to avoid memory issues
-    const BATCH_SIZE = 1000
-    let processedCount = 0
-    let lastProcessedId = 0
-
-    while (true) {
-      // Get a batch of events
-      const events = await this.db
-        .select()
-        .from(usageRecords)
-        .where(lastProcessedId > 0 ? sql`id > ${lastProcessedId}` : undefined)
-        .limit(BATCH_SIZE)
-        .orderBy(usageRecords.id)
-
-      if (events.length === 0) break
-
-      // Create a Map to deduplicate events based on their unique identifiers
-      const uniqueEvents = new Map()
-      for (const event of events) {
-        // Use a combination of customerId, featureSlug, and timestamp for deduplication
-        const key = `${event.customerId}-${event.featureSlug}-${event.timestamp}`
-        if (!uniqueEvents.has(key)) {
-          uniqueEvents.set(key, event)
-        }
-      }
-
-      const deduplicatedEvents = Array.from(uniqueEvents.values())
-      const ids = deduplicatedEvents.map((e) => e.id)
-
-      if (deduplicatedEvents.length > 0) {
-        try {
-          await this.analytics.ingestFeaturesUsage(deduplicatedEvents)
-
-          // Only delete events that were successfully sent
-          await this.db.delete(usageRecords).where(inArray(usageRecords.id, ids))
-          processedCount += ids.length
-        } catch (error) {
-          console.error("Failed to send events to Tinybird:", error)
-          // Don't delete events if sending failed
-          // We'll try again in the next alarm
-          break
-        }
-      }
-      // Update the last processed ID for the next batch
-      lastProcessedId = events[events.length - 1]?.id ?? lastProcessedId
-    }
-
-    // Log processing statistics
-    console.info(`Processed ${processedCount} events in this batch`)
   }
 
   // websocket message handler
@@ -194,8 +206,8 @@ export class DurableObjectUsagelimiter extends Server {
         conn.send(
           JSON.stringify({
             type: "profile",
-            data: this.usage,
-            usage: this.usage,
+            data: this.currentUsage,
+            usage: this.accumulatedUsage,
           })
         )
         break
@@ -205,7 +217,7 @@ export class DurableObjectUsagelimiter extends Server {
           JSON.stringify({
             type: "profile_updated",
             profile: profile,
-            usage: this.usage,
+            usage: this.currentUsage,
           })
         )
         break
@@ -214,11 +226,46 @@ export class DurableObjectUsagelimiter extends Server {
 
   // revalidate if needed
   async revalidate(): Promise<void> {
-    this.lastRevalidate = Date.now()
+    // add bd call for getting the entitlement
+    this.entitlement = this.entitlement
+
+    // validate the entitlement
+    const isValid = await this.isValidEntitlement(this.entitlement)
+
+    if (!isValid) {
+      // log error
+      console.error("error revalidating", "invalid entitlement")
+
+      // set another alarm to revalidate in 1 hour
+      this.ctx.storage.setAlarm(Date.now() + 1000 * 60 * 60 * 1)
+      // add a retry
+      this.revalidationRetries++
+
+      return
+    }
+
+    this.initialized = false
+    this.startup({ entitlement: this.entitlement })
   }
 
   async onAlarm(): Promise<void> {
-    // send usage to tinybird on alarm
-    await this.sendToTinybird()
+    if (!this.initialized) {
+      return
+    }
+
+    // avoid infinite retries
+    if (this.revalidationRetries > 50) {
+      // log error
+      console.error("error revalidating", "retries limit reached")
+
+      return
+    }
+
+    if (this.revalidateUntil < Date.now()) {
+      // on alarm revalidate the entitlement
+      await this.revalidate()
+    }
+
+    // log the revalidation time
   }
 }

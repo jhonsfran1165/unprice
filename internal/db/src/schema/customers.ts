@@ -24,10 +24,15 @@ import type {
   stripeSetupSchema,
 } from "../validators/customer"
 
-import { aggregationMethodEnum, currencyEnum, typeFeatureEnum } from "./enums"
+import {
+  aggregationMethodEnum,
+  currencyEnum,
+  typeFeatureEnum,
+  typeFeatureVersionEnum,
+} from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
 import { projects } from "./projects"
-import { subscriptionItems, subscriptions } from "./subscriptions"
+import { subscriptionItems, subscriptionPhases, subscriptions } from "./subscriptions"
 
 export const customers = pgTableProject(
   "customers",
@@ -62,9 +67,9 @@ export const customers = pgTableProject(
 
 // entitlements are the actual features that are assigned to a customer
 // normally this would match with subscription items but we need to add a way to
-// add entitlements to a plan version without having to create a subscription item
+// add entitlements to a plan version/customer without having to create a subscription item
 // since the subscription item is more of a billing concept and the entitlement is more of a
-// usage concept.
+// usage/access concept.
 export const customerEntitlements = pgTableProject(
   "customer_entitlements",
   {
@@ -73,17 +78,16 @@ export const customerEntitlements = pgTableProject(
     customerId: cuid("customer_id").notNull(),
     // subscriptionItemId is the id of the subscription item that the customer is entitled to
     subscriptionItemId: cuid("subscription_item_id"),
-    // TODO: we need to add a subscriptionId to the entitlement?
+    // subscriptionPhaseId is the id of the subscription phase that the customer is entitled to
+    subscriptionPhaseId: cuid("subscription_phase_id"),
+    // subscriptionId is the id of the subscription that the customer is entitled to
+    subscriptionId: cuid("subscription_id"),
     // featurePlanVersionId is the id of the feature plan version that the customer is entitled to
     featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
 
     // ****************** defaults from plan version features ******************
-    // These fields are duplicate but this improves the performance when checking the usage
-    // This table is cached in redis as well. All events usage are sent to tynibird and this table
-    // is restored with events in the subscription. The good thing about this is once a feature version
-    // is created, it never changes, so we don't need to worry about potential data inconsistency
-    // amount of units of the feature that the customer is entitled to
-    units: integer("units"),
+    // These fields are duplicate but help us to improve the performance when checking the usage
+    // and to avoid joins. Also help us to overwrite limits if needed.
     // limit is the limit of the feature that the customer is entitled to
     limit: integer("limit"),
     // usage is the usage of the feature that the customer has used
@@ -97,15 +101,26 @@ export const customerEntitlements = pgTableProject(
     // realtime features are updated in realtime, others are updated periodically
     realtime: boolean("realtime").notNull().default(false),
     // type of the feature plan version - feature or addon
-    type: text("type").notNull().default("feature"),
+    type: typeFeatureVersionEnum("type").notNull().default("feature"),
     // ****************** end defaults from plan version features ******************
 
-    // We need to know when the entitlement start and when it ends
+    // Phase dates when the entitlement starts and ends
     startAt: bigint("start_at", { mode: "number" }).notNull(),
     endAt: bigint("end_at", { mode: "number" }),
 
+    // current billing cycle start and end dates used to revalidate and reset the usage
+    currentCycleStartAt: bigint("current_cycle_start_at", { mode: "number" }).notNull(),
+    currentCycleEndAt: bigint("current_cycle_end_at", { mode: "number" }).notNull(),
+    // days of grace period to allow the customer to use the feature after the end of the cycle
+    // this is used to avoid overage charges also give us a windows to revalidate the entitlement when the subscription renew is triggered
+    gracePeriod: integer("grace_period").notNull().default(1),
+
+    // active is true if the entitlement is active
+    active: boolean("active").notNull().default(true),
+
     // if it's a custom entitlement, it's not tied to a subscription phase and it's not billed
     isCustom: boolean("is_custom").notNull().default(false),
+
     // entitlements are updated on a regular basis
     lastUsageUpdateAt: bigint("last_usage_update_at", { mode: "number" })
       .notNull()
@@ -136,11 +151,22 @@ export const customerEntitlements = pgTableProject(
       foreignColumns: [customers.id, customers.projectId],
       name: "customer_id_fkey",
     }),
+    subscriptionPhasefk: foreignKey({
+      columns: [table.subscriptionPhaseId, table.projectId],
+      foreignColumns: [subscriptionPhases.id, subscriptionPhases.projectId],
+      name: "subscription_phase_id_fkey",
+    }),
+    subscriptionfk: foreignKey({
+      columns: [table.subscriptionId, table.projectId],
+      foreignColumns: [subscriptions.id, subscriptions.projectId],
+      name: "subscription_id_fkey",
+    }),
     projectfk: foreignKey({
       columns: [table.projectId],
       foreignColumns: [projects.id],
       name: "project_id_fkey",
     }),
+    featureSlugIndex: index("feature_slug_index").on(table.featureSlug),
   })
 )
 

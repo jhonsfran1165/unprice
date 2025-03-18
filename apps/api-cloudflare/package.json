@@ -10,16 +10,16 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250311.0",
+    "@cloudflare/workers-types": "^4.20250313.0",
     "@unprice/tsconfig": "workspace:^",
     "drizzle-kit": "^0.30.5",
     "typescript": "^5.3.3",
-    "wrangler": "^4.0.0"
+    "wrangler": "^4.1.0"
   },
   "dependencies": {
+    "@auth/core": "^0.34.1",
     "@chronark/zod-bird": "^0.3.10",
     "@hono/zod-openapi": "^0.19.2",
-    "@neondatabase/serverless": "^0.10.4",
     "@unkey/cache": "^1.5.0",
     "@unprice/db": "workspace:^",
     "@unprice/error": "workspace:^",
@@ -32,6 +32,7 @@
     "hono": "^4.7.4",
     "hono-party": "^0.0.6",
     "partyserver": "^0.0.65",
+    "stoker": "^1.4.2",
     "zod": "^3.24.2"
   }
 }

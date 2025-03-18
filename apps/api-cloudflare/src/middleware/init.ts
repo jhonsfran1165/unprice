@@ -88,6 +88,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       metrics,
       analytics,
       cache,
+      db,
+      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
     })
 
     const apikey = new ApiKeysService({

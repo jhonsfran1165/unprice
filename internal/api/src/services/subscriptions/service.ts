@@ -89,6 +89,14 @@ export class SubscriptionService {
       where: (sub, { eq, and }) => and(eq(sub.id, subscriptionId), eq(sub.projectId, projectId)),
     })
 
+    if (!subscription) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription not found",
+        })
+      )
+    }
+
     // get all the active entitlements for the customer
     const { err, val } = await this.customerService.getEntitlementsByDate({
       customerId,
@@ -134,7 +142,7 @@ export class SubscriptionService {
     const entitiesToCreate: (typeof customerEntitlements.$inferInsert)[] = []
     const entitiesToUpdate: Pick<
       typeof customerEntitlements.$inferInsert,
-      "id" | "lastUsageUpdateAt" | "updatedAtM" | "endAt" | "units"
+      "id" | "lastUsageUpdateAt" | "updatedAtM" | "endAt"
     >[] = []
     const entitiesToDelete: string[] = []
 
@@ -150,14 +158,19 @@ export class SubscriptionService {
           projectId,
           customerId,
           subscriptionItemId: item.id,
+          subscriptionPhaseId: item.subscriptionPhaseId,
+          subscriptionId: item.subscriptionId,
           featurePlanVersionId: item.featurePlanVersionId,
-          units: item.units,
-          limit: item.featurePlanVersion.limit,
+          // if the units are not set, we use the limit of the feature plan version
+          limit: item.units ?? item.featurePlanVersion.limit ?? null,
           usage: 0, // Initialize usage to 0
           featureSlug: item.featurePlanVersion.feature.slug,
           featureType: item.featurePlanVersion.featureType,
           aggregationMethod: item.featurePlanVersion.aggregationMethod,
           realtime: item.featurePlanVersion.metadata?.realtime ?? false,
+          currentCycleStartAt: subscription.currentCycleStartAt,
+          currentCycleEndAt: subscription.currentCycleEndAt,
+          // for now only support features types
           type: "feature",
           startAt: now,
           endAt: activePhase?.endAt ?? null,
@@ -170,7 +183,6 @@ export class SubscriptionService {
         entitiesToUpdate.push({
           id: entitlement.id,
           endAt: activePhase?.endAt ?? null,
-          units: item.units,
           lastUsageUpdateAt: now,
           updatedAtM: now,
         })

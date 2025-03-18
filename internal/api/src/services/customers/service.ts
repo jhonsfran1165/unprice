@@ -273,15 +273,8 @@ export class CustomerService {
       return
     }
 
-    let usage = 0
-
-    usage = (totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage] as number) ?? 0
-
-    // if the usage is not found, then do nothing
-    // no need to log an error here because could be the case that there is not usage reported yet yet
-    if (!usage) {
-      return
-    }
+    const usage =
+      (totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage] as number) ?? 0
 
     // update the usage of the entitlement
     await this.ctx.db
@@ -458,7 +451,6 @@ export class CustomerService {
         deniedReason?: DenyReason
         remaining?: number
         featureType?: FeatureType
-        units?: number
       },
       UnPriceCustomerError | FetchError
     >
@@ -513,7 +505,6 @@ export class CustomerService {
               deniedReason: error.code,
               subscriptionPhaseId: "",
               subscriptionId: "",
-              workspaceId: "",
               requestId: this.ctx.requestId,
             })
             .catch((error) =>
@@ -580,10 +571,9 @@ export class CustomerService {
         // the rest of the features need to check the usage
         case "tier":
         case "package": {
-          const { usage, limit, units } = entitlement
+          const { usage, limit } = entitlement
           const currentUsage = usage ?? 0
           const hitLimit = limit ? limit - currentUsage : undefined
-          const hitUnits = units ? units - currentUsage : undefined
 
           // check limits first
           if (hitLimit && hitLimit <= 0) {
@@ -593,10 +583,8 @@ export class CustomerService {
                   ...analyticsPayload,
                   latency: performance.now() - start,
                   deniedReason: "LIMIT_EXCEEDED",
-                  subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id ?? null,
-                  subscriptionId:
-                    entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id ?? null,
-                  workspaceId: entitlement.project.workspaceId,
+                  subscriptionPhaseId: entitlement.subscriptionPhaseId ?? null,
+                  subscriptionId: entitlement.subscriptionId ?? null,
                   requestId: this.ctx.requestId,
                 })
                 .catch((error) =>
@@ -610,7 +598,6 @@ export class CustomerService {
             return Ok({
               currentUsage: currentUsage,
               limit: limit ?? undefined,
-              units: units ?? undefined,
               featureType: entitlement.featureType,
               access: false,
               deniedReason: "LIMIT_EXCEEDED",
@@ -619,17 +606,15 @@ export class CustomerService {
           }
 
           // check usage
-          if (hitUnits && hitUnits <= 0) {
+          if (hitLimit && hitLimit <= 0) {
             this.ctx.waitUntil(
               this.ctx.analytics
                 .ingestFeaturesVerification({
                   ...analyticsPayload,
                   latency: performance.now() - start,
                   deniedReason: "USAGE_EXCEEDED",
-                  subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id ?? null,
-                  subscriptionId:
-                    entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id ?? null,
-                  workspaceId: entitlement.project.workspaceId,
+                  subscriptionPhaseId: entitlement.subscriptionPhaseId ?? null,
+                  subscriptionId: entitlement.subscriptionId ?? null,
                   requestId: this.ctx.requestId,
                 })
                 .catch((error) =>
@@ -644,10 +629,9 @@ export class CustomerService {
               currentUsage: currentUsage,
               limit: limit ?? undefined,
               featureType: entitlement.featureType,
-              units: units ?? undefined,
               access: false,
               deniedReason: "USAGE_EXCEEDED",
-              remaining: hitUnits,
+              remaining: hitLimit,
             })
           }
 
@@ -667,10 +651,8 @@ export class CustomerService {
           .ingestFeaturesVerification({
             ...analyticsPayload,
             latency: performance.now() - start,
-            subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id ?? null,
-            subscriptionId:
-              entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id ?? null,
-            workspaceId: entitlement.project.workspaceId,
+            subscriptionPhaseId: entitlement.subscriptionPhaseId ?? null,
+            subscriptionId: entitlement.subscriptionId ?? null,
             requestId: this.ctx.requestId,
           })
           .catch((error) =>
@@ -729,26 +711,8 @@ export class CustomerService {
       const threshold = 80 // notify when the usage is 80% or more
       const currentUsage = entitlement.usage ?? 0
       const limit = entitlement.limit
-      const units = entitlement.units
       let message = ""
       let notifyUsage = false
-
-      // check usage
-      if (units) {
-        const unitsPercentage = (currentUsage / units) * 100
-
-        if (currentUsage >= units) {
-          message = `Your feature ${featureSlug} has reached or exceeded its usage of ${units}. Current usage: ${unitsPercentage.toFixed(
-            2
-          )}% of its units usage. This is over the units by ${currentUsage - units}`
-          notifyUsage = true
-        } else if (unitsPercentage >= threshold) {
-          message = `Your feature ${featureSlug} is at ${unitsPercentage.toFixed(
-            2
-          )}% of its units usage`
-          notifyUsage = true
-        }
-      }
 
       // check limit
       if (limit) {
@@ -793,9 +757,8 @@ export class CustomerService {
               entitlementId: entitlement.id,
               featureSlug: featureSlug,
               customerId: customerId,
-              subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
-              subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
-              workspaceId: entitlement.project.workspaceId,
+              subscriptionPhaseId: entitlement.subscriptionPhaseId!,
+              subscriptionId: entitlement.subscriptionId!,
               requestId: this.ctx.requestId,
               // TODO: add metadata to the usage
               metadata: {

@@ -57,6 +57,14 @@ export function initCache(c: Context<HonoEnv>, metrics: Metrics): C<CacheNamespa
 
   return createCache({
     apiKeyByHash: new Namespace<CacheNamespaces["apiKeyByHash"]>(c.executionCtx, defaultOpts),
+    featureByCustomerId: new Namespace<CacheNamespaces["featureByCustomerId"]>(
+      c.executionCtx,
+      defaultOpts
+    ),
+    entitlementsByCustomerId: new Namespace<CacheNamespaces["entitlementsByCustomerId"]>(
+      c.executionCtx,
+      defaultOpts
+    ),
   })
 }
 

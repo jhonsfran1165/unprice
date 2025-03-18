@@ -47,15 +47,15 @@ importers:
 
   apps/api-cloudflare:
     dependencies:
+      '@auth/core':
+        specifier: ^0.34.1
+        version: 0.34.2
       '@chronark/zod-bird':
         specifier: ^0.3.10
         version: 0.3.10
       '@hono/zod-openapi':
         specifier: ^0.19.2
         version: 0.19.2(hono@4.7.4)(zod@3.24.2)
-      '@neondatabase/serverless':
-        specifier: ^0.10.4
-        version: 0.10.4
       '@unkey/cache':
         specifier: ^1.5.0
         version: 1.5.0
@@ -82,7 +82,7 @@ importers:
         version: link:../../internal/tinybird
       drizzle-orm:
         specifier: ^0.40.0
-        version: 0.40.0(@cloudflare/workers-types@4.20250313.0)(@neondatabase/serverless@0.10.4)
+        version: 0.40.0(@cloudflare/workers-types@4.20250313.0)
       hono:
         specifier: ^4.7.4
         version: 4.7.4
@@ -92,12 +92,15 @@ importers:
       partyserver:
         specifier: ^0.0.65
         version: 0.0.65(@cloudflare/workers-types@4.20250313.0)
+      stoker:
+        specifier: ^1.4.2
+        version: 1.4.2(@asteasolutions/zod-to-openapi@7.3.0)(@hono/zod-openapi@0.19.2)(hono@4.7.4)(openapi3-ts@4.4.0)
       zod:
         specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20250311.0
+        specifier: ^4.20250313.0
         version: 4.20250313.0
       '@unprice/tsconfig':
         specifier: workspace:^
@@ -109,8 +112,8 @@ importers:
         specifier: ^5.3.3
         version: 5.8.2
       wrangler:
-        specifier: ^4.0.0
-        version: 4.0.0(@cloudflare/workers-types@4.20250313.0)
+        specifier: ^4.1.0
+        version: 4.1.0(@cloudflare/workers-types@4.20250313.0)
 
   apps/auth-proxy:
     dependencies:
@@ -350,7 +353,7 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.1)
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
       zod-validation-error:
         specifier: ^3.3.1
@@ -477,7 +480,7 @@ importers:
         specifier: ^5.19.2
         version: 5.19.2
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
       zod-form-data:
         specifier: ^2.0.2
@@ -526,7 +529,7 @@ importers:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@types/react':
@@ -548,7 +551,7 @@ importers:
         specifier: 0.1.0
         version: link:../ui
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@unprice/tsconfig':
@@ -589,7 +592,7 @@ importers:
         version: 2.0.0-alpha.14
       drizzle-orm:
         specifier: ^0.40.0
-        version: 0.40.0(@cloudflare/workers-types@4.20250313.0)(@neondatabase/serverless@0.10.4)
+        version: 0.40.0(@neondatabase/serverless@0.10.4)
       drizzle-zod:
         specifier: ^0.5.1
         version: 0.5.1(drizzle-orm@0.40.0)(zod@3.24.2)
@@ -600,7 +603,7 @@ importers:
         specifier: ^8.17.1
         version: 8.18.1
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@types/ws':
@@ -649,7 +652,7 @@ importers:
         specifier: ^3.2.0
         version: 3.5.0(react-dom@18.3.1)(react@18.3.1)
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@types/node':
@@ -671,7 +674,7 @@ importers:
   internal/error:
     dependencies:
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@types/node':
@@ -736,7 +739,7 @@ importers:
         specifier: 3.3.13
         version: 3.3.13(typescript@5.8.2)
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@unprice/tsconfig':
@@ -768,7 +771,7 @@ importers:
         specifier: workspace:^
         version: link:../metrics
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@types/node':
@@ -784,7 +787,7 @@ importers:
   internal/metrics:
     dependencies:
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@types/node':
@@ -815,7 +818,7 @@ importers:
         specifier: ^14.19.0
         version: 14.25.0
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@unprice/tsconfig':
@@ -834,7 +837,7 @@ importers:
         specifier: 0.9.1
         version: 0.9.1(typescript@5.8.2)(zod@3.24.2)
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@unprice/tsconfig':
@@ -949,7 +952,7 @@ importers:
         specifier: ^0.9.0
         version: 0.9.9(@types/react-dom@18.3.5)(@types/react@18.3.18)(react-dom@18.3.1)(react@18.3.1)
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@tanstack/react-table':
@@ -998,7 +1001,7 @@ importers:
         specifier: ^0.1.0
         version: link:../error
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@types/node':
@@ -1049,7 +1052,7 @@ importers:
         version: link:../../internal/db
       drizzle-orm:
         specifier: ^0.40.0
-        version: 0.40.0(@cloudflare/workers-types@4.20250313.0)(@neondatabase/serverless@0.10.4)
+        version: 0.40.0(@neondatabase/serverless@0.10.4)
       ws:
         specifier: ^8.17.1
         version: 8.18.1
@@ -1110,7 +1113,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/unprice
       zod:
-        specifier: ^3.23.8
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       '@types/node':
@@ -2320,7 +2323,7 @@ packages:
       mime: 3.0.0
     dev: true
 
-  /@cloudflare/unenv-preset@2.0.2(unenv@2.0.0-rc.14)(workerd@1.20250310.0):
+  /@cloudflare/unenv-preset@2.0.2(unenv@2.0.0-rc.14)(workerd@1.20250317.0):
     resolution: {integrity: sha512-nyzYnlZjjV5xT3LizahG1Iu6mnrCaxglJ04rZLpDwlDVDZ7v46lNsfxhV3A/xtfgQuSHmLnc6SVI+KwBpc3Lwg==}
     peerDependencies:
       unenv: 2.0.0-rc.14
@@ -2330,11 +2333,11 @@ packages:
         optional: true
     dependencies:
       unenv: 2.0.0-rc.14
-      workerd: 1.20250310.0
+      workerd: 1.20250317.0
     dev: true
 
-  /@cloudflare/workerd-darwin-64@1.20250310.0:
-    resolution: {integrity: sha512-LkLJO6F8lRNaCbK5sQCITi66SyCirDpffRuI5/5iILDJWQU4KVvAOKPvHrd4E5h/WDm9FGd22zMJwky7SxaNjg==}
+  /@cloudflare/workerd-darwin-64@1.20250317.0:
+    resolution: {integrity: sha512-ZnpF+MP/azHJ7sUOW9Ut/5pqeijsEOSmRUpONDXImv/DiHgtCd2BA/He11srp8nG2XeWav3jk+Ob84NKrrXXHg==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [darwin]
@@ -2342,8 +2345,8 @@ packages:
     dev: true
     optional: true
 
-  /@cloudflare/workerd-darwin-arm64@1.20250310.0:
-    resolution: {integrity: sha512-WythDJQbsU3Ii1hhA7pJZLBQlHezeYWAnaMnv3gS2Exj45oF8G4chFvrO7zCzjlcJXwSeBTtQRJqxw9AiUDhyA==}
+  /@cloudflare/workerd-darwin-arm64@1.20250317.0:
+    resolution: {integrity: sha512-ypn2/SIK7LAouYx5oB0NNhzb3h+ZdXtDh94VCcsNV81xAVdDXKp6xvTnqY8CWjGfuKWJocbRZVZvU+Lquhuujg==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [darwin]
@@ -2351,8 +2354,8 @@ packages:
     dev: true
     optional: true
 
-  /@cloudflare/workerd-linux-64@1.20250310.0:
-    resolution: {integrity: sha512-LbP769tT4/5QBHSj4lCt99QIKTi6cU+wYhLfF7rEtYHBnZS2+nIw9xttAzxeERx/aFrU+mxLcYPFV8fUeVxGng==}
+  /@cloudflare/workerd-linux-64@1.20250317.0:
+    resolution: {integrity: sha512-KfAHN9VHF2NxGjDjj7udLAatZ72GIg4xmN9r2AZ6N1/hsGDlbn+NbVkSJtWjpXBcCoWYxQqtAdpHyO4eb7nIvQ==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [linux]
@@ -2360,8 +2363,8 @@ packages:
     dev: true
     optional: true
 
-  /@cloudflare/workerd-linux-arm64@1.20250310.0:
-    resolution: {integrity: sha512-FzWeKM6id20EMZACaDg0Kkvg1C4lvXZgLBXVI6h6xaXTNFReoyEp4v4eMrRTuja5ec5k+m5iGKjP4/bMWJp9ew==}
+  /@cloudflare/workerd-linux-arm64@1.20250317.0:
+    resolution: {integrity: sha512-o7a3poQ4vzw553xGudUWm8yGsfdRWSGxqDEdYyuzT5k3z4qjsYMGsZgW9Yw8x3f1SSpPgYpdLlc8IKg9n7eukA==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [linux]
@@ -2369,8 +2372,8 @@ packages:
     dev: true
     optional: true
 
-  /@cloudflare/workerd-windows-64@1.20250310.0:
-    resolution: {integrity: sha512-04OgaDzm8/8nkjF3tovB+WywZLjSdAHCQT2omXKCwH3EDd1kpd8vvzE1pErtdIyKCOf9/sArY4BhPdxRj7ijlg==}
+  /@cloudflare/workerd-windows-64@1.20250317.0:
+    resolution: {integrity: sha512-tfDSioKY5OKP0nZ7Mkc6bLcwY2fIrROwoq2WjekQ62x91KRbKCJwjkOSvyFJYbshDATK90GutYoblqV80e34jw==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
@@ -12652,7 +12655,7 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.40.0(@cloudflare/workers-types@4.20250313.0)(@neondatabase/serverless@0.10.4):
+  /drizzle-orm@0.40.0(@cloudflare/workers-types@4.20250313.0):
     resolution: {integrity: sha512-7ptk/HQiMSrEZHnAsSlBESXWj52VwgMmyTEfoNmpNN2ZXpcz13LwHfXTIghsAEud7Z5UJhDOp8U07ujcqme7wg==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -12742,6 +12745,97 @@ packages:
         optional: true
     dependencies:
       '@cloudflare/workers-types': 4.20250313.0
+    dev: false
+
+  /drizzle-orm@0.40.0(@neondatabase/serverless@0.10.4):
+    resolution: {integrity: sha512-7ptk/HQiMSrEZHnAsSlBESXWj52VwgMmyTEfoNmpNN2ZXpcz13LwHfXTIghsAEud7Z5UJhDOp8U07ujcqme7wg==}
+    peerDependencies:
+      '@aws-sdk/client-rds-data': '>=3'
+      '@cloudflare/workers-types': '>=4'
+      '@electric-sql/pglite': '>=0.2.0'
+      '@libsql/client': '>=0.10.0'
+      '@libsql/client-wasm': '>=0.10.0'
+      '@neondatabase/serverless': '>=0.10.0'
+      '@op-engineering/op-sqlite': '>=2'
+      '@opentelemetry/api': ^1.4.1
+      '@planetscale/database': '>=1'
+      '@prisma/client': '*'
+      '@tidbcloud/serverless': '*'
+      '@types/better-sqlite3': '*'
+      '@types/pg': '*'
+      '@types/sql.js': '*'
+      '@vercel/postgres': '>=0.8.0'
+      '@xata.io/client': '*'
+      better-sqlite3: '>=7'
+      bun-types: '*'
+      expo-sqlite: '>=14.0.0'
+      gel: '>=2'
+      knex: '*'
+      kysely: '*'
+      mysql2: '>=2'
+      pg: '>=8'
+      postgres: '>=3'
+      prisma: '*'
+      sql.js: '>=1'
+      sqlite3: '>=5'
+    peerDependenciesMeta:
+      '@aws-sdk/client-rds-data':
+        optional: true
+      '@cloudflare/workers-types':
+        optional: true
+      '@electric-sql/pglite':
+        optional: true
+      '@libsql/client':
+        optional: true
+      '@libsql/client-wasm':
+        optional: true
+      '@neondatabase/serverless':
+        optional: true
+      '@op-engineering/op-sqlite':
+        optional: true
+      '@opentelemetry/api':
+        optional: true
+      '@planetscale/database':
+        optional: true
+      '@prisma/client':
+        optional: true
+      '@tidbcloud/serverless':
+        optional: true
+      '@types/better-sqlite3':
+        optional: true
+      '@types/pg':
+        optional: true
+      '@types/sql.js':
+        optional: true
+      '@vercel/postgres':
+        optional: true
+      '@xata.io/client':
+        optional: true
+      better-sqlite3:
+        optional: true
+      bun-types:
+        optional: true
+      expo-sqlite:
+        optional: true
+      gel:
+        optional: true
+      knex:
+        optional: true
+      kysely:
+        optional: true
+      mysql2:
+        optional: true
+      pg:
+        optional: true
+      postgres:
+        optional: true
+      prisma:
+        optional: true
+      sql.js:
+        optional: true
+      sqlite3:
+        optional: true
+    dependencies:
       '@neondatabase/serverless': 0.10.4
     dev: false
 
@@ -12751,7 +12845,7 @@ packages:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.40.0(@cloudflare/workers-types@4.20250313.0)(@neondatabase/serverless@0.10.4)
+      drizzle-orm: 0.40.0(@neondatabase/serverless@0.10.4)
       zod: 3.24.2
     dev: false
 
@@ -16414,8 +16508,8 @@ packages:
     hasBin: true
     dev: false
 
-  /miniflare@4.20250310.0:
-    resolution: {integrity: sha512-WL4hKQIfXyTxKyQzxJyyy/v+OYSiF51s3Qe1Q4W4MjHJbtiN8Kg7+oeTdHYgqYehanN2zYoSKJ/xooIy8q5+XA==}
+  /miniflare@4.20250317.0:
+    resolution: {integrity: sha512-fCyFTa3G41Vyo24QUZD5xgdm+6RMKT6VC3vk9Usmr+Pwf/15HcH1AVLPVgzmJaJosWVb8r4S0HQ9a/+bmmZx0Q==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     dependencies:
@@ -16426,7 +16520,7 @@ packages:
       glob-to-regexp: 0.4.1
       stoppable: 1.1.0
       undici: 5.28.5
-      workerd: 1.20250310.0
+      workerd: 1.20250317.0
       ws: 8.18.0
       youch: 3.2.3
       zod: 3.22.3
@@ -19745,6 +19839,23 @@ packages:
   /std-env@3.8.1:
     resolution: {integrity: sha512-vj5lIj3Mwf9D79hBkltk5qmkFI+biIKWS2IBxEyEU3AX1tUf7AoL8nSazCOiiqQsGKIq01SClsKEzweu34uwvA==}
 
+  /stoker@1.4.2(@asteasolutions/zod-to-openapi@7.3.0)(@hono/zod-openapi@0.19.2)(hono@4.7.4)(openapi3-ts@4.4.0):
+    resolution: {integrity: sha512-zna86ZzC3fnMOIkuO+1vRMfcRw7SpC/7yafRb0u8DwDVig2pPh6POVnGB7t2A5t/rMvyr7hE7tjXTPvW8bhJKg==}
+    peerDependencies:
+      '@asteasolutions/zod-to-openapi': ^7.0.0
+      '@hono/zod-openapi': '>=0.16.0'
+      hono: ^4.0.0
+      openapi3-ts: ^4.4.0
+    peerDependenciesMeta:
+      '@hono/zod-openapi':
+        optional: true
+    dependencies:
+      '@asteasolutions/zod-to-openapi': 7.3.0(zod@3.24.2)
+      '@hono/zod-openapi': 0.19.2(hono@4.7.4)(zod@3.24.2)
+      hono: 4.7.4
+      openapi3-ts: 4.4.0
+    dev: false
+
   /stoppable@1.1.0:
     resolution: {integrity: sha512-KXDYZ9dszj6bzvnEMRYvxgeTHU74QBFL54XKtP3nyMuJ81CFYtABZ3bAzL2EdFUaEwJOBOgENyFj3R7oTzDyyw==}
     engines: {node: '>=4', npm: '>=6'}
@@ -21744,38 +21855,38 @@ packages:
     resolution: {integrity: sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==}
     dev: false
 
-  /workerd@1.20250310.0:
-    resolution: {integrity: sha512-bAaZ9Bmts3mArbIrXYAtr+ZRsAJAAUEsCtvwfBavIYXaZ5sgdEOJBEiBbvsHp6CsVObegOM85tIWpYLpbTxQrQ==}
+  /workerd@1.20250317.0:
+    resolution: {integrity: sha512-m+aqA4RS/jsIaml0KuTi96UBlkx1vC0mcLClGKPFNPiMStK75hVQxUhupXEMI4knHtb/vgNQyPFMKAJtxW5c6w==}
     engines: {node: '>=16'}
     hasBin: true
     requiresBuild: true
     optionalDependencies:
-      '@cloudflare/workerd-darwin-64': 1.20250310.0
-      '@cloudflare/workerd-darwin-arm64': 1.20250310.0
-      '@cloudflare/workerd-linux-64': 1.20250310.0
-      '@cloudflare/workerd-linux-arm64': 1.20250310.0
-      '@cloudflare/workerd-windows-64': 1.20250310.0
+      '@cloudflare/workerd-darwin-64': 1.20250317.0
+      '@cloudflare/workerd-darwin-arm64': 1.20250317.0
+      '@cloudflare/workerd-linux-64': 1.20250317.0
+      '@cloudflare/workerd-linux-arm64': 1.20250317.0
+      '@cloudflare/workerd-windows-64': 1.20250317.0
     dev: true
 
-  /wrangler@4.0.0(@cloudflare/workers-types@4.20250313.0):
-    resolution: {integrity: sha512-9QqqoznS5sfLNqPKPkeEkwPAIe4lPfWLzPxVATmAbMQl4sh3/8iKEYSjZXQxdtcTgiS8iGOUbHq/rdiOFU8H1w==}
+  /wrangler@4.1.0(@cloudflare/workers-types@4.20250313.0):
+    resolution: {integrity: sha512-HcQZ2YappySGipEDEdbjMq01g3v+mv+xZYZSzwPTmRsoTfnbL5yteObshcK1JX9jdx7Qw23Ywd/4BPa1JyKIUQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     peerDependencies:
-      '@cloudflare/workers-types': ^4.20250310.0
+      '@cloudflare/workers-types': ^4.20250317.0
     peerDependenciesMeta:
       '@cloudflare/workers-types':
         optional: true
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.0
-      '@cloudflare/unenv-preset': 2.0.2(unenv@2.0.0-rc.14)(workerd@1.20250310.0)
+      '@cloudflare/unenv-preset': 2.0.2(unenv@2.0.0-rc.14)(workerd@1.20250317.0)
       '@cloudflare/workers-types': 4.20250313.0
       blake3-wasm: 2.1.5
       esbuild: 0.24.2
-      miniflare: 4.20250310.0
+      miniflare: 4.20250317.0
       path-to-regexp: 6.3.0
       unenv: 2.0.0-rc.14
-      workerd: 1.20250310.0
+      workerd: 1.20250317.0
     optionalDependencies:
       fsevents: 2.3.3
       sharp: 0.33.5

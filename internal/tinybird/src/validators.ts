@@ -62,7 +62,6 @@ export const featureVerificationSchemaV1 = z.object({
   featureSlug: z.string(),
   customerId: z.string(),
   requestId: z.string(),
-  workspaceId: z.string(),
   metadata: nullableJsonToString.default(null),
 })
 
@@ -84,7 +83,6 @@ export const featureUsageSchemaV1 = z.object({
     .number()
     .default(Date.now())
     .describe("timestamp of when this usage record was created"),
-  workspaceId: z.string(),
   requestId: z.string(),
   deleted: booleanToUInt8.default(false).describe("1 if the usage record was deleted, 0 otherwise"),
   metadata: nullableJsonToString.default(null),

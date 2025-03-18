@@ -23,7 +23,7 @@
     "@unprice/tinybird": "workspace:^",
     "date-fns": "^3.3.1",
     "trigger.dev": "3.3.13",
-    "zod": "^3.23.8"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@unprice/tsconfig": "^0.1.0",

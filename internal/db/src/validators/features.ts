@@ -7,7 +7,13 @@ import { deniedReasonSchema, typeFeatureSchema, unpriceCustomerErrorSchema } fro
 export const featureSelectBaseSchema = createSelectSchema(schema.features)
 
 export const featureInsertBaseSchema = createInsertSchema(schema.features, {
-  title: z.string().min(1).max(50),
+  title: z
+    .string()
+    .min(1)
+    .max(50)
+    .refine((title) => /^[a-zA-Z0-9\s]+$/.test(title), {
+      message: "Title must contain only letters, numbers, and spaces",
+    }),
   slug: z
     .string()
     .min(1)

@@ -26,6 +26,6 @@
   },
   "dependencies": {
     "@unprice/error": "^0.1.0",
-    "zod": "^3.23.8"
+    "zod": "^3.24.2"
   }
 }

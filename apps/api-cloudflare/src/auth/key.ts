@@ -50,7 +50,6 @@ export async function keyAuth(c: Context<HonoEnv>) {
       featureSlug: "",
       timestamp: Date.now(),
       requestId: c.get("requestId"),
-      workspaceId: "",
       planVersionFeatureId: "",
       subscriptionItemId: "",
       subscriptionPhaseId: "",

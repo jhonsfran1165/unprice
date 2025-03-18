@@ -8,7 +8,6 @@ import {
   paymentProviderSchema,
   typeFeatureSchema,
 } from "./shared"
-import { subscriptionSelectSchema } from "./subscriptions"
 import { subscriptionItemsConfigSchema } from "./subscriptions/items"
 
 export const reasonCreditSchema = z.enum([
@@ -89,28 +88,9 @@ export const stripePlanVersionSchema = z.object({
 export const customerEntitlementSchema = createSelectSchema(schema.customerEntitlements, {
   aggregationMethod: aggregationMethodSchema,
   featureType: typeFeatureSchema,
-}).extend({
-  project: z.object({
-    id: z.string(),
-    workspaceId: z.string(),
-  }),
-  subscriptionItem: z
-    .object({
-      id: z.string(),
-      subscriptionPhase: z
-        .object({
-          id: z.string(),
-          subscription: subscriptionSelectSchema
-            .pick({
-              id: true,
-              currentCycleStartAt: true,
-              currentCycleEndAt: true,
-            })
-            .nullable(),
-        })
-        .nullable(),
-    })
-    .nullable(),
+}).omit({
+  createdAtM: true,
+  updatedAtM: true,
 })
 
 export const customerEntitlementInsertSchema = createInsertSchema(schema.customerEntitlements, {

@@ -1,8 +1,9 @@
+import * as HttpStatusCodes from "stoker/http-status-codes"
 import { z } from "zod"
 import { errorSchemaFactory } from "./http"
 
 export const openApiErrorResponses = {
-  400: {
+  [HttpStatusCodes.BAD_REQUEST]: {
     description:
       "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
     content: {
@@ -11,7 +12,7 @@ export const openApiErrorResponses = {
       },
     },
   },
-  401: {
+  [HttpStatusCodes.UNAUTHORIZED]: {
     description: `Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.`,
     content: {
       "application/json": {
@@ -19,7 +20,7 @@ export const openApiErrorResponses = {
       },
     },
   },
-  403: {
+  [HttpStatusCodes.FORBIDDEN]: {
     description:
       "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
     content: {
@@ -28,7 +29,7 @@ export const openApiErrorResponses = {
       },
     },
   },
-  404: {
+  [HttpStatusCodes.NOT_FOUND]: {
     description:
       "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
     content: {
@@ -37,7 +38,7 @@ export const openApiErrorResponses = {
       },
     },
   },
-  409: {
+  [HttpStatusCodes.CONFLICT]: {
     description:
       "This response is sent when a request conflicts with the current state of the server.",
     content: {
@@ -46,7 +47,7 @@ export const openApiErrorResponses = {
       },
     },
   },
-  412: {
+  [HttpStatusCodes.PRECONDITION_FAILED]: {
     description:
       "The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails.",
     content: {
@@ -57,7 +58,7 @@ export const openApiErrorResponses = {
       },
     },
   },
-  429: {
+  [HttpStatusCodes.TOO_MANY_REQUESTS]: {
     description: `The user has sent too many requests in a given amount of time ("rate limiting")`,
     content: {
       "application/json": {
@@ -65,7 +66,7 @@ export const openApiErrorResponses = {
       },
     },
   },
-  500: {
+  [HttpStatusCodes.INTERNAL_SERVER_ERROR]: {
     description: "The server has encountered a situation it does not know how to handle.",
     content: {
       "application/json": {

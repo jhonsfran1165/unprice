@@ -25,35 +25,6 @@ export const getEntitlementsByDateQuery = async ({
 
   const entitlements = await db.query.customerEntitlements
     .findMany({
-      with: {
-        project: {
-          columns: {
-            id: true,
-            workspaceId: true,
-          },
-        },
-        subscriptionItem: {
-          columns: {
-            id: true,
-          },
-          with: {
-            subscriptionPhase: {
-              columns: {
-                id: true,
-              },
-              with: {
-                subscription: {
-                  columns: {
-                    id: true,
-                    currentCycleStartAt: true,
-                    currentCycleEndAt: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
       where: (ent, { eq, and, gte, lte, isNull, or }) =>
         and(
           eq(ent.customerId, customerId),

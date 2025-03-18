@@ -17,6 +17,7 @@ export const zEnv = z.object({
   DATABASE_READ2_URL: z.string().optional(),
   CLOUDFLARE_ZONE_ID: z.string().optional(),
   CLOUDFLARE_API_KEY: z.string().optional(),
+  AUTH_SECRET: z.string(),
   EMIT_METRICS_LOGS: z
     .string()
     .optional()

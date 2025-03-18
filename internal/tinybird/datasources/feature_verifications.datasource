@@ -11,7 +11,6 @@ SCHEMA >
     `latency` Float32 `json:$.latency`,
     `planVersionFeatureId` String `json:$.planVersionFeatureId`,
     `requestId` String `json:$.requestId`,
-    `workspaceId` String `json:$.workspaceId`,
     `projectId` String `json:$.projectId`,
     `entitlementId` String `json:$.entitlementId`,
     `subscriptionId` Nullable(String) `json:$.subscriptionId`,

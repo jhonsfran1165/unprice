@@ -1,24 +1,27 @@
+import type { Database } from "@unprice/db"
+import type { CustomerEntitlement } from "@unprice/db/validators"
+import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import type { Cache } from "~/cache"
 import type { Metrics } from "~/metrics/interface"
 import type { DurableObjectUsagelimiter } from "./do"
-import {
-  type LimitRequest,
-  type LimitResponse,
-  type RevalidateRequest,
-  type UsageLimiter,
-  limitResponseSchema,
+import type {
+  ReportUsageRequest,
+  ReportUsageResponse,
+  RevalidateRequest,
+  UsageLimiter,
 } from "./interface"
 
 export class DurableUsageLimiter implements UsageLimiter {
   private readonly namespace: DurableObjectNamespace<DurableObjectUsagelimiter>
-  private readonly domain: string
-  private readonly requestId: string
   private readonly logger: Logger
   private readonly metrics: Metrics
   private readonly analytics: Analytics
   private readonly cache: Cache
+  private readonly db: Database
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  private readonly waitUntil: (promise: Promise<any>) => void
 
   constructor(opts: {
     namespace: DurableObjectNamespace<DurableObjectUsagelimiter>
@@ -28,14 +31,17 @@ export class DurableUsageLimiter implements UsageLimiter {
     metrics: Metrics
     analytics: Analytics
     cache: Cache
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    waitUntil: (promise: Promise<any>) => void
+    db: Database
   }) {
-    this.requestId = opts.requestId
     this.namespace = opts.namespace
-    this.domain = opts.domain ?? "unkey.dev"
     this.logger = opts.logger
     this.metrics = opts.metrics
     this.analytics = opts.analytics
     this.cache = opts.cache
+    this.waitUntil = opts.waitUntil
+    this.db = opts.db
   }
 
   private getStub(
@@ -47,19 +53,212 @@ export class DurableUsageLimiter implements UsageLimiter {
     })
   }
 
-  public async reportUsage(req: LimitRequest): Promise<LimitResponse> {
-    const _start = performance.now()
+  private getDurableCustomerFeatureId(customerId: string, featureSlug: string): string {
+    return `${customerId}:${featureSlug}`
+  }
 
+  private async getEntitlement(
+    customerId: string,
+    featureSlug: string,
+    projectId: string,
+    opts: {
+      skipCache?: boolean
+    }
+  ): Promise<Result<CustomerEntitlement, FetchError>> {
+    if (opts.skipCache) {
+      const entitlement = await this.db.query.customerEntitlements
+        .findFirst({
+          where(fields, operators) {
+            return operators.and(
+              operators.eq(fields.customerId, customerId),
+              operators.eq(fields.featureSlug, featureSlug),
+              operators.eq(fields.projectId, projectId)
+            )
+          },
+        })
+        .then((entitlement) => {
+          if (!entitlement) {
+            return null
+          }
+
+          return entitlement
+        })
+
+      if (!entitlement) {
+        return Err(
+          new FetchError({
+            message: "entitlement not found",
+            retry: false,
+          })
+        )
+      }
+
+      return Ok(entitlement)
+    }
+
+    const { val, err } = await this.cache.featureByCustomerId.swr(
+      this.getDurableCustomerFeatureId(customerId, featureSlug),
+      async () => {
+        const entitlement = await this.db.query.customerEntitlements
+          .findFirst({
+            where(fields, operators) {
+              return operators.and(
+                operators.eq(fields.customerId, customerId),
+                operators.eq(fields.featureSlug, featureSlug),
+                operators.eq(fields.projectId, projectId)
+              )
+            },
+          })
+          .then((entitlement) => {
+            return entitlement ?? null
+          })
+
+        return entitlement
+      }
+    )
+
+    if (err) {
+      this.logger.error("error getting entitlement", {
+        error: err.message,
+        customerId,
+        featureSlug,
+        projectId,
+      })
+
+      return Err(
+        new FetchError({
+          message: err.message,
+          retry: true,
+          cause: err,
+        })
+      )
+    }
+
+    // cache miss, get from db
+    if (!val) {
+      // log cache miss
+      const entitlement = await this.db.query.customerEntitlements
+        .findFirst({
+          where(fields, operators) {
+            return operators.and(
+              operators.eq(fields.customerId, customerId),
+              operators.eq(fields.featureSlug, featureSlug),
+              operators.eq(fields.projectId, projectId)
+            )
+          },
+        })
+        .then((entitlement) => {
+          return entitlement ?? null
+        })
+
+      if (!entitlement) {
+        return Err(
+          new FetchError({
+            message: "entitlement not found",
+            retry: false,
+          })
+        )
+      }
+
+      return Ok(entitlement)
+    }
+
+    return Ok(val)
+  }
+
+  public async reportUsage(data: ReportUsageRequest): Promise<ReportUsageResponse> {
     try {
-      const stub = this.getStub(req.customerId)
-      const reportLimit = await stub.reportUsage(req)
-      // parse the result
-      const parsed = limitResponseSchema.parse(reportLimit)
+      const { err, val: entitlement } = await this.getEntitlement(
+        data.customerId,
+        data.featureSlug,
+        data.projectId,
+        {
+          skipCache: false,
+        }
+      )
 
-      return parsed
+      if (err) {
+        return { valid: false }
+      }
+
+      const threshold = 80 // notify when the usage is 80% or more
+      const currentUsage = entitlement.usage ?? 0
+      const limit = entitlement.limit
+      let message = ""
+      let notifyUsage = false
+
+      // check flat features
+      if (entitlement.featureType === "flat") {
+        return { valid: true }
+      }
+
+      // check limit
+      if (limit) {
+        const usagePercentage = (currentUsage / limit) * 100
+
+        if (currentUsage >= limit) {
+          // Usage has reached or exceeded the limit
+          message = `Your feature ${entitlement.featureSlug} has reached or exceeded its usage limit of ${limit}. Current usage: ${usagePercentage.toFixed(
+            2
+          )}% of its usage limit. This is over the limit by ${currentUsage - limit}`
+          notifyUsage = true
+        } else if (usagePercentage >= threshold) {
+          // Usage is at or above the threshold
+          message = `Your feature ${entitlement.featureSlug} is at ${usagePercentage.toFixed(
+            2
+          )}% of its usage limit`
+          notifyUsage = true
+        }
+      }
+
+      // broadcast the usage to the project and the customer if any user is connected
+      this.waitUntil(
+        Promise.all([
+          // TODO: send the usage to the analytics
+          // TODO: broadcast the usage to the project and the customer if any user is connected
+          // report the usage to analytics db
+          this.analytics
+            .ingestFeaturesUsage({
+              planVersionFeatureId: entitlement.featurePlanVersionId,
+              subscriptionItemId: entitlement.subscriptionItemId,
+              projectId: entitlement.projectId,
+              usage: data.usage,
+              timestamp: Date.now(),
+              createdAt: Date.now(),
+              entitlementId: entitlement.id,
+              featureSlug: data.featureSlug,
+              customerId: data.customerId,
+              subscriptionPhaseId: entitlement.subscriptionPhaseId!,
+              subscriptionId: entitlement.subscriptionId!,
+              requestId: "",
+              // TODO: add metadata to the usage
+              metadata: {
+                prompt: "test",
+              },
+            })
+            .then((res) => {
+              if (res.successful_rows <= 0) {
+                this.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
+                  ...res,
+                  entitlement: entitlement,
+                  usage: data.usage,
+                })
+              }
+            })
+            .catch((error) => {
+              this.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
+                error: JSON.stringify(error),
+                entitlement: entitlement,
+                usage: data.usage,
+              })
+            }),
+        ])
+      )
+
+      return { valid: true, message }
     } catch (e) {
       console.error("usagelimit failed", {
-        customerId: req.customerId,
+        customerId: data.customerId,
         error: (e as Error).message,
       })
       return { valid: false }
@@ -68,7 +267,7 @@ export class DurableUsageLimiter implements UsageLimiter {
   }
 
   public async revalidate(req: RevalidateRequest): Promise<void> {
-    const obj = this.namespace.get(this.namespace.idFromName(req.keyId))
+    const obj = this.namespace.get(this.namespace.idFromName(req.customerId))
     await obj.revalidate()
   }
 }

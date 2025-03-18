@@ -21,12 +21,7 @@ export const entitlements = protectedApiOrActiveWorkspaceProcedure
   )
   .output(
     z.object({
-      entitlements: customerEntitlementSchema
-        .omit({
-          createdAtM: true,
-          updatedAtM: true,
-        })
-        .array(),
+      entitlements: customerEntitlementSchema.array(),
     })
   )
   .query(async (opts) => {
