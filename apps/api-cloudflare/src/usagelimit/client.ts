@@ -169,6 +169,19 @@ export class DurableUsageLimiter implements UsageLimiter {
 
   public async reportUsage(data: ReportUsageRequest): Promise<ReportUsageResponse> {
     try {
+      // Good to know: DO is generally in the same region as the customer
+
+      // Fast path: check if the limit is reached in the cache
+      // Fast path: check if the event is already sent to the DO
+
+      // Next path: get the entitlement from cache which is revalidated with the DO
+
+      // Next path: send the usage to the DO
+
+      // Next path: get the entitlement from DB
+
+      // cache the responses
+
       const { err, val: entitlement } = await this.getEntitlement(
         data.customerId,
         data.featureSlug,

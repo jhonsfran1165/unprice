@@ -23,6 +23,6 @@ SCHEMA >
 ENGINE ReplacingMergeTree
 ENGINE_IS_DELETED deleted
 ENGINE_PARTITION_KEY toYYYYMM(fromUnixTimestamp64Milli(timestamp))
-ENGINE_SORTING_KEY idempotenceKey
+ENGINE_SORTING_KEY idempotenceKey, entitlementId
 ENGINE_TTL toDate(fromUnixTimestamp64Milli(timestamp)) + INTERVAL 6 MONTH
 ENGINE_VER timestamp
