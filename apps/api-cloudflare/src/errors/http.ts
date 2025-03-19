@@ -70,9 +70,10 @@ function codeToStatus(code: z.infer<typeof ErrorCode>): StatusCode {
   switch (code) {
     case "BAD_REQUEST":
       return 400
+    case "UNAUTHORIZED":
+      return 401
     case "FORBIDDEN":
     case "DISABLED":
-    case "UNAUTHORIZED":
     case "INSUFFICIENT_PERMISSIONS":
     case "USAGE_EXCEEDED":
     case "EXPIRED":
@@ -211,6 +212,7 @@ export function handleError(err: Error, c: Context<HonoEnv>): Response {
     stack: err.stack,
     requestId: c.get("requestId"),
   })
+
   return c.json<z.infer<typeof ErrorSchema>>(
     {
       error: {
@@ -221,19 +223,5 @@ export function handleError(err: Error, c: Context<HonoEnv>): Response {
       },
     },
     { status: 500 }
-  )
-}
-
-export function errorResponse(c: Context, code: z.infer<typeof ErrorCode>, message: string) {
-  return c.json<z.infer<typeof ErrorSchema>>(
-    {
-      error: {
-        code: code,
-        docs: `https://unprice.dev/docs/api-reference/errors/code/${code}`,
-        message,
-        requestId: c.get("requestId"),
-      },
-    },
-    { status: codeToStatus(code) as ContentfulStatusCode }
   )
 }

@@ -121,7 +121,6 @@ export class DurableObjectUsagelimiter extends Server {
     return {
       valid: true,
       remaining: 100,
-      usage: this.usage,
     }
   }
 

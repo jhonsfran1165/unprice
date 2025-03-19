@@ -20,6 +20,7 @@
     "@auth/core": "^0.34.1",
     "@chronark/zod-bird": "^0.3.10",
     "@hono/zod-openapi": "^0.19.2",
+    "@scalar/hono-api-reference": "^0.7.2",
     "@unkey/cache": "^1.5.0",
     "@unprice/db": "workspace:^",
     "@unprice/error": "workspace:^",

@@ -4,13 +4,14 @@ import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
 
 import { z } from "zod"
 import { keyAuth } from "~/auth/key"
+import { UnpriceApiError } from "~/errors/http"
 import { openApiErrorResponses } from "~/errors/openapi-responses"
 import type { App } from "~/hono/app"
 
 const tags = ["customer"]
 
 export const route = createRoute({
-  path: "/customer/{customerId}/reportUsage",
+  path: "/v1/customer/{customerId}/reportUsage",
   operationId: "customer.reportUsage",
   method: "post",
   tags,
@@ -36,9 +37,9 @@ export const route = createRoute({
           description: "The usage",
           example: 100,
         }),
-        idempotenceKey: z.string().openapi({
+        idempotenceKey: z.string().uuid().openapi({
           description: "The idempotence key",
-          example: "123",
+          example: "123e4567-e89b-12d3-a456-426614174000",
         }),
       }),
       "The usage to report"
@@ -63,7 +64,7 @@ export type ReportUsageResponse = z.infer<
   (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >
 
-export const registerReportUsage = (app: App) =>
+export const registerReportUsageV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { customerId } = c.req.valid("param")
     const { featureSlug, usage, idempotenceKey } = c.req.valid("json")
@@ -73,24 +74,16 @@ export const registerReportUsage = (app: App) =>
     const key = await keyAuth(c)
 
     if (!key) {
-      return c.json(
-        {
-          error: {
-            message: "Invalid API key",
-            docs: "https://docs.unprice.dev/reference/post_customer-customer-id-report-usage",
-            requestId: c.get("requestId"),
-          },
-        },
-        HttpStatusCodes.UNAUTHORIZED
-      )
+      throw new UnpriceApiError({
+        code: "UNAUTHORIZED",
+        message: "Invalid API key",
+      })
     }
 
     // check if the usage has been reported before
     const cacheHit = await cache.idempotentRequestUsageByHash.get(
       `idempotenceKey:${idempotenceKey}`
     )
-
-    console.log("cacheHit", cacheHit)
 
     if (cacheHit.val) {
       return c.json(

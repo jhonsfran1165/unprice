@@ -1,4 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi"
+import { apiReference } from "@scalar/hono-api-reference"
 import type { Context as GenericContext } from "hono"
 import { handleError, handleZodError } from "~/errors"
 import type { HonoEnv } from "~/hono/env"
@@ -33,6 +34,10 @@ export function newApp() {
         url: "https://api.unprice.dev",
         description: "Production",
       },
+      {
+        url: "http://localhost:8787",
+        description: "Development",
+      },
     ],
 
     "x-speakeasy-retries": {
@@ -47,6 +52,19 @@ export function newApp() {
       retryConnectionErrors: true,
     },
   })
+
+  app.get(
+    "/reference",
+    apiReference({
+      layout: "classic",
+      defaultHttpClient: {
+        targetKey: "node",
+        clientKey: "dasdasd",
+      },
+      theme: "deepSpace",
+      url: "/openapi.json",
+    })
+  )
 
   app.openAPIRegistry.registerComponent("securitySchemes", "bearerAuth", {
     bearerFormat: "root key",

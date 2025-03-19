@@ -7,13 +7,16 @@ import { type Env, zEnv } from "~/env"
 import { newApp } from "~/hono/app"
 import { init } from "~/middleware/init"
 
+import serveEmojiFavicon from "stoker/middlewares/serve-emoji-favicon"
+
 export { DurableObjectUsagelimiter } from "~/usagelimit/do"
 
+import { registerReportUsageV1 } from "~/routes/customer/reportUsageV1"
 import { registerTest } from "~/routes/test"
-import { registerReportUsage } from "./routes/customer/reportUsage"
 
 const app = newApp()
 
+app.use(serveEmojiFavicon("👁️‍🗨️"))
 app.use("*", init())
 app.use("*", cors())
 
@@ -60,10 +63,11 @@ app.use(
   })
 )
 
-// Register routes
+// Test routes
 registerTest(app)
-// TODO: add versioning to the routes
-registerReportUsage(app)
+
+// Customer routes
+registerReportUsageV1(app)
 
 // Export handler
 const handler = {
