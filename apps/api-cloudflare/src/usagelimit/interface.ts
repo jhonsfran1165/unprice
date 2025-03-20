@@ -10,6 +10,7 @@ export const reportUsageSchema = z.object({
   projectId: z.string(),
   date: z.number(),
   sync: z.boolean().optional(),
+  requestId: z.string(),
 })
 
 export type ReportUsageRequest = z.infer<typeof reportUsageSchema>

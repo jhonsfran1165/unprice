@@ -25,12 +25,7 @@ import type {
   stripeSetupSchema,
 } from "../validators/customer"
 
-import {
-  aggregationMethodEnum,
-  currencyEnum,
-  typeFeatureEnum,
-  typeFeatureVersionEnum,
-} from "./enums"
+import { currencyEnum, typeFeatureVersionEnum } from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
 import { projects } from "./projects"
 import { subscriptionItems, subscriptionPhases, subscriptions } from "./subscriptions"
@@ -77,14 +72,14 @@ export const customerEntitlements = pgTableProject(
     ...projectID,
     ...timestamps,
     customerId: cuid("customer_id").notNull(),
+    // subscriptionId the subscription that the customer is entitled to
+    subscriptionId: cuid("subscription_id").notNull(),
     // featurePlanVersionId is the id of the feature plan version that the customer is entitled to
     featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
     // subscriptionItemId is the id of the subscription item that the customer is entitled to
     subscriptionItemId: cuid("subscription_item_id"),
     // subscriptionPhaseId is the id of the subscription phase that the customer is entitled to
     subscriptionPhaseId: cuid("subscription_phase_id"),
-    // subscriptionId is the id of the subscription that the customer is entitled to
-    subscriptionId: cuid("subscription_id"),
 
     // ****************** defaults from plan version features ******************
     // These fields are duplicate but help us to improve the performance when checking the usage
@@ -95,28 +90,40 @@ export const customerEntitlements = pgTableProject(
     usage: numeric("usage"),
     // accumulatedUsage is the accumulated usage of the feature that the customer has used
     accumulatedUsage: numeric("accumulated_usage"),
-    // featureSlug is the slug of the feature that the customer is entitled to
-    featureSlug: text("feature_slug").notNull(),
-    // featureType is the type of the feature that the customer is entitled to
-    featureType: typeFeatureEnum("feature_type").notNull(),
-    // aggregationMethod is the method to aggregate the feature quantity - use for calculated the current usage of the feature
-    aggregationMethod: aggregationMethodEnum("aggregation_method").default("sum").notNull(),
+    // // featureSlug is the slug of the feature that the customer is entitled to
+    // featureSlug: text("feature_slug").notNull(),
+    // // featureType is the type of the feature that the customer is entitled to
+    // featureType: typeFeatureEnum("feature_type").notNull(),
+    // // aggregationMethod is the method to aggregate the feature quantity - use for calculated the current usage of the feature
+    // aggregationMethod: aggregationMethodEnum("aggregation_method").default("sum").notNull(),
     // realtime features are updated in realtime, others are updated periodically
     realtime: boolean("realtime").notNull().default(false),
     // type of the feature plan version - feature or addon
     type: typeFeatureVersionEnum("type").notNull().default("feature"),
     // ****************** end defaults from plan version features ******************
 
-    // Phase dates when the entitlement starts and ends
-    startAt: bigint("start_at", { mode: "number" }).notNull(),
-    endAt: bigint("end_at", { mode: "number" }),
+    // // Phase dates when the entitlement starts and ends
+    // startAt: bigint("start_at", { mode: "number" }).notNull(),
+    // endAt: bigint("end_at", { mode: "number" }),
 
-    // current billing cycle start and end dates used to revalidate and reset the usage
-    currentCycleStartAt: bigint("current_cycle_start_at", { mode: "number" }).notNull(),
-    currentCycleEndAt: bigint("current_cycle_end_at", { mode: "number" }).notNull(),
-    // days of grace period to allow the customer to use the feature after the end of the cycle
+    // // current billing cycle start and end dates used to revalidate and reset the usage
+    // currentCycleStartAt: bigint("current_cycle_start_at", { mode: "number" }).notNull(),
+    // currentCycleEndAt: bigint("current_cycle_end_at", { mode: "number" }).notNull(),
+    // // days of grace period to allow the customer to use the feature after the end of the cycle
+    // // this is used to avoid overage charges also give us a windows to revalidate the entitlement when the subscription renew is triggered
+    // gracePeriod: integer("grace_period").notNull().default(1),
+
+    // normally represent the current billing cycle start and end dates
+    // but for custom entitlements can be different, for instance if the customer has a custom entitlement for 1000 users
+    // for 1 year.
+    validFrom: bigint("valid_from", { mode: "number" }).notNull(),
+    validTo: bigint("valid_to", { mode: "number" }).notNull(),
+    // buffer is the period of time that the entitlement is valid after the validTo date
     // this is used to avoid overage charges also give us a windows to revalidate the entitlement when the subscription renew is triggered
-    gracePeriod: integer("grace_period").notNull().default(1),
+    bufferPeriodDays: integer("buffer_period_days").notNull().default(1),
+    // resetedAt is the date when the entitlement was reseted
+    // normally this is set by the subscription renew event
+    resetedAt: bigint("reseted_at", { mode: "number" }).notNull(),
 
     // active is true if the entitlement is active
     active: boolean("active").notNull().default(true),
@@ -169,7 +176,7 @@ export const customerEntitlements = pgTableProject(
       foreignColumns: [projects.id],
       name: "project_id_fkey",
     }),
-    featureSlugIndex: index("feature_slug_index").on(table.featureSlug),
+    // featureSlugIndex: index("feature_slug_index").on(table.featureSlug),
   })
 )
 
@@ -226,6 +233,14 @@ export const customerEntitlementsRelations = relations(customerEntitlements, ({ 
   featurePlanVersion: one(planVersionFeatures, {
     fields: [customerEntitlements.featurePlanVersionId, customerEntitlements.projectId],
     references: [planVersionFeatures.id, planVersionFeatures.projectId],
+  }),
+  subscription: one(subscriptions, {
+    fields: [customerEntitlements.subscriptionId, customerEntitlements.projectId],
+    references: [subscriptions.id, subscriptions.projectId],
+  }),
+  subscriptionPhase: one(subscriptionPhases, {
+    fields: [customerEntitlements.subscriptionPhaseId, customerEntitlements.projectId],
+    references: [subscriptionPhases.id, subscriptionPhases.projectId],
   }),
   customer: one(customers, {
     fields: [customerEntitlements.customerId, customerEntitlements.projectId],

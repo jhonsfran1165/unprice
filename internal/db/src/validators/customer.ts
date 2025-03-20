@@ -2,12 +2,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import * as schema from "../schema"
-import {
-  aggregationMethodSchema,
-  currencySchema,
-  paymentProviderSchema,
-  typeFeatureSchema,
-} from "./shared"
+import { currencySchema, paymentProviderSchema } from "./shared"
 import { subscriptionItemsConfigSchema } from "./subscriptions/items"
 
 export const reasonCreditSchema = z.enum([
@@ -85,18 +80,14 @@ export const stripePlanVersionSchema = z.object({
   paymentMethodRequired: z.boolean(),
 })
 
-export const customerEntitlementSchema = createSelectSchema(schema.customerEntitlements, {
-  aggregationMethod: aggregationMethodSchema,
-  featureType: typeFeatureSchema,
-}).omit({
+export const customerEntitlementSchema = createSelectSchema(schema.customerEntitlements).omit({
   createdAtM: true,
   updatedAtM: true,
 })
 
-export const customerEntitlementInsertSchema = createInsertSchema(schema.customerEntitlements, {
-  aggregationMethod: aggregationMethodSchema,
-  featureType: typeFeatureSchema,
-}).partial({
+export const customerEntitlementInsertSchema = createInsertSchema(
+  schema.customerEntitlements
+).partial({
   id: true,
   projectId: true,
 })

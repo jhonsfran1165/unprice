@@ -7,38 +7,37 @@ import migrations from "../../drizzle/migrations"
 import type { Env } from "~/env"
 import type { ReportUsageRequest, ReportUsageResponse } from "./interface"
 
-import { type Database, and, eq as eqDb } from "@unprice/db"
+import { type Database, type SQL, and, eq as eqDb, inArray, sql as sqlDrizzle } from "@unprice/db"
 import { customerEntitlements } from "@unprice/db/schema"
-import type { AggregationMethod, FeatureType } from "@unprice/db/validators"
-import type { CustomerEntitlement } from "@unprice/db/validators"
 import { Analytics } from "@unprice/tinybird"
-import { eq, inArray, sql } from "drizzle-orm"
-import { entitlements, type schema, usageRecords } from "~/db/schema"
+import { inArray as inArraySqlite, sql } from "drizzle-orm"
+import { type Entitlement, entitlements, type schema, usageRecords } from "~/db/schema"
 import { createDb } from "~/util/db"
 
 export class DurableObjectUsagelimiter extends Server {
-  private lastBroadcastTime = 0
   // once the durable object is initialized we can avoid
   // querying the db for usage on each request
-  private featuresUsage: Map<
-    string,
-    {
-      usage: number
-      limit: number
-      featureType: FeatureType
-      aggregationMethod: AggregationMethod
-      accumulatedUsage: number
-    }
-  > = new Map()
-
+  private featuresUsage: Map<string, Entitlement> = new Map()
+  // we avoid revalidating the entitlements if there is already a revalidation in progress
+  private revalidationInProgress = false
+  // internal database of the do
   private db: DrizzleSqliteDODatabase<typeof schema>
+  // unprice database
   private unpriceDb: Database
+  // tinybird analytics
   private analytics: Analytics
+  // Default ttl for the usage records
   private readonly TTL = 1000 * 60 // 60 secs
-  private readonly DEBOUNCE_DELAY = 1000 // Minimum time between broadcasts
+  // Debounce delay for the broadcast
+  private lastBroadcastTime = 0
+  // full revalidation interval (24 hours)
+  private readonly FULL_REVALIDATION_GRACE_PERIOD = 1000 * 60 * 60 * 24 // 24 hours
+  // debounce delay for the broadcast
+  private readonly DEBOUNCE_DELAY = 1000 * 1 // 1 second
 
+  // hibernate the do when no websocket nor connections are active
   static options = {
-    hibernate: true, // hibernate the do when idle
+    hibernate: true,
   }
 
   constructor(ctx: DurableObjectState, env: Env) {
@@ -70,10 +69,8 @@ export class DurableObjectUsagelimiter extends Server {
         // get the usage for the customer for every feature
         const ent = await this.db.query.entitlements
           .findMany({
-            // only get the entitlement that are active, meaning
-            // now is between startAt and endAt + gracePeriod
-            where: (e, { and, gte, isNotNull }) =>
-              and(isNotNull(e.startAt), isNotNull(e.endAt), gte(e.startAt, now)),
+            // only get the entitlement that are active
+            where: (e, { gte }) => gte(e.validFrom, now),
           })
           .catch((e) => {
             // TODO: log it
@@ -81,30 +78,12 @@ export class DurableObjectUsagelimiter extends Server {
             return []
           })
 
-        // entitlement are validated from cache
-        // if there are no entitlements an initizalition time
-        // then they are set from the cache when reporting or validating
+        // entitlement are revalidated on each request when needed
         if (ent.length === 0) return
 
         // user can't have the same feature slug for different entitlements
         ent.forEach((e) => {
-          // lets give a default grace period of 1 day
-          const gracePeriod = 1000 * 60 * 60 * 24 // 1 day
-          const endAt = e.endAt + gracePeriod
-
-          if (now > endAt) {
-            // entitlement is expired
-            // TODO: remove the entitlement from the db? log it?
-            return
-          }
-
-          this.featuresUsage.set(e.featureSlug, {
-            usage: Number(e.usage),
-            limit: Number(e.limit),
-            featureType: e.featureType,
-            aggregationMethod: e.aggregationMethod,
-            accumulatedUsage: Number(e.accumulatedUsage),
-          })
+          this.featuresUsage.set(e.featureSlug, e)
         })
       } catch (e) {
         // TODO: log it and alert
@@ -114,23 +93,15 @@ export class DurableObjectUsagelimiter extends Server {
     })
   }
 
-  // we rely on tinybird to get the current usage and its accumulated usage
-  async getInitialUsageTinybird() {
-    await this.db
-      .select()
-      .from(usageRecords)
-      .where(sql`timestamp > ${Date.now() - this.TTL}`)
-  }
-
   async reportUsage(data: ReportUsageRequest): Promise<ReportUsageResponse> {
     // first get the entitlement
     let entitlement = this.featuresUsage.get(data.featureSlug)
 
     if (!entitlement) {
-      const result = await this.revalidateEntitlement({
+      const result = await this.revalidateSingleEntitlement({
         customerId: data.customerId,
-        featureSlug: data.featureSlug,
         projectId: data.projectId,
+        featureSlug: data.featureSlug,
         now: Date.now(),
       })
 
@@ -148,6 +119,13 @@ export class DurableObjectUsagelimiter extends Server {
           valid: false,
           message: "entitlement not found in do",
         }
+      }
+    }
+
+    if (!entitlement) {
+      return {
+        valid: false,
+        message: "entitlement not found in do",
       }
     }
 
@@ -171,7 +149,7 @@ export class DurableObjectUsagelimiter extends Server {
       usage: data.usage.toString(),
       timestamp: Date.now(),
       idempotenceKey: data.idempotenceKey,
-      requestId: data.projectId,
+      requestId: data.requestId,
       projectId: data.projectId,
       planVersionFeatureId: data.projectId,
       entitlementId: data.projectId,
@@ -182,22 +160,6 @@ export class DurableObjectUsagelimiter extends Server {
       // TODO: add metadata
       // metadata: "",
     })
-
-    // update usage
-    if (!this.featuresUsage.get(data.featureSlug)) {
-      this.featuresUsage.set(data.featureSlug, {
-        ...entitlement,
-        usage: entitlement.usage + data.usage,
-      })
-
-      // update entitlement
-      await this.db
-        .update(entitlements)
-        .set({
-          usage: sql`CAST(${entitlements.usage} AS DECIMAL) + CAST(${data.usage} AS DECIMAL)`,
-        })
-        .where(eq(entitlements.featureSlug, data.featureSlug))
-    }
 
     const now = Date.now()
 
@@ -214,18 +176,18 @@ export class DurableObjectUsagelimiter extends Server {
       this.lastBroadcastTime = now
     }
 
-    let newUsage = entitlement.usage + data.usage
+    let newUsage = Number(entitlement.usage) + data.usage
 
     // for features that consider accumulated usage
     // we need to add the accumulated usage to the current usage
     if (entitlement.featureType.endsWith("_all")) {
-      newUsage += entitlement.accumulatedUsage
+      newUsage += Number(entitlement.accumulatedUsage)
     }
 
     // return usage
     return {
       valid: true,
-      remaining: entitlement.limit - newUsage,
+      remaining: Number(entitlement.limit) - newUsage,
       usage: newUsage,
     }
   }
@@ -273,7 +235,7 @@ export class DurableObjectUsagelimiter extends Server {
           await this.analytics.ingestFeaturesUsage(deduplicatedEvents)
 
           // Only delete events that were successfully sent
-          await this.db.delete(usageRecords).where(inArray(usageRecords.id, ids))
+          await this.db.delete(usageRecords).where(inArraySqlite(usageRecords.id, ids))
           processedCount += ids.length
         } catch (error) {
           // TODO: log it and alert
@@ -306,131 +268,379 @@ export class DurableObjectUsagelimiter extends Server {
     await this.ctx.storage.deleteAll()
   }
 
-  async getEntitlementFromUnpriceDb({
+  async shouldPerformFullRevalidation(now: number): Promise<boolean> {
+    const gracePeriod = this.FULL_REVALIDATION_GRACE_PERIOD
+    const currentCycle = (await this.ctx.storage.get("currentCycle")) as {
+      currentCycleStartAt: number
+      currentCycleEndAt: number
+    } | null
+
+    if (!currentCycle) {
+      return false
+    }
+
+    // if revalidation is in progress or the current cycle is not over
+    // we don't need to perform a full revalidation
+    if (this.revalidationInProgress || now < currentCycle.currentCycleEndAt + gracePeriod) {
+      return false
+    }
+
+    return true
+  }
+
+  async fullRevalidationEntitlements({
     customerId,
-    featureSlug,
     projectId,
     now,
   }: {
     customerId: string
-    featureSlug: string
     projectId: string
     now: number
-  }): Promise<CustomerEntitlement | null> {
-    const entitlement = await this.unpriceDb.query.customerEntitlements
-      .findFirst({
-        where: (e, { and, eq, gte, lte, or, isNull }) =>
-          and(
-            eq(e.customerId, customerId),
-            eq(e.featureSlug, featureSlug),
-            eq(e.projectId, projectId),
-            gte(e.startAt, now),
-            or(isNull(e.endAt), lte(e.endAt, now))
-          ),
-      })
-      .then((entitlement) => {
-        return entitlement ?? null
+  }): Promise<void> {
+    if (this.revalidationInProgress) return
+
+    try {
+      this.revalidationInProgress = true
+
+      const data = await this.unpriceDb.query.subscriptions
+        .findFirst({
+          with: {
+            customer: true,
+            customerEntitlements: {
+              where: (e, { eq }) => eq(e.active, true),
+              with: {
+                featurePlanVersion: {
+                  with: {
+                    feature: {
+                      columns: {
+                        slug: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          where: (s, { eq, and }) =>
+            and(eq(s.customerId, customerId), eq(s.projectId, projectId), eq(s.active, true)),
+        })
+        .catch((e) => {
+          // TODO: log it
+          console.error("error getting subscription", e)
+          return null
+        })
+
+      if (!data) {
+        // TODO: log it
+        return
+      }
+
+      const { customerEntitlements: unpriceEntitlements, customer, ...subscription } = data
+
+      // if the customer is not active
+      if (!customer.active) {
+        // TODO: log it
+        return
+      }
+
+      // if there are no entitlements active
+      if (unpriceEntitlements.length === 0) {
+        // TODO: log it
+        return
+      }
+
+      // current cycle of the subscription
+      const { currentCycleStartAt, currentCycleEndAt } = subscription
+
+      // save the current cycle start and end at for next full revalidation
+      await this.ctx.storage.put("currentCycle", {
+        currentCycleStartAt: currentCycleStartAt,
+        currentCycleEndAt: currentCycleEndAt,
       })
 
-    return entitlement
+      // usage for the current cycle to get the usage and accumulated usage
+      const { totalAccumulatedUsage, totalUsages } = await this.getUsagesFromAnalytics({
+        customerId,
+        projectId,
+        startAt: currentCycleStartAt,
+        endAt: now,
+      })
+
+      const preparedEntitlements = unpriceEntitlements.map((e) => {
+        const entitlementDo = {
+          id: e.id,
+          customerId: e.customerId,
+          projectId: e.projectId,
+          entitlementId: e.id,
+          featureSlug: e.featurePlanVersion.feature.slug,
+          validFrom: e.validFrom,
+          validTo: e.validTo,
+          bufferPeriodDays: e.bufferPeriodDays,
+          aggregationMethod: e.featurePlanVersion.aggregationMethod,
+          featureType: e.featurePlanVersion.featureType,
+          usage: "0",
+          accumulatedUsage: "0",
+          limit: e.limit?.toString(),
+          lastUsageUpdateAt: Date.now(),
+          subscriptionItemId: e.subscriptionItemId,
+          subscriptionPhaseId: e.subscriptionPhaseId,
+          subscriptionId: e.subscriptionId,
+          resetedAt: e.resetedAt,
+        }
+        if (!totalUsages || !totalAccumulatedUsage) {
+          return entitlementDo
+        }
+
+        const featureSlug = e.featurePlanVersion.feature.slug
+        const aggregationMethod = e.featurePlanVersion.aggregationMethod
+
+        const usage = totalUsages.find((u) => u.featureSlug === featureSlug)
+        const accumulatedUsage = totalAccumulatedUsage.find((u) => u.featureSlug === featureSlug)
+
+        if (!usage || !accumulatedUsage) {
+          return entitlementDo
+        }
+
+        const usageValue = (usage[aggregationMethod as keyof typeof usage] as number) ?? 0
+        const accumulatedUsageValue =
+          (accumulatedUsage[aggregationMethod as keyof typeof accumulatedUsage] as number) ?? 0
+
+        return {
+          ...entitlementDo,
+          usage: usageValue.toString(),
+          accumulatedUsage: accumulatedUsageValue.toString(),
+        }
+      })
+
+      // this happen in a transaction
+      await this.db.transaction(async (tx) => {
+        // delete all entitlements in the do and reinsert them
+        await tx.delete(entitlements)
+        // insert the entitlements
+        await tx.insert(entitlements).values(preparedEntitlements)
+      })
+
+      // update the usage of the entitlement in unprice db
+      const sqlUsage: SQL[] = []
+      const sqlAccumulatedUsage: SQL[] = []
+      const ids: string[] = []
+
+      sqlUsage.push(sqlDrizzle`(case`)
+      sqlAccumulatedUsage.push(sqlDrizzle`(case`)
+
+      for (const newEntitlement of preparedEntitlements) {
+        sqlUsage.push(
+          sqlDrizzle`when ${customerEntitlements.id} = ${newEntitlement.id} then ${newEntitlement.usage}`
+        )
+        sqlAccumulatedUsage.push(
+          sqlDrizzle`when ${customerEntitlements.id} = ${newEntitlement.id} then ${newEntitlement.accumulatedUsage}`
+        )
+        ids.push(newEntitlement.id)
+      }
+
+      sqlUsage.push(sqlDrizzle`end)`)
+
+      const finalSql: SQL = sqlDrizzle.join(sqlUsage, sqlDrizzle.raw(" "))
+      const finalSqlAccumulatedUsage: SQL = sqlDrizzle.join(
+        sqlAccumulatedUsage,
+        sqlDrizzle.raw(" ")
+      )
+
+      // don't await this to avoid blocking the transaction
+      this.ctx.waitUntil(
+        this.unpriceDb
+          .update(customerEntitlements)
+          .set({
+            usage: finalSql,
+            accumulatedUsage: finalSqlAccumulatedUsage,
+            lastUsageUpdateAt: Date.now(),
+          })
+          .where(
+            and(
+              inArray(customerEntitlements.id, ids),
+              eqDb(customerEntitlements.projectId, projectId),
+              eqDb(customerEntitlements.customerId, customerId)
+            )
+          )
+      )
+    } finally {
+      this.revalidationInProgress = false
+    }
   }
 
-  async revalidateEntitlement(
-    entitlement: {
-      customerId: string
-      projectId: string
-      now: number
-      featureSlug: string
-    },
-    opts: {
-      syncDb?: boolean
-    } = {}
-  ) {
-    // get the entitlement from the unprice db
-    const entUnpriceDb = await this.getEntitlementFromUnpriceDb({
-      customerId: entitlement.customerId,
-      featureSlug: entitlement.featureSlug,
-      projectId: entitlement.projectId,
-      now: entitlement.now,
+  shouldRevalidateEntitlement(featureSlug: string, now: number) {
+    const entitlement = this.featuresUsage.get(featureSlug)
+
+    if (!entitlement) {
+      return true
+    }
+
+    const bufferPeriod = entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
+    const resetAt = entitlement.validTo + bufferPeriod
+
+    if (now > resetAt) {
+      return true
+    }
+
+    return false
+  }
+
+  isValidEntitlement(featureSlug: string, now: number) {
+    const entitlement = this.featuresUsage.get(featureSlug)
+
+    if (!entitlement) {
+      return false
+    }
+
+    if (entitlement.featureType === "flat") {
+      return false
+    }
+
+    const bufferPeriod = entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
+    const validUntil = entitlement.validTo + bufferPeriod
+
+    if (now < entitlement.validFrom || now > validUntil) {
+      return false
+    }
+
+    return true
+  }
+
+  async revalidateSingleEntitlement(entitlement: {
+    customerId: string
+    projectId: string
+    featureSlug: string
+    now: number
+  }) {
+    // get current cycle from unprice db
+    const currentCycle = (await this.ctx.storage.get("currentCycle")) as {
+      currentCycleStartAt: number
+      currentCycleEndAt: number
+    } | null
+
+    if (!currentCycle) {
+      return {
+        valid: false,
+        message: "current cycle not found in do",
+      }
+    }
+
+    // get active entitlements from the unprice db
+    const unpriceEntitlements = await this.unpriceDb.query.customerEntitlements.findMany({
+      with: {
+        featurePlanVersion: {
+          with: {
+            feature: {
+              columns: {
+                slug: true,
+              },
+            },
+          },
+        },
+      },
+      where: (e, { eq, gte, lte, and }) =>
+        and(
+          eq(e.projectId, entitlement.projectId),
+          eq(e.active, true),
+          gte(e.validFrom, currentCycle.currentCycleStartAt),
+          lte(e.validTo, currentCycle.currentCycleEndAt)
+        ),
     })
 
-    if (!entUnpriceDb) {
+    if (!unpriceEntitlements) {
       return {
         valid: false,
         message: "entitlement not found in unprice db",
       }
     }
 
-    const usage = await this.getUsageFromAnalytics({
+    const activeEntitlement = unpriceEntitlements.find(
+      (e) => e.featurePlanVersion.feature.slug === entitlement.featureSlug
+    )
+
+    if (!activeEntitlement) {
+      return {
+        valid: false,
+        message: "entitlement not found in unprice db",
+      }
+    }
+    // get the usages for the entitlements from analytics
+    const { totalAccumulatedUsage, totalUsages } = await this.getUsagesFromAnalytics({
       customerId: entitlement.customerId,
-      entitlementId: entUnpriceDb.id,
       projectId: entitlement.projectId,
-      startAt: entUnpriceDb.startAt,
-      endAt: entUnpriceDb.endAt,
-      aggregationMethod: entUnpriceDb.aggregationMethod,
+      startAt: currentCycle.currentCycleStartAt,
+      endAt: Date.now(),
+      featureSlug: entitlement.featureSlug,
     })
+
+    const entitlementDo = {
+      id: activeEntitlement.id,
+      customerId: activeEntitlement.customerId,
+      projectId: activeEntitlement.projectId,
+      entitlementId: activeEntitlement.id,
+      featureSlug: activeEntitlement.featurePlanVersion.feature.slug,
+      validFrom: activeEntitlement.validFrom,
+      validTo: activeEntitlement.validTo,
+      bufferPeriodDays: activeEntitlement.bufferPeriodDays,
+      aggregationMethod: activeEntitlement.featurePlanVersion.aggregationMethod,
+      featureType: activeEntitlement.featurePlanVersion.featureType,
+      usage: "0",
+      accumulatedUsage: "0",
+      limit: activeEntitlement.limit?.toString() ?? null,
+      lastUsageUpdateAt: Date.now(),
+      subscriptionItemId: activeEntitlement.subscriptionItemId,
+      subscriptionPhaseId: activeEntitlement.subscriptionPhaseId,
+      subscriptionId: activeEntitlement.subscriptionId,
+      resetedAt: activeEntitlement.resetedAt,
+    }
+
+    if (totalUsages && totalAccumulatedUsage) {
+      const featureSlug = activeEntitlement.featurePlanVersion.feature.slug
+      const aggregationMethod = activeEntitlement.featurePlanVersion.aggregationMethod
+
+      const usage = totalUsages.find((u) => u.featureSlug === featureSlug)
+      const accumulatedUsage = totalAccumulatedUsage.find((u) => u.featureSlug === featureSlug)
+
+      if (!usage || !accumulatedUsage) {
+        return entitlementDo
+      }
+
+      const usageValue = (usage[aggregationMethod as keyof typeof usage] as number) ?? 0
+      const accumulatedUsageValue =
+        (accumulatedUsage[aggregationMethod as keyof typeof accumulatedUsage] as number) ?? 0
+
+      entitlementDo.usage = usageValue.toString()
+      entitlementDo.accumulatedUsage = accumulatedUsageValue.toString()
+    }
 
     // insert or update the entitlement in the db
     await this.db
       .insert(entitlements)
-      .values({
-        customerId: entUnpriceDb.customerId,
-        projectId: entUnpriceDb.projectId,
-        entitlementId: entUnpriceDb.id,
-        featureSlug: entUnpriceDb.featureSlug,
-        startAt: entUnpriceDb.currentCycleStartAt,
-        endAt: entUnpriceDb.currentCycleEndAt,
-        aggregationMethod: entUnpriceDb.aggregationMethod,
-        usage: usage.usage?.toString(),
-        accumulatedUsage: usage.accumulatedUsage?.toString(),
-        limit: entUnpriceDb.limit?.toString(),
-        gracePeriod: entUnpriceDb.gracePeriod,
-        lastUsageUpdateAt: entUnpriceDb.lastUsageUpdateAt,
-        featureType: entUnpriceDb.featureType,
-      })
+      .values(entitlementDo)
       .onConflictDoUpdate({
         target: entitlements.id,
         set: {
-          customerId: entUnpriceDb.customerId,
-          projectId: entUnpriceDb.projectId,
-          entitlementId: entUnpriceDb.id,
-          featureSlug: entUnpriceDb.featureSlug,
-          startAt: entUnpriceDb.currentCycleStartAt,
-          endAt: entUnpriceDb.currentCycleEndAt,
-          aggregationMethod: entUnpriceDb.aggregationMethod,
-          usage: usage.usage?.toString(),
-          accumulatedUsage: usage.accumulatedUsage?.toString(),
-          limit: entUnpriceDb.limit?.toString(),
-          gracePeriod: entUnpriceDb.gracePeriod,
-          lastUsageUpdateAt: entUnpriceDb.lastUsageUpdateAt,
-          featureType: entUnpriceDb.featureType,
+          ...entitlementDo,
         },
       })
 
-    if (opts.syncDb) {
-      this.ctx.waitUntil(
-        this.unpriceDb
-          .update(customerEntitlements)
-          .set({
-            usage: usage.usage?.toString(),
-            accumulatedUsage: usage.accumulatedUsage?.toString(),
-          })
-          .where(
-            and(
-              eqDb(customerEntitlements.id, entUnpriceDb.id),
-              eqDb(customerEntitlements.customerId, entUnpriceDb.customerId)
-            )
+    this.ctx.waitUntil(
+      this.unpriceDb
+        .update(customerEntitlements)
+        .set({
+          usage: entitlementDo.usage,
+          accumulatedUsage: entitlementDo.accumulatedUsage,
+        })
+        .where(
+          and(
+            eqDb(customerEntitlements.id, entitlementDo.id),
+            eqDb(customerEntitlements.customerId, entitlementDo.customerId),
+            eqDb(customerEntitlements.projectId, entitlementDo.projectId)
           )
-      )
-    }
+        )
+    )
 
-    this.featuresUsage.set(entUnpriceDb.featureSlug, {
-      usage: Number(usage.usage),
-      limit: Number(entUnpriceDb.limit),
-      featureType: entUnpriceDb.featureType,
-      aggregationMethod: entUnpriceDb.aggregationMethod,
-      accumulatedUsage: Number(usage.accumulatedUsage),
-    })
+    this.featuresUsage.set(entitlementDo.featureSlug, entitlementDo)
 
     return {
       valid: true,
@@ -438,100 +648,65 @@ export class DurableObjectUsagelimiter extends Server {
     }
   }
 
-  async getUsageFromAnalytics(entitlement: {
-    customerId: string
-    entitlementId: string
-    projectId: string
-    startAt: number
-    endAt: number | null
-    aggregationMethod: AggregationMethod
-  }): Promise<{ usage: number; accumulatedUsage: number }> {
-    const isAccumulated = entitlement.aggregationMethod.endsWith("_all")
-    let currentUsage = 0
-    let accumulatedUsage = 0
+  async getUsage(featureSlug: string): Promise<Entitlement | null> {
+    const entitlement = this.featuresUsage.get(featureSlug)
 
-    // not accumulated then only one query is needed
-    if (!isAccumulated) {
-      const totalUsage = await this.analytics
-        .getFeaturesUsagePeriod({
-          customerId: entitlement.customerId,
-          entitlementId: entitlement.entitlementId,
-          projectId: entitlement.projectId,
-          start: entitlement.startAt,
-          end: Date.now(), // get the usage for the current cycle
+    if (!entitlement) {
+      return null
+    }
+
+    return entitlement
+  }
+
+  async getUsagesFromAnalytics({
+    customerId,
+    projectId,
+    featureSlug,
+    startAt,
+    endAt,
+  }: {
+    customerId: string
+    projectId: string
+    // optional feature slug to get the usage for a specific feature
+    featureSlug?: string
+    startAt: number
+    endAt: number
+  }) {
+    // get the total usage and the usage for the current cycle
+    const [totalAccumulatedUsage, totalUsages] = await Promise.all([
+      this.analytics
+        .getFeaturesUsageTotal({
+          customerId,
+          projectId,
+          featureSlug,
         })
-        .then((usage) => usage.data[0])
+        .then((usage) => usage.data)
         .catch((error) => {
           // TODO: log this error
           console.error("error getting usage", error)
 
           return null
+        }),
+      this.analytics
+        .getFeaturesUsagePeriod({
+          customerId,
+          projectId,
+          featureSlug,
+          start: startAt,
+          end: endAt,
         })
+        .then((usage) => usage.data)
+        .catch((error) => {
+          // TODO: log this error
+          console.error("error getting usage", error)
 
-      if (!totalUsage) {
-        currentUsage = 0
-      } else {
-        const usage =
-          (totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage] as number) ?? 0
-        currentUsage = usage
-      }
-
-      accumulatedUsage = 0
-    } else {
-      // get the total usage and the usage for the current cycle when the entitlement is accumulated
-      const [totalAccumulatedUsage, totalUsage] = await Promise.all([
-        this.analytics
-          .getFeaturesUsageTotal({
-            customerId: entitlement.customerId,
-            projectId: entitlement.projectId,
-            entitlementId: entitlement.entitlementId,
-          })
-          .then((usage) => usage.data[0])
-          .catch((error) => {
-            // TODO: log this error
-            console.error("error getting usage", error)
-
-            return null
-          }),
-        this.analytics
-          .getFeaturesUsagePeriod({
-            customerId: entitlement.customerId,
-            entitlementId: entitlement.entitlementId,
-            projectId: entitlement.projectId,
-            start: entitlement.startAt,
-            end: Date.now(), // get the usage for the current cycle
-          })
-          .then((usage) => usage.data[0])
-          .catch((error) => {
-            // TODO: log this error
-            console.error("error getting usage", error)
-
-            return null
-          }),
-      ])
-
-      if (!totalUsage) {
-        currentUsage = 0
-      } else {
-        const usage =
-          (totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage] as number) ?? 0
-        currentUsage = usage
-      }
-
-      if (!totalAccumulatedUsage) {
-        accumulatedUsage = 0
-      } else {
-        const usage =
-          (totalAccumulatedUsage[
-            entitlement.aggregationMethod as keyof typeof totalAccumulatedUsage
-          ] as number) ?? 0
-        accumulatedUsage = usage
-      }
-    }
+          return null
+        }),
+    ])
 
     return {
-      usage: currentUsage,
-      accumulatedUsage,
+      totalAccumulatedUsage,
+      totalUsages,
     }
   }
 }

@@ -1,11 +1,19 @@
-import type { ApiKeyExtended, CustomerEntitlement } from "@unprice/db/validators"
+import type { ApiKeyExtended, FeatureType } from "@unprice/db/validators"
 
 export type CacheNamespaces = {
   apiKeyByHash: ApiKeyExtended | null
-  featureByCustomerId: CustomerEntitlement | null
+  customerEntitlementUsage: {
+    usage: number
+    accumulatedUsage: number
+    validFrom: number
+    validTo: number
+    resetedAt: number
+    limit: number
+    featureType: FeatureType
+  } | null
   entitlementsByCustomerId: Array<string>
   idempotentRequestUsageByHash: {
-    access: boolean
+    valid: boolean
     message?: string
   }
 }

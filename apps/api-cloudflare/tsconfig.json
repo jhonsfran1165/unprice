@@ -13,6 +13,6 @@
       "~/*": ["./src/*"]
     }
   },
-  "include": ["drizzle.config.ts", "src"],
+  "include": ["drizzle.config.ts", "src", "drizzle"],
   "exclude": ["node_modules", ".wrangler", "dist", ".turbo"]
 }

@@ -1,11 +1,11 @@
 import type { Database } from "@unprice/db"
-import type { CustomerEntitlement } from "@unprice/db/validators"
+import type { FeatureType } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import type { Cache } from "~/cache"
 import type { Metrics } from "~/metrics/interface"
-import type { DurableObjectUsagelimiter } from "./do"
+import type { DurableObjectUsagelimiter } from "./do.old"
 import type {
   ReportUsageRequest,
   ReportUsageResponse,
@@ -61,60 +61,43 @@ export class DurableUsageLimiter implements UsageLimiter {
   private async getEntitlement(
     customerId: string,
     featureSlug: string,
-    projectId: string,
-    opts: {
-      skipCache?: boolean
-    }
-  ): Promise<Result<CustomerEntitlement, FetchError>> {
-    if (opts.skipCache) {
-      const entitlement = await this.db.query.customerEntitlements
-        .findFirst({
-          where(fields, operators) {
-            return operators.and(
-              operators.eq(fields.customerId, customerId),
-              operators.eq(fields.featureSlug, featureSlug),
-              operators.eq(fields.projectId, projectId)
-            )
-          },
-        })
-        .then((entitlement) => {
-          if (!entitlement) {
-            return null
-          }
-
-          return entitlement
-        })
-
-      if (!entitlement) {
-        return Err(
-          new FetchError({
-            message: "entitlement not found",
-            retry: false,
-          })
-        )
-      }
-
-      return Ok(entitlement)
-    }
-
-    const { val, err } = await this.cache.featureByCustomerId.swr(
-      this.getDurableCustomerFeatureId(customerId, featureSlug),
+    projectId: string
+  ): Promise<
+    Result<
+      {
+        usage: number
+        accumulatedUsage: number
+        validFrom: number
+        validTo: number
+        resetedAt: number
+        limit: number
+        featureType: FeatureType
+      },
+      FetchError
+    >
+  > {
+    const { val, err } = await this.cache.customerEntitlementUsage.swr(
+      `${customerId}:${featureSlug}`,
       async () => {
-        const entitlement = await this.db.query.customerEntitlements
-          .findFirst({
-            where(fields, operators) {
-              return operators.and(
-                operators.eq(fields.customerId, customerId),
-                operators.eq(fields.featureSlug, featureSlug),
-                operators.eq(fields.projectId, projectId)
-              )
-            },
-          })
-          .then((entitlement) => {
-            return entitlement ?? null
-          })
+        // we revalidate against the durable object
+        const durableObject = this.getStub(
+          this.getDurableCustomerFeatureId(customerId, featureSlug)
+        )
+        const entitlement = await durableObject.getUsage(customerId, featureSlug, projectId)
 
-        return entitlement
+        if (!entitlement) {
+          return null
+        }
+
+        return {
+          usage: entitlement.usage,
+          accumulatedUsage: entitlement.accumulatedUsage,
+          validFrom: entitlement.validFrom,
+          validTo: entitlement.validTo,
+          resetedAt: entitlement.resetedAt,
+          limit: entitlement.limit,
+          featureType: entitlement.featureType,
+        }
       }
     )
 
@@ -135,22 +118,17 @@ export class DurableUsageLimiter implements UsageLimiter {
       )
     }
 
-    // cache miss, get from db
+    // cache miss, revalidate do
     if (!val) {
-      // log cache miss
-      const entitlement = await this.db.query.customerEntitlements
-        .findFirst({
-          where(fields, operators) {
-            return operators.and(
-              operators.eq(fields.customerId, customerId),
-              operators.eq(fields.featureSlug, featureSlug),
-              operators.eq(fields.projectId, projectId)
-            )
-          },
-        })
-        .then((entitlement) => {
-          return entitlement ?? null
-        })
+      const durableObject = this.getStub(this.getDurableCustomerFeatureId(customerId, featureSlug))
+      await durableObject.revalidateEntitlements({
+        customerId,
+        projectId,
+        now: Date.now(),
+      })
+
+      // get the entitlement again
+      const entitlement = await durableObject.getUsage(customerId, featureSlug, projectId)
 
       if (!entitlement) {
         return Err(
@@ -161,7 +139,15 @@ export class DurableUsageLimiter implements UsageLimiter {
         )
       }
 
-      return Ok(entitlement)
+      return Ok({
+        usage: entitlement.usage,
+        accumulatedUsage: entitlement.accumulatedUsage,
+        validFrom: entitlement.validFrom,
+        validTo: entitlement.validTo,
+        resetedAt: entitlement.resetedAt,
+        limit: entitlement.limit,
+        featureType: entitlement.featureType,
+      })
     }
 
     return Ok(val)
@@ -170,129 +156,102 @@ export class DurableUsageLimiter implements UsageLimiter {
   public async reportUsage(data: ReportUsageRequest): Promise<ReportUsageResponse> {
     try {
       // Good to know: DO is generally in the same region as the customer
+      // customer can decide where to deploy the DO with locationHint
+      // by default we let cloudflare decide the best location
 
       // Fast path: check if the limit is reached in the cache
-      // Fast path: check if the event is already sent to the DO
-
-      // Next path: get the entitlement from cache which is revalidated with the DO
-
-      // Next path: send the usage to the DO
-
-      // Next path: get the entitlement from DB
-
-      // cache the responses
-
-      const { err, val: entitlement } = await this.getEntitlement(
+      const { val: entitlement } = await this.getEntitlement(
         data.customerId,
         data.featureSlug,
-        data.projectId,
+        data.projectId
+      )
+
+      if (entitlement) {
+        // if feature type is flat, we don't need to call the DO
+        if (entitlement.featureType === "flat") {
+          return {
+            valid: true,
+            message:
+              "feature is flat, limit is not applicable but events is billed. Please avoid reporting usage for flat features.",
+          }
+        }
+
+        // it's a valid entitlement
+        // check if the usage is over the limit
+        if (entitlement.usage + data.usage > entitlement.limit) {
+          return { valid: false, message: "usage over the limit" }
+        }
+
+        // check if the entitlement is expired
+        // TODO: we have to revalidate the entitlement here
+        if (entitlement.validTo < data.date) {
+          return { valid: false, message: "entitlement expired" }
+        }
+
+        // validate entitlement dates
+        if (!isValidEntitlement(entitlement, data.date)) {
+          return { valid: false, message: "entitlement dates are invalid, please contact support." }
+        }
+      }
+
+      // Fast path: check if the event is already sent to the DO
+      const { val: sent } = await this.cache.idempotentRequestUsageByHash.get(data.idempotenceKey)
+
+      if (sent) {
+        return sent
+      }
+
+      // Next path: send the usage to the DO
+      const d = this.getStub(this.getDurableCustomerFeatureId(data.customerId, data.featureSlug))
+      const result = await d.reportUsage(data)
+
+      // cache the result for the next time
+      await this.cache.idempotentRequestUsageByHash.set(data.idempotenceKey, result)
+
+      // cache the entitlement for the next time
+      await this.cache.customerEntitlementUsage.set(
+        this.getDurableCustomerFeatureId(data.customerId, data.featureSlug),
         {
-          skipCache: false,
+          usage: result.usage,
+          accumulatedUsage: result.accumulatedUsage,
+          validFrom: result.validFrom,
+          validTo: result.validTo,
+          resetedAt: result.resetedAt,
+          limit: result.limit,
         }
       )
 
-      if (err) {
-        return { valid: false, message: err.message }
-      }
+      return result
 
-      // validate entitlement dates
-      if (!isValidEntitlement(entitlement, data.date)) {
-        return { valid: false, message: "entitlement dates are invalid, please contact support." }
-      }
+      // const threshold = 80 // notify when the usage is 80% or more
+      // const currentUsage = entitlement.usage ?? 0
+      // const limit = entitlement.limit
+      // let message = ""
+      // let notifyUsage = false
 
-      const threshold = 80 // notify when the usage is 80% or more
-      const currentUsage = entitlement.usage ?? 0
-      const limit = entitlement.limit
-      let message = ""
-      let notifyUsage = false
+      // // check flat features
+      // if (entitlement.featureType === "flat") {
+      //   return { valid: true }
+      // }
 
-      // check flat features
-      if (entitlement.featureType === "flat") {
-        return { valid: true }
-      }
+      // // check limit
+      // if (limit) {
+      //   const usagePercentage = (currentUsage / limit) * 100
 
-      // check limit
-      if (limit) {
-        const usagePercentage = (currentUsage / limit) * 100
-
-        if (currentUsage >= limit) {
-          // Usage has reached or exceeded the limit
-          message = `Your feature ${entitlement.featureSlug} has reached or exceeded its usage limit of ${limit}. Current usage: ${usagePercentage.toFixed(
-            2
-          )}% of its usage limit. This is over the limit by ${currentUsage - limit}`
-          notifyUsage = true
-        } else if (usagePercentage >= threshold) {
-          // Usage is at or above the threshold
-          message = `Your feature ${entitlement.featureSlug} is at ${usagePercentage.toFixed(
-            2
-          )}% of its usage limit`
-          notifyUsage = true
-        }
-      }
-
-      const durableObjectFeatureId = this.getDurableCustomerFeatureId(
-        data.customerId,
-        data.featureSlug
-      )
-
-      const durableObject = this.getStub(durableObjectFeatureId)
-
-      // broadcast the usage to the project and the customer if any user is connected
-      this.waitUntil(
-        Promise.all([
-          // TODO: send the usage to the analytics
-          // TODO: broadcast the usage to the project and the customer if any user is connected
-          // report the usage to analytics db
-          // TODO: add notification to email, slack?
-          notifyUsage &&
-            durableObject.broadcast(
-              JSON.stringify({
-                customerId: data.customerId,
-                featureSlug: data.featureSlug,
-                usage: data.usage,
-                date: data.date,
-              })
-            ),
-          this.analytics
-            .ingestFeaturesUsage({
-              idempotenceKey: data.idempotenceKey,
-              planVersionFeatureId: entitlement.featurePlanVersionId,
-              subscriptionItemId: entitlement.subscriptionItemId,
-              projectId: entitlement.projectId,
-              usage: data.usage,
-              timestamp: Date.now(),
-              createdAt: Date.now(),
-              entitlementId: entitlement.id,
-              featureSlug: data.featureSlug,
-              customerId: data.customerId,
-              subscriptionPhaseId: entitlement.subscriptionPhaseId!,
-              subscriptionId: entitlement.subscriptionId!,
-              requestId: "",
-              // TODO: add metadata to the usage
-              metadata: {
-                prompt: "test",
-              },
-            })
-            .then((res) => {
-              if (res.successful_rows <= 0) {
-                this.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
-                  ...res,
-                  entitlement: entitlement,
-                  usage: data.usage,
-                })
-              }
-            })
-            .catch((error) => {
-              this.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
-                error: JSON.stringify(error),
-                entitlement: entitlement,
-                usage: data.usage,
-              })
-            }),
-        ])
-      )
-
-      return { valid: true, message, remaining: limit ? limit - currentUsage : undefined }
+      //   if (currentUsage >= limit) {
+      //     // Usage has reached or exceeded the limit
+      //     message = `Your feature ${entitlement.featureSlug} has reached or exceeded its usage limit of ${limit}. Current usage: ${usagePercentage.toFixed(
+      //       2
+      //     )}% of its usage limit. This is over the limit by ${currentUsage - limit}`
+      //     notifyUsage = true
+      //   } else if (usagePercentage >= threshold) {
+      //     // Usage is at or above the threshold
+      //     message = `Your feature ${entitlement.featureSlug} is at ${usagePercentage.toFixed(
+      //       2
+      //     )}% of its usage limit`
+      //     notifyUsage = true
+      //   }
+      // }
     } catch (e) {
       console.error("usagelimit failed", {
         customerId: data.customerId,

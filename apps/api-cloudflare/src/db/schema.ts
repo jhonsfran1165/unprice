@@ -8,7 +8,7 @@ export const pgTableProject = sqliteTableCreator((name) => `${version}_${name}`)
 export const entitlements = pgTableProject(
   "entitlements",
   {
-    id: integer().primaryKey({ autoIncrement: true }),
+    id: text().primaryKey(),
     customerId: text().notNull(),
     projectId: text().notNull(),
     entitlementId: text().notNull(),
@@ -21,18 +21,21 @@ export const entitlements = pgTableProject(
     featureType: text().$type<FeatureType>().notNull(),
     aggregationMethod: text().$type<AggregationMethod>().notNull(),
     lastUsageUpdateAt: integer().notNull(),
-    // days of grace period to allow the customer to use the feature after the end of the cycle
-    gracePeriod: integer().notNull().default(1),
     // current billing cycle start and end dates used to revalidate and reset the usage
-    startAt: integer().notNull(),
-    endAt: integer().notNull(),
+    validFrom: integer().notNull(),
+    validTo: integer().notNull(),
+    // buffer period days to allow the customer to use the feature after the end of the cycle
+    bufferPeriodDays: integer().notNull().default(1),
+    // resetedAt is the date when the entitlement was reseted
+    // normally this is set by the subscription renew event
+    resetedAt: integer().notNull(),
   },
   (table) => [
     index("customer_idx").on(table.customerId),
     index("feature_idx").on(table.featureSlug),
     index("project_idx").on(table.projectId),
-    index("start_at_idx").on(table.startAt),
-    index("end_at_idx").on(table.endAt),
+    index("valid_from_idx").on(table.validFrom),
+    index("valid_to_idx").on(table.validTo),
   ]
 )
 

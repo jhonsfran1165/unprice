@@ -19,7 +19,7 @@ import type {
   subscriptionMetadataSchema,
   subscriptionPhaseMetadataSchema,
 } from "../validators/subscriptions"
-import { customerCredits, customers } from "./customers"
+import { customerCredits, customerEntitlements, customers } from "./customers"
 import {
   collectionMethodEnum,
   currencyEnum,
@@ -316,6 +316,7 @@ export const subscriptionRelations = relations(subscriptions, ({ one, many }) =>
     references: [customers.id, customers.projectId],
   }),
   phases: many(subscriptionPhases),
+  customerEntitlements: many(customerEntitlements),
 }))
 
 export const subscriptionPhaseRelations = relations(subscriptionPhases, ({ one, many }) => ({
