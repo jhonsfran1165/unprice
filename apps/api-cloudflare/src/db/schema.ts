@@ -17,7 +17,7 @@ export const entitlements = pgTableProject(
     usage: numeric().default("0"),
     // accumulated usage in all time
     accumulatedUsage: numeric().default("0"),
-    limit: numeric(),
+    limit: integer(),
     featureType: text().$type<FeatureType>().notNull(),
     aggregationMethod: text().$type<AggregationMethod>().notNull(),
     lastUsageUpdateAt: integer().notNull(),

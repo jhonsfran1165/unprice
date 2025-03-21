@@ -83,7 +83,7 @@ export class DurableUsageLimiter implements UsageLimiter {
         const durableObject = this.getStub(
           this.getDurableCustomerFeatureId(customerId, featureSlug)
         )
-        const entitlement = await durableObject.getUsage(customerId, featureSlug, projectId)
+        const entitlement = await durableObject.getUsage(featureSlug)
 
         if (!entitlement) {
           return null
@@ -121,14 +121,15 @@ export class DurableUsageLimiter implements UsageLimiter {
     // cache miss, revalidate do
     if (!val) {
       const durableObject = this.getStub(this.getDurableCustomerFeatureId(customerId, featureSlug))
-      await durableObject.revalidateEntitlements({
+      await durableObject.revalidateEntitlement({
         customerId,
         projectId,
+        featureSlug,
         now: Date.now(),
       })
 
       // get the entitlement again
-      const entitlement = await durableObject.getUsage(customerId, featureSlug, projectId)
+      const entitlement = await durableObject.getUsage(featureSlug)
 
       if (!entitlement) {
         return Err(
@@ -167,21 +168,6 @@ export class DurableUsageLimiter implements UsageLimiter {
       )
 
       if (entitlement) {
-        // if feature type is flat, we don't need to call the DO
-        if (entitlement.featureType === "flat") {
-          return {
-            valid: true,
-            message:
-              "feature is flat, limit is not applicable but events is billed. Please avoid reporting usage for flat features.",
-          }
-        }
-
-        // it's a valid entitlement
-        // check if the usage is over the limit
-        if (entitlement.usage + data.usage > entitlement.limit) {
-          return { valid: false, message: "usage over the limit" }
-        }
-
         // check if the entitlement is expired
         // TODO: we have to revalidate the entitlement here
         if (entitlement.validTo < data.date) {
@@ -192,16 +178,32 @@ export class DurableUsageLimiter implements UsageLimiter {
         if (!isValidEntitlement(entitlement, data.date)) {
           return { valid: false, message: "entitlement dates are invalid, please contact support." }
         }
+
+        // if feature type is flat, we don't need to call the DO
+        if (entitlement.featureType === "flat") {
+          return {
+            valid: true,
+            message:
+              "feature is flat, limit is not applicable but events are billed. Please don't report usage for flat features to avoid overbilling.",
+          }
+        }
+
+        // it's a valid entitlement
+        // check if the usage is over the limit
+        if (entitlement.usage + data.usage > entitlement.limit) {
+          return { valid: false, message: "usage over the limit" }
+        }
       }
 
       // Fast path: check if the event is already sent to the DO
       const { val: sent } = await this.cache.idempotentRequestUsageByHash.get(data.idempotenceKey)
 
+      // if the usage is already sent, return the result
       if (sent) {
         return sent
       }
 
-      // Next path: send the usage to the DO
+      // Report usage path: send the usage to the DO
       const d = this.getStub(this.getDurableCustomerFeatureId(data.customerId, data.featureSlug))
       const result = await d.reportUsage(data)
 
@@ -218,6 +220,7 @@ export class DurableUsageLimiter implements UsageLimiter {
           validTo: result.validTo,
           resetedAt: result.resetedAt,
           limit: result.limit,
+          featureType: result.featureType,
         }
       )
 

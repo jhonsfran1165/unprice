@@ -7,17 +7,30 @@ import migrations from "../../drizzle/migrations"
 import type { Env } from "~/env"
 import type { ReportUsageRequest, ReportUsageResponse } from "./interface"
 
-import { type Database, type SQL, and, eq as eqDb, inArray, sql as sqlDrizzle } from "@unprice/db"
-import { customerEntitlements } from "@unprice/db/schema"
+import {
+  type Database,
+  and,
+  eq as eqUnprice,
+  gte as gteUnprice,
+  lte as lteUnprice,
+} from "@unprice/db"
 import { Analytics } from "@unprice/tinybird"
 import { inArray as inArraySqlite, sql } from "drizzle-orm"
 import { type Entitlement, entitlements, type schema, usageRecords } from "~/db/schema"
 import { createDb } from "~/util/db"
 
+import { customerEntitlements, features, planVersionFeatures } from "@unprice/db/schema"
+import type { Customer, Project, Subscription } from "@unprice/db/validators"
+
 export class DurableObjectUsagelimiter extends Server {
   // once the durable object is initialized we can avoid
   // querying the db for usage on each request
   private featuresUsage: Map<string, Entitlement> = new Map()
+  private currentSubscription: {
+    subscription: Subscription
+    project: Project
+    customer: Customer
+  } | null = null
   // we avoid revalidating the entitlements if there is already a revalidation in progress
   private revalidationInProgress = false
   // internal database of the do
@@ -30,10 +43,10 @@ export class DurableObjectUsagelimiter extends Server {
   private readonly TTL = 1000 * 60 // 60 secs
   // Debounce delay for the broadcast
   private lastBroadcastTime = 0
-  // full revalidation interval (24 hours)
-  private readonly FULL_REVALIDATION_GRACE_PERIOD = 1000 * 60 * 60 * 24 // 24 hours
   // debounce delay for the broadcast
   private readonly DEBOUNCE_DELAY = 1000 * 1 // 1 second
+  // full revalidation grace period
+  private readonly FULL_REVALIDATION_GRACE_PERIOD = 1000 * 60 * 60 * 24 // 1 day
 
   // hibernate the do when no websocket nor connections are active
   static options = {
@@ -64,6 +77,20 @@ export class DurableObjectUsagelimiter extends Server {
       try {
         // migrate first
         await migrate(this.db, migrations)
+
+        // get the current from state
+        const currentSubscription = (await this.ctx.storage.get("currentSubscription")) as {
+          subscription: Subscription
+          project: Project
+          customer: Customer
+        } | null
+
+        // if there is no current subscription we need to revalidate
+        if (!currentSubscription) {
+          await this.revalidateSubscription({
+            customerId: ctx.id.toString(), // DO id is the customer id
+          })
+        }
 
         const now = Date.now()
         // get the usage for the customer for every feature
@@ -98,17 +125,26 @@ export class DurableObjectUsagelimiter extends Server {
     let entitlement = this.featuresUsage.get(data.featureSlug)
 
     if (!entitlement) {
-      const result = await this.revalidateSingleEntitlement({
+      const shouldRevalidateEntitlement = this.shouldRevalidateEntitlement(data.featureSlug)
+
+      if (!shouldRevalidateEntitlement.valid) {
+        return {
+          valid: false,
+          message: shouldRevalidateEntitlement.message,
+        }
+      }
+
+      const result = await this.revalidateEntitlement({
         customerId: data.customerId,
         projectId: data.projectId,
         featureSlug: data.featureSlug,
         now: Date.now(),
       })
 
-      if (!result) {
+      if (!result.valid) {
         return {
           valid: false,
-          message: "entitlement not found in do",
+          message: result.message,
         }
       }
 
@@ -122,10 +158,12 @@ export class DurableObjectUsagelimiter extends Server {
       }
     }
 
-    if (!entitlement) {
+    const isValid = this.isValidEntitlement(data.featureSlug)
+
+    if (!isValid.valid) {
       return {
         valid: false,
-        message: "entitlement not found in do",
+        message: isValid.message,
       }
     }
 
@@ -268,36 +306,71 @@ export class DurableObjectUsagelimiter extends Server {
     await this.ctx.storage.deleteAll()
   }
 
-  async shouldPerformFullRevalidation(now: number): Promise<boolean> {
+  isSubscriptionValid(): { valid: boolean; message: string } {
     const gracePeriod = this.FULL_REVALIDATION_GRACE_PERIOD
-    const currentCycle = (await this.ctx.storage.get("currentCycle")) as {
-      currentCycleStartAt: number
-      currentCycleEndAt: number
-    } | null
+    const currentSubscription = this.currentSubscription
+    const now = Date.now()
 
-    if (!currentCycle) {
-      return false
+    if (!currentSubscription) {
+      return {
+        valid: false,
+        message: "subscription not found in do",
+      }
+    }
+
+    // project is not active
+    if (!currentSubscription.project.enabled) {
+      return {
+        valid: false,
+        message: "project is not active",
+      }
+    }
+
+    // subscription is not active
+    if (!currentSubscription.subscription.active) {
+      return {
+        valid: false,
+        message: "subscription is not active",
+      }
+    }
+
+    // customer is not active
+    if (!currentSubscription.customer.active) {
+      return {
+        valid: false,
+        message: "customer is not active",
+      }
     }
 
     // if revalidation is in progress or the current cycle is not over
-    // we don't need to perform a full revalidation
-    if (this.revalidationInProgress || now < currentCycle.currentCycleEndAt + gracePeriod) {
-      return false
+    if (
+      now < currentSubscription.subscription.currentCycleStartAt ||
+      now > currentSubscription.subscription.currentCycleEndAt + gracePeriod
+    ) {
+      return {
+        valid: false,
+        message: "revalidation in progress or current cycle is not over",
+      }
     }
 
-    return true
+    return {
+      valid: true,
+      message: "subscription is valid",
+    }
   }
 
-  async fullRevalidationEntitlements({
+  async revalidateSubscription({
     customerId,
-    projectId,
-    now,
   }: {
     customerId: string
-    projectId: string
-    now: number
   }): Promise<void> {
     if (this.revalidationInProgress) return
+    const now = Date.now()
+    const shouldRevalidate = this.shouldRevalidateSubscription()
+
+    if (!shouldRevalidate.valid) {
+      return
+    }
 
     try {
       this.revalidationInProgress = true
@@ -306,23 +379,10 @@ export class DurableObjectUsagelimiter extends Server {
         .findFirst({
           with: {
             customer: true,
-            customerEntitlements: {
-              where: (e, { eq }) => eq(e.active, true),
-              with: {
-                featurePlanVersion: {
-                  with: {
-                    feature: {
-                      columns: {
-                        slug: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
+            project: true,
           },
-          where: (s, { eq, and }) =>
-            and(eq(s.customerId, customerId), eq(s.projectId, projectId), eq(s.active, true)),
+          where: (s, { eq, and, gte }) =>
+            and(eq(s.customerId, customerId), eq(s.active, true), gte(s.currentCycleStartAt, now)),
         })
         .catch((e) => {
           // TODO: log it
@@ -331,246 +391,178 @@ export class DurableObjectUsagelimiter extends Server {
         })
 
       if (!data) {
-        // TODO: log it
         return
       }
 
-      const { customerEntitlements: unpriceEntitlements, customer, ...subscription } = data
-
-      // if the customer is not active
-      if (!customer.active) {
-        // TODO: log it
-        return
-      }
-
-      // if there are no entitlements active
-      if (unpriceEntitlements.length === 0) {
-        // TODO: log it
-        return
-      }
-
-      // current cycle of the subscription
-      const { currentCycleStartAt, currentCycleEndAt } = subscription
+      const { project, customer, ...subscription } = data
 
       // save the current cycle start and end at for next full revalidation
-      await this.ctx.storage.put("currentCycle", {
-        currentCycleStartAt: currentCycleStartAt,
-        currentCycleEndAt: currentCycleEndAt,
+      await this.ctx.storage.put("currentSubscription", {
+        subscription: subscription,
+        project: project,
+        customer: customer,
       })
 
-      // usage for the current cycle to get the usage and accumulated usage
-      const { totalAccumulatedUsage, totalUsages } = await this.getUsagesFromAnalytics({
-        customerId,
-        projectId,
-        startAt: currentCycleStartAt,
-        endAt: now,
-      })
-
-      const preparedEntitlements = unpriceEntitlements.map((e) => {
-        const entitlementDo = {
-          id: e.id,
-          customerId: e.customerId,
-          projectId: e.projectId,
-          entitlementId: e.id,
-          featureSlug: e.featurePlanVersion.feature.slug,
-          validFrom: e.validFrom,
-          validTo: e.validTo,
-          bufferPeriodDays: e.bufferPeriodDays,
-          aggregationMethod: e.featurePlanVersion.aggregationMethod,
-          featureType: e.featurePlanVersion.featureType,
-          usage: "0",
-          accumulatedUsage: "0",
-          limit: e.limit?.toString(),
-          lastUsageUpdateAt: Date.now(),
-          subscriptionItemId: e.subscriptionItemId,
-          subscriptionPhaseId: e.subscriptionPhaseId,
-          subscriptionId: e.subscriptionId,
-          resetedAt: e.resetedAt,
-        }
-        if (!totalUsages || !totalAccumulatedUsage) {
-          return entitlementDo
-        }
-
-        const featureSlug = e.featurePlanVersion.feature.slug
-        const aggregationMethod = e.featurePlanVersion.aggregationMethod
-
-        const usage = totalUsages.find((u) => u.featureSlug === featureSlug)
-        const accumulatedUsage = totalAccumulatedUsage.find((u) => u.featureSlug === featureSlug)
-
-        if (!usage || !accumulatedUsage) {
-          return entitlementDo
-        }
-
-        const usageValue = (usage[aggregationMethod as keyof typeof usage] as number) ?? 0
-        const accumulatedUsageValue =
-          (accumulatedUsage[aggregationMethod as keyof typeof accumulatedUsage] as number) ?? 0
-
-        return {
-          ...entitlementDo,
-          usage: usageValue.toString(),
-          accumulatedUsage: accumulatedUsageValue.toString(),
-        }
-      })
-
-      // this happen in a transaction
-      await this.db.transaction(async (tx) => {
-        // delete all entitlements in the do and reinsert them
-        await tx.delete(entitlements)
-        // insert the entitlements
-        await tx.insert(entitlements).values(preparedEntitlements)
-      })
-
-      // update the usage of the entitlement in unprice db
-      const sqlUsage: SQL[] = []
-      const sqlAccumulatedUsage: SQL[] = []
-      const ids: string[] = []
-
-      sqlUsage.push(sqlDrizzle`(case`)
-      sqlAccumulatedUsage.push(sqlDrizzle`(case`)
-
-      for (const newEntitlement of preparedEntitlements) {
-        sqlUsage.push(
-          sqlDrizzle`when ${customerEntitlements.id} = ${newEntitlement.id} then ${newEntitlement.usage}`
-        )
-        sqlAccumulatedUsage.push(
-          sqlDrizzle`when ${customerEntitlements.id} = ${newEntitlement.id} then ${newEntitlement.accumulatedUsage}`
-        )
-        ids.push(newEntitlement.id)
-      }
-
-      sqlUsage.push(sqlDrizzle`end)`)
-
-      const finalSql: SQL = sqlDrizzle.join(sqlUsage, sqlDrizzle.raw(" "))
-      const finalSqlAccumulatedUsage: SQL = sqlDrizzle.join(
-        sqlAccumulatedUsage,
-        sqlDrizzle.raw(" ")
-      )
-
-      // don't await this to avoid blocking the transaction
-      this.ctx.waitUntil(
-        this.unpriceDb
-          .update(customerEntitlements)
-          .set({
-            usage: finalSql,
-            accumulatedUsage: finalSqlAccumulatedUsage,
-            lastUsageUpdateAt: Date.now(),
-          })
-          .where(
-            and(
-              inArray(customerEntitlements.id, ids),
-              eqDb(customerEntitlements.projectId, projectId),
-              eqDb(customerEntitlements.customerId, customerId)
-            )
-          )
-      )
+      // flush entitlements
+      this.featuresUsage.clear()
+      // clean entitlements from db
+      await this.db.delete(entitlements)
     } finally {
       this.revalidationInProgress = false
     }
   }
 
-  shouldRevalidateEntitlement(featureSlug: string, now: number) {
-    const entitlement = this.featuresUsage.get(featureSlug)
+  shouldRevalidateSubscription(): { valid: boolean; message: string } {
+    const currentSubscription = this.currentSubscription
 
-    if (!entitlement) {
-      return true
+    if (!currentSubscription) {
+      return {
+        valid: false,
+        message: "subscription not found in state of do",
+      }
     }
 
-    const bufferPeriod = entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
-    const resetAt = entitlement.validTo + bufferPeriod
+    const now = Date.now()
+    const gracePeriod = this.FULL_REVALIDATION_GRACE_PERIOD
+    const currentCycleEndAt = currentSubscription.subscription.currentCycleEndAt
+    const currentCycleStartAt = currentSubscription.subscription.currentCycleStartAt
 
-    if (now > resetAt) {
-      return true
+    // only revalidate if subscription cycle is over
+    if (now < currentCycleStartAt || now > currentCycleEndAt + gracePeriod) {
+      return {
+        valid: true,
+        message: "subscription cycle is not over",
+      }
     }
 
-    return false
+    return {
+      valid: false,
+      message: "subscription cycle is over",
+    }
   }
 
-  isValidEntitlement(featureSlug: string, now: number) {
+  shouldRevalidateEntitlement(featureSlug: string) {
     const entitlement = this.featuresUsage.get(featureSlug)
-
     if (!entitlement) {
-      return false
+      return {
+        valid: false,
+        message: "entitlement not found in do",
+      }
     }
 
-    if (entitlement.featureType === "flat") {
-      return false
-    }
-
+    const now = Date.now()
     const bufferPeriod = entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
     const validUntil = entitlement.validTo + bufferPeriod
 
     if (now < entitlement.validFrom || now > validUntil) {
-      return false
+      return {
+        valid: false,
+        message: "entitlement is expired",
+      }
     }
 
-    return true
+    return {
+      valid: true,
+      message: "entitlement is valid",
+    }
   }
 
-  async revalidateSingleEntitlement(entitlement: {
+  isValidEntitlement(featureSlug: string) {
+    const entitlement = this.featuresUsage.get(featureSlug)
+    // entitlement is valid if the subscription is valid
+    const subscription = this.isSubscriptionValid()
+
+    if (!subscription.valid) {
+      return {
+        valid: false,
+        message: subscription.message,
+      }
+    }
+
+    if (!entitlement) {
+      return {
+        valid: false,
+        message: "entitlement not found in do",
+      }
+    }
+
+    if (entitlement.featureType === "flat") {
+      return {
+        valid: false,
+        message: "entitlement is flat",
+      }
+    }
+
+    return {
+      valid: true,
+      message: "entitlement is valid",
+    }
+  }
+
+  async revalidateEntitlement({
+    customerId,
+    projectId,
+    featureSlug,
+    now,
+  }: {
     customerId: string
     projectId: string
     featureSlug: string
     now: number
   }) {
-    // get current cycle from unprice db
-    const currentCycle = (await this.ctx.storage.get("currentCycle")) as {
-      currentCycleStartAt: number
-      currentCycleEndAt: number
-    } | null
-
-    if (!currentCycle) {
-      return {
-        valid: false,
-        message: "current cycle not found in do",
-      }
-    }
-
-    // get active entitlements from the unprice db
-    const unpriceEntitlements = await this.unpriceDb.query.customerEntitlements.findMany({
-      with: {
-        featurePlanVersion: {
-          with: {
-            feature: {
-              columns: {
-                slug: true,
-              },
-            },
-          },
-        },
-      },
-      where: (e, { eq, gte, lte, and }) =>
+    const entitlement = await this.unpriceDb
+      .select({
+        customerEntitlement: customerEntitlements,
+        featureType: planVersionFeatures.featureType,
+        aggregationMethod: planVersionFeatures.aggregationMethod,
+      })
+      .from(customerEntitlements)
+      .leftJoin(
+        planVersionFeatures,
+        eqUnprice(customerEntitlements.featurePlanVersionId, planVersionFeatures.id)
+      )
+      .leftJoin(features, eqUnprice(planVersionFeatures.featureId, features.id))
+      .where(
         and(
-          eq(e.projectId, entitlement.projectId),
-          eq(e.active, true),
-          gte(e.validFrom, currentCycle.currentCycleStartAt),
-          lte(e.validTo, currentCycle.currentCycleEndAt)
-        ),
-    })
+          eqUnprice(features.slug, featureSlug),
+          eqUnprice(customerEntitlements.customerId, customerId),
+          eqUnprice(customerEntitlements.projectId, projectId),
+          eqUnprice(customerEntitlements.active, true),
+          gteUnprice(customerEntitlements.validFrom, now),
+          lteUnprice(customerEntitlements.validTo, now)
+        )
+      )
+      .then((e) => e[0])
+      .catch((e) => {
+        // TODO: log it
+        console.error("error getting entitlement", e)
+        return null
+      })
 
-    if (!unpriceEntitlements) {
+    if (!entitlement || !entitlement.featureType || !entitlement.aggregationMethod) {
       return {
         valid: false,
         message: "entitlement not found in unprice db",
       }
     }
 
-    const activeEntitlement = unpriceEntitlements.find(
-      (e) => e.featurePlanVersion.feature.slug === entitlement.featureSlug
-    )
+    const { customerEntitlement: activeEntitlement, featureType, aggregationMethod } = entitlement
 
     if (!activeEntitlement) {
       return {
         valid: false,
-        message: "entitlement not found in unprice db",
+        message: "active entitlement not found in unprice db",
       }
     }
+
     // get the usages for the entitlements from analytics
-    const { totalAccumulatedUsage, totalUsages } = await this.getUsagesFromAnalytics({
-      customerId: entitlement.customerId,
-      projectId: entitlement.projectId,
-      startAt: currentCycle.currentCycleStartAt,
+    const { totalAccumulatedUsage, totalUsage } = await this.getUsageFromAnalytics({
+      customerId,
+      projectId,
+      startAt: activeEntitlement.validFrom,
       endAt: Date.now(),
-      featureSlug: entitlement.featureSlug,
+      featureSlug,
+      isAccumulated: featureType.endsWith("_all"),
     })
 
     const entitlementDo = {
@@ -578,39 +570,20 @@ export class DurableObjectUsagelimiter extends Server {
       customerId: activeEntitlement.customerId,
       projectId: activeEntitlement.projectId,
       entitlementId: activeEntitlement.id,
-      featureSlug: activeEntitlement.featurePlanVersion.feature.slug,
+      featureSlug: featureSlug,
       validFrom: activeEntitlement.validFrom,
       validTo: activeEntitlement.validTo,
       bufferPeriodDays: activeEntitlement.bufferPeriodDays,
-      aggregationMethod: activeEntitlement.featurePlanVersion.aggregationMethod,
-      featureType: activeEntitlement.featurePlanVersion.featureType,
-      usage: "0",
-      accumulatedUsage: "0",
-      limit: activeEntitlement.limit?.toString() ?? null,
+      aggregationMethod: aggregationMethod,
+      featureType: featureType,
+      usage: totalUsage.toString(),
+      accumulatedUsage: totalAccumulatedUsage.toString(),
+      limit: activeEntitlement.limit,
       lastUsageUpdateAt: Date.now(),
       subscriptionItemId: activeEntitlement.subscriptionItemId,
       subscriptionPhaseId: activeEntitlement.subscriptionPhaseId,
       subscriptionId: activeEntitlement.subscriptionId,
       resetedAt: activeEntitlement.resetedAt,
-    }
-
-    if (totalUsages && totalAccumulatedUsage) {
-      const featureSlug = activeEntitlement.featurePlanVersion.feature.slug
-      const aggregationMethod = activeEntitlement.featurePlanVersion.aggregationMethod
-
-      const usage = totalUsages.find((u) => u.featureSlug === featureSlug)
-      const accumulatedUsage = totalAccumulatedUsage.find((u) => u.featureSlug === featureSlug)
-
-      if (!usage || !accumulatedUsage) {
-        return entitlementDo
-      }
-
-      const usageValue = (usage[aggregationMethod as keyof typeof usage] as number) ?? 0
-      const accumulatedUsageValue =
-        (accumulatedUsage[aggregationMethod as keyof typeof accumulatedUsage] as number) ?? 0
-
-      entitlementDo.usage = usageValue.toString()
-      entitlementDo.accumulatedUsage = accumulatedUsageValue.toString()
     }
 
     // insert or update the entitlement in the db
@@ -625,17 +598,19 @@ export class DurableObjectUsagelimiter extends Server {
       })
 
     this.ctx.waitUntil(
+      // update the entitlement in the unprice db
       this.unpriceDb
         .update(customerEntitlements)
         .set({
           usage: entitlementDo.usage,
           accumulatedUsage: entitlementDo.accumulatedUsage,
+          lastUsageUpdateAt: Date.now(),
         })
         .where(
           and(
-            eqDb(customerEntitlements.id, entitlementDo.id),
-            eqDb(customerEntitlements.customerId, entitlementDo.customerId),
-            eqDb(customerEntitlements.projectId, entitlementDo.projectId)
+            eqUnprice(customerEntitlements.id, entitlementDo.id),
+            eqUnprice(customerEntitlements.customerId, entitlementDo.customerId),
+            eqUnprice(customerEntitlements.projectId, entitlementDo.projectId)
           )
         )
     )
@@ -658,35 +633,38 @@ export class DurableObjectUsagelimiter extends Server {
     return entitlement
   }
 
-  async getUsagesFromAnalytics({
+  async getUsageFromAnalytics({
     customerId,
     projectId,
     featureSlug,
     startAt,
     endAt,
+    isAccumulated = false,
   }: {
     customerId: string
     projectId: string
-    // optional feature slug to get the usage for a specific feature
-    featureSlug?: string
+    featureSlug: string
     startAt: number
     endAt: number
+    isAccumulated?: boolean
   }) {
     // get the total usage and the usage for the current cycle
-    const [totalAccumulatedUsage, totalUsages] = await Promise.all([
-      this.analytics
-        .getFeaturesUsageTotal({
-          customerId,
-          projectId,
-          featureSlug,
-        })
-        .then((usage) => usage.data)
-        .catch((error) => {
-          // TODO: log this error
-          console.error("error getting usage", error)
+    const [totalAccumulatedUsage, totalUsage] = await Promise.all([
+      isAccumulated
+        ? this.analytics
+            .getFeaturesUsageTotal({
+              customerId,
+              projectId,
+              featureSlug,
+            })
+            .then((usage) => usage.data[0] ?? 0)
+            .catch((error) => {
+              // TODO: log this error
+              console.error("error getting usage", error)
 
-          return null
-        }),
+              return null
+            })
+        : null,
       this.analytics
         .getFeaturesUsagePeriod({
           customerId,
@@ -695,7 +673,7 @@ export class DurableObjectUsagelimiter extends Server {
           start: startAt,
           end: endAt,
         })
-        .then((usage) => usage.data)
+        .then((usage) => usage.data[0] ?? 0)
         .catch((error) => {
           // TODO: log this error
           console.error("error getting usage", error)
@@ -705,8 +683,8 @@ export class DurableObjectUsagelimiter extends Server {
     ])
 
     return {
-      totalAccumulatedUsage,
-      totalUsages,
+      totalAccumulatedUsage: totalAccumulatedUsage ?? 0,
+      totalUsage: totalUsage ?? 0,
     }
   }
 }
