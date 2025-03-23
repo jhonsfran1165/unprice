@@ -35,7 +35,12 @@ export const getUsage = protectedApiOrActiveProjectProcedure
         end: opts.input.end,
       })
       .catch((err) => {
-        opts.ctx.logger.error(err)
+        opts.ctx.logger.error(
+          JSON.stringify({
+            message: "Error getting usage",
+            error: err.message,
+          })
+        )
 
         return {
           data: [],

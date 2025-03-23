@@ -1,1 +1,0 @@
-ALTER TABLE "unprice_invoices" ADD COLUMN "payment_method_id" text;

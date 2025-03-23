@@ -53,7 +53,8 @@
       ".output",
       "./internal/db/src/migrations",
       "./internal/jobs/.trigger",
-      "./apps/api/drizzle/migrations"
+      "./apps/api/drizzle/migrations",
+      "./apps/api-cloudflare/worker-configuration.d.ts"
     ]
   },
   "formatter": {
@@ -76,7 +77,8 @@
       ".output",
       "./internal/db/src/migrations",
       "./internal/jobs/.trigger",
-      "./apps/api/drizzle/migrations"
+      "./apps/api/drizzle/migrations",
+      "./apps/api-cloudflare/worker-configuration.d.ts"
     ]
   },
   "organizeImports": {
@@ -94,7 +96,8 @@
       ".output",
       "./internal/db/src/migrations",
       "./internal/jobs/.trigger",
-      "./apps/api/drizzle/migrations"
+      "./apps/api/drizzle/migrations",
+      "./apps/api-cloudflare/worker-configuration.d.ts"
     ]
   },
   "javascript": {

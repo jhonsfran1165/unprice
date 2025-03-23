@@ -26,6 +26,13 @@ export const entitlements = protectedApiOrActiveWorkspaceProcedure
   )
   .query(async (opts) => {
     const { customerId } = opts.input
+    const isInternal = opts.ctx.workspace?.isInternal
+
+    if (isInternal) {
+      return {
+        entitlements: [],
+      }
+    }
 
     const res = await getEntitlements({
       customerId,

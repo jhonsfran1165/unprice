@@ -1,17 +1,21 @@
 import type { AggregationMethod, FeatureType } from "@unprice/db/validators"
 import { index, integer, numeric, sqliteTableCreator, text } from "drizzle-orm/sqlite-core"
 
-export const version = "v1"
+export const version = "unprice_do_v1"
 
 export const pgTableProject = sqliteTableCreator((name) => `${version}_${name}`)
 
 export const entitlements = pgTableProject(
   "entitlements",
   {
-    id: text().primaryKey(),
+    id: integer().primaryKey({ autoIncrement: true }),
+    entitlementId: text().notNull(),
     customerId: text().notNull(),
     projectId: text().notNull(),
-    entitlementId: text().notNull(),
+    subscriptionId: text().notNull(),
+    subscriptionPhaseId: text(),
+    subscriptionItemId: text(),
+    planVersionFeatureId: text().notNull(),
     featureSlug: text().notNull(),
     // usage in the current billing cycle
     usage: numeric().default("0"),
@@ -31,11 +35,12 @@ export const entitlements = pgTableProject(
     resetedAt: integer().notNull(),
   },
   (table) => [
-    index("customer_idx").on(table.customerId),
-    index("feature_idx").on(table.featureSlug),
-    index("project_idx").on(table.projectId),
-    index("valid_from_idx").on(table.validFrom),
-    index("valid_to_idx").on(table.validTo),
+    index("entitlements_customer_idx").on(table.customerId),
+    index("entitlements_feature_idx").on(table.featureSlug),
+    index("entitlements_project_idx").on(table.projectId),
+    index("entitlements_valid_from_idx").on(table.validFrom),
+    index("entitlements_valid_to_idx").on(table.validTo),
+    index("entitlements_entitlement_id_idx").on(table.entitlementId),
   ]
 )
 
@@ -65,9 +70,9 @@ export const usageRecords = pgTableProject(
   },
   (table) => [
     // Indexes for common queries
-    index("customer_idx").on(table.customerId),
-    index("feature_idx").on(table.featureSlug),
-    index("timestamp_idx").on(table.timestamp),
+    index("usage_records_customer_idx").on(table.customerId),
+    index("usage_records_feature_idx").on(table.featureSlug),
+    index("usage_records_timestamp_idx").on(table.timestamp),
   ]
 )
 
@@ -90,28 +95,13 @@ export const verifications = pgTableProject(
     featureSlug: text().notNull(),
     customerId: text().notNull(),
     metadata: text(),
-    // 0 = not deleted, 1 = deleted
-    deleted: integer().notNull().default(0),
   },
   (table) => [
     // Indexes for common queries
-    index("customer_idx").on(table.customerId),
-    index("feature_idx").on(table.featureSlug),
-    index("timestamp_idx").on(table.timestamp),
-    index("request_id_idx").on(table.requestId),
-    index("entitlement_idx").on(table.entitlementId),
+    index("verifications_customer_idx").on(table.customerId),
+    index("verifications_feature_idx").on(table.featureSlug),
+    index("verifications_timestamp_idx").on(table.timestamp),
+    index("verifications_request_id_idx").on(table.requestId),
+    index("verifications_entitlement_idx").on(table.entitlementId),
   ]
 )
-
-export type UsageRecord = typeof usageRecords.$inferSelect
-export type NewUsageRecord = typeof usageRecords.$inferInsert
-export type Entitlement = typeof entitlements.$inferSelect
-export type NewEntitlement = typeof entitlements.$inferInsert
-export type Verification = typeof verifications.$inferSelect
-export type NewVerification = typeof verifications.$inferInsert
-
-export const schema = {
-  entitlements,
-  usageRecords,
-  verifications,
-}

@@ -10,9 +10,11 @@ import { init } from "~/middleware/init"
 import serveEmojiFavicon from "stoker/middlewares/serve-emoji-favicon"
 
 export { DurableObjectUsagelimiter } from "~/usagelimit/do"
-
 import { registerReportUsageV1 } from "~/routes/customer/reportUsageV1"
 import { registerTest } from "~/routes/test"
+import { registerCanV1 } from "./routes/customer/canV1"
+import { registerDeleteCustomerV1 } from "./routes/customer/deleteCustomerV1"
+import { registerRevalidateEntitlementV1 } from "./routes/customer/revalidateEntitlementV1"
 
 const app = newApp()
 
@@ -40,7 +42,10 @@ app.use(
           req: mockReq,
           secret: env.AUTH_SECRET,
           raw: false,
-          salt: env.ENV === "production" ? "__Secure-authjs.session-token" : "authjs.session-token",
+          salt:
+            env.NODE_ENV === "production"
+              ? "__Secure-authjs.session-token"
+              : "authjs.session-token",
           // TODO: find a way to get this from the env
           // secureCookie: env.ENV === "production",
         })
@@ -68,6 +73,9 @@ registerTest(app)
 
 // Customer routes
 registerReportUsageV1(app)
+registerRevalidateEntitlementV1(app)
+registerDeleteCustomerV1(app)
+registerCanV1(app)
 
 // Export handler
 const handler = {

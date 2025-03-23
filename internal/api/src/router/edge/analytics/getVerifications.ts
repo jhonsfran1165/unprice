@@ -38,7 +38,7 @@ export const getVerifications = protectedApiOrActiveProjectProcedure
         opts.ctx.logger.error(
           JSON.stringify({
             message: "Error getting verifications",
-            error: err,
+            error: err.message,
           })
         )
 

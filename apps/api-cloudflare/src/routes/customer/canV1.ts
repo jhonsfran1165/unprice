@@ -1,6 +1,6 @@
 import { createRoute } from "@hono/zod-openapi"
 import * as HttpStatusCodes from "stoker/http-status-codes"
-import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
+import { jsonContent } from "stoker/openapi/helpers"
 
 import { z } from "zod"
 import { keyAuth } from "~/auth/key"
@@ -11,10 +11,10 @@ import type { App } from "~/hono/app"
 const tags = ["customer"]
 
 export const route = createRoute({
-  path: "/v1/customer/{customerId}/reportUsage",
-  operationId: "customer.reportUsage",
-  description: "Report usage for a customer",
-  method: "post",
+  path: "/v1/customer/{customerId}/can/{featureSlug}",
+  operationId: "customer.can",
+  description: "Check if a customer can use a feature",
+  method: "get",
   tags,
   request: {
     params: z.object({
@@ -26,24 +26,15 @@ export const route = createRoute({
           example: "cus_1H7KQFLr7RepUyQBKdnvY",
         },
       }),
-    }),
-    body: jsonContentRequired(
-      z.object({
-        featureSlug: z.string().openapi({
-          description: "The feature slug",
+      featureSlug: z.string().openapi({
+        description: "The feature slug",
+        param: {
+          name: "featureSlug",
+          in: "path",
           example: "tokens",
-        }),
-        usage: z.number().openapi({
-          description: "The usage",
-          example: 30,
-        }),
-        idempotenceKey: z.string().uuid().openapi({
-          description: "The idempotence key",
-          example: "123e4567-e89b-12d3-a456-426614174000",
-        }),
+        },
       }),
-      "The usage to report"
-    ),
+    }),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -59,15 +50,14 @@ export const route = createRoute({
   },
 })
 
-export type ReportUsageRequest = z.infer<typeof route.request.params>
-export type ReportUsageResponse = z.infer<
+export type CanRequest = z.infer<typeof route.request.params>
+export type CanResponse = z.infer<
   (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >
 
-export const registerReportUsageV1 = (app: App) =>
+export const registerCanV1 = (app: App) =>
   app.openapi(route, async (c) => {
-    const { customerId } = c.req.valid("param")
-    const { featureSlug, usage, idempotenceKey } = c.req.valid("json")
+    const { customerId, featureSlug } = c.req.valid("param")
     const { usagelimit } = c.get("services")
     const requestId = c.get("requestId")
 
@@ -82,12 +72,9 @@ export const registerReportUsageV1 = (app: App) =>
     }
 
     // validate usage from db
-    const result = await usagelimit.reportUsage({
+    const result = await usagelimit.can({
       customerId,
       featureSlug,
-      usage,
-      date: Date.now(),
-      idempotenceKey,
       projectId: key.projectId,
       requestId,
     })

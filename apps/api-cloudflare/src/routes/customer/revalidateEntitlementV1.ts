@@ -11,9 +11,9 @@ import type { App } from "~/hono/app"
 const tags = ["customer"]
 
 export const route = createRoute({
-  path: "/v1/customer/{customerId}/reportUsage",
-  operationId: "customer.reportUsage",
-  description: "Report usage for a customer",
+  path: "/v1/customer/{customerId}/revalidateEntitlement",
+  operationId: "customer.revalidateEntitlement",
+  description: "Pull new entitlement configuration from Unprice",
   method: "post",
   tags,
   request: {
@@ -30,19 +30,11 @@ export const route = createRoute({
     body: jsonContentRequired(
       z.object({
         featureSlug: z.string().openapi({
-          description: "The feature slug",
+          description: "The feature slug to revalidate",
           example: "tokens",
         }),
-        usage: z.number().openapi({
-          description: "The usage",
-          example: 30,
-        }),
-        idempotenceKey: z.string().uuid().openapi({
-          description: "The idempotence key",
-          example: "123e4567-e89b-12d3-a456-426614174000",
-        }),
       }),
-      "The usage to report"
+      "The feature slug to revalidate"
     ),
   },
   responses: {
@@ -50,26 +42,23 @@ export const route = createRoute({
       z.object({
         success: z.boolean(),
         message: z.string().optional(),
-        cacheHit: z.boolean().optional(),
-        remaining: z.number().optional(),
       }),
-      "The result of the report usage"
+      "The result of the delete customer"
     ),
     ...openApiErrorResponses,
   },
 })
 
-export type ReportUsageRequest = z.infer<typeof route.request.params>
-export type ReportUsageResponse = z.infer<
+export type RevalidateEntitlementRequest = z.infer<typeof route.request.params>
+export type RevalidateEntitlementResponse = z.infer<
   (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >
 
-export const registerReportUsageV1 = (app: App) =>
+export const registerRevalidateEntitlementV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { customerId } = c.req.valid("param")
-    const { featureSlug, usage, idempotenceKey } = c.req.valid("json")
+    const { featureSlug } = c.req.valid("json")
     const { usagelimit } = c.get("services")
-    const requestId = c.get("requestId")
 
     // validate the request
     const key = await keyAuth(c)
@@ -82,15 +71,7 @@ export const registerReportUsageV1 = (app: App) =>
     }
 
     // validate usage from db
-    const result = await usagelimit.reportUsage({
-      customerId,
-      featureSlug,
-      usage,
-      date: Date.now(),
-      idempotenceKey,
-      projectId: key.projectId,
-      requestId,
-    })
+    const result = await usagelimit.revalidateEntitlement(customerId, featureSlug)
 
     return c.json(result, HttpStatusCodes.OK)
   })

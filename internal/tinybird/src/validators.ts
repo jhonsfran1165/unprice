@@ -85,7 +85,7 @@ export const featureUsageSchemaV1 = z.object({
     .default(Date.now())
     .describe("timestamp of when this usage record was created"),
   requestId: z.string(),
-  deleted: booleanToUInt8.default(false).describe("1 if the usage record was deleted, 0 otherwise"),
+  deleted: z.number().int().min(0).max(1).default(0),
   metadata: nullableJsonToString.default(null),
 })
 

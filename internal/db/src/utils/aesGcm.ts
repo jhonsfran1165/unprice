@@ -31,7 +31,7 @@ export class AesGCM {
     )
 
     // @ts-ignore
-    return { iv: base64.encode(iv), ciphertext: base64.encode(ciphertext) }
+    return { iv: base64.encodeBase64(iv), ciphertext: base64.encodeBase64(ciphertext) }
   }
 
   public async decrypt(req: { iv: string; ciphertext: string }): Promise<string> {

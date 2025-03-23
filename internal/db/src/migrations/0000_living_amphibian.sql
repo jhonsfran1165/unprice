@@ -9,7 +9,7 @@ CREATE TYPE "public"."payment_providers" AS ENUM('stripe', 'lemonsqueezy');--> s
 CREATE TYPE "public"."plan_type" AS ENUM('recurring', 'onetime');--> statement-breakpoint
 CREATE TYPE "public"."app_stages" AS ENUM('prod', 'test', 'dev');--> statement-breakpoint
 CREATE TYPE "public"."plan_version_status" AS ENUM('draft', 'published');--> statement-breakpoint
-CREATE TYPE "public"."subscription_status" AS ENUM('renewing', 'changing', 'canceling', 'expiring', 'invoicing', 'invoiced', 'ending_trial', 'active', 'trialing', 'canceled', 'expired', 'past_due');--> statement-breakpoint
+CREATE TYPE "public"."subscription_status" AS ENUM('idle', 'renewing', 'changing', 'canceling', 'expiring', 'invoicing', 'invoiced', 'ending_trial', 'active', 'trialing', 'canceled', 'expired', 'past_due');--> statement-breakpoint
 CREATE TYPE "public"."team_roles" AS ENUM('OWNER', 'ADMIN', 'MEMBER');--> statement-breakpoint
 CREATE TYPE "public"."tier_mode" AS ENUM('volume', 'graduated');--> statement-breakpoint
 CREATE TYPE "public"."feature_types" AS ENUM('flat', 'tier', 'package', 'usage');--> statement-breakpoint
@@ -100,18 +100,20 @@ CREATE TABLE "unprice_customer_entitlements" (
 	"created_at_m" bigint DEFAULT 0 NOT NULL,
 	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"customer_id" varchar(36) NOT NULL,
-	"subscription_item_id" varchar(36),
+	"subscription_id" varchar(36) NOT NULL,
 	"feature_plan_version_id" varchar(36) NOT NULL,
-	"units" integer,
+	"subscription_item_id" varchar(36),
+	"subscription_phase_id" varchar(36),
 	"limit" integer,
-	"usage" integer,
-	"feature_slug" text NOT NULL,
-	"feature_type" "feature_types" NOT NULL,
-	"aggregation_method" "aggregation_method" DEFAULT 'sum' NOT NULL,
+	"usage" numeric,
+	"accumulated_usage" numeric,
 	"realtime" boolean DEFAULT false NOT NULL,
-	"type" text DEFAULT 'feature' NOT NULL,
-	"start_at" bigint NOT NULL,
-	"end_at" bigint,
+	"type" "feature_version_types" DEFAULT 'feature' NOT NULL,
+	"valid_from" bigint NOT NULL,
+	"valid_to" bigint NOT NULL,
+	"buffer_period_days" integer DEFAULT 1 NOT NULL,
+	"reseted_at" bigint NOT NULL,
+	"active" boolean DEFAULT true NOT NULL,
 	"is_custom" boolean DEFAULT false NOT NULL,
 	"last_usage_update_at" bigint DEFAULT 0 NOT NULL,
 	"metadata" json,
@@ -218,7 +220,7 @@ CREATE TABLE "unprice_plans" (
 	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"slug" text NOT NULL,
 	"active" boolean DEFAULT true,
-	"description" text,
+	"description" text NOT NULL,
 	"metadata" json,
 	"default_plan" boolean DEFAULT false,
 	"enterprise_plan" boolean DEFAULT false,
@@ -250,7 +252,7 @@ CREATE TABLE "unprice_plan_versions" (
 	"created_at_m" bigint DEFAULT 0 NOT NULL,
 	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"plan_id" varchar(36) NOT NULL,
-	"description" text,
+	"description" text NOT NULL,
 	"latest" boolean DEFAULT false,
 	"title" varchar(50) NOT NULL,
 	"tags" json,
@@ -262,13 +264,11 @@ CREATE TABLE "unprice_plan_versions" (
 	"archived_at_m" bigint,
 	"archived_by" varchar(36),
 	"payment_providers" "payment_providers" NOT NULL,
-	"plan_type" "plan_type" DEFAULT 'recurring' NOT NULL,
+	"due_behaviour" "due_behaviour" DEFAULT 'cancel' NOT NULL,
 	"currency" "currency" NOT NULL,
-	"billing_interval" "billing_interval" DEFAULT 'month' NOT NULL,
-	"billing_interval_count" integer DEFAULT 1 NOT NULL,
-	"billing_anchor" integer DEFAULT 1 NOT NULL,
+	"billing_config" json NOT NULL,
 	"when_to_bill" "when_to_bill" DEFAULT 'pay_in_advance' NOT NULL,
-	"grace_period" integer DEFAULT 0,
+	"grace_period" integer DEFAULT 0 NOT NULL,
 	"collection_method" "collection_method" DEFAULT 'charge_automatically' NOT NULL,
 	"trial_days" integer DEFAULT 0 NOT NULL,
 	"auto_renew" boolean DEFAULT true NOT NULL,
@@ -302,6 +302,7 @@ CREATE TABLE "unprice_invoices" (
 	"subscription_id" varchar(36) NOT NULL,
 	"subscription_phase_id" varchar(36) NOT NULL,
 	"required_payment_method" boolean DEFAULT false NOT NULL,
+	"payment_method_id" text,
 	"status" "invoice_status" DEFAULT 'draft' NOT NULL,
 	"type" "invoice_type" DEFAULT 'hybrid' NOT NULL,
 	"cycle_start_at_m" bigint NOT NULL,
@@ -319,8 +320,8 @@ CREATE TABLE "unprice_invoices" (
 	"subtotal" integer DEFAULT 0 NOT NULL,
 	"total" integer DEFAULT 0 NOT NULL,
 	"collection_method" "collection_method" DEFAULT 'charge_automatically' NOT NULL,
-	"invoice_id" text,
-	"invoice_url" text,
+	"invoice_payment_provider_id" text,
+	"invoice_payment_provider_url" text,
 	"payment_providers" "payment_providers" NOT NULL,
 	"currency" "currency" NOT NULL,
 	"past_due_at_m" bigint NOT NULL,
@@ -336,6 +337,7 @@ CREATE TABLE "unprice_subscription_items" (
 	"units" integer,
 	"feature_plan_version_id" varchar(36) NOT NULL,
 	"subscription_phase_id" varchar(36) NOT NULL,
+	"subscription_id" varchar(36) NOT NULL,
 	CONSTRAINT "subscription_items_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
@@ -348,14 +350,7 @@ CREATE TABLE "unprice_subscription_phases" (
 	"plan_version_id" varchar(36) NOT NULL,
 	"payment_method_id" text,
 	"trial_days" integer DEFAULT 0 NOT NULL,
-	"due_behaviour" "due_behaviour" DEFAULT 'cancel' NOT NULL,
-	"when_to_bill" "when_to_bill" DEFAULT 'pay_in_advance' NOT NULL,
-	"grace_period" integer DEFAULT 1 NOT NULL,
-	"collection_method" "collection_method" DEFAULT 'charge_automatically' NOT NULL,
-	"auto_renew" boolean DEFAULT true NOT NULL,
-	"billing_interval" "billing_interval" DEFAULT 'month' NOT NULL,
-	"billing_interval_count" integer DEFAULT 1 NOT NULL,
-	"billing_anchor" integer DEFAULT 1 NOT NULL,
+	"billing_anchor" integer DEFAULT 0 NOT NULL,
 	"trial_ends_at_m" bigint,
 	"start_at_m" bigint NOT NULL,
 	"end_at_m" bigint,
@@ -369,26 +364,21 @@ CREATE TABLE "unprice_subscriptions" (
 	"created_at_m" bigint DEFAULT 0 NOT NULL,
 	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"customers_id" varchar(36) NOT NULL,
-	"status" "subscription_status" DEFAULT 'active' NOT NULL,
-	"active" boolean DEFAULT true NOT NULL,
+	"status" "subscription_status" DEFAULT 'idle' NOT NULL,
+	"active" boolean DEFAULT false NOT NULL,
 	"plan_slug" text DEFAULT 'FREE',
 	"timezone" varchar(32) DEFAULT 'UTC' NOT NULL,
-	"previous_cycle_start_at_m" bigint,
-	"previous_cycle_end_at_m" bigint,
+	"locked" boolean DEFAULT false NOT NULL,
+	"locked_at_m" bigint,
 	"current_cycle_start_at_m" bigint NOT NULL,
 	"current_cycle_end_at_m" bigint NOT NULL,
-	"next_invoice_at_m" bigint DEFAULT 0 NOT NULL,
-	"last_invoice_at_m" bigint,
-	"last_renew_at_m" bigint,
+	"previous_cycle_start_at_m" bigint,
+	"previous_cycle_end_at_m" bigint,
+	"invoice_at_m" bigint DEFAULT 0 NOT NULL,
 	"renew_at_m" bigint DEFAULT 0 NOT NULL,
-	"past_due_at_m" bigint,
-	"past_dued_at_m" bigint,
-	"cancel_at_m" bigint,
-	"canceled_at_m" bigint,
-	"expires_at_m" bigint,
-	"expired_at_m" bigint,
-	"change_at_m" bigint,
-	"changed_at_m" bigint,
+	"end_at_m" bigint,
+	"last_renew_at_m" bigint DEFAULT 0 NOT NULL,
+	"last_invoice_at_m" bigint DEFAULT 0 NOT NULL,
 	"metadata" json,
 	CONSTRAINT "subscriptions_pkey" PRIMARY KEY("id","project_id")
 );
@@ -441,6 +431,8 @@ ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "unprice_customer_ent
 ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "feature_plan_version_id_fkey" FOREIGN KEY ("feature_plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions_features"("id","project_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "subscription_item_id_fkey" FOREIGN KEY ("subscription_item_id","project_id") REFERENCES "public"."unprice_subscription_items"("id","project_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "customer_id_fkey" FOREIGN KEY ("customer_id","project_id") REFERENCES "public"."unprice_customers"("id","project_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "subscription_phase_id_fkey" FOREIGN KEY ("subscription_phase_id","project_id") REFERENCES "public"."unprice_subscription_phases"("id","project_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "subscription_id_fkey" FOREIGN KEY ("subscription_id","project_id") REFERENCES "public"."unprice_subscriptions"("id","project_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_customers" ADD CONSTRAINT "unprice_customers_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_customers" ADD CONSTRAINT "project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -468,6 +460,7 @@ ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "unprice_subscription_it
 ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "subscription_items_plan_version_id_fkey" FOREIGN KEY ("feature_plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions_features"("id","project_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "subscription_items_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "subscription_items_subscription_phase_id_fkey" FOREIGN KEY ("subscription_phase_id","project_id") REFERENCES "public"."unprice_subscription_phases"("id","project_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "subscription_items_subscription_id_fkey" FOREIGN KEY ("subscription_id","project_id") REFERENCES "public"."unprice_subscriptions"("id","project_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_subscription_phases" ADD CONSTRAINT "unprice_subscription_phases_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_subscription_phases" ADD CONSTRAINT "subscription_phases_plan_version_id_fkey" FOREIGN KEY ("plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions"("id","project_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_subscription_phases" ADD CONSTRAINT "subscription_phases_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -481,7 +474,7 @@ ALTER TABLE "unprice_members" ADD CONSTRAINT "members_workspace_id_fkey" FOREIGN
 ALTER TABLE "unprice_workspaces" ADD CONSTRAINT "unprice_workspaces_created_by_unprice_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."unprice_user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "key" ON "unprice_apikeys" USING btree ("key");--> statement-breakpoint
 CREATE UNIQUE INDEX "hash" ON "unprice_apikeys" USING btree ("hash");--> statement-breakpoint
-CREATE UNIQUE INDEX "customer_credits_customer_id_active_key" ON "unprice_customer_credits" USING btree ("customer_id","active") WHERE "unprice_customer_credits"."active" = true;--> statement-breakpoint
+CREATE UNIQUE INDEX "customer_credits_customer_id_active_key" ON "unprice_customer_credits" USING btree ("customer_id","active") WHERE "unprice_customer_credits"."active" = 'true';--> statement-breakpoint
 CREATE INDEX "email" ON "unprice_customers" USING btree ("email");--> statement-breakpoint
 CREATE INDEX "name" ON "unprice_domains" USING btree ("name");--> statement-breakpoint
 CREATE UNIQUE INDEX "slug_feature" ON "unprice_features" USING btree ("slug","project_id");--> statement-breakpoint
@@ -490,6 +483,6 @@ CREATE INDEX "subdomain_index" ON "unprice_pages" USING btree ("subdomain");--> 
 CREATE INDEX "custom_domain_index" ON "unprice_pages" USING btree ("custom_domain");--> statement-breakpoint
 CREATE UNIQUE INDEX "unique_payment_provider_config" ON "unprice_payment_provider_config" USING btree ("payment_provider","project_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "slug_plan" ON "unprice_plans" USING btree ("slug","project_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "main_project" ON "unprice_projects" USING btree ("is_main") WHERE "unprice_projects"."is_main" = true;--> statement-breakpoint
+CREATE UNIQUE INDEX "main_project" ON "unprice_projects" USING btree ("is_main") WHERE "unprice_projects"."is_main" = 'true';--> statement-breakpoint
 CREATE INDEX "slug_index" ON "unprice_projects" USING btree ("slug");--> statement-breakpoint
-CREATE UNIQUE INDEX "main_workspace" ON "unprice_workspaces" USING btree ("is_main") WHERE "unprice_workspaces"."is_main" = true;
+CREATE UNIQUE INDEX "main_workspace" ON "unprice_workspaces" USING btree ("is_main") WHERE "unprice_workspaces"."is_main" = 'true';

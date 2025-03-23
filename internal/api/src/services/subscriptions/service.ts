@@ -142,7 +142,7 @@ export class SubscriptionService {
     const entitiesToCreate: (typeof customerEntitlements.$inferInsert)[] = []
     const entitiesToUpdate: Pick<
       typeof customerEntitlements.$inferInsert,
-      "id" | "lastUsageUpdateAt" | "updatedAtM" | "endAt"
+      "id" | "lastUsageUpdateAt" | "updatedAtM" | "validTo"
     >[] = []
     const entitiesToDelete: string[] = []
 
@@ -163,17 +163,13 @@ export class SubscriptionService {
           featurePlanVersionId: item.featurePlanVersionId,
           // if the units are not set, we use the limit of the feature plan version
           limit: item.units ?? item.featurePlanVersion.limit ?? null,
-          usage: 0, // Initialize usage to 0
-          featureSlug: item.featurePlanVersion.feature.slug,
-          featureType: item.featurePlanVersion.featureType,
-          aggregationMethod: item.featurePlanVersion.aggregationMethod,
+          usage: "0", // Initialize usage to 0
           realtime: item.featurePlanVersion.metadata?.realtime ?? false,
-          currentCycleStartAt: subscription.currentCycleStartAt,
-          currentCycleEndAt: subscription.currentCycleEndAt,
+          validFrom: subscription.currentCycleStartAt,
+          validTo: subscription.currentCycleEndAt,
           // for now only support features types
           type: "feature",
-          startAt: now,
-          endAt: activePhase?.endAt ?? null,
+          resetedAt: now,
           isCustom: false,
         })
       } else {
@@ -182,7 +178,7 @@ export class SubscriptionService {
         // and the units of the item
         entitiesToUpdate.push({
           id: entitlement.id,
-          endAt: activePhase?.endAt ?? null,
+          validTo: activePhase?.endAt ?? null,
           lastUsageUpdateAt: now,
           updatedAtM: now,
         })
@@ -214,7 +210,7 @@ export class SubscriptionService {
           await tx
             .update(customerEntitlements)
             // if the entitlement is not in the items, end them immediately
-            .set({ endAt: Date.now() })
+            .set({ validTo: Date.now() })
             .where(eq(customerEntitlements.id, id))
         }
       } catch (err) {

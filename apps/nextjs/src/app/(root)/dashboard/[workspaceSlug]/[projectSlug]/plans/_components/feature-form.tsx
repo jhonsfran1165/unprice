@@ -47,6 +47,7 @@ export function FeatureForm({
           .string()
           .min(3)
           .refine(async (slug) => {
+            // TODO: debounce this
             const { exist } = await featureExist.mutateAsync({
               slug: slug,
             })

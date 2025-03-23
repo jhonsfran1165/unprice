@@ -58,11 +58,18 @@ export function newApp() {
     apiReference({
       layout: "classic",
       defaultHttpClient: {
-        targetKey: "node",
-        clientKey: "dasdasd",
+        targetKey: "shell",
+        clientKey: "curl",
       },
       theme: "deepSpace",
       url: "/openapi.json",
+      authentication: {
+        name: "root key",
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "root key",
+        in: "header",
+      },
     })
   )
 
@@ -71,6 +78,9 @@ export function newApp() {
     type: "http",
     scheme: "bearer",
     "x-speakeasy-example": "UNPRICE_ROOT_KEY",
+    description: "The root key for the Unprice API",
+    name: "root key",
+    in: "header",
   })
 
   return app

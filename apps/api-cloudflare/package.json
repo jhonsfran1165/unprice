@@ -5,16 +5,16 @@
     "dev": "sh dev.sh",
     "dev:wrangler": "wrangler dev",
     "start": "wrangler dev",
-    "cf-typegen": "wrangler types",
+    "generate-types": "wrangler types",
     "db:generate": "drizzle-kit generate",
-    "typecheck": "tsc --noEmit"
+    "type-check": "generate-types && tsc --noEmit"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250313.0",
+    "@types/node": "^22.13.11",
     "@unprice/tsconfig": "workspace:^",
     "drizzle-kit": "^0.30.5",
     "typescript": "^5.3.3",
-    "wrangler": "^4.1.0"
+    "wrangler": "^4.3.0"
   },
   "dependencies": {
     "@auth/core": "^0.34.1",

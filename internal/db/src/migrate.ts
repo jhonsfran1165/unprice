@@ -7,6 +7,7 @@ import { migrate } from "drizzle-orm/neon-serverless/migrator"
 import { env } from "../env.mjs"
 
 async function main() {
+  console.log("env", env)
   const db = createConnection({
     env: env.NODE_ENV,
     primaryDatabaseUrl: env.DATABASE_URL,

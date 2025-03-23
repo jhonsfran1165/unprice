@@ -57,16 +57,18 @@ export default async function Page(props: {
         isInternal: atw.isInternal,
       }
 
-      // prefetch entitlements
-      void trpc.customers.entitlements.prefetch(
-        {
-          customerId: activeWorkspace.unPriceCustomerId,
-          skipCache: true,
-        },
-        {
-          staleTime: 1000 * 60 * 5, // 5 minutes
-        }
-      )
+      // prefetch entitlements only for non-internal workspaces
+      if (!activeWorkspace.isInternal) {
+        void trpc.customers.entitlements.prefetch(
+          {
+            customerId: activeWorkspace.unPriceCustomerId,
+            skipCache: true,
+          },
+          {
+            staleTime: 1000 * 60 * 5, // 5 minutes
+          }
+        )
+      }
     }
   }
 

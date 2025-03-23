@@ -1,11 +1,11 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "cc1b92cd-820a-4413-be7f-aa20e169a77c",
-  "prevId": "9c770bff-a488-47c0-83af-e41d8cb4a43f",
+  "id": "1b69e545-6154-4110-b15d-3f4b577c2553",
+  "prevId": "8adb71f8-4b41-4e38-8d7d-c33f2bfaf7c1",
   "tables": {
-    "usage_records": {
-      "name": "usage_records",
+    "unprice_do_v1_entitlements": {
+      "name": "unprice_do_v1_entitlements",
       "columns": {
         "id": {
           "name": "id",
@@ -14,8 +14,57 @@
           "notNull": true,
           "autoincrement": true
         },
-        "key_id": {
-          "name": "key_id",
+        "entitlementId": {
+          "name": "entitlementId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "customerId": {
+          "name": "customerId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "projectId": {
+          "name": "projectId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subscriptionId": {
+          "name": "subscriptionId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subscriptionPhaseId": {
+          "name": "subscriptionPhaseId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "subscriptionItemId": {
+          "name": "subscriptionItemId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "planVersionFeatureId": {
+          "name": "planVersionFeatureId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "featureSlug": {
+          "name": "featureSlug",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -23,6 +72,72 @@
         },
         "usage": {
           "name": "usage",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'0'"
+        },
+        "accumulatedUsage": {
+          "name": "accumulatedUsage",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'0'"
+        },
+        "limit": {
+          "name": "limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "featureType": {
+          "name": "featureType",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "aggregationMethod": {
+          "name": "aggregationMethod",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "lastUsageUpdateAt": {
+          "name": "lastUsageUpdateAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "validFrom": {
+          "name": "validFrom",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "validTo": {
+          "name": "validTo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "bufferPeriodDays": {
+          "name": "bufferPeriodDays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "resetedAt": {
+          "name": "resetedAt",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -30,9 +145,350 @@
         }
       },
       "indexes": {
-        "key_id_index": {
-          "name": "key_id_index",
-          "columns": ["key_id"],
+        "entitlements_customer_idx": {
+          "name": "entitlements_customer_idx",
+          "columns": [
+            "customerId"
+          ],
+          "isUnique": false
+        },
+        "entitlements_feature_idx": {
+          "name": "entitlements_feature_idx",
+          "columns": [
+            "featureSlug"
+          ],
+          "isUnique": false
+        },
+        "entitlements_project_idx": {
+          "name": "entitlements_project_idx",
+          "columns": [
+            "projectId"
+          ],
+          "isUnique": false
+        },
+        "entitlements_valid_from_idx": {
+          "name": "entitlements_valid_from_idx",
+          "columns": [
+            "validFrom"
+          ],
+          "isUnique": false
+        },
+        "entitlements_valid_to_idx": {
+          "name": "entitlements_valid_to_idx",
+          "columns": [
+            "validTo"
+          ],
+          "isUnique": false
+        },
+        "entitlements_entitlement_id_idx": {
+          "name": "entitlements_entitlement_id_idx",
+          "columns": [
+            "entitlementId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "unprice_do_v1_usage_records": {
+      "name": "unprice_do_v1_usage_records",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "entitlementId": {
+          "name": "entitlementId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "idempotenceKey": {
+          "name": "idempotenceKey",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "requestId": {
+          "name": "requestId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "featureSlug": {
+          "name": "featureSlug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "customerId": {
+          "name": "customerId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "projectId": {
+          "name": "projectId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "planVersionFeatureId": {
+          "name": "planVersionFeatureId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subscriptionItemId": {
+          "name": "subscriptionItemId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "subscriptionPhaseId": {
+          "name": "subscriptionPhaseId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "subscriptionId": {
+          "name": "subscriptionId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "usage": {
+          "name": "usage",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deleted": {
+          "name": "deleted",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "usage_records_customer_idx": {
+          "name": "usage_records_customer_idx",
+          "columns": [
+            "customerId"
+          ],
+          "isUnique": false
+        },
+        "usage_records_feature_idx": {
+          "name": "usage_records_feature_idx",
+          "columns": [
+            "featureSlug"
+          ],
+          "isUnique": false
+        },
+        "usage_records_timestamp_idx": {
+          "name": "usage_records_timestamp_idx",
+          "columns": [
+            "timestamp"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "unprice_do_v1_verifications": {
+      "name": "unprice_do_v1_verifications",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "requestId": {
+          "name": "requestId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "projectId": {
+          "name": "projectId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "planVersionFeatureId": {
+          "name": "planVersionFeatureId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subscriptionItemId": {
+          "name": "subscriptionItemId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "subscriptionPhaseId": {
+          "name": "subscriptionPhaseId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "subscriptionId": {
+          "name": "subscriptionId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "entitlementId": {
+          "name": "entitlementId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "deniedReason": {
+          "name": "deniedReason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "latency": {
+          "name": "latency",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "featureSlug": {
+          "name": "featureSlug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "customerId": {
+          "name": "customerId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deleted": {
+          "name": "deleted",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "verifications_customer_idx": {
+          "name": "verifications_customer_idx",
+          "columns": [
+            "customerId"
+          ],
+          "isUnique": false
+        },
+        "verifications_feature_idx": {
+          "name": "verifications_feature_idx",
+          "columns": [
+            "featureSlug"
+          ],
+          "isUnique": false
+        },
+        "verifications_timestamp_idx": {
+          "name": "verifications_timestamp_idx",
+          "columns": [
+            "timestamp"
+          ],
+          "isUnique": false
+        },
+        "verifications_request_id_idx": {
+          "name": "verifications_request_id_idx",
+          "columns": [
+            "requestId"
+          ],
+          "isUnique": false
+        },
+        "verifications_entitlement_idx": {
+          "name": "verifications_entitlement_idx",
+          "columns": [
+            "entitlementId"
+          ],
           "isUnique": false
         }
       },

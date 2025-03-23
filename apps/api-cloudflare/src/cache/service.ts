@@ -57,30 +57,25 @@ export function initCache(c: Context<HonoEnv>, metrics: Metrics): C<CacheNamespa
 
   return createCache({
     apiKeyByHash: new Namespace<CacheNamespaces["apiKeyByHash"]>(c.executionCtx, defaultOpts),
-    customerEntitlementUsage: new Namespace<CacheNamespaces["customerEntitlementUsage"]>(
-      c.executionCtx,
-      {
-        ...defaultOpts,
-        // update the cache every 1 day
-        fresh: 1000 * 60 * 60 * 24, // 1 day
-        // cache the entitlements for 30 days with revalidation in the background every 1 day
-        stale: 1000 * 60 * 60 * 24 * 30, // 30 days
-      }
-    ),
-    entitlementsByCustomerId: new Namespace<CacheNamespaces["entitlementsByCustomerId"]>(
-      c.executionCtx,
-      {
-        ...defaultOpts,
-        // update the cache every 1 day
-        fresh: 1000 * 60 * 60 * 24, // 1 day
-        // cache the entitlements for 30 days with revalidation in the background every 1 day
-        stale: 1000 * 60 * 60 * 24 * 30, // 30 days
-      }
-    ),
-    idempotentRequestUsageByHash: new Namespace<CacheNamespaces["idempotentRequestUsageByHash"]>(
+    customerEntitlement: new Namespace<CacheNamespaces["customerEntitlement"]>(
       c.executionCtx,
       defaultOpts
     ),
+    idempotentRequestUsageByHash: new Namespace<CacheNamespaces["idempotentRequestUsageByHash"]>(
+      c.executionCtx,
+      {
+        ...defaultOpts,
+        fresh: 1000 * 60, // 1 minute
+        stale: 1000 * 60, // delete after 1 minutes
+      }
+    ),
+    customerSubscription: new Namespace<CacheNamespaces["customerSubscription"]>(c.executionCtx, {
+      ...defaultOpts,
+      // update the cache every 1 day
+      fresh: 1000 * 60 * 60 * 24, // 1 day
+      // cache the entitlements for 30 days with revalidation in the background every 1 day
+      stale: 1000 * 60 * 60 * 24 * 30, // 30 days
+    }),
   })
 }
 
