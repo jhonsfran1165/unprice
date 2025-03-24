@@ -56,6 +56,7 @@ export function newApp() {
   app.get(
     "/reference",
     apiReference({
+      title: "Unprice API",
       layout: "classic",
       defaultHttpClient: {
         targetKey: "shell",

@@ -22,17 +22,12 @@ import { createDb } from "~/util/db"
 
 import { env } from "cloudflare:workers"
 import { customerEntitlements, features, planVersionFeatures } from "@unprice/db/schema"
-import type { Customer, Project, Subscription } from "@unprice/db/validators"
-
+import type { SubcriptionCache } from "~/cache/namespaces"
 export class DurableObjectUsagelimiter extends Server {
   // once the durable object is initialized we can avoid
   // querying the db for usage on each request
   private featuresUsage: Map<string, Entitlement> = new Map()
-  private currentSubscription: {
-    subscription: Subscription
-    project: Project
-    customer: Customer
-  } | null = null
+  private currentSubscription: SubcriptionCache | null = null
   // we avoid revalidating the entitlements if there is already a revalidation in progress
   private revalidationInProgress = false
   // internal database of the do
@@ -82,12 +77,10 @@ export class DurableObjectUsagelimiter extends Server {
         // migrate first
         await this._migrate()
 
-        // get the current from state
-        const currentSubscription = (await this.ctx.storage.get("currentSubscription")) as {
-          subscription: Subscription
-          project: Project
-          customer: Customer
-        } | null
+        // get the current subscription from state
+        const currentSubscription = (await this.ctx.storage.get(
+          "currentSubscription"
+        )) as SubcriptionCache | null
 
         // set the current subscription
         this.currentSubscription = currentSubscription
@@ -714,7 +707,7 @@ export class DurableObjectUsagelimiter extends Server {
     }
 
     // subscription is not active
-    if (!currentSubscription.subscription.active) {
+    if (!currentSubscription.active) {
       return {
         valid: false,
         message: "subscription is not active",
@@ -731,8 +724,8 @@ export class DurableObjectUsagelimiter extends Server {
 
     // if revalidation is in progress or the current cycle is not over
     if (
-      now < currentSubscription.subscription.currentCycleStartAt ||
-      now > currentSubscription.subscription.currentCycleEndAt + gracePeriod
+      now < currentSubscription.currentCycleStartAt ||
+      now > currentSubscription.currentCycleEndAt + gracePeriod
     ) {
       return {
         valid: false,
@@ -765,8 +758,16 @@ export class DurableObjectUsagelimiter extends Server {
       const data = await this.unpriceDb.query.subscriptions
         .findFirst({
           with: {
-            customer: true,
-            project: true,
+            customer: {
+              columns: {
+                active: true,
+              },
+            },
+            project: {
+              columns: {
+                enabled: true,
+              },
+            },
           },
           where: (s, { eq, and, lte, gte }) =>
             and(
@@ -786,21 +787,11 @@ export class DurableObjectUsagelimiter extends Server {
         return
       }
 
-      const { project, customer, ...subscription } = data
-
       // save the current cycle start and end at for next full revalidation
-      await this.ctx.storage.put("currentSubscription", {
-        subscription: subscription,
-        project: project,
-        customer: customer,
-      })
+      await this.ctx.storage.put("currentSubscription", data)
 
       // set the current subscription
-      this.currentSubscription = {
-        subscription: subscription,
-        project: project,
-        customer: customer,
-      }
+      this.currentSubscription = data
 
       // flush entitlements
       this.featuresUsage.clear()
@@ -823,8 +814,8 @@ export class DurableObjectUsagelimiter extends Server {
 
     const now = Date.now()
     const gracePeriod = this.FULL_REVALIDATION_GRACE_PERIOD
-    const currentCycleEndAt = currentSubscription.subscription.currentCycleEndAt
-    const currentCycleStartAt = currentSubscription.subscription.currentCycleStartAt
+    const currentCycleEndAt = currentSubscription.currentCycleEndAt
+    const currentCycleStartAt = currentSubscription.currentCycleStartAt
 
     // only revalidate if subscription cycle is over
     if (now < currentCycleStartAt || now > currentCycleEndAt + gracePeriod) {
@@ -914,10 +905,6 @@ export class DurableObjectUsagelimiter extends Server {
     success: boolean
     message: string
   }> {
-    const verification = await this.db.select().from(verifications)
-
-    console.info("verification", verification)
-
     const shouldRevalidateEntitlement = this.shouldRevalidateEntitlement(featureSlug)
 
     if (!shouldRevalidateEntitlement.valid && !forceRevalidate) {

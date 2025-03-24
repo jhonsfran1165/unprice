@@ -1,17 +1,26 @@
 import type { ApiKeyExtended, Subscription } from "@unprice/db/validators"
 import type { Entitlement } from "~/db/types"
 
-export type SubcriptionCache = Pick<
-  Subscription,
-  | "id"
-  | "projectId"
-  | "customerId"
-  | "active"
-  | "status"
-  | "planSlug"
-  | "currentCycleStartAt"
-  | "currentCycleEndAt"
-> | null
+export type SubcriptionCache =
+  | (Pick<
+      Subscription,
+      | "id"
+      | "projectId"
+      | "customerId"
+      | "active"
+      | "status"
+      | "planSlug"
+      | "currentCycleStartAt"
+      | "currentCycleEndAt"
+    > & {
+      project: {
+        enabled: boolean
+      }
+      customer: {
+        active: boolean
+      }
+    })
+  | null
 
 export type EntitlementCache = {
   success: boolean

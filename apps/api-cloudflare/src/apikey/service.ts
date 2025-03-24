@@ -44,7 +44,7 @@ export class ApiKeysService {
     return hash
   }
 
-  private async getData(keyHash: string): Promise<ApiKeyExtended | undefined> {
+  private async getData(keyHash: string): Promise<ApiKeyExtended | null> {
     const data = await createApiKeyQuery(this.db)
       .execute({
         hash: keyHash,
@@ -53,10 +53,10 @@ export class ApiKeysService {
         this.logger.error("Error fetching apikey from db", {
           error: JSON.stringify(e),
         })
-        return undefined
+        return null
       })
 
-    return data
+    return data ?? null
   }
 
   private async _getApiKey(
@@ -70,7 +70,7 @@ export class ApiKeysService {
     const keyHash = await this.hash(req.key)
 
     if (opts?.skipCache) {
-      this.logger.info("skipping cache", {
+      this.logger.info("force skipping cache", {
         keyHash: keyHash,
       })
     }

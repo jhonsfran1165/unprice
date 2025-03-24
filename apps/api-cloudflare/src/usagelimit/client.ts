@@ -1,12 +1,18 @@
 import { env } from "cloudflare:workers"
-import { type Database, and, eq } from "@unprice/db"
-import { subscriptions } from "@unprice/db/schema"
-import { Err, FetchError, Ok, type Result } from "@unprice/error"
+import { type Database, and, eq, gte, lte } from "@unprice/db"
+import {
+  customerEntitlements,
+  features,
+  planVersionFeatures,
+  subscriptions,
+} from "@unprice/db/schema"
+import { Err, FetchError, Ok, type Result, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import type { Cache, SubcriptionCache } from "~/cache"
 import type { Entitlement } from "~/db/types"
 import type { Metrics } from "~/metrics/interface"
+import { retry } from "~/util/retry"
 import type { DurableObjectUsagelimiter } from "./do"
 import type { CanRequest, ReportUsageRequest, ReportUsageResponse, UsageLimiter } from "./interface"
 
@@ -55,46 +61,169 @@ export class DurableUsageLimiter implements UsageLimiter {
     return `${customerId}`
   }
 
-  private async getSubscription(customerId: string): Promise<Result<SubcriptionCache, FetchError>> {
-    // swr handle cache stampede of us :)
-    const { val, err } = await this.cache.customerSubscription.swr(customerId, async () => {
-      const subscription = await this.db.query.subscriptions.findFirst({
-        with: {
-          customer: true,
+  private async getActiveSubscriptionData(customerId: string): Promise<SubcriptionCache | null> {
+    const subscription = await this.db.query.subscriptions.findFirst({
+      with: {
+        customer: {
+          columns: {
+            active: true,
+          },
         },
-        where: and(eq(subscriptions.customerId, customerId), eq(subscriptions.active, true)),
-      })
-
-      // return explicitly null to avoid cache miss
-      // this is useful to avoid cache revalidation on keys that don't exist
-      if (!subscription) {
-        return null
-      }
-
-      if (subscription.customer.active === false) {
-        return null
-      }
-
-      // don't return the whole subscription, just the fields we need
-      return {
-        id: subscription.id,
-        projectId: subscription.projectId,
-        customerId: subscription.customerId,
-        active: subscription.active,
-        status: subscription.status,
-        planSlug: subscription.planSlug,
-        currentCycleStartAt: subscription.currentCycleStartAt,
-        currentCycleEndAt: subscription.currentCycleEndAt,
-      }
+        project: {
+          columns: {
+            enabled: true,
+          },
+        },
+      },
+      where: and(eq(subscriptions.customerId, customerId), eq(subscriptions.active, true)),
     })
+
+    // return explicitly null to avoid cache miss
+    // this is useful to avoid cache revalidation on keys that don't exist
+    if (!subscription) {
+      return null
+    }
+
+    return {
+      id: subscription.id,
+      projectId: subscription.projectId,
+      customerId: subscription.customerId,
+      active: subscription.active,
+      status: subscription.status,
+      planSlug: subscription.planSlug,
+      currentCycleStartAt: subscription.currentCycleStartAt,
+      currentCycleEndAt: subscription.currentCycleEndAt,
+      project: {
+        enabled: subscription.project.enabled,
+      },
+      customer: {
+        active: subscription.customer.active,
+      },
+    }
+  }
+
+  private async getActiveSubscription(
+    customerId: string,
+    opts?: {
+      skipCache: boolean
+    }
+  ): Promise<Result<SubcriptionCache | null, FetchError>> {
+    // swr handle cache stampede and other problems for us :)
+    const { val, err } = opts?.skipCache
+      ? await wrapResult(
+          this.getActiveSubscriptionData(customerId),
+          (err) =>
+            new FetchError({
+              message: "unable to query db",
+              retry: false,
+              context: {
+                error: err.message,
+                url: "",
+                customerId: customerId,
+                method: "",
+              },
+            })
+        )
+      : await retry(
+          3,
+          async () =>
+            this.cache.customerSubscription.swr(customerId, (c) =>
+              this.getActiveSubscriptionData(c)
+            ),
+          (attempt, err) => {
+            this.logger.warn("Failed to fetch subscription data, retrying...", {
+              customerId: customerId,
+              attempt,
+              error: err.message,
+            })
+          }
+        )
 
     if (err) {
       this.logger.error("error getting customer", {
         error: err.message,
       })
+
+      return Err(
+        new FetchError({
+          message: err.message,
+          retry: true,
+          cause: err,
+        })
+      )
     }
 
-    return Ok(val ?? null)
+    if (!val) {
+      return Ok(null)
+    }
+
+    if (val.project.enabled === false) {
+      return Err(
+        new FetchError({
+          message: "project is disabled",
+          retry: false,
+        })
+      )
+    }
+
+    if (val.customer.active === false) {
+      return Err(
+        new FetchError({
+          message: "customer is disabled",
+          retry: false,
+        })
+      )
+    }
+
+    return Ok(val)
+  }
+
+  private async getEntitlementData({
+    customerId,
+    featureSlug,
+    projectId,
+    now,
+    opts,
+  }: {
+    customerId: string
+    featureSlug: string
+    projectId: string
+    now: number
+    opts?: {
+      skipCache: boolean
+    }
+  }): Promise<Entitlement | null> {
+    const entitlement = await this.db
+      .select({
+        customerEntitlement: customerEntitlements,
+        featureType: planVersionFeatures.featureType,
+        planVersionFeatureId: planVersionFeatures.id,
+        aggregationMethod: planVersionFeatures.aggregationMethod,
+      })
+      .from(customerEntitlements)
+      .leftJoin(
+        planVersionFeatures,
+        eq(customerEntitlements.featurePlanVersionId, planVersionFeatures.id)
+      )
+      .leftJoin(features, eq(planVersionFeatures.featureId, features.id))
+      .where(
+        and(
+          eq(features.slug, featureSlug),
+          eq(customerEntitlements.customerId, customerId),
+          eq(customerEntitlements.projectId, projectId),
+          eq(customerEntitlements.active, true),
+          lte(customerEntitlements.validFrom, now),
+          gte(customerEntitlements.validTo, now)
+        )
+      )
+      .then((e) => e[0])
+      .catch((e) => {
+        // TODO: log it
+        console.error("error getting entitlement", e)
+        return null
+      })
+
+    return entitlement
   }
 
   private async getEntitlement(
@@ -253,7 +382,7 @@ export class DurableUsageLimiter implements UsageLimiter {
 
       // this is not ideal but we need to validate the customer exists to avoid
       // reporting usage to a non existing customer or creating DOs for non existing customers
-      const { err: subscriptionErr, val: subscription } = await this.getSubscription(
+      const { err: subscriptionErr, val: subscription } = await this.getActiveSubscription(
         data.customerId
       )
 
@@ -265,7 +394,7 @@ export class DurableUsageLimiter implements UsageLimiter {
         return { success: false, message: "customer has no active subscription" }
       }
 
-      // in dev we use the idempotence key and timestamp to deduplicate so we can test the usage
+      // in dev we use the idempotence key and timestamp to deduplicate reuse the same key for the same request
       const idempotentKey =
         env.NODE_ENV === "production"
           ? `${data.idempotenceKey}`
@@ -275,12 +404,13 @@ export class DurableUsageLimiter implements UsageLimiter {
       const { val: sent } = await this.cache.idempotentRequestUsageByHash.get(idempotentKey)
 
       // if the usage is already sent, return the result
-      // TODO: remove this once we have a way to track the usage
-      if (sent && env.NODE_ENV === "production") {
+      if (sent) {
         return sent
       }
 
       // Fast path: check if the limit is reached in the cache
+      // Basically if the entitlement already hit it's limit we reject the request
+      // We could allow report over usage later on
       const { err: entitlementErr, val: entitlement } = await this.getEntitlement(
         data.customerId,
         data.featureSlug,
