@@ -22,6 +22,7 @@ export const canSchema = z.object({
   requestId: z.string(),
   metadata: z.record(z.string(), z.any()).optional(),
   secondsToLive: z.number().optional(),
+  performanceStart: z.number(),
 })
 
 export type ReportUsageRequest = z.infer<typeof reportUsageSchema>
@@ -39,20 +40,24 @@ export type ReportUsageResponse = z.infer<typeof reportUsageResponseSchema>
 export interface UsageLimiter {
   reportUsage(req: ReportUsageRequest): Promise<ReportUsageResponse>
 
-  deleteCustomer(customerId: string): Promise<{
-    success: boolean
-    message: string
-  }>
-
-  revalidateEntitlement(
+  deleteCustomer(
     customerId: string,
-    featureSlug: string
+    projectId: string
   ): Promise<{
     success: boolean
     message: string
   }>
 
   can(req: CanRequest): Promise<{
+    success: boolean
+    message: string
+  }>
+
+  revalidateEntitlement(
+    customerId: string,
+    featureSlug: string,
+    projectId: string
+  ): Promise<{
     success: boolean
     message: string
   }>

@@ -60,6 +60,7 @@ export const registerCanV1 = (app: App) =>
     const { customerId, featureSlug } = c.req.valid("param")
     const { usagelimit } = c.get("services")
     const requestId = c.get("requestId")
+    const performanceStart = c.get("performanceStart")
 
     // validate the request
     const key = await keyAuth(c)
@@ -77,6 +78,7 @@ export const registerCanV1 = (app: App) =>
       featureSlug,
       projectId: key.projectId,
       requestId,
+      performanceStart: performanceStart,
     })
 
     return c.json(result, HttpStatusCodes.OK)

@@ -1,7 +1,7 @@
 import type { AggregationMethod, FeatureType } from "@unprice/db/validators"
 import { index, integer, numeric, sqliteTableCreator, text } from "drizzle-orm/sqlite-core"
 
-export const version = "unprice_do_v1"
+export const version = "unpricedo_v1"
 
 export const pgTableProject = sqliteTableCreator((name) => `${version}_${name}`)
 
@@ -15,15 +15,16 @@ export const entitlements = pgTableProject(
     subscriptionId: text().notNull(),
     subscriptionPhaseId: text(),
     subscriptionItemId: text(),
-    planVersionFeatureId: text().notNull(),
+    featurePlanVersionId: text().notNull(),
+    // extra fields
     featureSlug: text().notNull(),
+    featureType: text().$type<FeatureType>().notNull(),
+    aggregationMethod: text().$type<AggregationMethod>().notNull(),
     // usage in the current billing cycle
     usage: numeric().default("0"),
     // accumulated usage in all time
     accumulatedUsage: numeric().default("0"),
     limit: integer(),
-    featureType: text().$type<FeatureType>().notNull(),
-    aggregationMethod: text().$type<AggregationMethod>().notNull(),
     lastUsageUpdateAt: integer().notNull(),
     // current billing cycle start and end dates used to revalidate and reset the usage
     validFrom: integer().notNull(),
@@ -33,6 +34,11 @@ export const entitlements = pgTableProject(
     // resetedAt is the date when the entitlement was reseted
     // normally this is set by the subscription renew event
     resetedAt: integer().notNull(),
+    metadata: text(),
+    active: integer().notNull().default(1),
+    realtime: integer().notNull().default(0),
+    type: text().$type<"feature" | "addon">().notNull().default("feature"),
+    isCustom: integer().notNull().default(0),
   },
   (table) => [
     index("entitlements_customer_idx").on(table.customerId),
@@ -55,7 +61,7 @@ export const usageRecords = pgTableProject(
     featureSlug: text().notNull(),
     customerId: text().notNull(),
     projectId: text().notNull(),
-    planVersionFeatureId: text().notNull(),
+    featurePlanVersionId: text().notNull(),
     subscriptionItemId: text(),
     subscriptionPhaseId: text(),
     subscriptionId: text(),
@@ -83,7 +89,7 @@ export const verifications = pgTableProject(
     id: integer().primaryKey({ autoIncrement: true }),
     requestId: text().notNull(),
     projectId: text().notNull(),
-    planVersionFeatureId: text().notNull(),
+    featurePlanVersionId: text().notNull(),
     subscriptionItemId: text(),
     subscriptionPhaseId: text(),
     subscriptionId: text(),

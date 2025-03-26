@@ -45,6 +45,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
     c.set("requestId", requestId)
 
     c.set("requestStartedAt", Date.now())
+    c.set("performanceStart", performance.now())
 
     c.res.headers.set("unprice-request-id", requestId)
 

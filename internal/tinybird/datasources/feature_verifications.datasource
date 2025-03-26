@@ -9,7 +9,7 @@ SCHEMA >
     `featureSlug` LowCardinality(String) `json:$.featureSlug`,
     `customerId` String `json:$.customerId`,
     `latency` Float32 `json:$.latency`,
-    `planVersionFeatureId` String `json:$.planVersionFeatureId`,
+    `featurePlanVersionId` String `json:$.featurePlanVersionId`,
     `requestId` String `json:$.requestId`,
     `projectId` String `json:$.projectId`,
     `entitlementId` String `json:$.entitlementId`,

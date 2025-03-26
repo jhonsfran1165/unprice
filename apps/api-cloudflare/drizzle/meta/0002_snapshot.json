@@ -1,11 +1,11 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "1b69e545-6154-4110-b15d-3f4b577c2553",
-  "prevId": "8adb71f8-4b41-4e38-8d7d-c33f2bfaf7c1",
+  "id": "afddf842-e524-4b85-87d7-7ea03f93abc0",
+  "prevId": "5d548d89-bc24-4f21-9141-473c50b93417",
   "tables": {
-    "unprice_do_v1_entitlements": {
-      "name": "unprice_do_v1_entitlements",
+    "unpricedo_v1_entitlements": {
+      "name": "unpricedo_v1_entitlements",
       "columns": {
         "id": {
           "name": "id",
@@ -56,8 +56,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "planVersionFeatureId": {
-          "name": "planVersionFeatureId",
+        "featurePlanVersionId": {
+          "name": "featurePlanVersionId",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -65,6 +65,20 @@
         },
         "featureSlug": {
           "name": "featureSlug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "featureType": {
+          "name": "featureType",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "aggregationMethod": {
+          "name": "aggregationMethod",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -91,20 +105,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
-        },
-        "featureType": {
-          "name": "featureType",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "aggregationMethod": {
-          "name": "aggregationMethod",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
           "autoincrement": false
         },
         "lastUsageUpdateAt": {
@@ -142,6 +142,45 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "active": {
+          "name": "active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "realtime": {
+          "name": "realtime",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'feature'"
+        },
+        "isCustom": {
+          "name": "isCustom",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         }
       },
       "indexes": {
@@ -193,8 +232,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "unprice_do_v1_usage_records": {
-      "name": "unprice_do_v1_usage_records",
+    "unpricedo_v1_usage_records": {
+      "name": "unpricedo_v1_usage_records",
       "columns": {
         "id": {
           "name": "id",
@@ -245,8 +284,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "planVersionFeatureId": {
-          "name": "planVersionFeatureId",
+        "featurePlanVersionId": {
+          "name": "featurePlanVersionId",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -338,8 +377,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "unprice_do_v1_verifications": {
-      "name": "unprice_do_v1_verifications",
+    "unpricedo_v1_verifications": {
+      "name": "unpricedo_v1_verifications",
       "columns": {
         "id": {
           "name": "id",
@@ -362,8 +401,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "planVersionFeatureId": {
-          "name": "planVersionFeatureId",
+        "featurePlanVersionId": {
+          "name": "featurePlanVersionId",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -445,14 +484,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "deleted": {
-          "name": "deleted",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
         }
       },
       "indexes": {

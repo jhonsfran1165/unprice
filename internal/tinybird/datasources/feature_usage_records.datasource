@@ -12,7 +12,7 @@ SCHEMA >
     `idempotenceKey` String `json:$.idempotenceKey`,
     `projectId` String `json:$.projectId`,
     `entitlementId` String `json:$.entitlementId`,
-    `planVersionFeatureId` String `json:$.planVersionFeatureId`,
+    `featurePlanVersionId` String `json:$.featurePlanVersionId`,
     `subscriptionId` Nullable(String) `json:$.subscriptionId`,
     `subscriptionItemId` Nullable(String) `json:$.subscriptionItemId`,
     `subscriptionPhaseId` Nullable(String) `json:$.subscriptionPhaseId`,

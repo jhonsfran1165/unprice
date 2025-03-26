@@ -2,7 +2,12 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import * as schema from "../schema"
-import { currencySchema, paymentProviderSchema } from "./shared"
+import {
+  aggregationMethodSchema,
+  currencySchema,
+  paymentProviderSchema,
+  typeFeatureSchema,
+} from "./shared"
 import { subscriptionItemsConfigSchema } from "./subscriptions/items"
 
 export const reasonCreditSchema = z.enum([
@@ -92,6 +97,12 @@ export const customerEntitlementInsertSchema = createInsertSchema(
   projectId: true,
 })
 
+export const customerEntitlementExtendedSchema = customerEntitlementSchema.extend({
+  featureType: typeFeatureSchema,
+  aggregationMethod: aggregationMethodSchema,
+  featureSlug: z.string(),
+})
+
 export type StripePlanVersion = z.infer<typeof stripePlanVersionSchema>
 export type Customer = z.infer<typeof customerSelectSchema>
 export type InsertCustomer = z.infer<typeof customerInsertBaseSchema>
@@ -100,3 +111,4 @@ export type CustomerSignUp = z.infer<typeof customerSignUpSchema>
 export type CustomerSetUp = z.infer<typeof customerSetUpSchema>
 export type CustomerEntitlement = z.infer<typeof customerEntitlementSchema>
 export type InsertCustomerEntitlement = z.infer<typeof customerEntitlementInsertSchema>
+export type CustomerEntitlementExtended = z.infer<typeof customerEntitlementExtendedSchema>

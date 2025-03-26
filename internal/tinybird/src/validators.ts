@@ -44,7 +44,7 @@ export const booleanToUInt8 = z.boolean().transform((b) => (b ? 1 : 0))
 
 export const featureVerificationSchemaV1 = z.object({
   projectId: z.string(),
-  planVersionFeatureId: z.string(),
+  featurePlanVersionId: z.string(),
   subscriptionItemId: z.string().nullable(),
   subscriptionPhaseId: z.string().nullable(),
   subscriptionId: z.string().nullable(),
@@ -78,7 +78,7 @@ export const featureUsageSchemaV1 = z.object({
     .default(Date.now())
     .describe("timestamp of when this usage record should be billed"),
   projectId: z.string(),
-  planVersionFeatureId: z.string(),
+  featurePlanVersionId: z.string(),
   usage: z.number(),
   createdAt: z
     .number()

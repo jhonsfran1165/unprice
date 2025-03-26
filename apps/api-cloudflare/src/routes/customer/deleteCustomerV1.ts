@@ -61,7 +61,7 @@ export const registerDeleteCustomerV1 = (app: App) =>
     }
 
     // delete the customer from the DO
-    const result = await usagelimit.deleteCustomer(customerId)
+    const result = await usagelimit.deleteCustomer(customerId, key.projectId)
 
     if (!result.success) {
       throw new UnpriceApiError({

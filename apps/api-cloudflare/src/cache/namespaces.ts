@@ -1,5 +1,8 @@
-import type { ApiKeyExtended, Subscription } from "@unprice/db/validators"
-import type { Entitlement } from "~/db/types"
+import type {
+  ApiKeyExtended,
+  CustomerEntitlementExtended,
+  Subscription,
+} from "@unprice/db/validators"
 
 export type SubcriptionCache =
   | (Pick<
@@ -22,7 +25,9 @@ export type SubcriptionCache =
     })
   | null
 
-export type EntitlementCache = {
+export type CustomerEntitlementCache = Omit<CustomerEntitlementExtended, "createdAt" | "updatedAt">
+
+export type UsageEntitlementCache = {
   success: boolean
   message: string | undefined
   limit: number | undefined
@@ -32,9 +37,9 @@ export type EntitlementCache = {
 
 export type CacheNamespaces = {
   apiKeyByHash: ApiKeyExtended | null
-  customerSubscription: SubcriptionCache
-  customerEntitlement: Entitlement | null
-  idempotentRequestUsageByHash: EntitlementCache
+  customerSubscription: SubcriptionCache | null
+  customerEntitlement: CustomerEntitlementCache | null
+  idempotentRequestUsageByHash: UsageEntitlementCache | null
 }
 
 export type CacheNamespace = keyof CacheNamespaces

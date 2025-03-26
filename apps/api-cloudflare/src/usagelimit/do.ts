@@ -4,36 +4,26 @@ import { type DrizzleSqliteDODatabase, drizzle } from "drizzle-orm/durable-sqlit
 import { migrate } from "drizzle-orm/durable-sqlite/migrator"
 import migrations from "../../drizzle/migrations"
 
-import type { Env } from "~/env"
-import type { CanRequest, ReportUsageRequest, ReportUsageResponse } from "./interface"
-
-import {
-  type Database,
-  and,
-  eq as eqUnprice,
-  gte as gteUnprice,
-  lte as lteUnprice,
-} from "@unprice/db"
 import { Analytics } from "@unprice/tinybird"
 import { count, eq, inArray, lte, sql } from "drizzle-orm"
 import { entitlements, usageRecords, verifications } from "~/db/schema"
 import type { Entitlement, schema } from "~/db/types"
-import { createDb } from "~/util/db"
+import type { Env } from "~/env"
+import type { CanRequest, ReportUsageRequest, ReportUsageResponse } from "./interface"
 
 import { env } from "cloudflare:workers"
-import { customerEntitlements, features, planVersionFeatures } from "@unprice/db/schema"
-import type { SubcriptionCache } from "~/cache/namespaces"
+import type { CustomerEntitlementCache } from "~/cache/namespaces"
+import type { DenyReason } from "~/errors/errors"
+
+// This durable object takes care of handling the usage of every feature per customer.
+// It is used to validate the usage of a feature and to report the usage to tinybird.
 export class DurableObjectUsagelimiter extends Server {
+  private initialized = false
   // once the durable object is initialized we can avoid
   // querying the db for usage on each request
   private featuresUsage: Map<string, Entitlement> = new Map()
-  private currentSubscription: SubcriptionCache | null = null
-  // we avoid revalidating the entitlements if there is already a revalidation in progress
-  private revalidationInProgress = false
   // internal database of the do
   private db: DrizzleSqliteDODatabase<typeof schema>
-  // unprice database
-  private unpriceDb: Database
   // tinybird analytics
   private analytics: Analytics
   // Default ttl for the usage records
@@ -42,10 +32,6 @@ export class DurableObjectUsagelimiter extends Server {
   private lastBroadcastTime = 0
   // debounce delay for the broadcast
   private readonly DEBOUNCE_DELAY = 1000 * 1 // 1 second
-  // full revalidation grace period
-  // once the current cycle is over we need to revalidate the entitlements
-  //  this give us a buffer between subscription renewals and the next entitlement revalidation
-  private readonly FULL_REVALIDATION_GRACE_PERIOD = 1000 * 60 * 60 * 24 // 1 day
 
   // hibernate the do when no websocket nor connections are active
   static options = {
@@ -55,19 +41,11 @@ export class DurableObjectUsagelimiter extends Server {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env)
 
-    this.db = drizzle(ctx.storage, { logger: false })
+    this.db = drizzle(ctx.storage, { logger: true })
     this.analytics = new Analytics({
       emit: env.EMIT_METRICS_LOGS,
       tinybirdToken: env.TINYBIRD_TOKEN,
       tinybirdUrl: env.TINYBIRD_URL,
-    })
-
-    this.unpriceDb = createDb({
-      env: env.ENV,
-      primaryDatabaseUrl: env.DATABASE_URL,
-      read1DatabaseUrl: env.DATABASE_READ1_URL,
-      read2DatabaseUrl: env.DATABASE_READ2_URL,
-      logger: false,
     })
 
     // block concurrency while initializing
@@ -77,13 +55,7 @@ export class DurableObjectUsagelimiter extends Server {
         // migrate first
         await this._migrate()
 
-        // get the current subscription from state
-        const currentSubscription = (await this.ctx.storage.get(
-          "currentSubscription"
-        )) as SubcriptionCache | null
-
-        // set the current subscription
-        this.currentSubscription = currentSubscription
+        this.initialized = true
 
         const now = Date.now()
         // get the usage for the customer for every feature
@@ -92,7 +64,6 @@ export class DurableObjectUsagelimiter extends Server {
           .from(entitlements)
           .where(lte(entitlements.validFrom, now))
           .catch((e) => {
-            // TODO: log it
             console.error("error getting entitlements from do", e)
             return []
           })
@@ -106,8 +77,9 @@ export class DurableObjectUsagelimiter extends Server {
         })
       } catch (e) {
         // TODO: log it and alert
-        console.error("error getting usage", e)
+        console.error("error initializing do", e)
         this.featuresUsage.clear()
+        this.initialized = false
       }
     })
   }
@@ -116,94 +88,73 @@ export class DurableObjectUsagelimiter extends Server {
     try {
       await migrate(this.db, migrations)
     } catch (error) {
-      // TODO: log it
+      // Log the error
       console.error("error migrating", error)
-
       console.error("Migration failed:", error)
+
       // Log more details about the error
       if (error instanceof Error) {
         console.error("Error message:", error.message)
         console.error("Error stack:", error.stack)
       }
+
+      // Throw the error to prevent further execution that depends on successful migration
+      throw new Error("Database migration failed, cannot initialize Durable Object")
+    }
+  }
+
+  private isValidEntitlement(featureSlug: string) {
+    if (!this.initialized) {
+      return {
+        valid: false,
+        message: "DO not initialized",
+      }
+    }
+
+    const entitlement = this.featuresUsage.get(featureSlug)
+
+    if (!entitlement) {
+      return {
+        valid: false,
+        message: "entitlement not found in do",
+      }
+    }
+
+    if (entitlement.featureType === "flat") {
+      return {
+        valid: false,
+        message: "entitlement is flat",
+      }
+    }
+
+    return {
+      valid: true,
+      message: "entitlement is valid",
+      entitlement,
     }
   }
 
   async can(data: CanRequest): Promise<{
     success: boolean
     message: string
+    deniedReason?: DenyReason
   }> {
-    const now = performance.now()
-    // if there is no current subscription we need to revalidate
-    if (!this.currentSubscription) {
-      await this.revalidateSubscription({
-        customerId: data.customerId,
-      })
-    }
-
     // first get the entitlement
-    let entitlement = this.featuresUsage.get(data.featureSlug)
+    const { valid, message, entitlement } = this.isValidEntitlement(data.featureSlug)
 
-    if (!entitlement) {
-      const result = await this.revalidateEntitlement({
-        customerId: data.customerId,
-        projectId: data.projectId,
-        featureSlug: data.featureSlug,
-        now: Date.now(),
-      })
-
-      if (!result.success) {
-        return {
-          success: false,
-          message: result.message,
-        }
-      }
-
-      // if after revalidating the entitlement is not found we need to return an error
-      entitlement = this.featuresUsage.get(data.featureSlug)
-
-      if (!entitlement) {
-        return {
-          success: false,
-          message: "entitlement not found in do",
-        }
-      }
-    }
-
-    // check if the entitlement is valid
-    const isValid = this.isValidEntitlement(data.featureSlug)
-
-    if (!isValid.valid) {
+    if (!valid || !entitlement) {
       return {
         success: false,
-        message: isValid.message,
+        message,
       }
     }
 
-    // we set alarms to send usage to tinybird periodically
-    // this would avoid having too many events in the db as well
-    const alarm = await this.ctx.storage.getAlarm()
-
-    // there is a default ttl for the usage records
-    // alternatively we can use the secondsToLive from the request
-    // secondsToLive is a pro feature so depending on the plan we can use it or not
-    const nextAlarm = data.secondsToLive
-      ? Date.now() + data.secondsToLive * 1000
-      : Date.now() + this.MS_TTL
-
-    // if there is no alarm set one given the ttl
-    if (!alarm) {
-      this.ctx.storage.setAlarm(nextAlarm)
-    } else if (alarm < Date.now()) {
-      // delete the alarm if it is in the past
-      // and set it again
-      this.ctx.storage.deleteAlarm()
-      this.ctx.storage.setAlarm(nextAlarm)
-    }
+    await this.ensureAlarmIsSet(data.secondsToLive)
 
     // TODO: check this
     // at this point we basically validate the user has access to the feature
     const result = this.checkLimit(entitlement)
-    const latency = performance.now() - now
+    const latency = performance.now() - (data.performanceStart ?? 0)
 
     // create a verification record
     const verification = await this.db
@@ -218,8 +169,8 @@ export class DurableObjectUsagelimiter extends Server {
         createdAt: Date.now(),
         latency: latency.toString() ?? "0",
         metadata: JSON.stringify(data.metadata),
-        deniedReason: result.message,
-        planVersionFeatureId: entitlement.planVersionFeatureId,
+        deniedReason: result.deniedReason,
+        featurePlanVersionId: entitlement.featurePlanVersionId,
         subscriptionItemId: entitlement.subscriptionItemId,
         subscriptionPhaseId: entitlement.subscriptionPhaseId,
         subscriptionId: entitlement.subscriptionId,
@@ -244,10 +195,15 @@ export class DurableObjectUsagelimiter extends Server {
     return {
       success: result.success,
       message: result.message,
+      deniedReason: result.deniedReason,
     }
   }
 
-  private checkLimit(entitlement: Entitlement) {
+  private checkLimit(entitlement: Entitlement): {
+    success: boolean
+    message: string
+    deniedReason?: DenyReason
+  } {
     switch (entitlement.featureType) {
       case "flat":
         return { success: true, message: "flat feature" }
@@ -258,7 +214,7 @@ export class DurableObjectUsagelimiter extends Server {
         const hitLimit = limit ? Number(usage) > Number(limit) : false
 
         if (hitLimit) {
-          return { success: false, message: "limit exceeded" }
+          return { success: false, message: "limit exceeded", deniedReason: "LIMIT_EXCEEDED" }
         }
 
         return { success: true, message: "can" }
@@ -267,72 +223,17 @@ export class DurableObjectUsagelimiter extends Server {
   }
 
   async reportUsage(data: ReportUsageRequest): Promise<ReportUsageResponse> {
-    // if there is no current subscription we need to revalidate
-    if (!this.currentSubscription) {
-      await this.revalidateSubscription({
-        customerId: data.customerId,
-      })
-    }
-
     // first get the entitlement
-    let entitlement = this.featuresUsage.get(data.featureSlug)
+    const { valid, message, entitlement } = this.isValidEntitlement(data.featureSlug)
 
-    if (!entitlement) {
-      const result = await this.revalidateEntitlement({
-        customerId: data.customerId,
-        projectId: data.projectId,
-        featureSlug: data.featureSlug,
-        now: data.date,
-      })
-
-      if (!result.success) {
-        return {
-          success: false,
-          message: result.message,
-        }
-      }
-
-      // if after revalidating the entitlement is not found we need to return an error
-      entitlement = this.featuresUsage.get(data.featureSlug)
-
-      if (!entitlement) {
-        return {
-          success: false,
-          message: "entitlement not found in do",
-        }
-      }
-    }
-
-    // check if the entitlement is valid
-    const isValid = this.isValidEntitlement(data.featureSlug)
-
-    if (!isValid.valid) {
+    if (!valid || !entitlement) {
       return {
         success: false,
-        message: isValid.message,
+        message,
       }
     }
 
-    // we set alarms to send usage to tinybird periodically
-    // this would avoid having too many events in the db as well
-    const alarm = await this.ctx.storage.getAlarm()
-
-    // there is a default ttl for the usage records
-    // alternatively we can use the secondsToLive from the request
-    // secondsToLive is a pro feature so depending on the plan we can use it or not
-    const nextAlarm = data.secondsToLive
-      ? Date.now() + data.secondsToLive * 1000
-      : Date.now() + this.MS_TTL
-
-    // if there is no alarm set one given the ttl
-    if (!alarm) {
-      this.ctx.storage.setAlarm(nextAlarm)
-    } else if (alarm < Date.now()) {
-      // delete the alarm if it is in the past
-      // and set it again
-      this.ctx.storage.deleteAlarm()
-      this.ctx.storage.setAlarm(nextAlarm)
-    }
+    await this.ensureAlarmIsSet(data.secondsToLive)
 
     // insert usage into db
     const usageRecord = await this.db
@@ -345,7 +246,7 @@ export class DurableObjectUsagelimiter extends Server {
         idempotenceKey: data.idempotenceKey,
         requestId: data.requestId,
         projectId: data.projectId,
-        planVersionFeatureId: entitlement.planVersionFeatureId,
+        featurePlanVersionId: entitlement.featurePlanVersionId,
         entitlementId: entitlement.entitlementId,
         subscriptionItemId: entitlement.subscriptionItemId,
         subscriptionPhaseId: entitlement.subscriptionPhaseId,
@@ -356,7 +257,7 @@ export class DurableObjectUsagelimiter extends Server {
       .returning()
       .catch((e) => {
         // TODO: log it
-        console.error("error inserting usage", e)
+        console.error("error inserting usage from do", e)
       })
       .then((result) => {
         return result?.[0] ?? null
@@ -394,6 +295,27 @@ export class DurableObjectUsagelimiter extends Server {
       entitlement: result.entitlement,
       message: result.message,
       notifyUsage: result.notifyUsage,
+    }
+  }
+
+  private async ensureAlarmIsSet(secondsToLive?: number): Promise<void> {
+    // we set alarms to send usage to tinybird periodically
+    // this would avoid having too many events in the db as well
+    const alarm = await this.ctx.storage.getAlarm()
+
+    // there is a default ttl for the usage records
+    // alternatively we can use the secondsToLive from the request
+    // secondsToLive is a pro feature so depending on the plan we can use it or not
+    const nextAlarm = secondsToLive ? Date.now() + secondsToLive * 1000 : Date.now() + this.MS_TTL
+
+    // if there is no alarm set one given the ttl
+    if (!alarm) {
+      this.ctx.storage.setAlarm(nextAlarm)
+    } else if (alarm < Date.now()) {
+      // delete the alarm if it is in the past
+      // and set it again
+      this.ctx.storage.deleteAlarm()
+      this.ctx.storage.setAlarm(nextAlarm)
     }
   }
 
@@ -533,7 +455,7 @@ export class DurableObjectUsagelimiter extends Server {
             metadata: event.metadata ? JSON.parse(event.metadata) : null,
             latency: event.latency ? Number(event.latency) : 0,
             requestId: event.requestId,
-            planVersionFeatureId: event.planVersionFeatureId,
+            featurePlanVersionId: event.featurePlanVersionId,
           }))
 
           await this.analytics
@@ -650,416 +572,64 @@ export class DurableObjectUsagelimiter extends Server {
   async resetDO(): Promise<{
     success: boolean
     message: string
+    slugs?: string[]
   }> {
-    // check if the are events in the db
-    const events = await this.db
-      .select({
-        count: count(),
-      })
-      .from(usageRecords)
-      .then((e) => e[0])
-
-    const verification_events = await this.db
-      .select({
-        count: count(),
-      })
-      .from(verifications)
-      .then((e) => e[0])
-
-    console.info(
-      `DO has ${events?.count} events and ${verification_events?.count} verification events`
-    )
-
-    // if there are no events, delete the do
-    if (events?.count === 0 && verification_events?.count === 0) {
-      await this.ctx.storage.deleteAll()
-    } else {
+    if (!this.initialized) {
       return {
         success: false,
-        message: `DO has ${events?.count} events and ${verification_events?.count} verification events, not deleting.`,
+        message: "DO not initialized",
       }
     }
 
-    return {
-      success: true,
-      message: "DO deleted",
-    }
-  }
-
-  private isSubscriptionValid(): { valid: boolean; message: string } {
-    const gracePeriod = this.FULL_REVALIDATION_GRACE_PERIOD
-    const currentSubscription = this.currentSubscription
-    const now = Date.now()
-
-    if (!currentSubscription) {
-      return {
-        valid: false,
-        message: "subscription not found in do",
-      }
-    }
-
-    // project is not active
-    if (!currentSubscription.project.enabled) {
-      return {
-        valid: false,
-        message: "project is not active",
-      }
-    }
-
-    // subscription is not active
-    if (!currentSubscription.active) {
-      return {
-        valid: false,
-        message: "subscription is not active",
-      }
-    }
-
-    // customer is not active
-    if (!currentSubscription.customer.active) {
-      return {
-        valid: false,
-        message: "customer is not active",
-      }
-    }
-
-    // if revalidation is in progress or the current cycle is not over
-    if (
-      now < currentSubscription.currentCycleStartAt ||
-      now > currentSubscription.currentCycleEndAt + gracePeriod
-    ) {
-      return {
-        valid: false,
-        message: "revalidation in progress or current cycle is not over",
-      }
-    }
-
-    return {
-      valid: true,
-      message: "subscription is valid",
-    }
-  }
-
-  async revalidateSubscription({
-    customerId,
-  }: {
-    customerId: string
-  }): Promise<void> {
-    if (this.revalidationInProgress) return
-    const now = Date.now()
-    const shouldRevalidate = this.shouldRevalidateSubscription()
-
-    if (!shouldRevalidate.valid) {
-      return
-    }
-
-    try {
-      this.revalidationInProgress = true
-
-      const data = await this.unpriceDb.query.subscriptions
-        .findFirst({
-          with: {
-            customer: {
-              columns: {
-                active: true,
-              },
-            },
-            project: {
-              columns: {
-                enabled: true,
-              },
-            },
-          },
-          where: (s, { eq, and, lte, gte }) =>
-            and(
-              eq(s.customerId, customerId),
-              eq(s.active, true),
-              lte(s.currentCycleStartAt, now),
-              gte(s.currentCycleEndAt, now)
-            ),
+    return this.ctx.blockConcurrencyWhile(async () => {
+      // check if the are events in the db
+      const events = await this.db
+        .select({
+          count: count(),
         })
-        .catch((e) => {
-          // TODO: log it
-          console.error("error getting subscription", e)
-          return null
+        .from(usageRecords)
+        .then((e) => e[0])
+
+      const verification_events = await this.db
+        .select({
+          count: count(),
         })
+        .from(verifications)
+        .then((e) => e[0])
 
-      if (!data) {
-        return
-      }
-
-      // save the current cycle start and end at for next full revalidation
-      await this.ctx.storage.put("currentSubscription", data)
-
-      // set the current subscription
-      this.currentSubscription = data
-
-      // flush entitlements
-      this.featuresUsage.clear()
-      // clean entitlements from db
-      await this.db.delete(entitlements)
-    } finally {
-      this.revalidationInProgress = false
-    }
-  }
-
-  private shouldRevalidateSubscription(): { valid: boolean; message: string } {
-    const currentSubscription = this.currentSubscription
-
-    if (!currentSubscription) {
-      return {
-        valid: true,
-        message: "subscription not found in state of do",
-      }
-    }
-
-    const now = Date.now()
-    const gracePeriod = this.FULL_REVALIDATION_GRACE_PERIOD
-    const currentCycleEndAt = currentSubscription.currentCycleEndAt
-    const currentCycleStartAt = currentSubscription.currentCycleStartAt
-
-    // only revalidate if subscription cycle is over
-    if (now < currentCycleStartAt || now > currentCycleEndAt + gracePeriod) {
-      return {
-        valid: true,
-        message: "subscription cycle is not over",
-      }
-    }
-
-    return {
-      valid: false,
-      message: "subscription cycle is over",
-    }
-  }
-
-  private shouldRevalidateEntitlement(featureSlug: string) {
-    const entitlement = this.featuresUsage.get(featureSlug)
-    if (!entitlement) {
-      return {
-        valid: true,
-        message: "entitlement not found in do",
-      }
-    }
-
-    const now = Date.now()
-    const bufferPeriod = entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
-    const validUntil = entitlement.validTo + bufferPeriod
-
-    if (now < entitlement.validFrom || now > validUntil) {
-      return {
-        valid: true,
-        message: "entitlement is expired",
-      }
-    }
-
-    return {
-      valid: false,
-      message: "entitlement is valid",
-    }
-  }
-
-  private isValidEntitlement(featureSlug: string) {
-    const entitlement = this.featuresUsage.get(featureSlug)
-    // entitlement is valid if the subscription is valid
-    const subscription = this.isSubscriptionValid()
-
-    if (!subscription.valid) {
-      return {
-        valid: false,
-        message: subscription.message,
-      }
-    }
-
-    if (!entitlement) {
-      return {
-        valid: false,
-        message: "entitlement not found in do",
-      }
-    }
-
-    if (entitlement.featureType === "flat") {
-      return {
-        valid: false,
-        message: "entitlement is flat",
-      }
-    }
-
-    return {
-      valid: true,
-      message: "entitlement is valid",
-    }
-  }
-
-  async revalidateEntitlement({
-    customerId,
-    projectId,
-    featureSlug,
-    now,
-    forceRevalidate = false,
-  }: {
-    customerId: string
-    projectId: string
-    featureSlug: string
-    now: number
-    forceRevalidate?: boolean
-  }): Promise<{
-    success: boolean
-    message: string
-  }> {
-    const shouldRevalidateEntitlement = this.shouldRevalidateEntitlement(featureSlug)
-
-    if (!shouldRevalidateEntitlement.valid && !forceRevalidate) {
-      return {
-        success: false,
-        message: shouldRevalidateEntitlement.message,
-      }
-    }
-
-    const entitlement = await this.unpriceDb
-      .select({
-        customerEntitlement: customerEntitlements,
-        featureType: planVersionFeatures.featureType,
-        planVersionFeatureId: planVersionFeatures.id,
-        aggregationMethod: planVersionFeatures.aggregationMethod,
-      })
-      .from(customerEntitlements)
-      .leftJoin(
-        planVersionFeatures,
-        eqUnprice(customerEntitlements.featurePlanVersionId, planVersionFeatures.id)
+      console.info(
+        `DO has ${events?.count} events and ${verification_events?.count} verification events`
       )
-      .leftJoin(features, eqUnprice(planVersionFeatures.featureId, features.id))
-      .where(
-        and(
-          eqUnprice(features.slug, featureSlug),
-          eqUnprice(customerEntitlements.customerId, customerId),
-          eqUnprice(customerEntitlements.projectId, projectId),
-          eqUnprice(customerEntitlements.active, true),
-          lteUnprice(customerEntitlements.validFrom, now),
-          gteUnprice(customerEntitlements.validTo, now)
-        )
-      )
-      .then((e) => e[0])
-      .catch((e) => {
-        // TODO: log it
-        console.error("error getting entitlement", e)
-        return null
-      })
 
-    if (
-      !entitlement ||
-      !entitlement.featureType ||
-      !entitlement.planVersionFeatureId ||
-      !entitlement.aggregationMethod
-    ) {
-      return {
-        success: false,
-        message: "entitlement not found in unprice db",
+      const slugs = await this.db
+        .select({
+          featureSlug: entitlements.featureSlug,
+        })
+        .from(entitlements)
+
+      // if there are no events, delete the do
+      if (events?.count === 0 && verification_events?.count === 0) {
+        await this.ctx.storage.deleteAll()
+      } else {
+        return {
+          success: false,
+          message: `DO has ${events?.count} events and ${verification_events?.count} verification events, not deleting.`,
+        }
       }
-    }
 
-    const {
-      customerEntitlement: activeEntitlement,
-      featureType,
-      planVersionFeatureId,
-      aggregationMethod,
-    } = entitlement
-
-    if (!activeEntitlement) {
       return {
-        success: false,
-        message: "active entitlement not found in unprice db",
+        success: true,
+        message: "DO deleted",
+        slugs: slugs.map((e) => e.featureSlug),
       }
-    }
-
-    // get the usages for the entitlements from analytics
-    const { totalAccumulatedUsage, totalUsage } = await this.getUsageFromAnalytics({
-      customerId,
-      projectId,
-      startAt: activeEntitlement.validFrom,
-      endAt: Date.now(),
-      featureSlug,
-      isAccumulated: featureType.endsWith("_all"),
     })
-
-    const usage =
-      totalUsage === 0
-        ? 0
-        : (totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage] ?? 0)
-
-    const accumulatedUsage =
-      totalAccumulatedUsage === 0
-        ? 0
-        : (totalAccumulatedUsage[
-            entitlement.aggregationMethod as keyof typeof totalAccumulatedUsage
-          ] ?? 0)
-
-    const entitlementDo = {
-      entitlementId: activeEntitlement.id,
-      customerId: activeEntitlement.customerId,
-      projectId: activeEntitlement.projectId,
-      validFrom: activeEntitlement.validFrom,
-      validTo: activeEntitlement.validTo,
-      featureSlug: featureSlug,
-      aggregationMethod: aggregationMethod,
-      bufferPeriodDays: activeEntitlement.bufferPeriodDays,
-      featureType: featureType,
-      usage: usage.toString(),
-      accumulatedUsage: accumulatedUsage.toString(),
-      limit: activeEntitlement.limit,
-      lastUsageUpdateAt: Date.now(),
-      subscriptionItemId: activeEntitlement.subscriptionItemId,
-      subscriptionPhaseId: activeEntitlement.subscriptionPhaseId,
-      subscriptionId: activeEntitlement.subscriptionId,
-      resetedAt: activeEntitlement.resetedAt,
-      planVersionFeatureId: planVersionFeatureId,
-    }
-
-    // insert or update the entitlement in the db
-    const result = await this.db
-      .insert(entitlements)
-      .values(entitlementDo)
-      .onConflictDoUpdate({
-        target: entitlements.id,
-        set: {
-          ...entitlementDo,
-        },
-      })
-      .returning()
-      .then((e) => e[0])
-
-    if (!result) {
-      return {
-        success: false,
-        message: "failed to update entitlement in db",
-      }
-    }
-
-    this.ctx.waitUntil(
-      // update the entitlement in the unprice db
-      this.unpriceDb
-        .update(customerEntitlements)
-        .set({
-          usage: entitlementDo.usage,
-          accumulatedUsage: entitlementDo.accumulatedUsage,
-          lastUsageUpdateAt: Date.now(),
-        })
-        .where(
-          and(
-            eqUnprice(customerEntitlements.id, entitlementDo.entitlementId),
-            eqUnprice(customerEntitlements.customerId, entitlementDo.customerId),
-            eqUnprice(customerEntitlements.projectId, entitlementDo.projectId)
-          )
-        )
-    )
-
-    this.featuresUsage.set(entitlementDo.featureSlug, result)
-
-    return {
-      success: true,
-      message: "entitlement revalidated",
-    }
   }
 
   async getEntitlement(featureSlug: string): Promise<Entitlement | null> {
+    if (!this.initialized) {
+      return null
+    }
+
     const entitlement = this.featuresUsage.get(featureSlug)
 
     if (!entitlement) {
@@ -1069,58 +639,48 @@ export class DurableObjectUsagelimiter extends Server {
     return entitlement
   }
 
-  private async getUsageFromAnalytics({
-    customerId,
-    projectId,
-    featureSlug,
-    startAt,
-    endAt,
-    isAccumulated = false,
-  }: {
-    customerId: string
-    projectId: string
-    featureSlug: string
-    startAt: number
-    endAt: number
-    isAccumulated?: boolean
-  }) {
-    // get the total usage and the usage for the current cycle
-    const [totalAccumulatedUsage, totalUsage] = await Promise.all([
-      isAccumulated
-        ? this.analytics
-            .getFeaturesUsageTotal({
-              customerId,
-              projectId,
-              featureSlug,
-            })
-            .then((usage) => usage.data[0] ?? 0)
-            .catch((error) => {
-              // TODO: log this error
-              console.error("error getting usage", error)
-
-              return null
-            })
-        : null,
-      this.analytics
-        .getFeaturesUsagePeriod({
-          customerId,
-          projectId,
-          featureSlug,
-          start: startAt,
-          end: endAt,
-        })
-        .then((usage) => usage.data[0] ?? 0)
-        .catch((error) => {
-          // TODO: log this error
-          console.error("error getting usage", error)
-
-          return null
-        }),
-    ])
-
-    return {
-      totalAccumulatedUsage: totalAccumulatedUsage ?? 0,
-      totalUsage: totalUsage ?? 0,
+  async setEntitlement(entitlement: CustomerEntitlementCache) {
+    if (!this.initialized) {
+      return
     }
+
+    const { id, ...rest } = entitlement
+    this.ctx.blockConcurrencyWhile(async () => {
+      try {
+        const data = {
+          ...rest,
+          entitlementId: id,
+          metadata: JSON.stringify(entitlement.metadata),
+          isCustom: entitlement.isCustom ? 1 : 0,
+          active: entitlement.active ? 1 : 0,
+          realtime: entitlement.realtime ? 1 : 0,
+        }
+        const result = await this.db
+          .insert(entitlements)
+          .values(data)
+          .onConflictDoUpdate({
+            target: entitlements.id,
+            set: {
+              ...data,
+            },
+          })
+          .returning()
+          .catch((e) => {
+            // TODO: log it
+            console.error("error setting entitlement from do", e)
+            return null
+          })
+          .then((e) => e?.[0] ?? null)
+
+        if (!result) {
+          return
+        }
+
+        this.featuresUsage.set(entitlement.featureSlug, result)
+      } catch (error) {
+        // TODO: log it and alert
+        console.error("error setting entitlement from do", error)
+      }
+    })
   }
 }

@@ -1,18 +1,18 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "8adb71f8-4b41-4e38-8d7d-c33f2bfaf7c1",
-  "prevId": "bec9afc5-b512-4c2c-9fd8-55d3d4723f01",
+  "id": "5d548d89-bc24-4f21-9141-473c50b93417",
+  "prevId": "8564d2f9-5305-46a6-a6e1-b3bc0e1b02bd",
   "tables": {
-    "unprice_do_v1_entitlements": {
-      "name": "unprice_do_v1_entitlements",
+    "unpricedo_v1_entitlements": {
+      "name": "unpricedo_v1_entitlements",
       "columns": {
         "id": {
           "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": true
         },
         "entitlementId": {
           "name": "entitlementId",
@@ -56,8 +56,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "planVersionFeatureId": {
-          "name": "planVersionFeatureId",
+        "featurePlanVersionId": {
+          "name": "featurePlanVersionId",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -65,6 +65,20 @@
         },
         "featureSlug": {
           "name": "featureSlug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "featureType": {
+          "name": "featureType",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "aggregationMethod": {
+          "name": "aggregationMethod",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -91,20 +105,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
-        },
-        "featureType": {
-          "name": "featureType",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "aggregationMethod": {
-          "name": "aggregationMethod",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
           "autoincrement": false
         },
         "lastUsageUpdateAt": {
@@ -141,6 +141,13 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         }
       },
@@ -193,8 +200,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "unprice_do_v1_usage_records": {
-      "name": "unprice_do_v1_usage_records",
+    "unpricedo_v1_usage_records": {
+      "name": "unpricedo_v1_usage_records",
       "columns": {
         "id": {
           "name": "id",
@@ -245,8 +252,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "planVersionFeatureId": {
-          "name": "planVersionFeatureId",
+        "featurePlanVersionId": {
+          "name": "featurePlanVersionId",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -338,8 +345,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "unprice_do_v1_verifications": {
-      "name": "unprice_do_v1_verifications",
+    "unpricedo_v1_verifications": {
+      "name": "unpricedo_v1_verifications",
       "columns": {
         "id": {
           "name": "id",
@@ -362,8 +369,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "planVersionFeatureId": {
-          "name": "planVersionFeatureId",
+        "featurePlanVersionId": {
+          "name": "featurePlanVersionId",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -445,14 +452,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "deleted": {
-          "name": "deleted",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
         }
       },
       "indexes": {

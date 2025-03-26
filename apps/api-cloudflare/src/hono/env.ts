@@ -25,6 +25,7 @@ export type HonoEnv = {
     isolateCreatedAt: number
     requestId: string
     requestStartedAt: number
+    performanceStart: number
     workspaceId?: string
     projectId?: string
     services: ServiceContext
