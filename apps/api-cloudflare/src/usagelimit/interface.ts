@@ -1,5 +1,4 @@
 import { z } from "zod"
-import type { Entitlement } from "~/db/types"
 
 export const reportUsageSchema = z.object({
   customerId: z.string(),
@@ -33,7 +32,7 @@ export const reportUsageResponseSchema = z.object({
   limit: z.number().optional(),
   usage: z.number().optional(),
   notifyUsage: z.boolean().optional(),
-  entitlement: z.custom<Entitlement>().optional(),
+  entitlementNotFound: z.boolean().optional(),
 })
 export type ReportUsageResponse = z.infer<typeof reportUsageResponseSchema>
 

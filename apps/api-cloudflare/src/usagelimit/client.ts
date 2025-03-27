@@ -322,6 +322,31 @@ export class DurableUsageLimiter implements UsageLimiter {
       }
 
       if (entitlementDO) {
+        // update the entitlement in the db
+        this.waitUntil(
+          Promise.all([
+            // set new usage and accumulated usage in background
+            this.db
+              .update(customerEntitlements)
+              .set({
+                usage: entitlementDO.usage,
+                accumulatedUsage: entitlementDO.accumulatedUsage,
+                lastUsageUpdateAt: Date.now(),
+              })
+              .where(
+                and(
+                  eq(customerEntitlements.projectId, projectId),
+                  eq(customerEntitlements.id, entitlementDO.id),
+                  eq(customerEntitlements.customerId, customerId)
+                )
+              )
+              .catch((e) => {
+                // TODO: log it
+                console.error("error setting entitlement", e)
+              }),
+          ])
+        )
+
         return entitlementDO
       }
     }
@@ -386,12 +411,15 @@ export class DurableUsageLimiter implements UsageLimiter {
 
     this.waitUntil(
       Promise.all([
+        // set cache
+        this.cache.customerEntitlement.set(`${customerId}:${featureSlug}`, result),
         // set new usage and accumulated usage in background
         this.db
           .update(customerEntitlements)
           .set({
             usage: usage.toString(),
             accumulatedUsage: accumulatedUsage.toString(),
+            lastUsageUpdateAt: Date.now(),
           })
           .where(
             and(
@@ -399,7 +427,11 @@ export class DurableUsageLimiter implements UsageLimiter {
               eq(customerEntitlements.id, entitlement.customerEntitlement.id),
               eq(customerEntitlements.customerId, customerId)
             )
-          ),
+          )
+          .catch((e) => {
+            // TODO: log it
+            console.error("error setting entitlement", e)
+          }),
       ])
     )
 
@@ -653,12 +685,68 @@ export class DurableUsageLimiter implements UsageLimiter {
       return { success: false, message: "entitlement not found" }
     }
 
+    const { valid, message, deniedReason } = this.isValidEntitlement(entitlement, Date.now())
+
+    if (!valid) {
+      return { success: false, message, deniedReason }
+    }
+
     // TODO: we could avoid call the DO if the limit is reached but we still need to report the verification
     const durableObject = this.getStub(this.getDurableObjectCustomerId(data.customerId))
 
-    const result = await durableObject.can(data)
+    let result = await durableObject.can(data)
+
+    // if the entitlement is not found at this point, it means it is in cache
+    // but not in the DO, we need to revalidate the entitlement
+    if (result.entitlementNotFound) {
+      // delete from cache and revalidate the entitlement
+      await this.cache.customerEntitlement.remove(`${data.customerId}:${data.featureSlug}`)
+      // revalidate the entitlement
+      await this.revalidateEntitlement(data.customerId, data.featureSlug, data.projectId)
+
+      // try again
+      result = await durableObject.can(data)
+    }
 
     return result
+  }
+
+  private isValidEntitlement(
+    entitlement: CustomerEntitlementCache,
+    now: number
+  ): {
+    valid: boolean
+    message: string
+    deniedReason?: DenyReason
+  } {
+    // check if the entitlement has expired
+    const validUntil = entitlement.validTo + entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
+
+    if (now > validUntil) {
+      return { valid: false, message: "entitlement expired", deniedReason: "ENTITLEMENT_EXPIRED" }
+    }
+
+    // if feature type is flat, we don't need to call the DO
+    if (entitlement.featureType === "flat") {
+      return {
+        valid: true,
+        message:
+          "feature is flat, limit is not applicable but events are billed. Please don't report usage for flat features to avoid overbilling.",
+      }
+    }
+
+    // it's a valid entitlement
+    // check if the usage is over the limit
+    // TODO: here calculattion is not correct, we should use the aggregation method
+    if (Number(entitlement.usage) > Number(entitlement.limit)) {
+      return {
+        valid: false,
+        message: "usage over the limit",
+        deniedReason: "LIMIT_EXCEEDED",
+      }
+    }
+
+    return { valid: true, message: "entitlement is valid" }
   }
 
   public async reportUsage(data: ReportUsageRequest): Promise<ReportUsageResponse> {
@@ -718,38 +806,28 @@ export class DurableUsageLimiter implements UsageLimiter {
       // TODO: should we report the usage even if the entitlement is expired?
       // TODO: should we report the usage even if the entitlement has reached the limit?
       if (entitlement) {
-        // check if the entitlement has expired
-        const validUntil = entitlement.validTo + entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
+        const { valid, message } = this.isValidEntitlement(entitlement, data.date)
 
-        if (data.date > validUntil) {
-          return { success: false, message: "entitlement expired" }
-        }
-
-        // if feature type is flat, we don't need to call the DO
-        if (entitlement.featureType === "flat") {
-          return {
-            success: true,
-            message:
-              "feature is flat, limit is not applicable but events are billed. Please don't report usage for flat features to avoid overbilling.",
-          }
-        }
-
-        // it's a valid entitlement
-        // check if the usage is over the limit
-        // TODO: here calculattion is not correct, we should use the aggregation method
-        if (Number(entitlement.usage) + data.usage > Number(entitlement.limit)) {
-          return {
-            success: false,
-            message: "usage over the limit",
-            usage: Number(entitlement.usage),
-            limit: Number(entitlement.limit),
-          }
+        if (!valid) {
+          return { success: false, message }
         }
       }
 
       // Report usage path: send the usage to the DO
       const d = this.getStub(this.getDurableObjectCustomerId(data.customerId))
-      const result = await d.reportUsage(data)
+      let result = await d.reportUsage(data)
+
+      // if the entitlement is not found at this point, it means it is in cache
+      // but not in the DO, we need to revalidate the entitlement
+      if (result.entitlementNotFound) {
+        // delete from cache and revalidate the entitlement
+        await this.cache.customerEntitlement.remove(`${data.customerId}:${data.featureSlug}`)
+        // revalidate the entitlement
+        await this.revalidateEntitlement(data.customerId, data.featureSlug, data.projectId)
+
+        // try again
+        result = await d.reportUsage(data)
+      }
 
       if (!result.success) {
         return result
@@ -758,14 +836,22 @@ export class DurableUsageLimiter implements UsageLimiter {
       const response = {
         success: result.success,
         message: result.message,
-        limit: Number(result.entitlement?.limit),
-        usage: Number(result.entitlement?.usage),
+        limit: Number(result.limit),
+        usage: Number(result.usage),
         notifyUsage: result.notifyUsage,
       }
 
-      // cache the result for the next time
       this.waitUntil(
-        Promise.all([this.cache.idempotentRequestUsageByHash.set(idempotentKey, response)])
+        // cache the result for the next time
+        // update the cache with the new usage so we can check limit in the next request
+        // without calling the DO again
+        Promise.all([
+          this.cache.idempotentRequestUsageByHash.set(idempotentKey, response),
+          this.cache.customerEntitlement.set(`${data.customerId}:${data.featureSlug}`, {
+            ...entitlement,
+            usage: result.usage?.toString() ?? "0",
+          }),
+        ])
       )
 
       return response

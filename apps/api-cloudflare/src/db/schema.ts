@@ -1,5 +1,5 @@
 import type { AggregationMethod, FeatureType } from "@unprice/db/validators"
-import { index, integer, numeric, sqliteTableCreator, text } from "drizzle-orm/sqlite-core"
+import { index, integer, numeric, sqliteTableCreator, text, unique } from "drizzle-orm/sqlite-core"
 
 export const version = "unpricedo_v1"
 
@@ -41,6 +41,7 @@ export const entitlements = pgTableProject(
     isCustom: integer().notNull().default(0),
   },
   (table) => [
+    unique("entitlements_entitlement_id_idx").on(table.entitlementId),
     index("entitlements_customer_idx").on(table.customerId),
     index("entitlements_feature_idx").on(table.featureSlug),
     index("entitlements_project_idx").on(table.projectId),

@@ -80,6 +80,10 @@ if [ "$MODE_ID" = "dev" ]; then
   attempt=1
 
   while ! curl -s http://localhost:7181 > /dev/null 2>&1; do
+    if [ $attempt = 1 -a $RESTART_TINYBIRD = "false" ]; then
+      tb local start
+    fi
+
     if [ $attempt -ge $max_attempts ]; then
       echo "Tinybird failed to start after 2 minutes"
       exit 1

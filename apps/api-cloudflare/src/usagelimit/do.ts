@@ -41,7 +41,7 @@ export class DurableObjectUsagelimiter extends Server {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env)
 
-    this.db = drizzle(ctx.storage, { logger: true })
+    this.db = drizzle(ctx.storage, { logger: false })
     this.analytics = new Analytics({
       emit: env.EMIT_METRICS_LOGS,
       tinybirdToken: env.TINYBIRD_TOKEN,
@@ -138,6 +138,7 @@ export class DurableObjectUsagelimiter extends Server {
     success: boolean
     message: string
     deniedReason?: DenyReason
+    entitlementNotFound?: boolean
   }> {
     // first get the entitlement
     const { valid, message, entitlement } = this.isValidEntitlement(data.featureSlug)
@@ -146,6 +147,7 @@ export class DurableObjectUsagelimiter extends Server {
       return {
         success: false,
         message,
+        entitlementNotFound: !entitlement,
       }
     }
 
@@ -230,6 +232,7 @@ export class DurableObjectUsagelimiter extends Server {
       return {
         success: false,
         message,
+        entitlementNotFound: !entitlement,
       }
     }
 
@@ -258,6 +261,7 @@ export class DurableObjectUsagelimiter extends Server {
       .catch((e) => {
         // TODO: log it
         console.error("error inserting usage from do", e)
+        throw e
       })
       .then((result) => {
         return result?.[0] ?? null
@@ -292,7 +296,6 @@ export class DurableObjectUsagelimiter extends Server {
     // return usage
     return {
       success: true,
-      entitlement: result.entitlement,
       message: result.message,
       notifyUsage: result.notifyUsage,
     }
@@ -463,6 +466,7 @@ export class DurableObjectUsagelimiter extends Server {
             .catch((e) => {
               // TODO: log it and alert
               console.error("Failed to send verifications to Tinybird:", e)
+              throw e
             })
             .then((data) => {
               const rows = data?.successful_rows ?? 0
@@ -535,6 +539,7 @@ export class DurableObjectUsagelimiter extends Server {
           await this.analytics.ingestFeaturesUsage(deduplicatedEvents).catch((e) => {
             // TODO: log it and alert
             console.error("Failed to send events to Tinybird:", e)
+            throw e
           })
 
           // Only delete events that were successfully sent
@@ -630,7 +635,12 @@ export class DurableObjectUsagelimiter extends Server {
       return null
     }
 
-    const entitlement = this.featuresUsage.get(featureSlug)
+    // get entitlement from db
+    const entitlement = await this.db
+      .select()
+      .from(entitlements)
+      .where(eq(entitlements.featureSlug, featureSlug))
+      .then((e) => e?.[0] ?? null)
 
     if (!entitlement) {
       return null
@@ -655,28 +665,57 @@ export class DurableObjectUsagelimiter extends Server {
           active: entitlement.active ? 1 : 0,
           realtime: entitlement.realtime ? 1 : 0,
         }
-        const result = await this.db
-          .insert(entitlements)
-          .values(data)
-          .onConflictDoUpdate({
-            target: entitlements.id,
-            set: {
-              ...data,
-            },
-          })
-          .returning()
-          .catch((e) => {
-            // TODO: log it
-            console.error("error setting entitlement from do", e)
-            return null
-          })
+
+        // find the entitlement by entitlementId
+        const existingEntitlement = await this.db
+          .select()
+          .from(entitlements)
+          .where(eq(entitlements.entitlementId, id))
           .then((e) => e?.[0] ?? null)
 
-        if (!result) {
-          return
-        }
+        if (existingEntitlement) {
+          // update the entitlement
+          const result = await this.db
+            .update(entitlements)
+            .set(data)
+            .where(eq(entitlements.id, existingEntitlement.id))
+            .returning()
+            .catch((e) => {
+              // TODO: log it
+              console.error("error setting entitlement from do", e)
+              return null
+            })
+            .then((e) => e?.[0] ?? null)
 
-        this.featuresUsage.set(entitlement.featureSlug, result)
+          if (!result) {
+            return
+          }
+
+          this.featuresUsage.set(entitlement.featureSlug, result)
+        } else {
+          const result = await this.db
+            .insert(entitlements)
+            .values(data)
+            .onConflictDoUpdate({
+              target: entitlements.id,
+              set: {
+                ...data,
+              },
+            })
+            .returning()
+            .catch((e) => {
+              // TODO: log it
+              console.error("error setting entitlement from do", e)
+              return null
+            })
+            .then((e) => e?.[0] ?? null)
+
+          if (!result) {
+            return
+          }
+
+          this.featuresUsage.set(entitlement.featureSlug, result)
+        }
       } catch (error) {
         // TODO: log it and alert
         console.error("error setting entitlement from do", error)
