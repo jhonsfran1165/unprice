@@ -143,13 +143,13 @@ export class DurableUsageLimiter implements UsageLimiter {
           }),
           (err) =>
             new FetchError({
-              message: "unable to query db",
+              message: "unable to query db for active subscription",
               retry: false,
               context: {
                 error: err.message,
                 url: "",
                 customerId: customerId,
-                method: "",
+                method: "getActiveSubscription",
               },
             })
         )
@@ -164,7 +164,7 @@ export class DurableUsageLimiter implements UsageLimiter {
               })
             ),
           (attempt, err) => {
-            this.logger.warn("Failed to fetch subscription data, retrying...", {
+            this.logger.warn("Failed to fetch subscription data from cache, retrying...", {
               customerId: customerId,
               attempt,
               error: err.message,
@@ -180,7 +180,7 @@ export class DurableUsageLimiter implements UsageLimiter {
       return Err(
         new FetchError({
           message: err.message,
-          retry: true,
+          retry: false,
           cause: err,
         })
       )
@@ -250,8 +250,14 @@ export class DurableUsageLimiter implements UsageLimiter {
             })
             .then((usage) => usage.data[0] ?? 0)
             .catch((error) => {
-              // TODO: log this error
-              console.error("error getting usage", error)
+              this.logger.error("error getting usage from analytics", {
+                error: error.message,
+                customerId,
+                method: "getFeaturesUsageTotal",
+                featureSlug,
+                startAt,
+                endAt,
+              })
 
               return null
             })
@@ -266,8 +272,14 @@ export class DurableUsageLimiter implements UsageLimiter {
         })
         .then((usage) => usage.data[0] ?? 0)
         .catch((error) => {
-          // TODO: log this error
-          console.error("error getting usage", error)
+          this.logger.error("error getting usage from analytics", {
+            error: error.message,
+            customerId,
+            method: "getFeaturesUsagePeriod",
+            featureSlug,
+            startAt,
+            endAt,
+          })
 
           return null
         }),
@@ -309,7 +321,7 @@ export class DurableUsageLimiter implements UsageLimiter {
     }
   }): Promise<CustomerEntitlementCache | null> {
     if (opts?.skipDO) {
-      // we data from the DO first, if not found then we query the db
+      // we get the data from the DO first, if not found then we query the db
       const { val: entitlementDO, err: entitlementDOErr } = await this.getActiveEntitlementFromDO(
         customerId,
         featureSlug
@@ -341,8 +353,13 @@ export class DurableUsageLimiter implements UsageLimiter {
                 )
               )
               .catch((e) => {
-                // TODO: log it
-                console.error("error setting entitlement", e)
+                this.logger.error("error setting entitlement usage 1", {
+                  error: e.message,
+                  customerId,
+                  featureSlug,
+                  projectId,
+                  now,
+                })
               }),
           ])
         )
@@ -376,8 +393,14 @@ export class DurableUsageLimiter implements UsageLimiter {
       )
       .then((e) => e[0])
       .catch((e) => {
-        // TODO: log it
-        console.error("error getting entitlement", e)
+        this.logger.error("error getting entitlement", {
+          error: e.message,
+          customerId,
+          featureSlug,
+          projectId,
+          now,
+        })
+
         return null
       })
 
@@ -429,8 +452,13 @@ export class DurableUsageLimiter implements UsageLimiter {
             )
           )
           .catch((e) => {
-            // TODO: log it
-            console.error("error setting entitlement", e)
+            this.logger.error("error setting entitlement usage 2", {
+              error: e.message,
+              customerId,
+              featureSlug,
+              projectId,
+              now,
+            })
           }),
       ])
     )
@@ -471,9 +499,6 @@ export class DurableUsageLimiter implements UsageLimiter {
     }
   ): Promise<Result<CustomerEntitlementCache | null, FetchError | UnPriceCustomerError>> {
     // first try to get the entitlement from cache, if not found try to get it from DO,
-    // if not found try to get it from db
-    // if found and expired, try to revalidate it
-    // if expired then return the error
     const { val, err } = opts?.skipCache
       ? await wrapResult(
           this.getEntitlementData({
@@ -493,7 +518,7 @@ export class DurableUsageLimiter implements UsageLimiter {
                 error: err.message,
                 url: "",
                 customerId: customerId,
-                method: "",
+                method: "getActiveEntitlement",
               },
             })
         )
@@ -560,6 +585,7 @@ export class DurableUsageLimiter implements UsageLimiter {
 
     return Ok(val)
   }
+
   public async revalidateEntitlement(
     customerId: string,
     featureSlug: string,
@@ -568,28 +594,14 @@ export class DurableUsageLimiter implements UsageLimiter {
     success: boolean
     message: string
   }> {
-    const { err: subscriptionErr, val: subscription } = await this.getActiveSubscription(
-      customerId,
-      projectId,
-      Date.now()
-    )
-
-    if (subscriptionErr) {
-      return { success: false, message: subscriptionErr.message }
-    }
-
-    if (!subscription) {
-      return { success: false, message: "customer has no active subscription" }
-    }
-
     const { err: entitlementErr, val: entitlement } = await this.getActiveEntitlement(
       customerId,
       featureSlug,
       projectId,
       Date.now(),
       {
-        skipCache: true,
-        skipDO: true,
+        skipCache: true, // skip cache to force revalidation
+        skipDO: true, // skip DO to force revalidation
       }
     )
 
@@ -600,10 +612,6 @@ export class DurableUsageLimiter implements UsageLimiter {
     if (!entitlement) {
       return { success: false, message: "entitlement not found" }
     }
-
-    // set the entitlement in the DO
-    const durableObject = this.getStub(this.getDurableObjectCustomerId(customerId))
-    durableObject.setEntitlement(entitlement)
 
     return { success: true, message: "entitlement revalidated" }
   }
@@ -650,6 +658,42 @@ export class DurableUsageLimiter implements UsageLimiter {
     return { success: true, message: "customer object deleted" }
   }
 
+  private isValidEntitlement(
+    entitlement: CustomerEntitlementCache,
+    now: number
+  ): {
+    valid: boolean
+    message: string
+    deniedReason?: DenyReason
+  } {
+    // check if the entitlement has expired
+    const validUntil = entitlement.validTo + entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
+
+    if (now > validUntil) {
+      return { valid: false, message: "entitlement expired", deniedReason: "ENTITLEMENT_EXPIRED" }
+    }
+
+    // if feature type is flat, we don't need to call the DO
+    if (entitlement.featureType === "flat") {
+      return {
+        valid: true,
+        message:
+          "feature is flat, limit is not applicable but events are billed. Please don't report usage for flat features to avoid overbilling.",
+      }
+    }
+
+    // check if the usage is over the limit
+    if (Number(entitlement.usage) > Number(entitlement.limit)) {
+      return {
+        valid: false,
+        message: "usage over the limit",
+        deniedReason: "LIMIT_EXCEEDED",
+      }
+    }
+
+    return { valid: true, message: "entitlement is valid" }
+  }
+
   public async can(data: CanRequest): Promise<{
     success: boolean
     message: string
@@ -685,14 +729,33 @@ export class DurableUsageLimiter implements UsageLimiter {
       return { success: false, message: "entitlement not found" }
     }
 
+    // after this point we can report the verification event
+    const durableObject = this.getStub(this.getDurableObjectCustomerId(data.customerId))
+
     const { valid, message, deniedReason } = this.isValidEntitlement(entitlement, Date.now())
 
     if (!valid) {
+      const latency = performance.now() - (data.performanceStart ?? 0)
+      await durableObject.insertVerification(
+        {
+          entitlementId: entitlement.id,
+          customerId: data.customerId,
+          projectId: data.projectId,
+          featureSlug: data.featureSlug,
+          requestId: data.requestId,
+          metadata: JSON.stringify(data.metadata),
+          featurePlanVersionId: entitlement.featurePlanVersionId,
+          subscriptionItemId: entitlement.subscriptionItemId,
+          subscriptionPhaseId: entitlement.subscriptionPhaseId,
+          subscriptionId: entitlement.subscriptionId,
+        },
+        data,
+        latency,
+        deniedReason
+      )
+
       return { success: false, message, deniedReason }
     }
-
-    // TODO: we could avoid call the DO if the limit is reached but we still need to report the verification
-    const durableObject = this.getStub(this.getDurableObjectCustomerId(data.customerId))
 
     let result = await durableObject.can(data)
 
@@ -709,44 +772,6 @@ export class DurableUsageLimiter implements UsageLimiter {
     }
 
     return result
-  }
-
-  private isValidEntitlement(
-    entitlement: CustomerEntitlementCache,
-    now: number
-  ): {
-    valid: boolean
-    message: string
-    deniedReason?: DenyReason
-  } {
-    // check if the entitlement has expired
-    const validUntil = entitlement.validTo + entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
-
-    if (now > validUntil) {
-      return { valid: false, message: "entitlement expired", deniedReason: "ENTITLEMENT_EXPIRED" }
-    }
-
-    // if feature type is flat, we don't need to call the DO
-    if (entitlement.featureType === "flat") {
-      return {
-        valid: true,
-        message:
-          "feature is flat, limit is not applicable but events are billed. Please don't report usage for flat features to avoid overbilling.",
-      }
-    }
-
-    // it's a valid entitlement
-    // check if the usage is over the limit
-    // TODO: here calculattion is not correct, we should use the aggregation method
-    if (Number(entitlement.usage) > Number(entitlement.limit)) {
-      return {
-        valid: false,
-        message: "usage over the limit",
-        deniedReason: "LIMIT_EXCEEDED",
-      }
-    }
-
-    return { valid: true, message: "entitlement is valid" }
   }
 
   public async reportUsage(data: ReportUsageRequest): Promise<ReportUsageResponse> {

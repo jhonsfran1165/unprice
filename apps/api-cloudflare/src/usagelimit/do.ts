@@ -12,6 +12,7 @@ import type { Env } from "~/env"
 import type { CanRequest, ReportUsageRequest, ReportUsageResponse } from "./interface"
 
 import { env } from "cloudflare:workers"
+import { ConsoleLogger, type Logger } from "@unprice/logging"
 import type { CustomerEntitlementCache } from "~/cache/namespaces"
 import type { DenyReason } from "~/errors/errors"
 
@@ -26,6 +27,8 @@ export class DurableObjectUsagelimiter extends Server {
   private db: DrizzleSqliteDODatabase<typeof schema>
   // tinybird analytics
   private analytics: Analytics
+  // logger
+  private logger: Logger
   // Default ttl for the usage records
   private readonly MS_TTL = 1000 * 5 // 5 secs
   // Debounce delay for the broadcast
@@ -42,10 +45,17 @@ export class DurableObjectUsagelimiter extends Server {
     super(ctx, env)
 
     this.db = drizzle(ctx.storage, { logger: false })
+
     this.analytics = new Analytics({
       emit: env.EMIT_METRICS_LOGS,
       tinybirdToken: env.TINYBIRD_TOKEN,
       tinybirdUrl: env.TINYBIRD_URL,
+    })
+
+    this.logger = new ConsoleLogger({
+      requestId: this.ctx.id.toString(),
+      application: "usagelimiter",
+      environment: env.ENV,
     })
 
     // block concurrency while initializing
@@ -58,13 +68,17 @@ export class DurableObjectUsagelimiter extends Server {
         this.initialized = true
 
         const now = Date.now()
+
         // get the usage for the customer for every feature
         const entitlementsDO = await this.db
           .select()
           .from(entitlements)
           .where(lte(entitlements.validFrom, now))
           .catch((e) => {
-            console.error("error getting entitlements from do", e)
+            this.logger.error("error getting entitlements from do", {
+              error: e.message,
+            })
+
             return []
           })
 
@@ -76,8 +90,10 @@ export class DurableObjectUsagelimiter extends Server {
           this.featuresUsage.set(e.featureSlug, e)
         })
       } catch (e) {
-        // TODO: log it and alert
-        console.error("error initializing do", e)
+        this.logger.error("error initializing do", {
+          error: e instanceof Error ? e.message : "unknown error",
+        })
+
         this.featuresUsage.clear()
         this.initialized = false
       }
@@ -89,26 +105,35 @@ export class DurableObjectUsagelimiter extends Server {
       await migrate(this.db, migrations)
     } catch (error) {
       // Log the error
-      console.error("error migrating", error)
-      console.error("Migration failed:", error)
+      this.logger.error("error migrating DO", {
+        error: error instanceof Error ? error.message : "unknown error",
+      })
 
-      // Log more details about the error
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
-
-      // Throw the error to prevent further execution that depends on successful migration
-      throw new Error("Database migration failed, cannot initialize Durable Object")
+      throw error
     }
   }
 
-  private isValidEntitlement(featureSlug: string) {
+  private isInitialized() {
     if (!this.initialized) {
       return {
         valid: false,
         message: "DO not initialized",
       }
+    }
+
+    return { valid: true, message: "DO initialized" }
+  }
+
+  private isValidEntitlement(featureSlug: string): {
+    valid: boolean
+    message: string
+    entitlement?: Entitlement
+    deniedReason?: DenyReason
+  } {
+    const { valid, message } = this.isInitialized()
+
+    if (!valid) {
+      return { valid, message }
     }
 
     const entitlement = this.featuresUsage.get(featureSlug)
@@ -120,10 +145,27 @@ export class DurableObjectUsagelimiter extends Server {
       }
     }
 
+    const now = Date.now()
+    // check if the entitlement has expired
+    const validUntil = entitlement.validTo + entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
+
+    if (now > validUntil) {
+      return { valid: false, message: "entitlement expired", deniedReason: "ENTITLEMENT_EXPIRED" }
+    }
+
     if (entitlement.featureType === "flat") {
       return {
         valid: false,
-        message: "entitlement is flat",
+        message:
+          "feature is flat, limit is not applicable but events are billed. Please don't report usage for flat features to avoid overbilling.",
+      }
+    }
+
+    if (Number(entitlement.usage) > Number(entitlement.limit)) {
+      return {
+        valid: false,
+        message: "entitlement limit exceeded",
+        deniedReason: "LIMIT_EXCEEDED",
       }
     }
 
@@ -134,32 +176,24 @@ export class DurableObjectUsagelimiter extends Server {
     }
   }
 
-  async can(data: CanRequest): Promise<{
-    success: boolean
-    message: string
+  public async insertVerification(
+    entitlement: {
+      entitlementId: string
+      customerId: string
+      projectId: string
+      featureSlug: string
+      requestId: string
+      metadata: string
+      featurePlanVersionId: string
+      subscriptionItemId: string | null
+      subscriptionPhaseId: string | null
+      subscriptionId: string | null
+    },
+    data: CanRequest,
+    latency: number,
     deniedReason?: DenyReason
-    entitlementNotFound?: boolean
-  }> {
-    // first get the entitlement
-    const { valid, message, entitlement } = this.isValidEntitlement(data.featureSlug)
-
-    if (!valid || !entitlement) {
-      return {
-        success: false,
-        message,
-        entitlementNotFound: !entitlement,
-      }
-    }
-
-    await this.ensureAlarmIsSet(data.secondsToLive)
-
-    // TODO: check this
-    // at this point we basically validate the user has access to the feature
-    const result = this.checkLimit(entitlement)
-    const latency = performance.now() - (data.performanceStart ?? 0)
-
-    // create a verification record
-    const verification = await this.db
+  ) {
+    return this.db
       .insert(verifications)
       .values({
         entitlementId: entitlement.entitlementId,
@@ -171,7 +205,7 @@ export class DurableObjectUsagelimiter extends Server {
         createdAt: Date.now(),
         latency: latency.toString() ?? "0",
         metadata: JSON.stringify(data.metadata),
-        deniedReason: result.deniedReason,
+        deniedReason: deniedReason,
         featurePlanVersionId: entitlement.featurePlanVersionId,
         subscriptionItemId: entitlement.subscriptionItemId,
         subscriptionPhaseId: entitlement.subscriptionPhaseId,
@@ -179,20 +213,85 @@ export class DurableObjectUsagelimiter extends Server {
       })
       .returning()
       .catch((e) => {
-        // TODO: log it
-        console.error("error inserting verification", e)
+        this.logger.error("error inserting verification", {
+          error: e instanceof Error ? e.message : "unknown error",
+        })
         return null
       })
       .then((result) => {
         return result?.[0] ?? null
       })
+  }
 
-    if (!verification) {
+  async can(data: CanRequest): Promise<{
+    success: boolean
+    message: string
+    deniedReason?: DenyReason
+    entitlementNotFound?: boolean
+  }> {
+    // first get the entitlement
+    const { valid, message, entitlement, deniedReason } = this.isValidEntitlement(data.featureSlug)
+
+    if (!entitlement) {
       return {
         success: false,
-        message: "error inserting verification",
+        message: "entitlement not found",
+        entitlementNotFound: true,
       }
     }
+
+    await this.ensureAlarmIsSet(data.secondsToLive)
+
+    const latency = performance.now() - (data.performanceStart ?? 0)
+
+    if (!valid) {
+      // insert verification
+      await this.insertVerification(
+        {
+          entitlementId: entitlement.entitlementId,
+          customerId: data.customerId,
+          projectId: data.projectId,
+          featureSlug: data.featureSlug,
+          requestId: data.requestId,
+          metadata: JSON.stringify(data.metadata),
+          featurePlanVersionId: entitlement.featurePlanVersionId,
+          subscriptionItemId: entitlement.subscriptionItemId,
+          subscriptionPhaseId: entitlement.subscriptionPhaseId,
+          subscriptionId: entitlement.subscriptionId,
+        },
+        data,
+        latency,
+        deniedReason
+      )
+
+      return {
+        success: false,
+        message,
+        deniedReason,
+      }
+    }
+
+    // at this point we basically validate the user has access to the feature
+    const result = this.checkLimit(entitlement)
+
+    // insert verification
+    await this.insertVerification(
+      {
+        entitlementId: entitlement.entitlementId,
+        customerId: data.customerId,
+        projectId: data.projectId,
+        featureSlug: data.featureSlug,
+        requestId: data.requestId,
+        metadata: JSON.stringify(data.metadata),
+        featurePlanVersionId: entitlement.featurePlanVersionId,
+        subscriptionItemId: entitlement.subscriptionItemId,
+        subscriptionPhaseId: entitlement.subscriptionPhaseId,
+        subscriptionId: entitlement.subscriptionId,
+      },
+      data,
+      latency,
+      result.deniedReason
+    )
 
     return {
       success: result.success,
@@ -208,7 +307,7 @@ export class DurableObjectUsagelimiter extends Server {
   } {
     switch (entitlement.featureType) {
       case "flat":
-        return { success: true, message: "flat feature" }
+        return { success: true, message: "flat feature is not applicable for usage limit" }
       case "tier":
       case "package":
       case "usage": {
@@ -259,8 +358,10 @@ export class DurableObjectUsagelimiter extends Server {
       })
       .returning()
       .catch((e) => {
-        // TODO: log it
-        console.error("error inserting usage from do", e)
+        this.logger.error("error inserting usage from do", {
+          error: e.message,
+        })
+
         throw e
       })
       .then((result) => {
@@ -308,7 +409,6 @@ export class DurableObjectUsagelimiter extends Server {
 
     // there is a default ttl for the usage records
     // alternatively we can use the secondsToLive from the request
-    // secondsToLive is a pro feature so depending on the plan we can use it or not
     const nextAlarm = secondsToLive ? Date.now() + secondsToLive * 1000 : Date.now() + this.MS_TTL
 
     // if there is no alarm set one given the ttl
@@ -394,12 +494,15 @@ export class DurableObjectUsagelimiter extends Server {
       .update(entitlements)
       .set({
         usage: newUsage.toString(),
+        lastUsageUpdateAt: Date.now(),
       })
       .where(eq(entitlements.id, entitlement.id))
       .returning()
       .catch((e) => {
-        // TODO: log it
-        console.error("error updating entitlement", e)
+        this.logger.error("error updating entitlement", {
+          error: e.message,
+        })
+
         return null
       })
       .then((result) => {
@@ -464,8 +567,10 @@ export class DurableObjectUsagelimiter extends Server {
           await this.analytics
             .ingestFeaturesVerification(transformedEvents)
             .catch((e) => {
-              // TODO: log it and alert
-              console.error("Failed to send verifications to Tinybird:", e)
+              this.logger.error("Failed to send verifications to Tinybird:", {
+                error: e.message,
+              })
+
               throw e
             })
             .then((data) => {
@@ -475,18 +580,23 @@ export class DurableObjectUsagelimiter extends Server {
               const total = rows + quarantined
 
               if (total >= ids.length) {
-                // TODO: log it quarantined rows
-                console.info("deleted verifications", rows)
+                this.logger.info("deleted verifications", {
+                  rows: total,
+                })
+
                 // Only delete events that were successfully sent
                 this.db.delete(verifications).where(inArray(verifications.id, ids))
                 processedCount += ids.length
               } else {
-                console.info("failed to send verifications to Tinybird", data)
+                this.logger.info("failed to send verifications to Tinybird", {
+                  data,
+                })
               }
             })
         } catch (error) {
-          // TODO: log it and alert
-          console.error("Failed to send verifications to Tinybird:", error)
+          this.logger.error("Failed to send verifications to Tinybird:", {
+            error: error instanceof Error ? error.message : "unknown error",
+          })
           // Don't delete events if sending failed
           // We'll try again in the next alarm
           break
@@ -496,8 +606,7 @@ export class DurableObjectUsagelimiter extends Server {
       lastProcessedId = verificationEvents[verificationEvents.length - 1]?.id ?? lastProcessedId
     }
 
-    // Log processing statistics
-    console.info(`Processed ${processedCount} verifications in this batch`)
+    this.logger.info(`Processed ${processedCount} verifications in this batch`)
   }
 
   async sendUsageToTinybird() {
@@ -536,18 +645,39 @@ export class DurableObjectUsagelimiter extends Server {
 
       if (deduplicatedEvents.length > 0) {
         try {
-          await this.analytics.ingestFeaturesUsage(deduplicatedEvents).catch((e) => {
-            // TODO: log it and alert
-            console.error("Failed to send events to Tinybird:", e)
-            throw e
-          })
+          await this.analytics
+            .ingestFeaturesUsage(deduplicatedEvents)
+            .catch((e) => {
+              this.logger.error("Failed to send events to Tinybird:", {
+                error: e.message,
+              })
 
-          // Only delete events that were successfully sent
-          await this.db.delete(usageRecords).where(inArray(usageRecords.id, ids))
-          processedCount += ids.length
+              throw e
+            })
+            .then(async (data) => {
+              const rows = data?.successful_rows ?? 0
+              const quarantined = data?.quarantined_rows ?? 0
+
+              const total = rows + quarantined
+
+              if (total >= ids.length) {
+                this.logger.info("deleted usage records", {
+                  rows: total,
+                })
+              } else {
+                this.logger.info("failed to send usage to Tinybird", {
+                  data,
+                })
+              }
+
+              // Only delete events that were successfully sent
+              await this.db.delete(usageRecords).where(inArray(usageRecords.id, ids))
+              processedCount += ids.length
+            })
         } catch (error) {
-          // TODO: log it and alert
-          console.error("Failed to send events to Tinybird:", error)
+          this.logger.error("Failed to send events to Tinybird:", {
+            error: error instanceof Error ? error.message : "unknown error",
+          })
           // Don't delete events if sending failed
           // We'll try again in the next alarm
           break
@@ -557,8 +687,7 @@ export class DurableObjectUsagelimiter extends Server {
       lastProcessedId = events[events.length - 1]?.id ?? lastProcessedId
     }
 
-    // Log processing statistics
-    console.info(`Processed ${processedCount} usage events in this batch`)
+    this.logger.info(`Processed ${processedCount} usage events in this batch`)
   }
 
   // websocket message handler
@@ -602,7 +731,7 @@ export class DurableObjectUsagelimiter extends Server {
         .from(verifications)
         .then((e) => e[0])
 
-      console.info(
+      this.logger.info(
         `DO has ${events?.count} events and ${verification_events?.count} verification events`
       )
 
@@ -681,8 +810,10 @@ export class DurableObjectUsagelimiter extends Server {
             .where(eq(entitlements.id, existingEntitlement.id))
             .returning()
             .catch((e) => {
-              // TODO: log it
-              console.error("error setting entitlement from do", e)
+              this.logger.error("error setting entitlement from do", {
+                error: e.message,
+              })
+
               return null
             })
             .then((e) => e?.[0] ?? null)
@@ -704,8 +835,10 @@ export class DurableObjectUsagelimiter extends Server {
             })
             .returning()
             .catch((e) => {
-              // TODO: log it
-              console.error("error setting entitlement from do", e)
+              this.logger.error("error setting entitlement from do", {
+                error: e.message,
+              })
+
               return null
             })
             .then((e) => e?.[0] ?? null)
@@ -717,8 +850,9 @@ export class DurableObjectUsagelimiter extends Server {
           this.featuresUsage.set(entitlement.featureSlug, result)
         }
       } catch (error) {
-        // TODO: log it and alert
-        console.error("error setting entitlement from do", error)
+        this.logger.error("error setting entitlement from do", {
+          error: error instanceof Error ? error.message : "unknown error",
+        })
       }
     })
   }
