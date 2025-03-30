@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@auth/core": "^0.34.1",
-    "@auth/drizzle-adapter": "1.4.1",
+    "@auth/drizzle-adapter": "1.8.0",
     "@t3-oss/env-nextjs": "0.9.1",
     "@unprice/db": "^0.1.0",
     "encoding": "^0.1.13",

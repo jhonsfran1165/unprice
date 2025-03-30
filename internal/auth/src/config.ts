@@ -46,6 +46,7 @@ export const authConfig: NextAuthConfig = {
   },
   debug: process.env.NODE_ENV === "development",
   adapter: {
+    // @ts-expect-error - Type mismatch between DrizzleAdapter and the database connection
     ...DrizzleAdapter(db.$primary, {
       usersTable: schema.users,
       accountsTable: schema.accounts,

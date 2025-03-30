@@ -21,9 +21,9 @@ export const entitlements = pgTableProject(
     featureType: text().$type<FeatureType>().notNull(),
     aggregationMethod: text().$type<AggregationMethod>().notNull(),
     // usage in the current billing cycle
-    usage: numeric().default("0"),
+    usage: numeric().notNull().default("0"),
     // accumulated usage in all time
-    accumulatedUsage: numeric().default("0"),
+    accumulatedUsage: numeric().notNull().default("0"),
     limit: integer(),
     lastUsageUpdateAt: integer().notNull(),
     // current billing cycle start and end dates used to revalidate and reset the usage

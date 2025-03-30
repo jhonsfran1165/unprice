@@ -87,9 +87,9 @@ export const customerEntitlements = pgTableProject(
     // limit is the limit of the feature that the customer is entitled to
     limit: integer("limit"),
     // usage is the usage of the feature that the customer has used
-    usage: numeric("usage"),
+    usage: numeric("usage").notNull().default("0"),
     // accumulatedUsage is the accumulated usage of the feature that the customer has used
-    accumulatedUsage: numeric("accumulated_usage"),
+    accumulatedUsage: numeric("accumulated_usage").notNull().default("0"),
     // // featureSlug is the slug of the feature that the customer is entitled to
     // featureSlug: text("feature_slug").notNull(),
     // // featureType is the type of the feature that the customer is entitled to

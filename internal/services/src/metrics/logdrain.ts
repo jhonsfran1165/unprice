@@ -5,23 +5,20 @@ import type { Metrics } from "./interface"
 
 export class LogdrainMetrics implements Metrics {
   private readonly requestId: string
+  private readonly logger: Logger
   private readonly environment: LogSchema["environment"]
   private readonly application: LogSchema["application"]
-  private readonly logger: Logger
-  private readonly isolateId?: string
 
   constructor(opts: {
     requestId: string
+    logger: Logger
     environment: LogSchema["environment"]
     application: LogSchema["application"]
-    logger: Logger
-    isolateId?: string
   }) {
     this.requestId = opts.requestId
+    this.logger = opts.logger
     this.environment = opts.environment
     this.application = opts.application
-    this.logger = opts.logger
-    this.isolateId = opts.isolateId
   }
 
   public emit(metric: Metric): void {
@@ -32,7 +29,6 @@ export class LogdrainMetrics implements Metrics {
       metric,
       environment: this.environment,
       application: this.application,
-      isolateId: this.isolateId,
     })
 
     this.logger.emit(log.toString(), {

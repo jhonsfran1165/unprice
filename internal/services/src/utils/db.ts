@@ -1,5 +1,5 @@
 import { createConnection } from "@unprice/db"
-import { env } from "./env.mjs"
+import { env } from "../../env"
 
 export const db = createConnection({
   env: env.NODE_ENV,

@@ -11,7 +11,6 @@ import serveEmojiFavicon from "stoker/middlewares/serve-emoji-favicon"
 
 export { DurableObjectUsagelimiter } from "~/usagelimit/do"
 import { registerReportUsageV1 } from "~/routes/customer/reportUsageV1"
-import { registerTest } from "~/routes/test"
 import { registerCanV1 } from "./routes/customer/canV1"
 import { registerDeleteCustomerV1 } from "./routes/customer/deleteCustomerV1"
 import { registerRevalidateEntitlementV1 } from "./routes/customer/revalidateEntitlementV1"
@@ -30,7 +29,7 @@ app.use(
     options: {
       prefix: "broadcast",
       onBeforeConnect: async (_req) => {
-        // this should be defined once frontend calls the api from nextjs
+        // TODO: this should be defined once frontend calls the api from nextjs
         const mockReq = new Request("https://example.com", {
           headers: {
             cookie:
@@ -46,8 +45,7 @@ app.use(
             env.NODE_ENV === "production"
               ? "__Secure-authjs.session-token"
               : "authjs.session-token",
-          // TODO: find a way to get this from the env
-          // secureCookie: env.ENV === "production",
+          secureCookie: env.NODE_ENV === "production",
         })
 
         if (!token) return new Response("Unauthorized", { status: 401 })
@@ -68,9 +66,6 @@ app.use(
   })
 )
 
-// Test routes
-registerTest(app)
-
 // Customer routes
 registerReportUsageV1(app)
 registerRevalidateEntitlementV1(app)
@@ -81,12 +76,14 @@ registerCanV1(app)
 const handler = {
   fetch: (req: Request, env: Env, executionCtx: ExecutionContext) => {
     const parsedEnv = zEnv.safeParse(env)
+
     if (!parsedEnv.success) {
       new ConsoleLogger({
         requestId: "",
         environment: env.ENV,
         application: "api",
       }).fatal(`BAD_ENVIRONMENT: ${parsedEnv.error.message}`)
+
       return Response.json(
         {
           code: "BAD_ENVIRONMENT",

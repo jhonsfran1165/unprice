@@ -12,6 +12,9 @@ export type ConnectionDatabaseOptions = {
   logger: boolean
 }
 
+export type Database = NeonDatabase<typeof schema>
+export type TransactionDatabase = Parameters<Parameters<Database["transaction"]>[0]>[0]
+
 export function createConnection(opts: ConnectionDatabaseOptions): PgWithReplicas<Database> {
   neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket : ws
 
@@ -80,5 +83,3 @@ export function createConnection(opts: ConnectionDatabaseOptions): PgWithReplica
 
 export * from "drizzle-orm"
 export { pgTableProject as tableCreator } from "./utils"
-export type Database = NeonDatabase<typeof schema>
-export type TransactionDatabase = Parameters<Parameters<Database["transaction"]>[0]>[0]

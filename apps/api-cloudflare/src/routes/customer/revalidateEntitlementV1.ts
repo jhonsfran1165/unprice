@@ -71,7 +71,12 @@ export const registerRevalidateEntitlementV1 = (app: App) =>
     }
 
     // validate usage from db
-    const result = await usagelimit.revalidateEntitlement(customerId, featureSlug, key.projectId)
+    const result = await usagelimit.revalidateEntitlement(
+      customerId,
+      featureSlug,
+      key.projectId,
+      Date.now()
+    )
 
     return c.json(result, HttpStatusCodes.OK)
   })

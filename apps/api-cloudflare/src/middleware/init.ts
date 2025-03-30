@@ -1,16 +1,14 @@
 import { newId } from "@unprice/id"
 import { ConsoleLogger } from "@unprice/logging"
+import { CacheService } from "@unprice/services/cache"
+import { LogdrainMetrics, NoopMetrics } from "@unprice/services/metrics"
+import type { Metrics } from "@unprice/services/metrics"
 import { Analytics } from "@unprice/tinybird"
 import type { MiddlewareHandler } from "hono"
 import { ApiKeysService } from "~/apikey/service"
-import { initCache } from "~/cache/service"
 import type { HonoEnv } from "~/hono/env"
-import type { Metrics } from "~/metrics"
-import { LogdrainMetrics } from "~/metrics/logdrain"
-import { NoopMetrics } from "~/metrics/noop"
 import { DurableUsageLimiter } from "~/usagelimit"
 import { createDb } from "~/util/db"
-
 /**
  * These maps persist between worker executions and are used for caching
  */
@@ -57,6 +55,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       logger: false,
     })
 
+    // TODO: define proper logger
     const logger = new ConsoleLogger({
       requestId,
       application: "api",
@@ -67,13 +66,20 @@ export function init(): MiddlewareHandler<HonoEnv> {
       ? new LogdrainMetrics({
           requestId,
           environment: c.env.ENV,
-          isolateId,
           logger,
           application: "api",
         })
       : new NoopMetrics()
 
-    const cache = initCache(c, metrics)
+    const cacheService = new CacheService(
+      {
+        waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      },
+      metrics
+    )
+
+    await cacheService.init()
+    const cache = cacheService.getCache()
 
     const analytics = new Analytics({
       emit: c.env.EMIT_METRICS_LOGS,

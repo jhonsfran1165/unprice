@@ -70,6 +70,7 @@ if [ "$MODE_ID" = "dev" ]; then
 
   # check if tinybird is running
   if [ "$RESTART_TINYBIRD" = "true" ]; then
+    TB_RESTARTED=true
     # restart tinybird
     tb local restart && tb update
   fi
@@ -80,7 +81,8 @@ if [ "$MODE_ID" = "dev" ]; then
   attempt=1
 
   while ! curl -s http://localhost:7181 > /dev/null 2>&1; do
-    if [ $attempt = 1 -a $RESTART_TINYBIRD = "false" ]; then
+    if [ $attempt = 1 -a $TB_RESTARTED = "false" ]; then
+      echo "Starting Tinybird"
       tb local start
     fi
 
@@ -98,8 +100,10 @@ if [ "$MODE_ID" = "dev" ]; then
   TB_TOKEN=$(curl -s http://localhost:7181/tokens | jq -r ".workspace_admin_token")
 
   # auth tb with the admin token
-  tb auth --token $TB_TOKEN --host $TB_HOST
+  echo "Authenticating Tinybird"
+  # tb auth --token $TB_TOKEN --host $TB_HOST
 
+  echo "Building Tinybird"
   if [ "$TB_RESTARTED" = true ]; then
     # build the project
     tb build
@@ -110,6 +114,7 @@ if [ "$MODE_ID" = "dev" ]; then
 
   cd ../../
 
+  echo "Starting the application"
   infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" AUTH_REDIRECT_PROXY_URL="$AUTH_REDIRECT_PROXY_URL" UPSTASH_REDIS_REST_URL="$REDIS_URL" UPSTASH_REDIS_REST_TOKEN="$REDIS_TOKEN" pnpm run dev
 
 elif [ "$MODE_ID" = "preview" ]; then

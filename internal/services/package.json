@@ -1,0 +1,42 @@
+{
+  "name": "@unprice/services",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./metrics": "./src/metrics/index.ts",
+    "./cache": "./src/cache/index.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": ["src/*"]
+    }
+  },
+  "license": "AGPL-3.0",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "^0.12.0",
+    "@unkey/cache": "^1.5.0",
+    "@unprice/config": "workspace:^",
+    "@unprice/db": "workspace:^",
+    "@unprice/error": "workspace:^",
+    "@unprice/logging": "workspace:^",
+    "@unprice/logs": "workspace:^",
+    "@unprice/metrics": "workspace:^",
+    "@unprice/stripe": "workspace:^",
+    "@unprice/tinybird": "workspace:^",
+    "date-fns": "^3.3.1",
+    "date-fns-tz": "^3.1.3",
+    "xstate": "^5.19.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@unprice/tsconfig": "workspace:*",
+    "typescript": "^5.3.3",
+    "vitest": "^2.0.5"
+  }
+}

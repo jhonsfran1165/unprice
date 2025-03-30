@@ -1,10 +1,10 @@
 import type { Database } from "@unprice/db"
 import type { Logger } from "@unprice/logging"
+import type { Cache } from "@unprice/services/cache"
+import type { Metrics } from "@unprice/services/metrics"
 import type { Analytics } from "@unprice/tinybird"
 import type { ApiKeysService } from "~/apikey/service"
-import type { Cache } from "~/cache"
 import type { Env } from "~/env"
-import type { Metrics } from "~/metrics"
 import type { UsageLimiter } from "~/usagelimit"
 
 export type ServiceContext = {

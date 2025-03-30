@@ -79,6 +79,7 @@ export const registerCanV1 = (app: App) =>
       projectId: key.projectId,
       requestId,
       performanceStart: performanceStart,
+      now: Date.now(),
     })
 
     return c.json(result, HttpStatusCodes.OK)

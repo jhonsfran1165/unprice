@@ -86,7 +86,10 @@ export const registerReportUsageV1 = (app: App) =>
       customerId,
       featureSlug,
       usage,
-      date: Date.now(),
+      // timestamp of the record
+      timestamp: Date.now(),
+      // now date
+      now: Date.now(),
       idempotenceKey,
       projectId: key.projectId,
       requestId,

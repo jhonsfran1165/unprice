@@ -7,13 +7,12 @@ import migrations from "../../drizzle/migrations"
 import { Analytics } from "@unprice/tinybird"
 import { count, eq, inArray, lte, sql } from "drizzle-orm"
 import { entitlements, usageRecords, verifications } from "~/db/schema"
-import type { Entitlement, schema } from "~/db/types"
+import type { Entitlement, NewEntitlement, schema } from "~/db/types"
 import type { Env } from "~/env"
 import type { CanRequest, ReportUsageRequest, ReportUsageResponse } from "./interface"
 
 import { env } from "cloudflare:workers"
 import { ConsoleLogger, type Logger } from "@unprice/logging"
-import type { CustomerEntitlementCache } from "~/cache/namespaces"
 import type { DenyReason } from "~/errors/errors"
 
 // This durable object takes care of handling the usage of every feature per customer.
@@ -52,6 +51,7 @@ export class DurableObjectUsagelimiter extends Server {
       tinybirdUrl: env.TINYBIRD_URL,
     })
 
+    // TODO: set a proper console log here
     this.logger = new ConsoleLogger({
       requestId: this.ctx.id.toString(),
       application: "usagelimiter",
@@ -142,6 +142,7 @@ export class DurableObjectUsagelimiter extends Server {
       return {
         valid: false,
         message: "entitlement not found in do",
+        deniedReason: "ENTITLEMENT_NOT_FOUND",
       }
     }
 
@@ -176,7 +177,7 @@ export class DurableObjectUsagelimiter extends Server {
     }
   }
 
-  public async insertVerification(
+  private async insertVerification(
     entitlement: {
       entitlementId: string
       customerId: string
@@ -242,7 +243,7 @@ export class DurableObjectUsagelimiter extends Server {
 
     await this.ensureAlarmIsSet(data.secondsToLive)
 
-    const latency = performance.now() - (data.performanceStart ?? 0)
+    const performanceStart = data.performanceStart ?? 0
 
     if (!valid) {
       // insert verification
@@ -260,7 +261,7 @@ export class DurableObjectUsagelimiter extends Server {
           subscriptionId: entitlement.subscriptionId,
         },
         data,
-        latency,
+        performance.now() - performanceStart,
         deniedReason
       )
 
@@ -289,7 +290,7 @@ export class DurableObjectUsagelimiter extends Server {
         subscriptionId: entitlement.subscriptionId,
       },
       data,
-      latency,
+      performance.now() - performanceStart,
       result.deniedReason
     )
 
@@ -344,7 +345,7 @@ export class DurableObjectUsagelimiter extends Server {
         customerId: data.customerId,
         featureSlug: data.featureSlug,
         usage: data.usage.toString(),
-        timestamp: data.date,
+        timestamp: data.timestamp,
         idempotenceKey: data.idempotenceKey,
         requestId: data.requestId,
         projectId: data.projectId,
@@ -371,7 +372,7 @@ export class DurableObjectUsagelimiter extends Server {
     if (!usageRecord) {
       return {
         success: false,
-        message: "error inserting usage, please try again later",
+        message: "error inserting usage from do, please try again later",
       }
     }
 
@@ -387,34 +388,24 @@ export class DurableObjectUsagelimiter extends Server {
 
     const result = await this.setUsage(entitlement, data.usage)
 
-    if (!result.success) {
-      return {
-        success: false,
-        message: result.message,
-      }
-    }
-
     // return usage
-    return {
-      success: true,
-      message: result.message,
-      notifyUsage: result.notifyUsage,
-    }
+    return result
   }
 
   private async ensureAlarmIsSet(secondsToLive?: number): Promise<void> {
     // we set alarms to send usage to tinybird periodically
     // this would avoid having too many events in the db as well
     const alarm = await this.ctx.storage.getAlarm()
+    const now = Date.now()
 
     // there is a default ttl for the usage records
     // alternatively we can use the secondsToLive from the request
-    const nextAlarm = secondsToLive ? Date.now() + secondsToLive * 1000 : Date.now() + this.MS_TTL
+    const nextAlarm = secondsToLive ? now + secondsToLive * 1000 : now + this.MS_TTL
 
     // if there is no alarm set one given the ttl
     if (!alarm) {
       this.ctx.storage.setAlarm(nextAlarm)
-    } else if (alarm < Date.now()) {
+    } else if (alarm < now) {
       // delete the alarm if it is in the past
       // and set it again
       this.ctx.storage.deleteAlarm()
@@ -447,7 +438,16 @@ export class DurableObjectUsagelimiter extends Server {
     }
   }
 
-  private async setUsage(entitlement: Entitlement, usage: number) {
+  private async setUsage(
+    entitlement: Entitlement,
+    usage: number
+  ): Promise<{
+    success: boolean
+    message: string
+    notifyUsage?: boolean
+    usage?: number
+    limit?: number
+  }> {
     const threshold = 80 // notify when the usage is 80% or more
     const limit = Number(entitlement.limit)
 
@@ -459,7 +459,8 @@ export class DurableObjectUsagelimiter extends Server {
       return {
         success: false,
         message: "feature is flat, limit is not applicable",
-        newUsage: 1,
+        usage: 1,
+        limit: 1,
       }
     }
 
@@ -516,7 +517,7 @@ export class DurableObjectUsagelimiter extends Server {
       }
     }
 
-    return { success: true, message, notifyUsage, entitlement: updatedEntitlement }
+    return { success: true, message, notifyUsage, usage: newUsage, limit }
   }
 
   onStart(): void | Promise<void> {
@@ -731,10 +732,6 @@ export class DurableObjectUsagelimiter extends Server {
         .from(verifications)
         .then((e) => e[0])
 
-      this.logger.info(
-        `DO has ${events?.count} events and ${verification_events?.count} verification events`
-      )
-
       const slugs = await this.db
         .select({
           featureSlug: entitlements.featureSlug,
@@ -778,35 +775,25 @@ export class DurableObjectUsagelimiter extends Server {
     return entitlement
   }
 
-  async setEntitlement(entitlement: CustomerEntitlementCache) {
+  async setEntitlement(entitlement: NewEntitlement) {
     if (!this.initialized) {
       return
     }
 
-    const { id, ...rest } = entitlement
     this.ctx.blockConcurrencyWhile(async () => {
       try {
-        const data = {
-          ...rest,
-          entitlementId: id,
-          metadata: JSON.stringify(entitlement.metadata),
-          isCustom: entitlement.isCustom ? 1 : 0,
-          active: entitlement.active ? 1 : 0,
-          realtime: entitlement.realtime ? 1 : 0,
-        }
-
         // find the entitlement by entitlementId
         const existingEntitlement = await this.db
           .select()
           .from(entitlements)
-          .where(eq(entitlements.entitlementId, id))
+          .where(eq(entitlements.entitlementId, entitlement.entitlementId))
           .then((e) => e?.[0] ?? null)
 
         if (existingEntitlement) {
           // update the entitlement
           const result = await this.db
             .update(entitlements)
-            .set(data)
+            .set(entitlement)
             .where(eq(entitlements.id, existingEntitlement.id))
             .returning()
             .catch((e) => {
@@ -826,13 +813,7 @@ export class DurableObjectUsagelimiter extends Server {
         } else {
           const result = await this.db
             .insert(entitlements)
-            .values(data)
-            .onConflictDoUpdate({
-              target: entitlements.id,
-              set: {
-                ...data,
-              },
-            })
+            .values(entitlement)
             .returning()
             .catch((e) => {
               this.logger.error("error setting entitlement from do", {

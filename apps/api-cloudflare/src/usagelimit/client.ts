@@ -9,10 +9,10 @@ import {
 import type { AggregationMethod } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
+import type { Cache, CustomerEntitlementCache, SubcriptionCache } from "@unprice/services/cache"
+import type { Metrics } from "@unprice/services/metrics"
 import type { Analytics } from "@unprice/tinybird"
-import type { Cache, CustomerEntitlementCache, SubcriptionCache } from "~/cache"
 import { type DenyReason, UnPriceCustomerError } from "~/errors"
-import type { Metrics } from "~/metrics/interface"
 import { retry } from "~/util/retry"
 import type { DurableObjectUsagelimiter } from "./do"
 import type { CanRequest, ReportUsageRequest, ReportUsageResponse, UsageLimiter } from "./interface"
@@ -430,7 +430,19 @@ export class DurableUsageLimiter implements UsageLimiter {
 
     const durableObject = this.getStub(this.getDurableObjectCustomerId(customerId))
     // set the entitlement in the DO
-    durableObject.setEntitlement(result)
+
+    const { id, ...rest } = result
+
+    const data = {
+      ...rest,
+      entitlementId: id,
+      metadata: JSON.stringify(result.metadata),
+      isCustom: result.isCustom ? 1 : 0,
+      active: result.active ? 1 : 0,
+      realtime: result.realtime ? 1 : 0,
+    }
+
+    durableObject.setEntitlement(data)
 
     this.waitUntil(
       Promise.all([
@@ -589,7 +601,8 @@ export class DurableUsageLimiter implements UsageLimiter {
   public async revalidateEntitlement(
     customerId: string,
     featureSlug: string,
-    projectId: string
+    projectId: string,
+    now: number
   ): Promise<{
     success: boolean
     message: string
@@ -598,7 +611,7 @@ export class DurableUsageLimiter implements UsageLimiter {
       customerId,
       featureSlug,
       projectId,
-      Date.now(),
+      now,
       {
         skipCache: true, // skip cache to force revalidation
         skipDO: true, // skip DO to force revalidation
@@ -658,42 +671,6 @@ export class DurableUsageLimiter implements UsageLimiter {
     return { success: true, message: "customer object deleted" }
   }
 
-  private isValidEntitlement(
-    entitlement: CustomerEntitlementCache,
-    now: number
-  ): {
-    valid: boolean
-    message: string
-    deniedReason?: DenyReason
-  } {
-    // check if the entitlement has expired
-    const validUntil = entitlement.validTo + entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
-
-    if (now > validUntil) {
-      return { valid: false, message: "entitlement expired", deniedReason: "ENTITLEMENT_EXPIRED" }
-    }
-
-    // if feature type is flat, we don't need to call the DO
-    if (entitlement.featureType === "flat") {
-      return {
-        valid: true,
-        message:
-          "feature is flat, limit is not applicable but events are billed. Please don't report usage for flat features to avoid overbilling.",
-      }
-    }
-
-    // check if the usage is over the limit
-    if (Number(entitlement.usage) > Number(entitlement.limit)) {
-      return {
-        valid: false,
-        message: "usage over the limit",
-        deniedReason: "LIMIT_EXCEEDED",
-      }
-    }
-
-    return { valid: true, message: "entitlement is valid" }
-  }
-
   public async can(data: CanRequest): Promise<{
     success: boolean
     message: string
@@ -702,7 +679,7 @@ export class DurableUsageLimiter implements UsageLimiter {
     const { err: subscriptionErr, val: subscription } = await this.getActiveSubscription(
       data.customerId,
       data.projectId,
-      Date.now()
+      data.now
     )
 
     if (subscriptionErr) {
@@ -718,7 +695,7 @@ export class DurableUsageLimiter implements UsageLimiter {
       data.customerId,
       data.featureSlug,
       data.projectId,
-      Date.now()
+      data.now
     )
 
     if (entitlementErr) {
@@ -729,35 +706,20 @@ export class DurableUsageLimiter implements UsageLimiter {
       return { success: false, message: "entitlement not found" }
     }
 
+    if (entitlement.featureType === "flat") {
+      return {
+        success: true,
+        message: "Flat fearture",
+      }
+    }
+
+    // INFO: we could check if the entitlement already hit the limit from here to avoid
+    // calling the DO all the time.
+
     // after this point we can report the verification event
     const durableObject = this.getStub(this.getDurableObjectCustomerId(data.customerId))
 
-    const { valid, message, deniedReason } = this.isValidEntitlement(entitlement, Date.now())
-
-    if (!valid) {
-      const latency = performance.now() - (data.performanceStart ?? 0)
-      await durableObject.insertVerification(
-        {
-          entitlementId: entitlement.id,
-          customerId: data.customerId,
-          projectId: data.projectId,
-          featureSlug: data.featureSlug,
-          requestId: data.requestId,
-          metadata: JSON.stringify(data.metadata),
-          featurePlanVersionId: entitlement.featurePlanVersionId,
-          subscriptionItemId: entitlement.subscriptionItemId,
-          subscriptionPhaseId: entitlement.subscriptionPhaseId,
-          subscriptionId: entitlement.subscriptionId,
-        },
-        data,
-        latency,
-        deniedReason
-      )
-
-      return { success: false, message, deniedReason }
-    }
-
-    let result = await durableObject.can(data)
+    const result = await durableObject.can(data)
 
     // if the entitlement is not found at this point, it means it is in cache
     // but not in the DO, we need to revalidate the entitlement
@@ -765,10 +727,10 @@ export class DurableUsageLimiter implements UsageLimiter {
       // delete from cache and revalidate the entitlement
       await this.cache.customerEntitlement.remove(`${data.customerId}:${data.featureSlug}`)
       // revalidate the entitlement
-      await this.revalidateEntitlement(data.customerId, data.featureSlug, data.projectId)
+      await this.revalidateEntitlement(data.customerId, data.featureSlug, data.projectId, data.now)
 
       // try again
-      result = await durableObject.can(data)
+      return await durableObject.can(data)
     }
 
     return result
@@ -800,7 +762,7 @@ export class DurableUsageLimiter implements UsageLimiter {
       const idempotentKey =
         env.NODE_ENV === "production"
           ? `${data.idempotenceKey}`
-          : `${data.idempotenceKey}:${data.date}`
+          : `${data.idempotenceKey}:${data.now}`
 
       // Fast path: check if the event has already been sent to the DO
       const { val: sent } = await this.cache.idempotentRequestUsageByHash.get(idempotentKey)
@@ -817,7 +779,7 @@ export class DurableUsageLimiter implements UsageLimiter {
         data.customerId,
         data.featureSlug,
         data.projectId,
-        Date.now()
+        data.now
       )
 
       if (entitlementErr) {
@@ -828,14 +790,8 @@ export class DurableUsageLimiter implements UsageLimiter {
         return { success: false, message: "entitlement not found" }
       }
 
-      // TODO: should we report the usage even if the entitlement is expired?
-      // TODO: should we report the usage even if the entitlement has reached the limit?
-      if (entitlement) {
-        const { valid, message } = this.isValidEntitlement(entitlement, data.date)
-
-        if (!valid) {
-          return { success: false, message }
-        }
+      if (entitlement.featureType === "flat") {
+        return { success: true, message: "Flat fearture, not applicable for usage limit" }
       }
 
       // Report usage path: send the usage to the DO
@@ -848,14 +804,15 @@ export class DurableUsageLimiter implements UsageLimiter {
         // delete from cache and revalidate the entitlement
         await this.cache.customerEntitlement.remove(`${data.customerId}:${data.featureSlug}`)
         // revalidate the entitlement
-        await this.revalidateEntitlement(data.customerId, data.featureSlug, data.projectId)
+        await this.revalidateEntitlement(
+          data.customerId,
+          data.featureSlug,
+          data.projectId,
+          data.now
+        )
 
         // try again
         result = await d.reportUsage(data)
-      }
-
-      if (!result.success) {
-        return result
       }
 
       const response = {

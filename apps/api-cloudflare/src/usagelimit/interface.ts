@@ -6,15 +6,16 @@ export const reportUsageSchema = z.object({
   usage: z.number(),
   idempotenceKey: z.string(),
   secondsToLive: z.number().optional(),
-  timestamp: z.number().optional(),
+  timestamp: z.number(),
   projectId: z.string(),
-  date: z.number(),
+  now: z.number().default(Date.now()),
   sync: z.boolean().optional(),
   requestId: z.string(),
   metadata: z.record(z.string(), z.any()).optional(),
 })
 
 export const canSchema = z.object({
+  now: z.number(),
   customerId: z.string(),
   featureSlug: z.string(),
   projectId: z.string(),
@@ -55,7 +56,8 @@ export interface UsageLimiter {
   revalidateEntitlement(
     customerId: string,
     featureSlug: string,
-    projectId: string
+    projectId: string,
+    now: number
   ): Promise<{
     success: boolean
     message: string
