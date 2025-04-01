@@ -1,6 +1,5 @@
 "use client"
 
-import type { RouterOutputs } from "@unprice/api"
 import {
   FEATURE_TYPES_MAPS,
   TIER_MODES_MAP,
@@ -8,6 +7,7 @@ import {
   currencySymbol,
 } from "@unprice/db/utils"
 import { calculateFreeUnits, calculatePricePerFeature } from "@unprice/db/validators"
+import type { RouterOutputs } from "@unprice/trpc"
 import { CheckIcon, HelpCircle } from "@unprice/ui/icons"
 import { Slider } from "@unprice/ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"

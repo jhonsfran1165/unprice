@@ -1,6 +1,6 @@
 import { QueryClient, defaultShouldDehydrateQuery } from "@tanstack/react-query"
 import { TRPCClientError } from "@trpc/client"
-import { transformer } from "@unprice/api/transformer"
+import { transformer } from "@unprice/trpc/transformer"
 import { getErrorMessage } from "~/lib/handle-error"
 import { toastAction } from "~/lib/toast"
 

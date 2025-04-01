@@ -27,55 +27,26 @@
 // main()
 
 import { randomUUID } from "node:crypto"
-import { Unprice } from "@unprice/unprice"
+import { Unprice } from "@unprice/api"
 
 const unprice = new Unprice({
   token: process.env.UNPRICE_TOKEN || "",
-  baseUrl: "http://api.localhost:3000",
+  baseUrl: "http://localhost:8787",
 })
 
 async function main() {
-  const customerId = "cus_1GTzSGrapiBW1QwCL3Fcn"
+  const now = performance.now()
+  const customerId = "cus_1H7KQFLr7RepUyQBKdnvY"
 
   // get the usage
-  const entitlements = await unprice.customers.entitlements({
-    customerId,
+  const entitlements = await unprice.customers.reportUsage(customerId, {
+    featureSlug: "tokens",
+    usage: 100,
+    idempotenceKey: randomUUID(),
   })
 
-  for (const entitlement of entitlements.result?.entitlements ?? []) {
-    // report random usage between 0 and 100
-    const usage = Math.floor(Math.random() * 100)
-
-    // before reporting usage lets verify the feature
-    const verifyFeature = await unprice.customers.can({
-      customerId,
-      featureSlug: entitlement.featureSlug,
-    })
-
-    console.info("Verify feature", entitlement.featureSlug)
-
-    if (!verifyFeature.result?.access) {
-      console.info(
-        `Feature ${entitlement.featureSlug} don't have access, ${verifyFeature.result?.deniedReason}`
-      )
-      continue
-    }
-
-    if (
-      entitlement.featureType === "usage" ||
-      entitlement.featureType === "tier" ||
-      entitlement.featureType === "package"
-    ) {
-      console.info(`Reporting usage for entitlement ${entitlement.featureSlug}: ${usage}`)
-
-      await unprice.customers.reportUsage({
-        customerId,
-        featureSlug: entitlement.featureSlug,
-        usage,
-        idempotenceKey: randomUUID(),
-      })
-    }
-  }
+  console.info(entitlements)
+  console.info(`Time taken: ${performance.now() - now}ms`)
 }
 
 main()

@@ -1,4 +1,7 @@
 import { createEnv } from "@t3-oss/env-core"
+import { env as authEnv } from "@unprice/auth/env"
+import { env as stripeEnv } from "@unprice/stripe/env"
+import { env as trpcEnv } from "@unprice/trpc/env"
 import { z } from "zod"
 
 export const env = createEnv({
@@ -18,4 +21,5 @@ export const env = createEnv({
   clientPrefix: "NEXT_PUBLIC_",
   client: {},
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
+  extends: [authEnv, stripeEnv, trpcEnv],
 })

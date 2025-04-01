@@ -1,6 +1,6 @@
 import { Pencil } from "lucide-react"
 
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Button } from "@unprice/ui/button"
 import { Card, CardContent, CardFooter } from "@unprice/ui/card"
 import { Separator } from "@unprice/ui/separator"

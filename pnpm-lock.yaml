@@ -45,7 +45,7 @@ importers:
         specifier: ^5.3.3
         version: 5.8.2
 
-  apps/api-cloudflare:
+  apps/api:
     dependencies:
       '@auth/core':
         specifier: ^0.34.1
@@ -184,9 +184,6 @@ importers:
       '@next/mdx':
         specifier: 14.3.0-canary.44
         version: 14.3.0-canary.44
-      '@potatohd/trpc-openapi':
-        specifier: ^1.2.3
-        version: 1.2.3(@trpc/server@11.0.0-rc.761)(@types/node@20.11.24)(zod@3.24.2)
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.0.6
         version: 2.1.6(@types/react-dom@18.3.5)(@types/react@18.3.18)(react-dom@18.3.1)(react@18.3.1)
@@ -289,6 +286,9 @@ importers:
       highlight.js:
         specifier: ^11.9.0
         version: 11.11.1
+      jiti:
+        specifier: 2.4.2
+        version: 2.4.2
       jotai:
         specifier: ^2.7.0
         version: 2.12.2(@types/react@18.3.18)(react@18.3.1)
@@ -828,15 +828,6 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
-      '@trpc-limiter/core':
-        specifier: 1.0.0
-        version: 1.0.0(@trpc/server@11.0.0-rc.761)
-      '@trpc-limiter/memory':
-        specifier: ^1.0.0
-        version: 1.0.0(@trpc/server@11.0.0-rc.761)
-      '@trpc-limiter/upstash':
-        specifier: ^1.0.0
-        version: 1.0.0(@trpc/server@11.0.0-rc.761)(@upstash/ratelimit@2.0.5)(@upstash/redis@1.34.5)
       '@trpc/server':
         specifier: 11.0.0-rc.761
         version: 11.0.0-rc.761(typescript@5.8.2)
@@ -1093,11 +1084,7 @@ importers:
         specifier: ^5.3.3
         version: 5.8.2
 
-  packages/unprice:
-    dependencies:
-      superjson:
-        specifier: 2.2.1
-        version: 2.2.1
+  packages/api:
     devDependencies:
       '@types/node':
         specifier: 20.11.24
@@ -1114,6 +1101,9 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.8.2
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.9(@types/node@20.11.24)
 
   tooling/k6:
     devDependencies:
@@ -1185,12 +1175,12 @@ importers:
       '@tinybirdco/mockingbird':
         specifier: 2.0.0-rc.0
         version: 2.0.0-rc.0
+      '@unprice/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@unprice/tinybird':
         specifier: workspace:*
         version: link:../../internal/tinybird
-      '@unprice/unprice':
-        specifier: workspace:*
-        version: link:../../packages/unprice
       zod:
         specifier: ^3.24.2
         version: 3.24.2
@@ -9891,42 +9881,6 @@ packages:
       - bufferutil
       - supports-color
       - utf-8-validate
-    dev: false
-
-  /@trpc-limiter/core@1.0.0(@trpc/server@11.0.0-rc.761):
-    resolution: {integrity: sha512-Wjq2oTCmCdwNbZKRfKpzpl1Um9QXGE8OHXOab+EUSj5Wk+26I/V6Vs2p0VBFAz6eEsBn36982cCC/vaaznA8+Q==}
-    engines: {node: '>=16'}
-    peerDependencies:
-      '@trpc/client': next
-      '@trpc/server': next
-    dependencies:
-      '@trpc/server': 11.0.0-rc.761(typescript@5.8.2)
-    dev: false
-
-  /@trpc-limiter/memory@1.0.0(@trpc/server@11.0.0-rc.761):
-    resolution: {integrity: sha512-3ahqbHV7mVLH7+H69kOaNozMsID+3P4hoU178viPIGbfrOCiu2SGUFgB+TdGl2SZ6PNPmeCACF1AlfTfIerDvw==}
-    engines: {node: '>=16'}
-    peerDependencies:
-      '@trpc/client': next
-      '@trpc/server': next
-    dependencies:
-      '@trpc-limiter/core': 1.0.0(@trpc/server@11.0.0-rc.761)
-      '@trpc/server': 11.0.0-rc.761(typescript@5.8.2)
-    dev: false
-
-  /@trpc-limiter/upstash@1.0.0(@trpc/server@11.0.0-rc.761)(@upstash/ratelimit@2.0.5)(@upstash/redis@1.34.5):
-    resolution: {integrity: sha512-TsMkHd/a6GtXvsuSevBwaRHrTBWIz3IW9D5ggAJg5iYg6Ocew42iNqxX/n7L143z3C9vW1purBDdFaDK0zK/zQ==}
-    engines: {node: '>=16'}
-    peerDependencies:
-      '@trpc/client': next
-      '@trpc/server': next
-      '@upstash/ratelimit': ^0.1.5
-      '@upstash/redis': ^1.18.0
-    dependencies:
-      '@trpc-limiter/core': 1.0.0(@trpc/server@11.0.0-rc.761)
-      '@trpc/server': 11.0.0-rc.761(typescript@5.8.2)
-      '@upstash/ratelimit': 2.0.5(@upstash/redis@1.34.5)
-      '@upstash/redis': 1.34.5
     dev: false
 
   /@trpc/client@11.0.0-rc.761(@trpc/server@11.0.0-rc.761)(typescript@5.8.2):

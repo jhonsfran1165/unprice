@@ -1,8 +1,8 @@
 "use client"
 import { useCallback } from "react"
 
-import type { RouterOutputs } from "@unprice/api"
 import { calculatePricePerFeature } from "@unprice/db/validators"
+import type { RouterOutputs } from "@unprice/trpc"
 import { isZero } from "dinero.js"
 
 type PlanVersionResponse = RouterOutputs["planVersions"]["listByUnpriceProject"]["planVersions"][0]

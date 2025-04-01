@@ -13,7 +13,7 @@
   "dependencies": {
     "@tinybirdco/mockingbird": "2.0.0-rc.0",
     "@unprice/tinybird": "workspace:*",
-    "@unprice/unprice": "workspace:*",
+    "@unprice/api": "workspace:*",
     "zod": "^3.24.2"
   },
   "devDependencies": {

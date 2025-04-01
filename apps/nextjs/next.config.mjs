@@ -1,14 +1,13 @@
-import "@unprice/auth/env"
-import "@unprice/stripe/env"
-import "@unprice/trpc/env"
-import "./src/env.ts"
+import { createJiti } from "jiti"
+import { fileURLToPath } from "node:url"
+
+const jiti = createJiti(fileURLToPath(import.meta.url))
+
+jiti.import("./src/env")
 
 import path from "node:path"
 
-import { fileURLToPath } from "node:url"
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __dirname = path.resolve()
 
 // import MillionLint from "@million/lint"
 import createMDX from "@next/mdx"
@@ -40,9 +39,6 @@ const nextConfig = {
     optimizePackageImports: ["@unprice/ui", "@unprice/trpc", "@unprice/auth", "@unprice/db"],
     instrumentationHook: process.env.NODE_ENV === "production",
   },
-  /** We already do linting and typechecking as separate tasks in CI */
-  eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
   /**
    * This is a workaround to allow us to use inside api a path alias
    * TODO: remove when api is deployed as an app
@@ -54,16 +50,14 @@ const nextConfig = {
     }
     return config
   },
+  /** We already do linting and typechecking as separate tasks in CI */
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
 }
 
-const withMDX = createMDX({
-  // Add markdown plugins here, as desired
-  options: {
-    remarkPlugins: [],
-    rehypePlugins: [],
-  },
-})
+const withMDX = createMDX()
 
+// Export the combined config
 export default withMDX(nextConfig)
 
 // TODO: try to use million

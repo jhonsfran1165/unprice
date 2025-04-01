@@ -1,5 +1,5 @@
-import type { RouterOutputs } from "@unprice/api"
 import { calculateFlatPricePlan } from "@unprice/db/validators"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Button } from "@unprice/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@unprice/ui/card"
 import { Skeleton } from "@unprice/ui/skeleton"

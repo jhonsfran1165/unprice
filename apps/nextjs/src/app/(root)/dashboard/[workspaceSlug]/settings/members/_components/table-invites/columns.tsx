@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { formatRelative } from "date-fns"
 
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Checkbox } from "@unprice/ui/checkbox"
 
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"

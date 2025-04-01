@@ -6,7 +6,7 @@ import { PaymentMethodForm } from "~/components/forms/payment-method-form"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
 import { Badge } from "@unprice/ui/badge"
 import { Button } from "@unprice/ui/button"

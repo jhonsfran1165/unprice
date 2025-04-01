@@ -8,6 +8,13 @@
       "when": 1742634679626,
       "tag": "0000_living_amphibian",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1743532893975,
+      "tag": "0001_calm_sleeper",
+      "breakpoints": true
     }
   ]
 }

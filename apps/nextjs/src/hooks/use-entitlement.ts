@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { atom, useAtom } from "jotai"
 
 export const entitlementsAtom = atom<{

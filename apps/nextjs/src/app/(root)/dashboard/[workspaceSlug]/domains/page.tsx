@@ -1,7 +1,7 @@
 import { ExternalLink, Globe } from "lucide-react"
 import { Suspense } from "react"
 
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Badge } from "@unprice/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@unprice/ui/card"
 

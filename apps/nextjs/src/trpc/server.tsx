@@ -4,10 +4,10 @@ import { cookies, headers } from "next/headers"
 import { cache } from "react"
 
 import { createHydrationHelpers } from "@trpc/react-query/rsc"
-import { type appRouter, createCaller, createTRPCContext } from "@unprice/api"
 import { getSession } from "@unprice/auth/server-rsc"
 import { COOKIES_APP } from "@unprice/config"
 import { newId } from "@unprice/db/utils"
+import { type appRouter, createCaller, createTRPCContext } from "@unprice/trpc"
 import { createQueryClient } from "./shared"
 
 /**

@@ -7,7 +7,7 @@
     "./server": "./src/server.ts",
     "./server-rsc": "./src/server-rsc.ts",
     "./config": "./src/config.ts",
-    "./env": "./src/env.mjs"
+    "./env": "./src/env.ts"
   },
   "typesVersions": {
     "*": {

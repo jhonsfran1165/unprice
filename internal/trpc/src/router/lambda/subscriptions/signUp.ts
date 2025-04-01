@@ -3,9 +3,9 @@ import { SubscriptionService } from "@unprice/services/subscriptions"
 import { z } from "zod"
 
 import { TRPCError } from "@trpc/server"
-import { rateLimiterProcedure } from "#trpc"
+import { publicProcedure } from "#trpc"
 
-export const signUp = rateLimiterProcedure
+export const signUp = publicProcedure
   .input(
     subscriptionInsertSchema.required({
       projectId: true,

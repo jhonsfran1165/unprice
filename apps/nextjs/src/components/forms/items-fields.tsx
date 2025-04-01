@@ -14,7 +14,6 @@ import {
   useFieldArray,
 } from "react-hook-form"
 
-import type { RouterOutputs } from "@unprice/api"
 import { currencySymbol } from "@unprice/db/utils"
 import type {
   Currency,
@@ -27,6 +26,7 @@ import {
   calculatePricePerFeature,
   createDefaultSubscriptionConfig,
 } from "@unprice/db/validators"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Button } from "@unprice/ui/button"
 import {
   Dialog,

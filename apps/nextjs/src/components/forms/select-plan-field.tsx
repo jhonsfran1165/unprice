@@ -1,6 +1,6 @@
 "use client"
-import type { RouterOutputs } from "@unprice/api"
 import { getBillingCycleMessage } from "@unprice/db/validators"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Badge } from "@unprice/ui/badge"
 import { Button } from "@unprice/ui/button"
 import {

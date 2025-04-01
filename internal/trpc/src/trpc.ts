@@ -1,8 +1,6 @@
 import { tracing } from "@baselime/trpc-opentelemetry-middleware"
 import type { Session } from "@unprice/auth/server"
 import "server-only"
-
-import { createTRPCStoreLimiter } from "@trpc-limiter/memory"
 import { TRPCError, initTRPC } from "@trpc/server"
 import type { Cache as C } from "@unkey/cache"
 import type { NextAuthRequest } from "@unprice/auth"
@@ -203,14 +201,6 @@ export const t = initTRPC.context<typeof createTRPCContext>().create({
   },
 })
 
-const rateLimiterMemory = createTRPCStoreLimiter<typeof t>({
-  fingerprint: (ctx) => ctx.req?.ip ?? ctx.ip,
-  message: (hitInfo) =>
-    `Mem! Too many requests, please try again in ${hitInfo} seconds. Don't DDoS me pls 🥺`,
-  max: 100, // 100 requests per second
-  windowMs: 1000, // 1 second
-})
-
 /**
  * Create a server-side caller
  * @see https://trpc.io/docs/server/server-side-calls
@@ -239,10 +229,6 @@ export const mergeRouters = t.mergeRouters
  * can still access user session data if they are logged in
  */
 export const publicProcedure = t.procedure.use(tracing({ collectInput: true }))
-
-// rate limit per tier, first memory then redis
-// useful for limiting public endpoints that don't need strict rate limiting
-export const rateLimiterProcedure = publicProcedure.use(rateLimiterMemory)
 
 /**
  * Reusable procedure that enforces users are logged in before running the

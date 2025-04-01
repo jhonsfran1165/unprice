@@ -4,7 +4,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./env": "./src/env.mjs",
+    "./env": "./src/env.ts",
     "./routes": "./src/routes.ts",
     "./transformer": "./src/transformer.ts",
     "./services/subscriptions": "./src/services/subscriptions/index.ts",
@@ -23,7 +23,7 @@
   "imports": {
     "#*": "./src/*.ts",
     "#services/*": "./src/services/*.ts",
-    "#env": "./src/env.mjs"
+    "#env": "./src/env.ts"
   },
   "license": "AGPL-3.0",
   "scripts": {
@@ -38,9 +38,6 @@
     "@dinero.js/currencies": "2.0.0-alpha.14",
     "@potatohd/trpc-openapi": "^1.2.3",
     "@t3-oss/env-core": "^0.12.0",
-    "@trpc-limiter/core": "1.0.0",
-    "@trpc-limiter/memory": "^1.0.0",
-    "@trpc-limiter/upstash": "^1.0.0",
     "@trpc/server": "11.0.0-rc.761",
     "@unkey/cache": "^1.5.0",
     "@unprice/auth": "workspace:^",

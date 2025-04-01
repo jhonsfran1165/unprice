@@ -82,20 +82,12 @@ export const customerEntitlements = pgTableProject(
     subscriptionPhaseId: cuid("subscription_phase_id"),
 
     // ****************** defaults from plan version features ******************
-    // These fields are duplicate but help us to improve the performance when checking the usage
-    // and to avoid joins. Also help us to overwrite limits if needed.
     // limit is the limit of the feature that the customer is entitled to
     limit: integer("limit"),
     // usage is the usage of the feature that the customer has used
     usage: numeric("usage").notNull().default("0"),
     // accumulatedUsage is the accumulated usage of the feature that the customer has used
     accumulatedUsage: numeric("accumulated_usage").notNull().default("0"),
-    // // featureSlug is the slug of the feature that the customer is entitled to
-    // featureSlug: text("feature_slug").notNull(),
-    // // featureType is the type of the feature that the customer is entitled to
-    // featureType: typeFeatureEnum("feature_type").notNull(),
-    // // aggregationMethod is the method to aggregate the feature quantity - use for calculated the current usage of the feature
-    // aggregationMethod: aggregationMethodEnum("aggregation_method").default("sum").notNull(),
     // realtime features are updated in realtime, others are updated periodically
     realtime: boolean("realtime").notNull().default(false),
     // type of the feature plan version - feature or addon
@@ -117,7 +109,7 @@ export const customerEntitlements = pgTableProject(
     // but for custom entitlements can be different, for instance if the customer has a custom entitlement for 1000 users
     // for 1 year.
     validFrom: bigint("valid_from", { mode: "number" }).notNull(),
-    validTo: bigint("valid_to", { mode: "number" }).notNull(),
+    validTo: bigint("valid_to", { mode: "number" }),
     // buffer is the period of time that the entitlement is valid after the validTo date
     // this is used to avoid overage charges also give us a windows to revalidate the entitlement when the subscription renew is triggered
     bufferPeriodDays: integer("buffer_period_days").notNull().default(1),
@@ -165,7 +157,7 @@ export const customerEntitlements = pgTableProject(
       columns: [table.subscriptionPhaseId, table.projectId],
       foreignColumns: [subscriptionPhases.id, subscriptionPhases.projectId],
       name: "subscription_phase_id_fkey",
-    }),
+    }).onDelete("cascade"),
     subscriptionfk: foreignKey({
       columns: [table.subscriptionId, table.projectId],
       foreignColumns: [subscriptions.id, subscriptions.projectId],

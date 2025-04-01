@@ -1,4 +1,12 @@
-import { type Database, type TransactionDatabase, and, eq } from "@unprice/db"
+import {
+  type Database,
+  type SQL,
+  type TransactionDatabase,
+  and,
+  eq,
+  inArray,
+  sql,
+} from "@unprice/db"
 import {
   customerEntitlements,
   subscriptionItems,
@@ -7,21 +15,16 @@ import {
 } from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import {
-  type CustomerEntitlement,
   type InsertSubscription,
   type InsertSubscriptionPhase,
   type InvoiceStatus,
   type Subscription,
   type SubscriptionItemConfig,
-  type SubscriptionItemExtended,
   type SubscriptionPhase,
   configureBillingCycleSubscription,
   createDefaultSubscriptionConfig,
-  subscriptionInsertSchema,
-  subscriptionPhaseInsertSchema,
-  subscriptionPhaseSelectSchema,
 } from "@unprice/db/validators"
-import { Err, Ok, type Result, SchemaError } from "@unprice/error"
+import { Err, Ok, type Result, type SchemaError } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { getDay } from "date-fns"
@@ -75,194 +78,137 @@ export class SubscriptionService {
     })
   }
 
-  // entitlements are the actual features that are assigned to a customer
-  // sync the entitlements with the subscription items, meaning end entitlements or revoke them
-  // given the new phases.
-  // 1. get the active items for the subscription (paid ones)
-  // 2. get the current entitlements for the customer
-  // 3. compare the active items with the entitlements for the current phase
-  // 4. if there is a difference, create a new entitlement, deactivate the old ones or update the units
-  // 5. for custom entitlements we don't do anything, they are already synced
-  // TODO: FIX THIS!!
-  private async syncEntitlementsForSubscription({
-    subscriptionId,
+  // get the items for the phase and set the end date to the entitlements that are no longer valid
+  private async setEndEntitlementsForPhase({
+    phaseId,
     projectId,
-    customerId,
-    now,
+    endAt,
     db,
   }: {
-    subscriptionId: string
+    phaseId: string
     projectId: string
-    customerId: string
-    now: number
+    endAt: number | null
     db?: Database | TransactionDatabase
   }): Promise<Result<void, UnPriceSubscriptionError>> {
-    // get the active phase for the subscription
-    const subscription = await (db ?? this.db).query.subscriptions.findFirst({
+    // get the active phase for the subscription with the customer entitlements
+    const phase = await (db ?? this.db).query.subscriptionPhases.findFirst({
       with: {
-        phases: {
-          // get active phase now
-          where: (phase, { eq, and, gte, lte, isNull, or }) =>
-            and(
-              lte(phase.startAt, now),
-              or(isNull(phase.endAt), gte(phase.endAt, now)),
-              eq(phase.projectId, projectId)
-            ),
-          // phases don't overlap, so we can use limit 1
-          limit: 1,
+        items: true,
+      },
+      where: (phase, { eq, and }) => and(eq(phase.id, phaseId), eq(phase.projectId, projectId)),
+    })
+
+    if (!phase) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Phase not found",
+        })
+      )
+    }
+
+    const { items } = phase
+
+    const sqlChunks: SQL[] = []
+    const ids: string[] = []
+    sqlChunks.push(sql`(case`)
+
+    for (const item of items) {
+      sqlChunks.push(
+        endAt === null
+          ? sql`when ${customerEntitlements.subscriptionItemId} = ${item.id} then NULL`
+          : sql`when ${customerEntitlements.subscriptionItemId} = ${item.id} then cast(${endAt} as bigint)`
+      )
+      ids.push(item.id)
+    }
+
+    sqlChunks.push(sql`end)`)
+    const finalSql: SQL = sql.join(sqlChunks, sql.raw(" "))
+
+    await (db ?? this.db)
+      .update(customerEntitlements)
+      .set({ validTo: finalSql })
+      .where(inArray(customerEntitlements.subscriptionItemId, ids))
+      .catch((e) => {
+        this.logger.error(e.message)
+        throw new UnPriceSubscriptionError({
+          message: `Error while updating customer entitlements: ${e.message}`,
+        })
+      })
+
+    return Ok(undefined)
+  }
+
+  // create the entitlements for the new phase
+  public async createEntitlementsForPhase({
+    phaseId,
+    projectId,
+    customerId,
+    db,
+  }: {
+    phaseId: string
+    projectId: string
+    customerId: string
+    db?: Database | TransactionDatabase
+  }): Promise<Result<void, UnPriceSubscriptionError>> {
+    // get the active phase for the subscription with the customer entitlements
+    const phase = await (db ?? this.db).query.subscriptionPhases.findFirst({
+      with: {
+        items: {
           with: {
-            items: {
+            featurePlanVersion: {
               with: {
-                featurePlanVersion: {
-                  with: {
-                    feature: true,
-                  },
-                },
+                feature: true,
               },
             },
           },
         },
       },
-      where: (sub, { eq, and }) => and(eq(sub.id, subscriptionId), eq(sub.projectId, projectId)),
+      where: (phase, { eq, and }) => and(eq(phase.id, phaseId), eq(phase.projectId, projectId)),
     })
 
-    if (!subscription) {
+    if (!phase) {
       return Err(
         new UnPriceSubscriptionError({
-          message: "Subscription not found",
+          message: "Phase not found",
         })
       )
     }
 
-    // get all the active entitlements for the customer
-    const { err, val } = await this.customerService.getEntitlementsByDate({
-      customerId,
-      // get the entitlements for the given date
-      date: now,
-      // we don't want to cache the entitlements here, because we want to get the latest ones
-      skipCache: true,
-      // custom entitlements are not synced with the subscription items
-      includeCustom: false,
-      updateUsage: false,
-    })
+    const { items, ...phaseData } = phase
 
-    if (err) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message: `Error getting entitlements: ${err.message}`,
-        })
-      )
-    }
-
-    const activeEntitlements = val
-    const activePhase = subscription?.phases[0]
-    const activeSubItems = activePhase?.items ?? []
-
-    const activeSubItemsMap = new Map<string, SubscriptionItemExtended>()
-    const entitlementsMap = new Map<
-      string,
-      Omit<CustomerEntitlement, "createdAtM" | "updatedAtM">
-    >()
-
-    for (const item of activeSubItems) {
-      activeSubItemsMap.set(item.id, item)
-    }
-
-    for (const entitlement of activeEntitlements) {
-      // there is a 1:1 relationship between the items and the entitlements
-      // subItemId is null only for custom entitlements
-      entitlementsMap.set(entitlement.subscriptionItemId!, entitlement)
-    }
-    // get the items that are not in the entitlements and create them
-    // get the entitlements that are not in the items and deactivate them
-    // update the lastUsageUpdateAt of the entitlements
-    const entitiesToCreate: (typeof customerEntitlements.$inferInsert)[] = []
-    const entitiesToUpdate: Pick<
-      typeof customerEntitlements.$inferInsert,
-      "id" | "lastUsageUpdateAt" | "updatedAtM" | "validTo"
-    >[] = []
-    const entitiesToDelete: string[] = []
-
-    // if entitlements are not in the items, we create them
-    // if entitlements are in the items, we update them with the end date of the phase
-
-    // IMPORTANT: A customer can't have the same feature plan version assigned to multiple entitlements
-    // Find items to create
-    for (const item of activeSubItemsMap.values()) {
-      if (!entitlementsMap.has(item.id)) {
-        entitiesToCreate.push({
+    await (db ?? this.db)
+      .insert(customerEntitlements)
+      .values(
+        items.map((item) => ({
           id: newId("customer_entitlement"),
           projectId,
           customerId,
-          subscriptionItemId: item.id,
-          subscriptionPhaseId: item.subscriptionPhaseId,
-          subscriptionId: item.subscriptionId,
+          subscriptionId: phaseData.subscriptionId,
           featurePlanVersionId: item.featurePlanVersionId,
-          // if the units are not set, we use the limit of the feature plan version
-          limit: item.units ?? item.featurePlanVersion.limit ?? null,
-          usage: "0", // Initialize usage to 0
-          realtime: item.featurePlanVersion.metadata?.realtime ?? false,
-          validFrom: subscription.currentCycleStartAt,
-          validTo: subscription.currentCycleEndAt,
-          // for now only support features types
-          type: "feature",
-          resetedAt: now,
+          subscriptionItemId: item.id,
+          units: item.units,
+          usage: "0",
+          accumulatedUsage: "0",
+          // if there are defined units thats the limit
+          limit: item.units ?? item.featurePlanVersion.limit,
+          subscriptionPhaseId: phaseData.id,
+          validFrom: phaseData.startAt,
+          validTo: phaseData.endAt,
+          resetedAt: Date.now(),
+          active: true,
           isCustom: false,
+          lastUsageUpdateAt: Date.now(),
+        }))
+      )
+      .catch((e) => {
+        this.logger.error(e.message)
+        throw new UnPriceSubscriptionError({
+          message: `Error while creating customer entitlements: ${e.message}`,
         })
-      } else {
-        const entitlement = entitlementsMap.get(item.id)!
-        // if the entitlement is in the items, we update it with the end date of the phase
-        // and the units of the item
-        entitiesToUpdate.push({
-          id: entitlement.id,
-          validTo: activePhase?.endAt ?? null,
-          lastUsageUpdateAt: now,
-          updatedAtM: now,
-        })
-      }
-    }
-
-    // Find entitlements to delete
-    for (const entitlement of entitlementsMap.values()) {
-      if (!activeSubItemsMap.has(entitlement.subscriptionItemId!)) {
-        entitiesToDelete.push(entitlement.id)
-      }
-    }
-
-    // Perform database operations
-    await (db ?? this.db).transaction(async (tx) => {
-      try {
-        for (const entity of entitiesToCreate) {
-          await tx.insert(customerEntitlements).values(entity)
-        }
-
-        for (const entity of entitiesToUpdate) {
-          await tx
-            .update(customerEntitlements)
-            .set(entity)
-            .where(eq(customerEntitlements.id, entity.id))
-        }
-
-        for (const id of entitiesToDelete) {
-          await tx
-            .update(customerEntitlements)
-            // if the entitlement is not in the items, end them immediately
-            .set({ validTo: Date.now() })
-            .where(eq(customerEntitlements.id, id))
-        }
-      } catch (err) {
-        this.logger.error("Error syncing entitlements", {
-          error: JSON.stringify(err),
-        })
-
-        tx.rollback()
-        throw err
-      }
-    })
+      })
 
     return Ok(undefined)
   }
-
   // creating a phase is a 2 step process:
   // 1. validate the input
   // 2. validate the subscription exists
@@ -282,12 +228,6 @@ export class SubscriptionService {
     db?: Database | TransactionDatabase
     now: number
   }): Promise<Result<SubscriptionPhase, UnPriceSubscriptionError | SchemaError>> {
-    const { success, data, error } = subscriptionPhaseInsertSchema.safeParse(input)
-
-    if (!success) {
-      return Err(SchemaError.fromZod(error, input))
-    }
-
     const {
       planVersionId,
       trialDays,
@@ -297,7 +237,7 @@ export class SubscriptionService {
       startAt,
       endAt,
       subscriptionId,
-    } = data
+    } = input
 
     const startAtToUse = startAt ?? now
     const endAtToUse = endAt ?? undefined
@@ -429,11 +369,6 @@ export class SubscriptionService {
         })
       )
     }
-
-    // if the customer has a default payment method, we use that
-    // TODO: here it could be a problem, if the user sends a wrong payment method id, we will use the customer default payment method
-    // for now just accept the default payment method is equal to the customer default payment method
-    // but probably the best approach would be to use the payment method directly from the customer and don't have a default payment method in the subscription
 
     // check if payment method is required for the plan version
     const paymentMethodRequired = versionData.paymentMethodRequired
@@ -582,22 +517,37 @@ export class SubscriptionService {
           .where(eq(subscriptions.id, subscriptionId))
       }
 
-      // every time there is a new phase, we sync entitlements
-      const syncEntitlementsResult = await this.syncEntitlementsForSubscription({
+      // we set end date to the entitlements that are no longer valid
+      // phases are ordered by startAt so we can get the previous phase
+      const previousPhase = orderedPhases.find((p) => p.startAt < phase.startAt)
+
+      if (previousPhase?.endAt) {
+        const removeEntitlementsResult = await this.setEndEntitlementsForPhase({
+          phaseId: previousPhase.id,
+          projectId,
+          endAt: previousPhase.endAt,
+          db: trx,
+        })
+
+        if (removeEntitlementsResult.err) {
+          this.logger.error(removeEntitlementsResult.err.message)
+          trx.rollback()
+          throw removeEntitlementsResult.err
+        }
+      }
+
+      // we create the entitlements for the new phase
+      const createEntitlementsResult = await this.createEntitlementsForPhase({
+        phaseId: phase.id,
         projectId,
         customerId: subscriptionWithPhases.customerId,
-        // we sync entitlements for the start date of the new phase
-        // this will calculate the new entitlements for the phase
-        // and add the end date to the entitlements that are no longer valid
-        now: startAtToUse,
         db: trx,
-        subscriptionId,
       })
 
-      if (syncEntitlementsResult.err) {
-        this.logger.error(syncEntitlementsResult.err.message)
+      if (createEntitlementsResult.err) {
+        this.logger.error(createEntitlementsResult.err.message)
         trx.rollback()
-        throw syncEntitlementsResult.err
+        throw createEntitlementsResult.err
       }
 
       return Ok(phase)
@@ -675,13 +625,7 @@ export class SubscriptionService {
     db?: Database | TransactionDatabase
     now: number
   }): Promise<Result<SubscriptionPhase, UnPriceSubscriptionError | SchemaError>> {
-    const { success, data, error } = subscriptionPhaseSelectSchema.safeParse(input)
-
-    if (!success) {
-      return Err(SchemaError.fromZod(error, input))
-    }
-
-    const { startAt, endAt, items } = data
+    const { startAt, endAt, items } = input
 
     // get subscription with phases from start date
     const subscriptionWithPhases = await (db ?? this.db).query.subscriptions.findFirst({
@@ -848,24 +792,17 @@ export class SubscriptionService {
           .where(eq(subscriptions.id, subscriptionId))
       }
 
-      // every time there is a new phase, we sync entitlements
-      const syncEntitlementsResult = await this.syncEntitlementsForSubscription({
+      // set the new end date for the entitlements
+      const setEndEntitlementsResult = await this.setEndEntitlementsForPhase({
+        phaseId: subscriptionPhase.id,
         projectId,
-        customerId: subscriptionWithPhases.customerId,
-        // we sync entitlements for the start date of the new phase
-        // this will calculate the new entitlements for the phase
-        // and add the end date to the entitlements that are no longer valid
-        now: subscriptionPhase.startAt,
+        endAt: endAt,
         db: trx,
-        subscriptionId,
       })
 
-      if (syncEntitlementsResult.err) {
-        this.logger.error("Error syncing entitlements", {
-          error: JSON.stringify(syncEntitlementsResult.err),
-        })
+      if (setEndEntitlementsResult.err) {
         trx.rollback()
-        throw syncEntitlementsResult.err
+        throw setEndEntitlementsResult.err
       }
 
       return Ok(subscriptionPhase)
@@ -886,13 +823,7 @@ export class SubscriptionService {
     input: InsertSubscription
     projectId: string
   }): Promise<Result<Subscription, UnPriceSubscriptionError | SchemaError>> {
-    const { success, data, error } = subscriptionInsertSchema.safeParse(input)
-
-    if (!success) {
-      return Err(SchemaError.fromZod(error, input))
-    }
-
-    const { customerId, phases, metadata, timezone } = data
+    const { customerId, phases, metadata, timezone } = input
 
     const customerData = await this.db.query.customers.findFirst({
       with: {
@@ -1018,14 +949,6 @@ export class SubscriptionService {
     if (result.err) {
       return Err(result.err)
     }
-
-    // once the subscription is created, we can update the cache
-    this.waitUntil(
-      this.customerService.updateCacheAllCustomerEntitlementsByDate({
-        customerId,
-        date: Date.now(),
-      })
-    )
 
     const subscription = result.val
 

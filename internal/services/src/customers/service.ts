@@ -1,20 +1,26 @@
-import { type Database, type TransactionDatabase, and, eq } from "@unprice/db"
+import { type Database, type TransactionDatabase, and, eq, gte, lte } from "@unprice/db"
 
-import { customerEntitlements, customerSessions, customers } from "@unprice/db/schema"
+import {
+  customerEntitlements,
+  customerSessions,
+  customers,
+  features,
+  planVersionFeatures,
+  subscriptions,
+} from "@unprice/db/schema"
 import { AesGCM, newId } from "@unprice/db/utils"
-import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
-import { Err, FetchError, Ok, type Result } from "@unprice/error"
+import type { AggregationMethod, CustomerSignUp } from "@unprice/db/validators"
+import { Err, FetchError, Ok, type Result, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { env } from "../../env"
-import type { CacheNamespaces } from "../cache/namespaces"
+import type { CustomerEntitlementCache, SubcriptionCache } from "../cache"
 import type { Cache } from "../cache/service"
 import type { Metrics } from "../metrics"
 import { PaymentProviderService } from "../payment-provider/service"
 import { SubscriptionService } from "../subscriptions/service"
-import type { DenyReason } from "./errors"
+import { retry } from "../utils/retry"
 import { UnPriceCustomerError } from "./errors"
-import { getEntitlementByDateQuery, getEntitlementsByDateQuery } from "./queries"
 
 export class CustomerService {
   private readonly db: Database | TransactionDatabase
@@ -49,805 +55,456 @@ export class CustomerService {
     this.metrics = metrics
   }
 
-  private async _getCustomerEntitlementByDate(opts: {
-    customerId: string
-    featureSlug: string
-    date: number
-    skipCache?: boolean
-    updateUsage?: boolean
-    includeCustom?: boolean
-  }): Promise<
-    Result<
-      Omit<CustomerEntitlement, "createdAtM" | "updatedAtM">,
-      UnPriceCustomerError | FetchError
-    >
-  > {
-    if (opts.skipCache || !this.cache) {
-      const entitlement = await getEntitlementByDateQuery({
-        customerId: opts.customerId,
-        db: this.db,
-        metrics: this.metrics,
-        logger: this.logger,
-        date: opts.date,
-        featureSlug: opts.featureSlug,
-        includeCustom: opts.includeCustom,
-      })
-
-      if (!entitlement) {
-        return Err(
-          new UnPriceCustomerError({
-            code: "FEATURE_OR_CUSTOMER_NOT_FOUND",
-            customerId: opts.customerId,
-            message: `Feature ${opts.featureSlug} not found in subscription`,
-          })
-        )
-      }
-
-      if (opts.updateUsage) {
-        this.waitUntil(
-          this.updateEntitlementUsage({
-            customerId: opts.customerId,
-            entitlementId: entitlement.id,
-            date: opts.date,
-          })
-        )
-      }
-
-      return Ok(entitlement)
-    }
-
-    const res = await this.cache.customerEntitlement.swr(
-      `${opts.customerId}:${opts.featureSlug}`,
-      async () => {
-        const entitlement = await getEntitlementByDateQuery({
-          customerId: opts.customerId,
-          db: this.db,
-          metrics: this.metrics,
-          logger: this.logger,
-          date: opts.date,
-          featureSlug: opts.featureSlug,
-          includeCustom: opts.includeCustom,
-        })
-
-        if (!entitlement) {
-          return null
-        }
-
-        if (opts.updateUsage) {
-          this.updateEntitlementUsage({
-            customerId: opts.customerId,
-            entitlementId: entitlement.id,
-            date: opts.date,
-          })
-        }
-
-        return entitlement
-      }
-    )
-
-    if (res.err) {
-      this.logger.error(`Error in _getCustomerEntitlementByDate: ${res.err.message}`, {
-        error: JSON.stringify(res.err),
-        customerId: opts.customerId,
-        featureSlug: opts.featureSlug,
-      })
-
-      return Err(
-        new FetchError({
-          message: "unable to fetch required data",
-          retry: true,
-          cause: res.err,
-        })
-      )
-    }
-
-    // cache miss, get from db
-    if (!res.val) {
-      const entitlement = await getEntitlementByDateQuery({
-        customerId: opts.customerId,
-        db: this.db,
-        metrics: this.metrics,
-        logger: this.logger,
-        date: opts.date,
-        featureSlug: opts.featureSlug,
-        includeCustom: opts.includeCustom,
-      })
-
-      if (!entitlement) {
-        return Err(
-          new UnPriceCustomerError({
-            code: "FEATURE_OR_CUSTOMER_NOT_FOUND",
-            customerId: opts.customerId,
-            message: `Feature ${opts.featureSlug} not found in subscription`,
-          })
-        )
-      }
-
-      return Ok(entitlement)
-    }
-
-    return Ok(res.val)
-  }
-
-  public async updateCacheAllCustomerEntitlementsByDate({
+  private async getActiveSubscriptionData({
     customerId,
-    date,
+    projectId,
+    now,
   }: {
     customerId: string
-    date: number
-  }) {
-    if (!this.cache) {
-      return
-    }
-
-    // update the cache
-    await getEntitlementsByDateQuery({
-      customerId,
-      db: this.db,
-      metrics: this.metrics,
-      date,
-      logger: this.logger,
-      includeCustom: true,
-    }).then(async (activeEntitlements) => {
-      if (activeEntitlements.length === 0) {
-        return
-      }
-
-      return Promise.all([
-        // save the customer entitlements
-        // this.cache.entitlementsByCustomerId.set(
-        //   subscriptionData.customerId,
-        //   customerEntitlements
-        // ),
-        // save features
-
-        // we need to think about the best way to cache the features
-        activeEntitlements.map((item) => {
-          return this.cache?.customerEntitlement.set(`${customerId}:${item.}`, item)
-        }),
-      ])
-    })
-  }
-
-  public async updateEntitlementUsage(opts: {
-    customerId: string
-    entitlementId: string
-    date: number
-  }) {
-    // get entitlement from the db
-    const entitlement = await this.db.query.customerEntitlements.findFirst({
-      with: {
-        subscriptionItem: {
-          with: {
-            subscriptionPhase: {
-              with: {
-                subscription: true,
-              },
+    projectId: string
+    now: number
+  }): Promise<SubcriptionCache | null> {
+    const subscription = await this.db.query.subscriptions
+      .findFirst({
+        with: {
+          customer: {
+            columns: {
+              active: true,
+            },
+          },
+          project: {
+            columns: {
+              enabled: true,
             },
           },
         },
+        where: and(
+          eq(subscriptions.customerId, customerId),
+          eq(subscriptions.active, true),
+          eq(subscriptions.projectId, projectId),
+          gte(subscriptions.currentCycleEndAt, now),
+          lte(subscriptions.currentCycleStartAt, now)
+        ),
+      })
+      .catch((e) => {
+        console.error("error getting active subscription data", e)
+        throw e
+      })
+
+    // return explicitly null to avoid cache miss
+    // this is useful to avoid cache revalidation on keys that don't exist
+    if (!subscription) {
+      return null
+    }
+
+    const result = {
+      id: subscription.id,
+      projectId: subscription.projectId,
+      customerId: subscription.customerId,
+      active: subscription.active,
+      status: subscription.status,
+      planSlug: subscription.planSlug,
+      currentCycleStartAt: subscription.currentCycleStartAt,
+      currentCycleEndAt: subscription.currentCycleEndAt,
+      project: {
+        enabled: subscription.project.enabled,
       },
-      where: (ent, { eq, and }) =>
-        and(eq(ent.id, opts.entitlementId), eq(ent.customerId, opts.customerId)),
-    })
-
-    if (!entitlement) {
-      this.logger.error("updateEntitlementUsage: entitlement not found", {
-        entitlementId: opts.entitlementId,
-        customerId: opts.customerId,
-      })
-
-      return
+      customer: {
+        active: subscription.customer.active,
+      },
     }
 
-    const activeSubscription = entitlement.subscriptionItem?.subscriptionPhase?.subscription
-    const subscriptionItemId = entitlement.subscriptionItem?.id
+    return result
+  }
 
-    // TODO: if the entitlement is not tied to a subscription (isCustom), we need to get the subscription from the customer
-    if (!activeSubscription || !subscriptionItemId) {
-      this.logger.error(
-        "updateEntitlementUsage: active subscription or subscription item not found",
-        {
-          entitlementId: opts.entitlementId,
-          customerId: opts.customerId,
-        }
-      )
-
-      return
+  public async getActiveSubscription(
+    customerId: string,
+    projectId: string,
+    now: number,
+    opts?: {
+      skipCache: boolean
     }
-
-    // TODO: we want to be able to get data from entitlements where date doesn't matter
-    // meaning count all the usage for the customer ever
-    const isAll = entitlement.aggregationMethod.endsWith("_all")
-
-    // we need to get the current subscription
-    // get usage for the period from the analytics service
-    const totalUsage = isAll
-      ? await this.analytics
-          .getFeaturesUsageTotal({
-            customerId: opts.customerId,
-            entitlementId: entitlement.id,
-            projectId: entitlement.projectId,
-          })
-          .then((usage) => usage.data[0])
-          .catch((error) => {
-            this.logger.error("Error getting getFeaturesUsage all", {
-              error: JSON.stringify(error.message),
-              customerId: opts.customerId,
-              entitlementId: entitlement.id,
-              projectId: entitlement.projectId,
+  ): Promise<Result<SubcriptionCache | null, FetchError | UnPriceCustomerError>> {
+    // swr handle cache stampede and other problems for us :)
+    const { val, err } = opts?.skipCache
+      ? await wrapResult(
+          this.getActiveSubscriptionData({
+            customerId,
+            projectId,
+            now,
+          }),
+          (err) =>
+            new FetchError({
+              message: "unable to query db for active subscription",
+              retry: false,
+              context: {
+                error: err.message,
+                url: "",
+                customerId: customerId,
+                method: "getActiveSubscription",
+              },
             })
-
-            return null
-          })
-      : await this.analytics
-          .getFeaturesUsagePeriod({
-            customerId: opts.customerId,
-            entitlementId: entitlement.id,
-            start: activeSubscription.currentCycleStartAt,
-            end: activeSubscription.currentCycleEndAt,
-          })
-          .then((usage) => usage.data[0])
-          .catch((error) => {
-            this.logger.error("Error getting getFeaturesUsage", {
-              error: JSON.stringify(error.message),
-              customerId: opts.customerId,
-              entitlementId: entitlement.id,
+        )
+      : await retry(
+          3,
+          async () =>
+            this.cache.customerSubscription.swr(customerId, () =>
+              this.getActiveSubscriptionData({
+                customerId,
+                projectId,
+                now,
+              })
+            ),
+          (attempt, err) => {
+            this.logger.warn("Failed to fetch subscription data from cache, retrying...", {
+              customerId: customerId,
+              attempt,
+              error: err.message,
             })
-
-            return null
-          })
-
-    if (!totalUsage) {
-      return
-    }
-
-    const usage =
-      (totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage] as number) ?? 0
-
-    // update the usage of the entitlement
-    await this.db
-      .update(customerEntitlements)
-      .set({
-        usage: usage,
-        lastUsageUpdateAt: Date.now(),
-      })
-      .where(
-        and(
-          eq(customerEntitlements.id, entitlement.id),
-          eq(customerEntitlements.projectId, entitlement.projectId)
+          }
         )
-      )
-  }
 
-  public async updateEntitlementsUsage(opts: {
-    customerId: string
-    date: number
-  }) {
-    // get active entitlements from the db
-    const entitlements = await getEntitlementsByDateQuery({
-      customerId: opts.customerId,
-      db: this.db,
-      metrics: this.metrics,
-      logger: this.logger,
-      date: opts.date,
-      includeCustom: true,
-    })
-
-    if (entitlements.length === 0) {
-      return
-    }
-
-    // TODO: we want to be able to get data from entitlements where date doesn't matter
-    // meaning count all the usage for the customer ever
-
-    // we need  to update the usage for each entitlement
-    await Promise.all(
-      entitlements.map((entitlement) => {
-        return this.updateEntitlementUsage({
-          customerId: opts.customerId,
-          entitlementId: entitlement.id,
-          date: opts.date,
-        })
-      })
-    )
-  }
-
-  public async getEntitlementByDate(opts: {
-    customerId: string
-    featureSlug: string
-    date: number
-    includeCustom?: boolean
-    updateUsage?: boolean
-    skipCache?: boolean
-  }): Promise<
-    Result<
-      Omit<CustomerEntitlement, "createdAtM" | "updatedAtM">,
-      UnPriceCustomerError | FetchError
-    >
-  > {
-    return await this._getCustomerEntitlementByDate(opts)
-  }
-
-  public async getEntitlementsByDate(opts: {
-    customerId: string
-    date: number
-    includeCustom?: boolean
-    skipCache?: boolean
-    // update usage from analytics service on revalidation
-    updateUsage?: boolean
-  }): Promise<
-    Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
-  > {
-    if (opts.skipCache || !this.cache) {
-      if (opts.updateUsage) {
-        this.waitUntil(
-          this.updateEntitlementsUsage({
-            customerId: opts.customerId,
-            date: opts.date,
-          })
-        )
-      }
-
-      const entitlements = await getEntitlementsByDateQuery({
-        customerId: opts.customerId,
-        db: this.db,
-        metrics: this.metrics,
-        logger: this.logger,
-        date: opts.date,
-        includeCustom: opts.includeCustom,
-      })
-
-      return Ok(entitlements)
-    }
-
-    const res = await this.cache.entitlementsByCustomerId.swr(opts.customerId, async () => {
-      // updating the usage from the analytics service first and then updating the cache
-      // TODO: mesure the performance of this
-      if (opts.updateUsage) {
-        this.updateEntitlementsUsage({
-          customerId: opts.customerId,
-          date: opts.date,
-        })
-      }
-
-      return await getEntitlementsByDateQuery({
-        customerId: opts.customerId,
-        db: this.db,
-        metrics: this.metrics,
-        date: opts.date,
-        logger: this.logger,
-        includeCustom: opts.includeCustom,
-      })
-    })
-
-    if (res.err) {
-      this.logger.error("unable to fetch entitlements", {
-        error: JSON.stringify(res.err),
-        customerId: opts.customerId,
+    if (err) {
+      this.logger.error("error getting customer", {
+        error: err.message,
       })
 
       return Err(
         new FetchError({
-          message: "unable to fetch required data",
-          retry: true,
-          cause: res.err,
+          message: err.message,
+          retry: false,
+          cause: err,
         })
       )
     }
 
-    if (res.val && res.val.length > 0) {
-      // filter out to get only the active entitlements
-      return Ok(
-        res.val.filter((ent) => {
-          // an entitlement is active if it's between startAt and endAt
-          // end date could be null, so it's active until the end of time
-          return ent.startAt <= opts.date && (ent.endAt ? ent.endAt >= opts.date : true)
+    if (!val) {
+      return Ok(null)
+    }
+
+    if (val.project.enabled === false) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "PROJECT_DISABLED",
+          message: "project is disabled",
         })
       )
     }
 
-    // cache miss, get from db
-    const entitlements = await getEntitlementsByDateQuery({
-      customerId: opts.customerId,
-      db: this.db,
-      metrics: this.metrics,
-      logger: this.logger,
-      date: opts.date,
-      includeCustom: opts.includeCustom,
-    })
+    if (val.customer.active === false) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "CUSTOMER_DISABLED",
+          message: "customer is disabled",
+        })
+      )
+    }
 
-    // cache the active entitlements
-    this.waitUntil(this.cache.entitlementsByCustomerId.set(opts.customerId, entitlements))
+    // take a look if the subscription is expired
+    const bufferPeriod = 24 * 60 * 60 * 1000 // 1 day
+    const validUntil = val.currentCycleEndAt + bufferPeriod
+    const validFrom = val.currentCycleStartAt
 
-    return Ok(entitlements)
+    if (now < validFrom || now > validUntil) {
+      return Err(
+        new UnPriceCustomerError({ code: "SUBSCRIPTION_EXPIRED", message: "subscription expired" })
+      )
+    }
+
+    return Ok(val)
   }
 
-  public async verifyEntitlement(opts: {
+  private async getUsageFromAnalytics({
+    customerId,
+    projectId,
+    featureSlug,
+    startAt,
+    endAt,
+    aggregationMethod,
+    isAccumulated = false,
+  }: {
+    customerId: string
+    projectId: string
+    featureSlug: string
+    startAt: number
+    endAt: number
+    aggregationMethod: AggregationMethod
+    isAccumulated?: boolean
+  }): Promise<
+    Result<{ usage: number; accumulatedUsage: number }, FetchError | UnPriceCustomerError>
+  > {
+    const start = performance.now()
+    // get the total usage and the usage for the current cycle
+    const [totalAccumulatedUsage, totalUsage] = await Promise.all([
+      isAccumulated
+        ? this.analytics
+            .getFeaturesUsageTotal({
+              customerId,
+              projectId,
+              featureSlug,
+            })
+            .then((usage) => usage.data[0] ?? 0)
+            .catch((error) => {
+              this.logger.error("error getting usage from analytics", {
+                error: error.message,
+                customerId,
+                method: "getFeaturesUsageTotal",
+                featureSlug,
+                startAt,
+                endAt,
+              })
+
+              throw new FetchError({
+                message: error.message,
+                retry: false,
+              })
+            })
+        : null,
+      this.analytics
+        .getFeaturesUsagePeriod({
+          customerId,
+          projectId,
+          featureSlug,
+          start: startAt,
+          end: endAt,
+        })
+        .then((usage) => usage.data[0] ?? 0)
+        .catch((error) => {
+          this.logger.error("error getting usage from analytics", {
+            error: error.message,
+            customerId,
+            method: "getFeaturesUsagePeriod",
+            featureSlug,
+            startAt,
+            endAt,
+          })
+
+          throw new FetchError({
+            message: error.message,
+            retry: false,
+          })
+        }),
+    ])
+
+    const end = performance.now()
+
+    this.metrics.emit({
+      metric: "metric.analytics.read",
+      query: "getUsageFromAnalytics",
+      duration: end - start,
+      service: "customer",
+      customerId,
+      featureSlug,
+      projectId,
+      isAccumulated,
+      start,
+      end,
+    })
+
+    let usage = 0
+    let accumulatedUsage = 0
+
+    if (totalUsage) {
+      usage = (totalUsage[aggregationMethod as keyof typeof totalUsage] as number) ?? 0
+    }
+
+    if (totalAccumulatedUsage) {
+      accumulatedUsage =
+        (totalAccumulatedUsage[
+          aggregationMethod as keyof typeof totalAccumulatedUsage
+        ] as number) ?? 0
+    }
+
+    return Ok({
+      usage,
+      accumulatedUsage,
+    })
+  }
+
+  private async getEntitlementData({
+    customerId,
+    featureSlug,
+    projectId,
+    now,
+  }: {
     customerId: string
     featureSlug: string
-    date: number
-    skipCache?: boolean
-    updateUsage?: boolean
-    includeCustom?: boolean
-    metadata?: Record<string, string | number | boolean | null>
-  }): Promise<
-    Result<
-      {
-        access: boolean
-        currentUsage?: number
-        limit?: number
-        deniedReason?: DenyReason
-        remaining?: number
-        featureType?: FeatureType
-      },
-      UnPriceCustomerError | FetchError
-    >
-  > {
-    try {
-      const { customerId, featureSlug, date, metadata } = opts
-      const start = performance.now()
+    projectId: string
+    now: number
+  }): Promise<CustomerEntitlementCache | null> {
+    const start = performance.now()
 
-      // TODO: should I validate if the subscription is active?
-      // TODO: should I validate if the customer is active?
-
-      const res = await this._getCustomerEntitlementByDate({
-        customerId,
-        featureSlug,
-        date,
-        skipCache: opts.skipCache,
-        updateUsage: opts.updateUsage,
-        includeCustom: opts.includeCustom,
+    // if not found in DO, then we query the db
+    const entitlement = await this.db
+      .select({
+        customerEntitlement: customerEntitlements,
+        featureType: planVersionFeatures.featureType,
+        aggregationMethod: planVersionFeatures.aggregationMethod,
       })
-
-      // TODO: I could save more information here later on, for instance, the country, web browser details, etc.
-      // The main idea is trying to give as much insights as possible of the usage of these features so we can decide later on different plans or strategies to increase conversion.
-      // For instance, if we see that a feature is being used a lot in a specific country, we can decide to add it to the plan for that country.
-      const baseAnalyticsPayload = {
-        projectId: "",
-        planVersionFeatureId: "",
-        subscriptionItemId: "",
-        entitlementId: "",
-        featureSlug: featureSlug,
-        customerId: customerId,
-        createdAt: Date.now(),
-        timestamp: Date.now(),
-        metadata,
-      }
-
-      if (res.err) {
-        const error = res.err
-
-        this.logger.error(`Error in verifyEntitlement: ${error.message}`, {
-          customerId: opts.customerId,
-          featureSlug: opts.featureSlug,
+      .from(customerEntitlements)
+      .leftJoin(
+        planVersionFeatures,
+        eq(customerEntitlements.featurePlanVersionId, planVersionFeatures.id)
+      )
+      .leftJoin(features, eq(planVersionFeatures.featureId, features.id))
+      .where(
+        and(
+          eq(features.slug, featureSlug),
+          eq(customerEntitlements.customerId, customerId),
+          eq(customerEntitlements.projectId, projectId),
+          eq(customerEntitlements.active, true),
+          lte(customerEntitlements.validFrom, now),
+          gte(customerEntitlements.validTo, now)
+        )
+      )
+      .then((e) => e[0])
+      .catch((e) => {
+        this.logger.error("error getting entitlement", {
+          error: e.message,
+          customerId,
+          featureSlug,
+          projectId,
+          now,
         })
 
-        // Here lies a valuable information because when the customer is trying to access to a feature
-        // that doesn't have that is considered an intent that we can capitalize later on on different plans.
-        // We can use this information to send emails to the customer to upgrade to a higher plan, etc.
-        this.waitUntil(
-          this.analytics
-            .ingestFeaturesVerification({
-              ...baseAnalyticsPayload,
-              latency: performance.now() - start,
-              deniedReason: error.code,
-              subscriptionPhaseId: "",
-              subscriptionId: "",
-              requestId: this.requestId,
+        throw e
+      })
+
+    const end = performance.now()
+
+    this.metrics.emit({
+      metric: "metric.db.read",
+      query: "getActiveEntitlement",
+      duration: end - start,
+      service: "customer",
+      customerId,
+      featureSlug,
+      projectId,
+    })
+
+    if (!entitlement || !entitlement.featureType || !entitlement.aggregationMethod) {
+      return null
+    }
+
+    // get the usage from analytics
+    const { err, val } = await this.getUsageFromAnalytics({
+      customerId,
+      projectId,
+      featureSlug,
+      startAt: entitlement.customerEntitlement.validFrom,
+      endAt: now,
+      aggregationMethod: entitlement.aggregationMethod,
+      isAccumulated: entitlement.featureType.endsWith("_all"),
+    })
+
+    if (err) {
+      throw err
+    }
+
+    const result = {
+      ...entitlement.customerEntitlement,
+      featureType: entitlement.featureType,
+      aggregationMethod: entitlement.aggregationMethod,
+      usage: val.usage.toString(),
+      accumulatedUsage: val.accumulatedUsage.toString(),
+      featureSlug,
+    }
+
+    return result
+  }
+
+  public async getActiveEntitlement(
+    customerId: string,
+    featureSlug: string,
+    projectId: string,
+    now: number,
+    opts?: {
+      skipCache?: boolean // skip cache to force revalidation
+    }
+  ): Promise<Result<CustomerEntitlementCache | null, FetchError | UnPriceCustomerError>> {
+    // first try to get the entitlement from cache, if not found try to get it from DO,
+    const { val, err } = opts?.skipCache
+      ? await wrapResult(
+          this.getEntitlementData({
+            customerId,
+            featureSlug,
+            projectId,
+            now,
+          }),
+          (err) =>
+            new FetchError({
+              message: "unable to query entitlement from db",
+              retry: false,
+              context: {
+                error: err.message,
+                url: "",
+                customerId: customerId,
+                method: "getActiveEntitlement",
+              },
             })
-            .catch((error) =>
-              this.logger.error("Error reporting usage to analytics verifyEntitlement 1", {
-                error: JSON.stringify(error),
-                baseAnalyticsPayload,
+        )
+      : await retry(
+          3,
+          async () =>
+            this.cache.customerEntitlement.swr(`${customerId}:${featureSlug}`, () =>
+              this.getEntitlementData({
+                customerId,
+                featureSlug,
+                projectId,
+                now,
               })
-            )
+            ),
+          (attempt, err) => {
+            this.logger.warn("Failed to fetch entitlement data from cache, retrying...", {
+              customerId: customerId,
+              attempt,
+              error: err.message,
+            })
+          }
         )
 
-        switch (true) {
-          case error instanceof UnPriceCustomerError: {
-            // we should return a response with the denied reason in this case
-            if (error.code === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
-              return Ok({
-                access: false,
-                deniedReason: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
-              })
-            }
-
-            return res
-          }
-
-          default:
-            return res
-        }
-      }
-
-      const entitlement = res.val
-
-      const analyticsPayload = {
-        ...baseAnalyticsPayload,
-        projectId: entitlement.projectId,
-        planVersionFeatureId: entitlement.featurePlanVersionId,
-        subscriptionItemId: entitlement.subscriptionItemId,
-        entitlementId: entitlement.id,
-      }
-
-      switch (entitlement.featureType) {
-        case "flat": {
-          // flat feature are like feature flags
-          break
-        }
-
-        case "usage": {
-          const { usage, limit } = entitlement
-          const currentUsage = usage ?? 0
-          const hitLimit = limit ? limit - currentUsage : undefined
-
-          if (hitLimit && hitLimit <= 0) {
-            return Ok({
-              currentUsage: currentUsage,
-              limit: limit ?? undefined,
-              featureType: entitlement.featureType,
-              access: false,
-              deniedReason: "LIMIT_EXCEEDED",
-              remaining: hitLimit,
-            })
-          }
-          // the rest of the features need to check the usage
-          break
-        }
-
-        // the rest of the features need to check the usage
-        case "tier":
-        case "package": {
-          const { usage, limit } = entitlement
-          const currentUsage = usage ?? 0
-          const hitLimit = limit ? limit - currentUsage : undefined
-
-          // check limits first
-          if (hitLimit && hitLimit <= 0) {
-            this.waitUntil(
-              this.analytics
-                .ingestFeaturesVerification({
-                  ...analyticsPayload,
-                  latency: performance.now() - start,
-                  deniedReason: "LIMIT_EXCEEDED",
-                  subscriptionPhaseId: entitlement.subscriptionPhaseId ?? null,
-                  subscriptionId: entitlement.subscriptionId ?? null,
-                  requestId: this.requestId,
-                })
-                .catch((error) =>
-                  this.logger.error("Error reporting usage to analytics verifyEntitlement 2", {
-                    error: JSON.stringify(error),
-                    analyticsPayload,
-                  })
-                )
-            )
-
-            return Ok({
-              currentUsage: currentUsage,
-              limit: limit ?? undefined,
-              featureType: entitlement.featureType,
-              access: false,
-              deniedReason: "LIMIT_EXCEEDED",
-              remaining: hitLimit,
-            })
-          }
-
-          // check usage
-          if (hitLimit && hitLimit <= 0) {
-            this.waitUntil(
-              this.analytics
-                .ingestFeaturesVerification({
-                  ...analyticsPayload,
-                  latency: performance.now() - start,
-                  deniedReason: "USAGE_EXCEEDED",
-                  subscriptionPhaseId: entitlement.subscriptionPhaseId ?? null,
-                  subscriptionId: entitlement.subscriptionId ?? null,
-                  requestId: this.requestId,
-                })
-                .catch((error) =>
-                  this.logger.error("Error reporting usage to analytics verifyEntitlement 3", {
-                    error: JSON.stringify(error),
-                    analyticsPayload,
-                  })
-                )
-            )
-
-            return Ok({
-              currentUsage: currentUsage,
-              limit: limit ?? undefined,
-              featureType: entitlement.featureType,
-              access: false,
-              deniedReason: "USAGE_EXCEEDED",
-              remaining: hitLimit,
-            })
-          }
-
-          break
-        }
-
-        default:
-          this.logger.error("Unhandled feature type", {
-            featureType: entitlement.featureType,
-            analyticsPayload,
-          })
-          break
-      }
-
-      this.waitUntil(
-        this.analytics
-          .ingestFeaturesVerification({
-            ...analyticsPayload,
-            latency: performance.now() - start,
-            subscriptionPhaseId: entitlement.subscriptionPhaseId ?? null,
-            subscriptionId: entitlement.subscriptionId ?? null,
-            requestId: this.requestId,
-          })
-          .catch((error) =>
-            this.logger.error("Error reporting usage to analytics verifyEntitlement 4", {
-              error: JSON.stringify(error),
-              analyticsPayload,
-            })
-          )
-      )
-
-      return Ok({
-        featureType: entitlement.featureType,
-        access: true,
-      })
-    } catch (e) {
-      const error = e as Error
-      this.logger.error("Unhandled error while verifying feature", {
-        error: JSON.stringify(error),
-        customerId: opts.customerId,
-        featureSlug: opts.featureSlug,
+    if (err) {
+      this.logger.error("error getting entitlement", {
+        error: err.message,
       })
 
       return Err(
+        new FetchError({
+          message: err.message,
+          retry: true,
+          cause: err,
+        })
+      )
+    }
+
+    if (!val) {
+      return Ok(null)
+    }
+
+    // entitlement could be expired since is in cache, validate it
+    const bufferPeriod = val.bufferPeriodDays * 24 * 60 * 60 * 1000
+    const validUntil = val.validTo ? val.validTo + bufferPeriod : null
+    const active = val.active
+
+    if (now < val.validFrom || (validUntil && now > validUntil)) {
+      return Err(
         new UnPriceCustomerError({
-          code: "UNHANDLED_ERROR",
-          customerId: opts.customerId,
+          code: "ENTITLEMENT_EXPIRED",
+          message: "entitlement expired",
         })
       )
     }
-  }
 
-  public async reportUsage(opts: {
-    customerId: string
-    featureSlug: string
-    date: number
-    usage: number
-    idempotenceKey: string
-  }): Promise<Result<{ success: boolean; message?: string }, UnPriceCustomerError | FetchError>> {
-    try {
-      const { customerId, featureSlug, usage, date } = opts
-
-      // get the item details from the cache or the db
-      const res = await this._getCustomerEntitlementByDate({
-        customerId,
-        featureSlug,
-        date,
-      })
-
-      if (res.err) {
-        return res
-      }
-
-      const entitlement = res.val
-
-      // TODO: should I report the usage even if the limit was exceeded?
-      // for now let the customer report more usage than the limit but add notifications
-      const threshold = 80 // notify when the usage is 80% or more
-      const currentUsage = entitlement.usage ?? 0
-      const limit = entitlement.limit
-      let message = ""
-      let notifyUsage = false
-
-      // check limit
-      if (limit) {
-        const usagePercentage = (currentUsage / limit) * 100
-
-        if (currentUsage >= limit) {
-          // Usage has reached or exceeded the limit
-          message = `Your feature ${featureSlug} has reached or exceeded its usage limit of ${limit}. Current usage: ${usagePercentage.toFixed(
-            2
-          )}% of its usage limit. This is over the limit by ${currentUsage - limit}`
-          notifyUsage = true
-        } else if (usagePercentage >= threshold) {
-          // Usage is at or above the threshold
-          message = `Your feature ${featureSlug} is at ${usagePercentage.toFixed(
-            2
-          )}% of its usage limit`
-          notifyUsage = true
-        }
-      }
-
-      // flat features don't have usage
-      if (entitlement.featureType === "flat") {
-        return Ok({
-          success: true,
+    if (active === false) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "ENTITLEMENT_NOT_ACTIVE",
+          message: "entitlement is not active",
         })
-      }
-
-      this.waitUntil(
-        Promise.all([
-          // notify usage
-          // TODO: add notification to email, slack?
-          notifyUsage && Promise.resolve(),
-          // report the usage to analytics db
-          this.analytics
-            .ingestFeaturesUsage({
-              idempotenceKey: opts.idempotenceKey,
-              planVersionFeatureId: entitlement.featurePlanVersionId,
-              subscriptionItemId: entitlement.subscriptionItemId,
-              projectId: entitlement.projectId,
-              usage: usage,
-              timestamp: opts.date,
-              createdAt: Date.now(),
-              entitlementId: entitlement.id,
-              featureSlug: featureSlug,
-              customerId: customerId,
-              subscriptionPhaseId: entitlement.subscriptionPhaseId!,
-              subscriptionId: entitlement.subscriptionId!,
-              requestId: this.requestId,
-              // TODO: add metadata to the usage
-              metadata: {
-                prompt: "test",
-              },
-            })
-            .then((res) => {
-              if (res.successful_rows <= 0) {
-                this.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
-                  ...res,
-                  entitlement: entitlement,
-                  usage: usage,
-                })
-              }
-              // TODO: Only available in pro plus plan
-              // TODO: usage is not always sum to the current usage, could be counter, etc
-              // also if there are many request per second, we could debounce the update somehow
-              // only update the cache if the feature is realtime
-              if (this.cache) {
-                this.cache.customerEntitlement.set(`${customerId}:${featureSlug}`, {
-                  ...entitlement,
-                  usage: (entitlement.usage ?? 0) + usage,
-                  lastUsageUpdateAt: Date.now(),
-                })
-              } else if (entitlement.realtime) {
-                // update the usage in db
-                this.db
-                  .update(customerEntitlements)
-                  .set({
-                    usage: (entitlement.usage ?? 0) + usage,
-                  })
-                  .where(eq(customerEntitlements.id, entitlement.id))
-              }
-            })
-            .catch((error) => {
-              this.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
-                error: JSON.stringify(error),
-                entitlement: entitlement,
-                usage: usage,
-              })
-            }),
-        ])
       )
-
-      return Ok({
-        success: true,
-        message,
-      })
-    } catch (e) {
-      const error = e as Error
-      this.logger.error("Unhandled error while reporting usage", {
-        error: JSON.stringify(error),
-        customerId: opts.customerId,
-        featureSlug: opts.featureSlug,
-      })
-
-      throw e
     }
+
+    return Ok(val)
   }
 
   public async signUp(opts: {
@@ -1040,7 +697,11 @@ export class CustomerService {
         }
 
         const subscriptionService = new SubscriptionService({
-          ...this.ctx,
+          logger: this.logger,
+          analytics: this.analytics,
+          waitUntil: this.waitUntil,
+          cache: this.cache,
+          metrics: this.metrics,
           // pass the transaction to the subscription service
           // so we can use it to create the subscription
           db: trx,

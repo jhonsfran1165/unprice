@@ -1,6 +1,5 @@
 "use client"
 
-import type { RouterOutputs } from "@unprice/api"
 import {
   calculateFlatPricePlan,
   calculateFreeUnits,
@@ -8,6 +7,7 @@ import {
   calculateTotalPricePlan,
   configureBillingCycleSubscription,
 } from "@unprice/db/validators"
+import type { RouterOutputs } from "@unprice/trpc"
 import {
   Card,
   CardContent,

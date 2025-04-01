@@ -5,9 +5,9 @@ import { TRPCError } from "@trpc/server"
 import { AesGCM } from "@unprice/db/utils"
 import { PaymentProviderService } from "@unprice/services/payment-provider"
 import { env } from "#env"
-import { rateLimiterProcedure } from "#trpc"
+import { publicProcedure } from "#trpc"
 
-export const getSession = rateLimiterProcedure
+export const getSession = publicProcedure
   .meta({
     span: "paymentProvider.getSession",
     openapi: {

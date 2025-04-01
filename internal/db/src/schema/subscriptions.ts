@@ -333,4 +333,5 @@ export const subscriptionPhaseRelations = relations(subscriptionPhases, ({ one, 
     references: [versions.id, versions.projectId],
   }),
   items: many(subscriptionItems),
+  customerEntitlements: many(customerEntitlements),
 }))

@@ -7,9 +7,9 @@ import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client"
 import { createTRPCReact } from "@trpc/react-query"
 import { use, useState } from "react"
 
-import type { AppRouter } from "@unprice/api"
-import { transformer } from "@unprice/api/transformer"
 import { newId } from "@unprice/db/utils"
+import type { AppRouter } from "@unprice/trpc"
+import { transformer } from "@unprice/trpc/transformer"
 import { useSSROnlySecret } from "ssr-only-secrets"
 import { createQueryClient, getBaseUrl } from "./shared"
 

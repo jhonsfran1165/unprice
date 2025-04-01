@@ -6,9 +6,7 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
   },
-  server: {
-    STRIPE_API_KEY: z.string(),
-  },
+  server: {},
   runtimeEnv: process.env,
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
 })

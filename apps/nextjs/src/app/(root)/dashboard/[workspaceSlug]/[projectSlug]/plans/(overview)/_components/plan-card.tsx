@@ -1,6 +1,6 @@
 import { GalleryHorizontalEnd, MoreVertical, Settings } from "lucide-react"
 
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Button } from "@unprice/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import {

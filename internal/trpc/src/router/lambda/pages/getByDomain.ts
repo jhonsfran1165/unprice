@@ -1,10 +1,10 @@
 import { pageSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { rateLimiterProcedure } from "#trpc"
+import { publicProcedure } from "#trpc"
 
 /// public endpoint for getting a page by domain
-export const getByDomain = rateLimiterProcedure
+export const getByDomain = publicProcedure
   .input(
     z.object({
       domain: z.string(),

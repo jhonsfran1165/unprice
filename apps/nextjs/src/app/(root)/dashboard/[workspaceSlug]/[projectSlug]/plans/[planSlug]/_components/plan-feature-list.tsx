@@ -5,7 +5,7 @@ import { useHydrateAtoms } from "jotai/utils"
 import { FileStack, Search } from "lucide-react"
 import { useState } from "react"
 
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Button } from "@unprice/ui/button"
 import { Input } from "@unprice/ui/input"
 import { Separator } from "@unprice/ui/separator"

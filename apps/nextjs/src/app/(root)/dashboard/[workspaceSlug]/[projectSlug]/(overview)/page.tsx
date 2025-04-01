@@ -1,7 +1,7 @@
 import { formatRelative } from "date-fns"
 
-import type { RouterOutputs } from "@unprice/api"
 import { prepareInterval } from "@unprice/tinybird"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Button } from "@unprice/ui/button"
 import {
   Card,
