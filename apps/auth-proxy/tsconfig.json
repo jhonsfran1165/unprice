@@ -1,4 +1,7 @@
 {
   "extends": "@unprice/tsconfig/base.json",
-  "include": ["routes"]
+  "include": ["routes", "env.ts"],
+  "compilerOptions": {
+    "moduleResolution": "bundler"
+  }
 }

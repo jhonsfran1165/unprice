@@ -1,3 +1,4 @@
+import { db } from "@unprice/db"
 import { newId } from "@unprice/id"
 import { ConsoleLogger } from "@unprice/logging"
 import { CacheService } from "@unprice/services/cache"
@@ -8,7 +9,6 @@ import type { MiddlewareHandler } from "hono"
 import { ApiKeysService } from "~/apikey/service"
 import type { HonoEnv } from "~/hono/env"
 import { DurableUsageLimiter } from "~/usagelimit"
-import { createDb } from "~/util/db"
 /**
  * These maps persist between worker executions and are used for caching
  */
@@ -46,14 +46,6 @@ export function init(): MiddlewareHandler<HonoEnv> {
     c.set("performanceStart", performance.now())
 
     c.res.headers.set("unprice-request-id", requestId)
-
-    const db = createDb({
-      env: c.env.ENV,
-      primaryDatabaseUrl: c.env.DATABASE_URL,
-      read1DatabaseUrl: c.env.DATABASE_READ1_URL,
-      read2DatabaseUrl: c.env.DATABASE_READ2_URL,
-      logger: false,
-    })
 
     // TODO: define proper logger
     const logger = new ConsoleLogger({

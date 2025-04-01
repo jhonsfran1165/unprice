@@ -3,7 +3,8 @@ import { subscriptions } from "@unprice/db/schema"
 import type { Subscription } from "@unprice/db/validators"
 import type { Logger } from "@unprice/logging"
 import { env } from "../../env"
-import { db } from "../utils/db"
+
+import { db } from "@unprice/db"
 import type { SubscriptionContext, SubscriptionEvent } from "./types"
 
 /**

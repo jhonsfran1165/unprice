@@ -1,7 +1,7 @@
-import "@unprice/api/env"
 import "@unprice/auth/env"
 import "@unprice/stripe/env"
-import "./src/env.mjs"
+import "@unprice/trpc/env"
+import "./src/env.ts"
 
 import path from "node:path"
 
@@ -20,7 +20,7 @@ const nextConfig = {
   reactStrictMode: true,
   /** Enables hot reloading for local packages without a build step */
   transpilePackages: [
-    "@unprice/api",
+    "@unprice/trpc",
     "@unprice/db",
     "@unprice/stripe",
     "@unprice/ui",
@@ -37,7 +37,7 @@ const nextConfig = {
     turbo: {},
     // ppr: true, // TODO: activate later
     mdxRs: true,
-    optimizePackageImports: ["@unprice/ui", "@unprice/api", "@unprice/auth", "@unprice/db"],
+    optimizePackageImports: ["@unprice/ui", "@unprice/trpc", "@unprice/auth", "@unprice/db"],
     instrumentationHook: process.env.NODE_ENV === "production",
   },
   /** We already do linting and typechecking as separate tasks in CI */

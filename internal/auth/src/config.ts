@@ -3,17 +3,19 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import type { NextAuthConfig } from "next-auth"
 
 import { and, eq, sql } from "@unprice/db"
+import { db } from "@unprice/db"
 import { createWorkspacesByUserQuery } from "@unprice/db/queries"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import type { WorkspacesJWTPayload } from "@unprice/db/validators"
-import { db } from "./db"
 
-const useSecureCookies = process.env.VERCEL_ENV === "production"
+import { env } from "./env"
+
+const useSecureCookies = env.VERCEL_ENV === "production"
 const log = console // TODO: create a logger for this
 
 export const authConfig: NextAuthConfig = {
-  trustHost: Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
+  trustHost: Boolean(env.VERCEL_ENV) || env.NODE_ENV === "development",
   logger: {
     debug: (message, metadata) => log.debug(message, { metadata }),
     error: (error) => log.error(error),
@@ -25,7 +27,7 @@ export const authConfig: NextAuthConfig = {
       log.warn(message)
     },
   },
-  redirectProxyUrl: process.env.AUTH_REDIRECT_PROXY_URL,
+  redirectProxyUrl: env.AUTH_REDIRECT_PROXY_URL,
   session: {
     strategy: "jwt",
     updateAge: 24 * 60 * 60, // 24 hours for update session

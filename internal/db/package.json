@@ -8,7 +8,8 @@
     "./validators": "./src/validators.ts",
     "./schema": "./src/schema.ts",
     "./queries": "./src/queries.ts",
-    "./utils": "./src/utils.ts"
+    "./utils": "./src/utils.ts",
+    "./env": "./env.ts"
   },
   "typesVersions": {
     "*": {
@@ -31,9 +32,9 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.3",
+    "@t3-oss/env-core": "^0.12.0",
     "@auth/core": "^0.34.1",
     "@dinero.js/currencies": "2.0.0-alpha.14",
-    "@t3-oss/env-nextjs": "0.9.1",
     "@unprice/config": "^0.1.0",
     "@unprice/error": "^0.1.0",
     "base-x": "^4.0.0",

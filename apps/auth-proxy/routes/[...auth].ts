@@ -2,16 +2,18 @@ import { Auth } from "@auth/core"
 import Github from "@auth/core/providers/github"
 import { eventHandler, toWebRequest } from "h3"
 
+import { env } from "../env"
+
 export default eventHandler((event) =>
   Auth(toWebRequest(event), {
-    secret: process.env.AUTH_SECRET,
-    trustHost: Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
-    redirectProxyUrl: process.env.AUTH_REDIRECT_PROXY_URL,
+    secret: env.AUTH_SECRET,
+    trustHost: Boolean(env.VERCEL_ENV) || env.NODE_ENV === "development",
+    redirectProxyUrl: env.AUTH_REDIRECT_PROXY_URL,
     basePath: "/auth",
     providers: [
       Github({
-        clientId: process.env.GITHUB_ID,
-        clientSecret: process.env.GITHUB_SECRET,
+        clientId: env.AUTH_GITHUB_CLIENT_ID,
+        clientSecret: env.AUTH_GITHUB_CLIENT_SECRET,
         profile: (p) => ({
           id: p.id.toString(),
           email: p.email,

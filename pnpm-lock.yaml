@@ -59,6 +59,9 @@ importers:
       '@scalar/hono-api-reference':
         specifier: ^0.7.2
         version: 0.7.2(hono@4.7.4)
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
       '@unkey/cache':
         specifier: ^1.5.0
         version: 1.5.0
@@ -126,6 +129,12 @@ importers:
       '@auth/core':
         specifier: ^0.34.1
         version: 0.34.2
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
+      zod:
+        specifier: ^3.23.8
+        version: 3.24.2
     devDependencies:
       '@types/node':
         specifier: 20.11.24
@@ -181,9 +190,9 @@ importers:
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.0.6
         version: 2.1.6(@types/react-dom@18.3.5)(@types/react@18.3.18)(react-dom@18.3.1)(react@18.3.1)
-      '@t3-oss/env-nextjs':
-        specifier: 0.9.1
-        version: 0.9.1(typescript@5.8.2)(zod@3.24.2)
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
       '@tanstack/react-query':
         specifier: 5.66.0
         version: 5.66.0(react@18.3.1)
@@ -214,9 +223,6 @@ importers:
       '@trpc/server':
         specifier: 11.0.0-rc.761
         version: 11.0.0-rc.761(typescript@5.8.2)
-      '@unprice/api':
-        specifier: workspace:^
-        version: link:../../internal/api
       '@unprice/auth':
         specifier: workspace:^
         version: link:../../internal/auth
@@ -235,6 +241,9 @@ importers:
       '@unprice/tinybird':
         specifier: workspace:^
         version: link:../../internal/tinybird
+      '@unprice/trpc':
+        specifier: workspace:^
+        version: link:../../internal/trpc
       '@unprice/ui':
         specifier: workspace:^
         version: link:../../internal/ui
@@ -396,112 +405,6 @@ importers:
         specifier: ^5.3.3
         version: 5.8.2
 
-  internal/api:
-    dependencies:
-      '@baselime/trpc-opentelemetry-middleware':
-        specifier: ^0.1.2
-        version: 0.1.2(@opentelemetry/api@1.9.0)(@trpc/server@11.0.0-rc.761)
-      '@dinero.js/currencies':
-        specifier: 2.0.0-alpha.14
-        version: 2.0.0-alpha.14
-      '@potatohd/trpc-openapi':
-        specifier: ^1.2.3
-        version: 1.2.3(@trpc/server@11.0.0-rc.761)(@types/node@20.11.24)(zod@3.24.2)
-      '@t3-oss/env-nextjs':
-        specifier: 0.9.1
-        version: 0.9.1(typescript@5.8.2)(zod@3.24.2)
-      '@trpc-limiter/core':
-        specifier: 1.0.0
-        version: 1.0.0(@trpc/server@11.0.0-rc.761)
-      '@trpc-limiter/memory':
-        specifier: ^1.0.0
-        version: 1.0.0(@trpc/server@11.0.0-rc.761)
-      '@trpc-limiter/upstash':
-        specifier: ^1.0.0
-        version: 1.0.0(@trpc/server@11.0.0-rc.761)(@upstash/ratelimit@2.0.5)(@upstash/redis@1.34.5)
-      '@trpc/server':
-        specifier: 11.0.0-rc.761
-        version: 11.0.0-rc.761(typescript@5.8.2)
-      '@unkey/cache':
-        specifier: ^1.5.0
-        version: 1.5.0
-      '@unprice/auth':
-        specifier: workspace:^
-        version: link:../auth
-      '@unprice/config':
-        specifier: workspace:^
-        version: link:../config
-      '@unprice/db':
-        specifier: workspace:^
-        version: link:../db
-      '@unprice/email':
-        specifier: workspace:^
-        version: link:../email
-      '@unprice/error':
-        specifier: workspace:^
-        version: link:../error
-      '@unprice/logging':
-        specifier: workspace:^
-        version: link:../logging
-      '@unprice/logs':
-        specifier: workspace:^
-        version: link:../logs
-      '@unprice/metrics':
-        specifier: workspace:^
-        version: link:../metrics
-      '@unprice/stripe':
-        specifier: workspace:^
-        version: link:../stripe
-      '@unprice/tinybird':
-        specifier: workspace:^
-        version: link:../tinybird
-      '@unprice/vercel':
-        specifier: workspace:^
-        version: link:../vercel
-      '@upstash/ratelimit':
-        specifier: ^2.0.0
-        version: 2.0.5(@upstash/redis@1.34.5)
-      '@upstash/redis':
-        specifier: ^1.33.0
-        version: 1.34.5
-      '@vercel/functions':
-        specifier: ^1.0.2
-        version: 1.6.0
-      date-fns:
-        specifier: ^3.3.1
-        version: 3.6.0
-      date-fns-tz:
-        specifier: ^3.1.3
-        version: 3.2.0(date-fns@3.6.0)
-      dinero.js:
-        specifier: 2.0.0-alpha.14
-        version: 2.0.0-alpha.14
-      server-only:
-        specifier: ^0.0.1
-        version: 0.0.1
-      superjson:
-        specifier: 2.2.1
-        version: 2.2.1
-      zod:
-        specifier: ^3.24.2
-        version: 3.24.2
-      zod-form-data:
-        specifier: ^2.0.2
-        version: 2.0.7(zod@3.24.2)
-      zod-validation-error:
-        specifier: ^3.3.1
-        version: 3.4.0(zod@3.24.2)
-    devDependencies:
-      '@unprice/tsconfig':
-        specifier: workspace:^
-        version: link:../../tooling/typescript
-      typescript:
-        specifier: ^5.3.3
-        version: 5.8.2
-      vitest:
-        specifier: ^2.0.5
-        version: 2.1.9(@types/node@20.11.24)
-
   internal/auth:
     dependencies:
       '@auth/core':
@@ -510,9 +413,9 @@ importers:
       '@auth/drizzle-adapter':
         specifier: 1.8.0
         version: 1.8.0
-      '@t3-oss/env-nextjs':
-        specifier: 0.9.1
-        version: 0.9.1(typescript@5.8.2)(zod@3.24.2)
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
       '@unprice/db':
         specifier: ^0.1.0
         version: link:../db
@@ -547,12 +450,9 @@ importers:
 
   internal/config:
     dependencies:
-      '@t3-oss/env-nextjs':
-        specifier: 0.9.1
-        version: 0.9.1(typescript@5.8.2)(zod@3.24.2)
-      '@unprice/ui':
-        specifier: 0.1.0
-        version: link:../ui
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
       zod:
         specifier: ^3.24.2
         version: 3.24.2
@@ -575,9 +475,9 @@ importers:
       '@neondatabase/serverless':
         specifier: ^0.10.3
         version: 0.10.4
-      '@t3-oss/env-nextjs':
-        specifier: 0.9.1
-        version: 0.9.1(typescript@5.8.2)(zod@3.24.2)
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
       '@unprice/config':
         specifier: ^0.1.0
         version: link:../config
@@ -711,24 +611,24 @@ importers:
       '@infisical/sdk':
         specifier: ^3.0.4
         version: 3.0.6
-      '@t3-oss/env-nextjs':
-        specifier: 0.9.1
-        version: 0.9.1(typescript@5.8.2)(zod@3.24.2)
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
       '@trigger.dev/build':
         specifier: ^3.3.13
         version: 3.3.17(typescript@5.8.2)
       '@trigger.dev/sdk':
         specifier: 3.3.13
         version: 3.3.13(zod@3.24.2)
-      '@unprice/api':
-        specifier: workspace:^
-        version: link:../api
       '@unprice/db':
         specifier: workspace:^0.1.0
         version: link:../db
       '@unprice/logging':
         specifier: workspace:^
         version: link:../logging
+      '@unprice/services':
+        specifier: workspace:^
+        version: link:../services
       '@unprice/stripe':
         specifier: workspace:^0.1.0
         version: link:../stripe
@@ -760,10 +660,19 @@ importers:
       '@baselime/edge-logger':
         specifier: ^0.4.2
         version: 0.4.2
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
       '@unprice/logs':
         specifier: ^1.0.0
         version: link:../logs
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
     devDependencies:
+      '@unprice/tsconfig':
+        specifier: workspace:^
+        version: link:../../tooling/typescript
       typescript:
         specifier: ^5.3.3
         version: 5.8.2
@@ -854,12 +763,15 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.8.2
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.9(@types/node@20.11.24)
 
   internal/stripe:
     dependencies:
-      '@t3-oss/env-nextjs':
-        specifier: 0.9.1
-        version: 0.9.1(typescript@5.8.2)(zod@3.24.2)
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
       '@unprice/auth':
         specifier: ^0.1.0
         version: link:../auth
@@ -888,9 +800,9 @@ importers:
       '@chronark/zod-bird':
         specifier: ^0.3.9
         version: 0.3.10
-      '@t3-oss/env-nextjs':
-        specifier: 0.9.1
-        version: 0.9.1(typescript@5.8.2)(zod@3.24.2)
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
       zod:
         specifier: ^3.24.2
         version: 3.24.2
@@ -901,6 +813,115 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.8.2
+
+  internal/trpc:
+    dependencies:
+      '@baselime/trpc-opentelemetry-middleware':
+        specifier: ^0.1.2
+        version: 0.1.2(@opentelemetry/api@1.9.0)(@trpc/server@11.0.0-rc.761)
+      '@dinero.js/currencies':
+        specifier: 2.0.0-alpha.14
+        version: 2.0.0-alpha.14
+      '@potatohd/trpc-openapi':
+        specifier: ^1.2.3
+        version: 1.2.3(@trpc/server@11.0.0-rc.761)(@types/node@20.11.24)(zod@3.24.2)
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
+      '@trpc-limiter/core':
+        specifier: 1.0.0
+        version: 1.0.0(@trpc/server@11.0.0-rc.761)
+      '@trpc-limiter/memory':
+        specifier: ^1.0.0
+        version: 1.0.0(@trpc/server@11.0.0-rc.761)
+      '@trpc-limiter/upstash':
+        specifier: ^1.0.0
+        version: 1.0.0(@trpc/server@11.0.0-rc.761)(@upstash/ratelimit@2.0.5)(@upstash/redis@1.34.5)
+      '@trpc/server':
+        specifier: 11.0.0-rc.761
+        version: 11.0.0-rc.761(typescript@5.8.2)
+      '@unkey/cache':
+        specifier: ^1.5.0
+        version: 1.5.0
+      '@unprice/auth':
+        specifier: workspace:^
+        version: link:../auth
+      '@unprice/config':
+        specifier: workspace:^
+        version: link:../config
+      '@unprice/db':
+        specifier: workspace:^
+        version: link:../db
+      '@unprice/email':
+        specifier: workspace:^
+        version: link:../email
+      '@unprice/error':
+        specifier: workspace:^
+        version: link:../error
+      '@unprice/logging':
+        specifier: workspace:^
+        version: link:../logging
+      '@unprice/logs':
+        specifier: workspace:^
+        version: link:../logs
+      '@unprice/metrics':
+        specifier: workspace:^
+        version: link:../metrics
+      '@unprice/services':
+        specifier: workspace:^
+        version: link:../services
+      '@unprice/stripe':
+        specifier: workspace:^
+        version: link:../stripe
+      '@unprice/tinybird':
+        specifier: workspace:^
+        version: link:../tinybird
+      '@unprice/vercel':
+        specifier: workspace:^
+        version: link:../vercel
+      '@upstash/ratelimit':
+        specifier: ^2.0.0
+        version: 2.0.5(@upstash/redis@1.34.5)
+      '@upstash/redis':
+        specifier: ^1.33.0
+        version: 1.34.5
+      '@vercel/functions':
+        specifier: ^1.0.2
+        version: 1.6.0
+      date-fns:
+        specifier: ^3.3.1
+        version: 3.6.0
+      date-fns-tz:
+        specifier: ^3.1.3
+        version: 3.2.0(date-fns@3.6.0)
+      dinero.js:
+        specifier: 2.0.0-alpha.14
+        version: 2.0.0-alpha.14
+      server-only:
+        specifier: ^0.0.1
+        version: 0.0.1
+      superjson:
+        specifier: 2.2.1
+        version: 2.2.1
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
+      zod-form-data:
+        specifier: ^2.0.2
+        version: 2.0.7(zod@3.24.2)
+      zod-validation-error:
+        specifier: ^3.3.1
+        version: 3.4.0(zod@3.24.2)
+    devDependencies:
+      '@unprice/tsconfig':
+        specifier: workspace:^
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: ^5.3.3
+        version: 5.8.2
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.9(@types/node@20.11.24)
 
   internal/ui:
     dependencies:
@@ -1052,6 +1073,9 @@ importers:
 
   internal/vercel:
     dependencies:
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
       '@unprice/error':
         specifier: ^0.1.0
         version: link:../error

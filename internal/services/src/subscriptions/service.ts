@@ -25,7 +25,9 @@ import { Err, Ok, type Result, SchemaError } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { getDay } from "date-fns"
+import type { Cache } from "../cache"
 import { CustomerService } from "../customers/service"
+import type { Metrics } from "../metrics"
 import { UnPriceSubscriptionError } from "./errors"
 import { SubscriptionMachine } from "./machine"
 import type { SusbriptionMachineStatus } from "./types"
@@ -35,6 +37,8 @@ export class SubscriptionService {
   private readonly db: Database | TransactionDatabase
   private readonly logger: Logger
   private readonly analytics: Analytics
+  private readonly cache: Cache
+  private readonly metrics: Metrics
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   private readonly waitUntil: (promise: Promise<any>) => void
   private customerService: CustomerService
@@ -44,19 +48,30 @@ export class SubscriptionService {
     logger,
     analytics,
     waitUntil,
+    cache,
+    metrics,
   }: {
     db: Database | TransactionDatabase
     logger: Logger
     analytics: Analytics
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     waitUntil: (promise: Promise<any>) => void
+    cache: Cache
+    metrics: Metrics
   }) {
     this.db = db
     this.logger = logger
     this.analytics = analytics
+    this.cache = cache
+    this.metrics = metrics
     this.waitUntil = waitUntil
     this.customerService = new CustomerService({
       db,
+      logger,
+      analytics,
+      waitUntil,
+      cache,
+      metrics,
     })
   }
 

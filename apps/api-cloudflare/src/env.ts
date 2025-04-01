@@ -1,5 +1,16 @@
+import { createEnv } from "@t3-oss/env-core"
+import { env as envDb } from "@unprice/db/env"
+import { env as envServices } from "@unprice/services/env"
 import { z } from "zod"
 import type { DurableObjectUsagelimiter } from "~/usagelimit/do"
+
+export const env = createEnv({
+  server: {},
+  emptyStringAsUndefined: true,
+  runtimeEnv: process.env,
+  extends: [envServices, envDb],
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
+})
 
 export const cloudflareRatelimiter = z.custom<{
   limit: (opts: { key: string }) => Promise<{ success: boolean }>

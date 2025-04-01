@@ -1,5 +1,5 @@
 import { Tinybird } from "@chronark/zod-bird"
-import { env } from "./env"
+import { env } from "../env"
 
 export const analytics = new Tinybird({
   token: env.TINYBIRD_TOKEN,

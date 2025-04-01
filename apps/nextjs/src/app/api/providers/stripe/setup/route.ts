@@ -2,9 +2,8 @@ import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
 import { and, eq } from "@unprice/db"
+import { db } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
-import { db } from "~/lib/db"
-import { ratelimitOrThrow } from "~/lib/ratelimit"
 import { api } from "~/trpc/server"
 
 export const runtime = "edge"
@@ -15,8 +14,6 @@ export const preferredRegion = ["fra1"]
 // usually used for the first time a customer creates a payment method
 export async function GET(req: NextRequest) {
   try {
-    await ratelimitOrThrow(req, "stripe-setup")
-
     const sessionId = req.nextUrl.searchParams.get("session_id")
     const projId = req.nextUrl.searchParams.get("project_id")
 

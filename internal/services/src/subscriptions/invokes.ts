@@ -1,10 +1,10 @@
 import { and, eq } from "@unprice/db"
+import { db } from "@unprice/db"
 import { invoices, subscriptions } from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import { type InvoiceType, configureBillingCycleSubscription } from "@unprice/db/validators"
 import type { Logger } from "@unprice/logging"
 import { addDays } from "date-fns"
-import { db } from "../utils/db"
 import type { SubscriptionContext } from "./types"
 import { validatePaymentMethod } from "./utils"
 

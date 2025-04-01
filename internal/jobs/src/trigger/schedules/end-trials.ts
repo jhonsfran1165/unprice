@@ -1,5 +1,5 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
-import { db } from "../../db"
+import { db } from "@unprice/db"
 import { endTrialTask } from "../tasks/end-trial"
 
 export const endTrialsSchedule = schedules.task({

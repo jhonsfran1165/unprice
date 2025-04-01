@@ -22,7 +22,7 @@
   "dependencies": {
     "@auth/core": "^0.34.1",
     "@auth/drizzle-adapter": "1.8.0",
-    "@t3-oss/env-nextjs": "0.9.1",
+    "@t3-oss/env-core": "^0.12.0",
     "@unprice/db": "^0.1.0",
     "encoding": "^0.1.13",
     "next": "14.3.0-canary.44",

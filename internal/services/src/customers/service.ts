@@ -96,7 +96,7 @@ export class CustomerService {
       return Ok(entitlement)
     }
 
-    const res = await this.cache.featureByCustomerId.swr(
+    const res = await this.cache.customerEntitlement.swr(
       `${opts.customerId}:${opts.featureSlug}`,
       async () => {
         const entitlement = await getEntitlementByDateQuery({
@@ -203,7 +203,7 @@ export class CustomerService {
 
         // we need to think about the best way to cache the features
         activeEntitlements.map((item) => {
-          return this.cache?.featureByCustomerId.set(`${customerId}:${item.featureSlug}`, item)
+          return this.cache?.customerEntitlement.set(`${customerId}:${item.}`, item)
         }),
       ])
     })
@@ -809,7 +809,7 @@ export class CustomerService {
               // also if there are many request per second, we could debounce the update somehow
               // only update the cache if the feature is realtime
               if (this.cache) {
-                this.cache.featureByCustomerId.set(`${customerId}:${featureSlug}`, {
+                this.cache.customerEntitlement.set(`${customerId}:${featureSlug}`, {
                   ...entitlement,
                   usage: (entitlement.usage ?? 0) + usage,
                   lastUsageUpdateAt: Date.now(),

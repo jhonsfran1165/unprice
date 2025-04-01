@@ -1,8 +1,9 @@
 {
   "extends": "@unprice/tsconfig/base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "moduleResolution": "bundler"
   },
-  "include": ["*.ts", "src", "env.mjs"],
+  "include": ["*.ts", "src", "env.ts"],
   "exclude": ["node_modules"]
 }

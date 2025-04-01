@@ -1,5 +1,5 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
-import { db } from "../../db"
+import { db } from "@unprice/db"
 import { invoiceTask } from "../tasks/invoice"
 
 export const invoicingSchedule = schedules.task({

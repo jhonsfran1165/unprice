@@ -1,15 +1,15 @@
 import { createEnv } from "@t3-oss/env-core"
+import { env as envDb } from "@unprice/db/env"
+import { env as envStripe } from "@unprice/stripe/env"
 import { z } from "zod"
 
 export const env = createEnv({
+  shared: {
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  },
   server: {
     CLOUDFLARE_ZONE_ID: z.string().optional(),
     CLOUDFLARE_API_KEY: z.string().optional(),
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    DATABASE_URL: z.string().min(1).url(),
-    DATABASE_READ1_URL: z.string().optional(),
-    DATABASE_READ2_URL: z.string().optional(),
-    DRIZZLE_LOG: z.boolean().optional().default(false),
     ENCRYPTION_KEY: z.string().min(1),
   },
 
@@ -41,4 +41,6 @@ export const env = createEnv({
    * explicitly specify this option as true.
    */
   emptyStringAsUndefined: true,
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
+  extends: [envDb, envStripe],
 })
