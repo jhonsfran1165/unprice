@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import { Unprice } from "@unprice/api"
 import type { FeatureVerification } from "@unprice/db/validators"
 import { CustomerService, UnPriceCustomerError } from "@unprice/services/customers"
 import type { Context } from "#trpc"
@@ -47,10 +48,15 @@ export const featureGuard = async ({
   const now = performance.now()
   const customer = new CustomerService(ctx)
 
+  const unprice = new Unprice({
+    apiKey: "unprice_api_key",
+    apiUrl: "https://api.unprice.dev",
+  })
+
   // use current date for now
   const date = Date.now()
 
-  const { err, val } = await customer.verifyEntitlement({
+  const { err, val } = await unprice.verifyEntitlement({
     customerId,
     featureSlug,
     date,

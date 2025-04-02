@@ -108,25 +108,13 @@ export class SubscriptionService {
 
     const { items } = phase
 
-    const sqlChunks: SQL[] = []
-    const ids: string[] = []
-    sqlChunks.push(sql`(case`)
+    const ids = items.map((item) => item.id)
 
-    for (const item of items) {
-      sqlChunks.push(
-        endAt === null
-          ? sql`when ${customerEntitlements.subscriptionItemId} = ${item.id} then NULL`
-          : sql`when ${customerEntitlements.subscriptionItemId} = ${item.id} then cast(${endAt} as bigint)`
-      )
-      ids.push(item.id)
-    }
-
-    sqlChunks.push(sql`end)`)
-    const finalSql: SQL = sql.join(sqlChunks, sql.raw(" "))
+    console.log(endAt)
 
     await (db ?? this.db)
       .update(customerEntitlements)
-      .set({ validTo: finalSql })
+      .set({ validTo: endAt ?? null })
       .where(inArray(customerEntitlements.subscriptionItemId, ids))
       .catch((e) => {
         this.logger.error(e.message)
@@ -759,37 +747,32 @@ export class SubscriptionService {
 
       // add items to the subscription
       if (items?.length) {
-        await Promise.all(
-          // this is important because every item has the configuration of the quantity of a feature in the subscription
-          items.map((item) =>
-            trx
-              .update(subscriptionItems)
-              .set({
-                units: item.units,
-              })
-              .where(eq(subscriptionItems.id, item.id))
+        const sqlChunks: SQL[] = []
+        const ids: string[] = []
+        sqlChunks.push(sql`(case`)
+
+        for (const item of items) {
+          sqlChunks.push(
+            item.units === null
+              ? sql`when ${customerEntitlements.subscriptionItemId} = ${item.id} then NULL`
+              : sql`when ${customerEntitlements.subscriptionItemId} = ${item.id} then ${item.units}`
           )
-        ).catch((e) => {
-          this.logger.error("Error inserting subscription items", {
-            error: JSON.stringify(e),
-          })
-          trx.rollback()
-          throw e
-        })
-      }
+          ids.push(item.id)
+        }
 
-      // update the status of the subscription if the phase is active
-      const isActivePhase =
-        subscriptionPhase.startAt <= Date.now() &&
-        (subscriptionPhase.endAt ?? Number.POSITIVE_INFINITY) >= Date.now()
+        sqlChunks.push(sql`end)`)
+        const finalSql: SQL = sql.join(sqlChunks, sql.raw(" "))
 
-      if (isActivePhase) {
-        await trx
-          .update(subscriptions)
-          .set({
-            renewAt: endAt ? endAt + 1 : undefined,
+        await (db ?? this.db)
+          .update(subscriptionItems)
+          .set({ units: finalSql })
+          .where(inArray(subscriptionItems.id, ids))
+          .catch((e) => {
+            this.logger.error(e.message)
+            throw new UnPriceSubscriptionError({
+              message: `Error while updating subscription items: ${e.message}`,
+            })
           })
-          .where(eq(subscriptions.id, subscriptionId))
       }
 
       // set the new end date for the entitlements

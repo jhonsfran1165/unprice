@@ -386,27 +386,49 @@ export class CustomerService {
       return null
     }
 
-    // get the usage from analytics
-    const { err, val } = await this.getUsageFromAnalytics({
-      customerId,
-      projectId,
-      featureSlug,
-      startAt: entitlement.customerEntitlement.validFrom,
-      endAt: now,
-      aggregationMethod: entitlement.aggregationMethod,
-      isAccumulated: entitlement.featureType.endsWith("_all"),
-    })
+    // get the usage from analytics if the entitlement was updated more than 1 minute ago
+    if (entitlement.customerEntitlement.lastUsageUpdateAt < Date.now() - 60_000) {
+      const { err, val } = await this.getUsageFromAnalytics({
+        customerId,
+        projectId,
+        featureSlug,
+        startAt: entitlement.customerEntitlement.validFrom,
+        endAt: now,
+        aggregationMethod: entitlement.aggregationMethod,
+      })
 
-    if (err) {
-      throw err
+      if (err) {
+        throw err
+      }
+
+      const result = {
+        ...entitlement.customerEntitlement,
+        featureType: entitlement.featureType,
+        aggregationMethod: entitlement.aggregationMethod,
+        usage: val.usage.toString(),
+        accumulatedUsage: val.accumulatedUsage.toString(),
+        featureSlug,
+      }
+
+      // update the entitlement with the new usage
+      this.waitUntil(
+        this.db
+          .update(customerEntitlements)
+          .set({
+            usage: val.usage.toString(),
+            accumulatedUsage: val.accumulatedUsage.toString(),
+            lastUsageUpdateAt: Date.now(),
+          })
+          .where(eq(customerEntitlements.id, entitlement.customerEntitlement.id))
+      )
+
+      return result
     }
 
     const result = {
       ...entitlement.customerEntitlement,
       featureType: entitlement.featureType,
       aggregationMethod: entitlement.aggregationMethod,
-      usage: val.usage.toString(),
-      accumulatedUsage: val.accumulatedUsage.toString(),
       featureSlug,
     }
 
@@ -703,7 +725,7 @@ export class CustomerService {
           cache: this.cache,
           metrics: this.metrics,
           // pass the transaction to the subscription service
-          // so we can use it to create the subscription
+          // so we can rollback the transaction if something goes wrong
           db: trx,
         })
 
@@ -763,6 +785,9 @@ export class CustomerService {
     }
   }
 
+  // TODO: to implement
+  // signout means cancel all subscriptions and deactivate the customer
+  // cancel all entitlements
   public async signOut(opts: {
     customerId: string
     projectId: string

@@ -834,6 +834,9 @@ importers:
       '@unkey/cache':
         specifier: ^1.5.0
         version: 1.5.0
+      '@unprice/api':
+        specifier: workspace:^
+        version: link:../../packages/api
       '@unprice/auth':
         specifier: workspace:^
         version: link:../auth

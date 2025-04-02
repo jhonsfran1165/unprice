@@ -249,7 +249,7 @@ export default function DurationFormField<TFieldValues extends FormValues>({
                         className="justify-start font-normal"
                         onClick={() => {
                           setEnd(undefined)
-                          field.onChange(undefined)
+                          field.onChange(null)
                           setIsOpenPopOverEnd(false)
                         }}
                       >

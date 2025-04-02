@@ -184,7 +184,11 @@ export class EntitlementService implements EntitlementLimiter {
     }
 
     if (!subscription) {
-      return { success: false, message: "customer has no active subscription" }
+      return {
+        success: false,
+        message: "customer has no active subscription",
+        deniedReason: "CUSTOMER_SUBSCRIPTION_NOT_FOUND",
+      }
     }
 
     // Fast path: check if the limit is reached in the cache
@@ -201,7 +205,11 @@ export class EntitlementService implements EntitlementLimiter {
     }
 
     if (!entitlement) {
-      return { success: false, message: "entitlement not found" }
+      return {
+        success: false,
+        message: "entitlement not found",
+        deniedReason: "ENTITLEMENT_NOT_FOUND",
+      }
     }
 
     if (entitlement.featureType === "flat") {
@@ -215,6 +223,7 @@ export class EntitlementService implements EntitlementLimiter {
       return {
         success: false,
         message: "entitlement limit reached",
+        deniedReason: "LIMIT_EXCEEDED",
       }
     }
 
@@ -284,6 +293,8 @@ export class EntitlementService implements EntitlementLimiter {
       // Fast path: check if the limit is reached in the cache
       // Basically if the entitlement already hit it's limit we reject the request
       // We could allow report over usage later on
+      // TODO: better trust in the DO data than the cache
+      // TODO: If it's not in the DO, it will be revalidated in the next request
       const { err: entitlementErr, val: entitlement } =
         await this.customerService.getActiveEntitlement(
           data.customerId,
