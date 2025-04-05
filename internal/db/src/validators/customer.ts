@@ -103,6 +103,13 @@ export const customerEntitlementExtendedSchema = customerEntitlementSchema.exten
   featureSlug: z.string(),
 })
 
+export const customerEntitlementsSchema = customerEntitlementExtendedSchema.pick({
+  featureSlug: true,
+  validFrom: true,
+  validTo: true,
+  featureType: true,
+})
+
 export type StripePlanVersion = z.infer<typeof stripePlanVersionSchema>
 export type Customer = z.infer<typeof customerSelectSchema>
 export type InsertCustomer = z.infer<typeof customerInsertBaseSchema>
@@ -112,3 +119,4 @@ export type CustomerSetUp = z.infer<typeof customerSetUpSchema>
 export type CustomerEntitlement = z.infer<typeof customerEntitlementSchema>
 export type InsertCustomerEntitlement = z.infer<typeof customerEntitlementInsertSchema>
 export type CustomerEntitlementExtended = z.infer<typeof customerEntitlementExtendedSchema>
+export type CustomerEntitlementsExtended = z.infer<typeof customerEntitlementsSchema>

@@ -1,9 +1,10 @@
 import { createRoute } from "@hono/zod-openapi"
 import * as HttpStatusCodes from "stoker/http-status-codes"
-import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
+import { jsonContent } from "stoker/openapi/helpers"
 
 import { z } from "zod"
 import { keyAuth } from "~/auth/key"
+import { getEntitlementsResponseSchema } from "~/entitlement/interface"
 import { UnpriceApiError } from "~/errors/http"
 import { openApiErrorResponses } from "~/errors/openapi-responses"
 import type { App } from "~/hono/app"
@@ -11,53 +12,36 @@ import type { App } from "~/hono/app"
 const tags = ["customer"]
 
 export const route = createRoute({
-  path: "/v1/customer/{customerId}/revalidateEntitlement",
-  operationId: "customer.revalidateEntitlement",
-  description: "Pull new entitlement configuration from Unprice",
-  method: "post",
+  path: "/v1/customer/{customerId}/getEntitlements",
+  operationId: "customer.getEntitlements",
+  description: "Get entitlements for a customer",
+  method: "get",
   tags,
   request: {
     params: z.object({
       customerId: z.string().openapi({
         description: "The customer ID",
-        param: {
-          name: "customerId",
-          in: "path",
-          example: "cus_1H7KQFLr7RepUyQBKdnvY",
-        },
+        example: "cus_1H7KQFLr7RepUyQBKdnvY",
       }),
     }),
-    body: jsonContentRequired(
-      z.object({
-        featureSlug: z.string().openapi({
-          description: "The feature slug to revalidate",
-          example: "tokens",
-        }),
-      }),
-      "The feature slug to revalidate"
-    ),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        success: z.boolean(),
-        message: z.string().optional(),
-      }),
+      getEntitlementsResponseSchema,
       "The result of the delete customer"
     ),
     ...openApiErrorResponses,
   },
 })
 
-export type RevalidateEntitlementRequest = z.infer<typeof route.request.params>
-export type RevalidateEntitlementResponse = z.infer<
+export type GetEntitlementsRequest = z.infer<typeof route.request.params>
+export type GetEntitlementsResponse = z.infer<
   (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >
 
-export const registerRevalidateEntitlementV1 = (app: App) =>
+export const registerGetEntitlementsV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { customerId } = c.req.valid("param")
-    const { featureSlug } = c.req.valid("json")
     const { entitlement } = c.get("services")
 
     // validate the request
@@ -71,12 +55,11 @@ export const registerRevalidateEntitlementV1 = (app: App) =>
     }
 
     // validate usage from db
-    const result = await entitlement.revalidateEntitlement(
+    const result = await entitlement.getEntitlements({
       customerId,
-      featureSlug,
-      key.projectId,
-      Date.now()
-    )
+      projectId: key.projectId,
+      now: Date.now(),
+    })
 
     return c.json(result, HttpStatusCodes.OK)
   })

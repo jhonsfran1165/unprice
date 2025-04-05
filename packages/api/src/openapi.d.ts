@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/v1/customer/{customerId}/reportUsage": {
+    "/v1/customer/reportUsage": {
         parameters: {
             query?: never;
             header?: never;
@@ -21,17 +21,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/customer/{customerId}/revalidateEntitlement": {
+    "/v1/customer/{customerId}/getEntitlements": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** @description Get entitlements for a customer */
+        get: operations["customer.getEntitlements"];
         put?: never;
-        /** @description Pull new entitlement configuration from Unprice */
-        post: operations["customer.revalidateEntitlement"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -55,17 +55,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/customer/{customerId}/can/{featureSlug}": {
+    "/v1/customer/can": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** @description Check if a customer can use a feature */
-        get: operations["customer.can"];
+        get?: never;
         put?: never;
-        post?: never;
+        /** @description Check if a customer can use a feature */
+        post: operations["customer.can"];
         delete?: never;
         options?: never;
         head?: never;
@@ -265,16 +265,18 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @example cus_1H7KQFLr7RepUyQBKdnvY */
-                customerId: string;
-            };
+            path?: never;
             cookie?: never;
         };
         /** @description The usage to report */
         requestBody: {
             content: {
                 "application/json": {
+                    /**
+                     * @description The customer ID
+                     * @example cus_1H7KQFLr7RepUyQBKdnvY
+                     */
+                    customerId: string;
                     /**
                      * @description The feature slug
                      * @example tokens
@@ -383,28 +385,16 @@ export interface operations {
             };
         };
     };
-    "customer.revalidateEntitlement": {
+    "customer.getEntitlements": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @example cus_1H7KQFLr7RepUyQBKdnvY */
                 customerId: string;
             };
             cookie?: never;
         };
-        /** @description The feature slug to revalidate */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description The feature slug to revalidate
-                     * @example tokens
-                     */
-                    featureSlug: string;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description The result of the delete customer */
             200: {
@@ -413,8 +403,13 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        success: boolean;
-                        message?: string;
+                        entitlements: {
+                            featureSlug: string;
+                            validFrom: number;
+                            validTo: number | null;
+                            /** @enum {string} */
+                            featureType: "flat" | "tier" | "package" | "usage";
+                        }[];
                     };
                 };
             };
@@ -496,13 +491,21 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @example cus_1H7KQFLr7RepUyQBKdnvY */
-                customerId: string;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        /** @description The customer ID */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description The customer ID
+                     * @example cus_1H7KQFLr7RepUyQBKdnvY
+                     */
+                    customerId: string;
+                };
+            };
+        };
         responses: {
             /** @description The result of the reset entitlements */
             200: {
@@ -594,17 +597,38 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @example cus_1H7KQFLr7RepUyQBKdnvY */
-                customerId: string;
-                /** @example tokens */
-                featureSlug: string;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        /** @description Body of the request */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description The customer ID
+                     * @example cus_1H7KQFLr7RepUyQBKdnvY
+                     */
+                    customerId: string;
+                    /**
+                     * @description The feature slug
+                     * @example tokens
+                     */
+                    featureSlug: string;
+                    /**
+                     * @description The metadata
+                     * @example {
+                     *       "action": "create",
+                     *       "country": "US"
+                     *     }
+                     */
+                    metadata: {
+                        [key: string]: string | undefined;
+                    };
+                };
+            };
+        };
         responses: {
-            /** @description The result of the report usage */
+            /** @description The result of the can check */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -613,6 +637,8 @@ export interface operations {
                     "application/json": {
                         success: boolean;
                         message?: string;
+                        /** @enum {string} */
+                        deniedReason?: "RATE_LIMITED" | "CUSTOMER_SUBSCRIPTION_NOT_FOUND" | "ENTITLEMENT_NOT_FOUND" | "LIMIT_EXCEEDED" | "ENTITLEMENT_EXPIRED" | "ENTITLEMENT_NOT_ACTIVE";
                         cacheHit?: boolean;
                         remaining?: number;
                     };

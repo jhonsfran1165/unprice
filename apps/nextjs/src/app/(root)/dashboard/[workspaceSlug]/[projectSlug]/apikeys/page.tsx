@@ -19,7 +19,7 @@ export default async function ApiKeysPage(props: {
   const filters = filtersDataTableCache.parse(props.searchParams)
   const { apikeys, pageCount, error } = await api.apikeys.listByActiveProject(filters)
 
-  if (!error?.access) {
+  if (!error.success) {
     return <UpgradePlanError error={error} />
   }
 

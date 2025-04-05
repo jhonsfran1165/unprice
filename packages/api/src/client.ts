@@ -184,14 +184,15 @@ export class Unprice {
     }
 
     if (res) {
-      return { error: (await res.json()) as ErrorResponse["error"] }
+      return (await res.json()) as ErrorResponse
     }
 
     return {
       error: {
-        code: "INTERNAL_SERVER_ERROR",
-        // @ts-expect-error I don't understand why `err` is `never`
-        message: JSON.stringify(err?.message) ?? "No response",
+        // @ts-ignore
+        code: "FETCH_ERROR",
+        // @ts-ignore I don't understand why `err` is `never`
+        message: err?.message ?? "No response",
         docs: "https://developer.mozilla.org/en-US/docs/Web/API/fetch",
         requestId: "N/A",
       },
@@ -201,59 +202,55 @@ export class Unprice {
   public get customers() {
     return {
       reportUsage: async (
-        customerId: string,
-        req: paths["/v1/customer/{customerId}/reportUsage"]["post"]["requestBody"]["content"]["application/json"]
+        req: paths["/v1/customer/reportUsage"]["post"]["requestBody"]["content"]["application/json"]
       ): Promise<
         Result<
-          paths["/v1/customer/{customerId}/reportUsage"]["post"]["responses"]["200"]["content"]["application/json"]
+          paths["/v1/customer/reportUsage"]["post"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["v1", "customer", customerId, "reportUsage"],
+          path: ["v1", "customer", "reportUsage"],
           method: "POST",
           body: req,
         })
       },
 
-      revalidateEntitlement: async (
-        customerId: string,
-        req: paths["/v1/customer/{customerId}/revalidateEntitlement"]["post"]["requestBody"]["content"]["application/json"]
+      getEntitlements: async (
+        customerId: string
       ): Promise<
         Result<
-          paths["/v1/customer/{customerId}/revalidateEntitlement"]["post"]["responses"]["200"]["content"]["application/json"]
+          paths["/v1/customer/{customerId}/getEntitlements"]["get"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["v1", "customer", customerId, "revalidateEntitlement"],
-          method: "POST",
-          body: req,
+          path: ["v1", "customer", customerId, "getEntitlements"],
+          method: "GET",
         })
       },
 
       resetEntitlements: async (
-        customerId: string
+        req: paths["/v1/customer/{customerId}/reset-entitlements"]["post"]["requestBody"]["content"]["application/json"]
       ): Promise<
         Result<
           paths["/v1/customer/{customerId}/reset-entitlements"]["post"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["v1", "customer", customerId, "reset-entitlements"],
+          path: ["v1", "customer", req.customerId, "reset-entitlements"],
           method: "POST",
+          body: req,
         })
       },
 
       can: async (
-        customerId: string,
-        featureSlug: string
+        req: paths["/v1/customer/can"]["post"]["requestBody"]["content"]["application/json"]
       ): Promise<
-        Result<
-          paths["/v1/customer/{customerId}/can/{featureSlug}"]["get"]["responses"]["200"]["content"]["application/json"]
-        >
+        Result<paths["/v1/customer/can"]["post"]["responses"]["200"]["content"]["application/json"]>
       > => {
         return await this.fetch({
-          path: ["v1", "customer", customerId, "can", featureSlug],
-          method: "GET",
+          path: ["v1", "customer", "can"],
+          method: "POST",
+          body: req,
         })
       },
     }

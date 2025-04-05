@@ -27,16 +27,13 @@ export const create = protectedProjectProcedure
     const result = await featureGuard({
       customerId,
       featureSlug,
-      ctx: opts.ctx,
-      skipCache: true,
-      updateUsage: true,
-      isInternal: project.workspace.isInternal,
+      isMain: project.workspace.isMain,
       metadata: {
         action: "create",
       },
     })
 
-    if (!result.access) {
+    if (!result.success) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: `You don't have access to this feature ${result.deniedReason}`,
@@ -84,9 +81,7 @@ export const create = protectedProjectProcedure
         customerId,
         featureSlug,
         usage: 1, // the new project
-        ctx: opts.ctx,
-        isInternal: project.workspace.isInternal,
-        idempotenceKey: opts.ctx.requestId,
+        isMain: project.workspace.isMain,
       })
     )
 

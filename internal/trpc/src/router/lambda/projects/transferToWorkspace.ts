@@ -29,15 +29,13 @@ export const transferToWorkspace = protectedWorkspaceProcedure
     const result = await featureGuard({
       customerId,
       featureSlug,
-      ctx: opts.ctx,
-      skipCache: true,
-      isInternal: workspace.isInternal,
+      isMain: workspace.isMain,
       metadata: {
         action: "transferToWorkspace",
       },
     })
 
-    if (!result.access) {
+    if (!result.success) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: `You don't have access to this feature ${result.deniedReason}`,
@@ -68,7 +66,7 @@ export const transferToWorkspace = protectedWorkspaceProcedure
         id: true,
         slug: true,
         unPriceCustomerId: true,
-        isInternal: true,
+        isMain: true,
       },
       with: {
         projects: true,
@@ -88,9 +86,10 @@ export const transferToWorkspace = protectedWorkspaceProcedure
       await featureGuard({
         customerId: targetWorkspace.unPriceCustomerId,
         featureSlug,
-        ctx: opts.ctx,
-        skipCache: true,
-        isInternal: targetWorkspace.isInternal,
+        isMain: targetWorkspace.isMain,
+        metadata: {
+          action: "transferToWorkspace",
+        },
       })
     } catch (error) {
       const e = error as TRPCError

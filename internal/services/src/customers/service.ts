@@ -14,7 +14,11 @@ import { Err, FetchError, Ok, type Result, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { env } from "../../env"
-import type { CustomerEntitlementCache, SubcriptionCache } from "../cache"
+import type {
+  CustomerEntitlementCache,
+  CustomerEntitlementsCache,
+  SubcriptionCache,
+} from "../cache"
 import type { Cache } from "../cache/service"
 import type { Metrics } from "../metrics"
 import { PaymentProviderService } from "../payment-provider/service"
@@ -321,20 +325,163 @@ export class CustomerService {
     })
   }
 
+  private async getEntitlementsData({
+    customerId,
+    projectId,
+    now,
+  }: {
+    customerId: string
+    projectId: string
+    now: number
+  }): Promise<CustomerEntitlementsCache[] | null> {
+    const start = performance.now()
+
+    // if not found in DO, then we query the db
+    const entitlements = await this.db.query.customerEntitlements.findMany({
+      with: {
+        featurePlanVersion: {
+          columns: {
+            aggregationMethod: true,
+            featureType: true,
+          },
+          with: {
+            feature: {
+              columns: {
+                slug: true,
+              },
+            },
+          },
+        },
+      },
+      columns: {
+        validFrom: true,
+        validTo: true,
+      },
+      where: (entitlement, { and, eq, gte, lte, isNull, or }) =>
+        and(
+          eq(entitlement.customerId, customerId),
+          eq(entitlement.projectId, projectId),
+          eq(entitlement.active, true),
+          lte(entitlement.validFrom, now),
+          or(isNull(entitlement.validTo), gte(entitlement.validTo, now))
+        ),
+    })
+
+    const end = performance.now()
+
+    this.metrics.emit({
+      metric: "metric.db.read",
+      query: "getActiveEntitlements",
+      duration: end - start,
+      service: "customer",
+      customerId,
+      projectId,
+    })
+
+    if (entitlements.length === 0) {
+      return null
+    }
+
+    const result = entitlements.map((entitlement) => ({
+      featureType: entitlement.featurePlanVersion.featureType,
+      featureSlug: entitlement.featurePlanVersion.feature.slug,
+      validFrom: entitlement.validFrom,
+      validTo: entitlement.validTo,
+    }))
+
+    return result
+  }
+
+  public async getActiveEntitlements({
+    customerId,
+    projectId,
+    now,
+    opts,
+  }: {
+    customerId: string
+    projectId: string
+    now: number
+    opts?: {
+      skipCache?: boolean // skip cache to force revalidation
+    }
+  }): Promise<Result<CustomerEntitlementsCache[] | null, FetchError | UnPriceCustomerError>> {
+    // first try to get the entitlement from cache, if not found try to get it from DO,
+    const { val, err } = opts?.skipCache
+      ? await wrapResult(
+          this.getEntitlementsData({
+            customerId,
+            projectId,
+            now,
+          }),
+          (err) =>
+            new FetchError({
+              message: "unable to query entitlement from db",
+              retry: false,
+              context: {
+                error: err.message,
+                url: "",
+                customerId: customerId,
+                method: "getActiveEntitlement",
+              },
+            })
+        )
+      : await retry(
+          3,
+          async () =>
+            this.cache.customerEntitlements.swr(`${customerId}`, () =>
+              this.getEntitlementsData({
+                customerId,
+                projectId,
+                now,
+              })
+            ),
+          (attempt, err) => {
+            this.logger.warn("Failed to fetch entitlements data from cache, retrying...", {
+              customerId: customerId,
+              attempt,
+              error: err.message,
+            })
+          }
+        )
+
+    if (err) {
+      this.logger.error("error getting entitlements", {
+        error: err.message,
+      })
+
+      return Err(
+        new FetchError({
+          message: err.message,
+          retry: true,
+          cause: err,
+        })
+      )
+    }
+
+    if (!val) {
+      return Ok(null)
+    }
+
+    return Ok(val)
+  }
+
   private async getEntitlementData({
     customerId,
     featureSlug,
     projectId,
     now,
+    opts,
   }: {
     customerId: string
     featureSlug: string
     projectId: string
     now: number
+    opts?: {
+      withLastUsage?: boolean
+    }
   }): Promise<CustomerEntitlementCache | null> {
     const start = performance.now()
 
-    // if not found in DO, then we query the db
     const entitlement = await this.db
       .select({
         customerEntitlement: customerEntitlements,
@@ -387,7 +534,10 @@ export class CustomerService {
     }
 
     // get the usage from analytics if the entitlement was updated more than 1 minute ago
-    if (entitlement.customerEntitlement.lastUsageUpdateAt < Date.now() - 60_000) {
+    if (
+      opts?.withLastUsage ||
+      entitlement.customerEntitlement.lastUsageUpdateAt < Date.now() - 60_000
+    ) {
       const { err, val } = await this.getUsageFromAnalytics({
         customerId,
         projectId,
@@ -442,6 +592,7 @@ export class CustomerService {
     now: number,
     opts?: {
       skipCache?: boolean // skip cache to force revalidation
+      withLastUsage?: boolean // if true, we will get the last usage from analytics
     }
   ): Promise<Result<CustomerEntitlementCache | null, FetchError | UnPriceCustomerError>> {
     // first try to get the entitlement from cache, if not found try to get it from DO,
@@ -452,6 +603,9 @@ export class CustomerService {
             featureSlug,
             projectId,
             now,
+            opts: {
+              withLastUsage: opts?.withLastUsage,
+            },
           }),
           (err) =>
             new FetchError({
@@ -563,7 +717,7 @@ export class CustomerService {
     if (!planVersion) {
       return Err(
         new UnPriceCustomerError({
-          code: "INTERNAL_SERVER_ERROR",
+          code: "PLAN_VERSION_NOT_FOUND",
           message: "Plan version not found",
         })
       )
@@ -572,7 +726,7 @@ export class CustomerService {
     if (planVersion.status !== "published") {
       return Err(
         new UnPriceCustomerError({
-          code: "INTERNAL_SERVER_ERROR",
+          code: "PLAN_VERSION_NOT_PUBLISHED",
           message: "Plan version is not published",
         })
       )
@@ -581,7 +735,7 @@ export class CustomerService {
     if (planVersion.active === false) {
       return Err(
         new UnPriceCustomerError({
-          code: "INTERNAL_SERVER_ERROR",
+          code: "PLAN_VERSION_NOT_ACTIVE",
           message: "Plan version is not active",
         })
       )
@@ -608,7 +762,7 @@ export class CustomerService {
     if (!configPaymentProvider) {
       return Err(
         new UnPriceCustomerError({
-          code: "INTERNAL_SERVER_ERROR",
+          code: "PAYMENT_PROVIDER_CONFIG_NOT_FOUND",
           message: "Payment provider config not found or not active",
         })
       )
@@ -658,7 +812,7 @@ export class CustomerService {
       if (!customerSession) {
         return Err(
           new UnPriceCustomerError({
-            code: "INTERNAL_SERVER_ERROR",
+            code: "CUSTOMER_SESSION_NOT_CREATED",
             message: "Error creating customer session",
           })
         )
@@ -679,7 +833,7 @@ export class CustomerService {
       if (err ?? !val) {
         return Err(
           new UnPriceCustomerError({
-            code: "INTERNAL_SERVER_ERROR",
+            code: "PAYMENT_PROVIDER_ERROR",
             message: err.message,
           })
         )
@@ -712,7 +866,7 @@ export class CustomerService {
         if (!newCustomer?.id) {
           return Err(
             new UnPriceCustomerError({
-              code: "INTERNAL_SERVER_ERROR",
+              code: "CUSTOMER_NOT_CREATED",
               message: "Error creating customer",
             })
           )
@@ -759,7 +913,7 @@ export class CustomerService {
         if (!newSubscription?.id) {
           return Err(
             new UnPriceCustomerError({
-              code: "INTERNAL_SERVER_ERROR",
+              code: "SUBSCRIPTION_NOT_CREATED",
               message: "Error creating subscription",
             })
           )
@@ -821,7 +975,7 @@ export class CustomerService {
       if (!cancelSubs) {
         return Err(
           new UnPriceCustomerError({
-            code: "INTERNAL_SERVER_ERROR",
+            code: "SUBSCRIPTION_NOT_CANCELED",
             message: "Error canceling subscription",
           })
         )

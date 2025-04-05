@@ -11,24 +11,18 @@ import type { App } from "~/hono/app"
 const tags = ["customer"]
 
 export const route = createRoute({
-  path: "/v1/customer/{customerId}/reportUsage",
+  path: "/v1/customer/reportUsage",
   operationId: "customer.reportUsage",
   description: "Report usage for a customer",
   method: "post",
   tags,
   request: {
-    params: z.object({
-      customerId: z.string().openapi({
-        description: "The customer ID",
-        param: {
-          name: "customerId",
-          in: "path",
-          example: "cus_1H7KQFLr7RepUyQBKdnvY",
-        },
-      }),
-    }),
     body: jsonContentRequired(
       z.object({
+        customerId: z.string().openapi({
+          description: "The customer ID",
+          example: "cus_1H7KQFLr7RepUyQBKdnvY",
+        }),
         featureSlug: z.string().openapi({
           description: "The feature slug",
           example: "tokens",
@@ -59,15 +53,16 @@ export const route = createRoute({
   },
 })
 
-export type ReportUsageRequest = z.infer<typeof route.request.params>
+export type ReportUsageRequest = z.infer<
+  (typeof route.request.body)["content"]["application/json"]["schema"]
+>
 export type ReportUsageResponse = z.infer<
   (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >
 
 export const registerReportUsageV1 = (app: App) =>
   app.openapi(route, async (c) => {
-    const { customerId } = c.req.valid("param")
-    const { featureSlug, usage, idempotenceKey } = c.req.valid("json")
+    const { customerId, featureSlug, usage, idempotenceKey } = c.req.valid("json")
     const { entitlement } = c.get("services")
     const requestId = c.get("requestId")
 

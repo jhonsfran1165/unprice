@@ -1,6 +1,6 @@
 import { createRoute } from "@hono/zod-openapi"
 import * as HttpStatusCodes from "stoker/http-status-codes"
-import { jsonContent } from "stoker/openapi/helpers"
+import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
 
 import { z } from "zod"
 import { keyAuth } from "~/auth/key"
@@ -17,16 +17,15 @@ export const route = createRoute({
   method: "post",
   tags,
   request: {
-    params: z.object({
-      customerId: z.string().openapi({
-        description: "The customer ID",
-        param: {
-          name: "customerId",
-          in: "path",
+    body: jsonContentRequired(
+      z.object({
+        customerId: z.string().openapi({
+          description: "The customer ID",
           example: "cus_1H7KQFLr7RepUyQBKdnvY",
-        },
+        }),
       }),
-    }),
+      "The customer ID"
+    ),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -40,14 +39,16 @@ export const route = createRoute({
   },
 })
 
-export type ResetEntitlementsRequest = z.infer<typeof route.request.params>
+export type ResetEntitlementsRequest = z.infer<
+  (typeof route.request.body)["content"]["application/json"]["schema"]
+>
 export type ResetEntitlementsResponse = z.infer<
   (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >
 
 export const registerResetEntitlementsV1 = (app: App) =>
   app.openapi(route, async (c) => {
-    const { customerId } = c.req.valid("param")
+    const { customerId } = c.req.valid("json")
     const { entitlement } = c.get("services")
 
     // validate the request

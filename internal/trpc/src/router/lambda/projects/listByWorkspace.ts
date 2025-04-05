@@ -36,15 +36,13 @@ export const listByWorkspace = protectedWorkspaceProcedure
     const result = await featureGuard({
       customerId,
       featureSlug,
-      ctx: opts.ctx,
-      skipCache: true,
-      isInternal: workspace.isInternal,
+      isMain: workspace.isMain,
       metadata: {
         action: "listByWorkspace",
       },
     })
 
-    if (!result.access) {
+    if (!result.success) {
       return {
         error: result,
         projects: [],

@@ -12,7 +12,10 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
   },
-  server: {},
+  server: {
+    UNPRICE_API_KEY: z.string(),
+    FLAGS_SECRET: z.string(),
+  },
   runtimeEnv: process.env,
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
   extends: [vercelEnv, dbEnv, loggingEnv, analyticsEnv, servicesEnv],

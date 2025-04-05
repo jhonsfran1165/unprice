@@ -1,9 +1,6 @@
 import { TRPCError } from "@trpc/server"
 import { Unprice } from "@unprice/api"
-import type { FeatureVerification } from "@unprice/db/validators"
-import { CustomerService, UnPriceCustomerError } from "@unprice/services/customers"
-import type { Context } from "#trpc"
-
+import { env } from "#env"
 /**
  * Shared logic for verifying feature access across procedures.
  * Uses UnPrice's own product to manage feature access internally,
@@ -14,86 +11,46 @@ import type { Context } from "#trpc"
 export const featureGuard = async ({
   customerId,
   featureSlug,
-  ctx,
-  skipCache = false,
-  updateUsage = false,
-  includeCustom = true,
-  isInternal = false,
+  isMain = false,
   metadata = {},
 }: {
   /** The UnPrice customer ID to check feature access for */
   customerId: string
   /** The feature slug to verify access to */
   featureSlug: string
-  /** The TRPC context containing services like cache, db, analytics etc */
-  ctx: Context
-  /** Whether to bypass cache and check entitlement directly. Defaults to false */
-  skipCache?: boolean
-  /** Whether to increment usage counter for the feature. Defaults to false */
-  updateUsage?: boolean
-  /** Whether to include custom entitlements in check. Defaults to true */
-  includeCustom?: boolean
   /** Whether this is an internal workspace with unlimited access. Defaults to false */
-  isInternal?: boolean
+  isMain?: boolean
   /** Metadata to include in the feature verification. Defaults to an empty object */
-  metadata?: Record<string, string | number | boolean | null>
-}): Promise<FeatureVerification> => {
+  metadata?: Record<string, string | undefined>
+}) => {
   // internal workspaces have unlimited access to all features
-  if (isInternal) {
+  if (isMain) {
     return {
-      access: true,
+      success: true,
     }
   }
 
-  const now = performance.now()
-  const customer = new CustomerService(ctx)
-
   const unprice = new Unprice({
-    apiKey: "unprice_api_key",
-    apiUrl: "https://api.unprice.dev",
+    token: env.UNPRICE_API_KEY,
   })
 
-  // use current date for now
-  const date = Date.now()
+  console.log("unprice", customerId, featureSlug, metadata)
 
-  const { err, val } = await unprice.verifyEntitlement({
+  const { result, error } = await unprice.customers.can({
     customerId,
     featureSlug,
-    date,
-    skipCache,
-    updateUsage,
-    includeCustom,
     metadata,
   })
 
-  const end = performance.now()
+  console.log("result", result)
+  console.log("error", error)
 
-  ctx.metrics.emit({
-    metric: "metric.db.read",
-    query: "verifyEntitlement",
-    duration: end - now,
-    customerId,
-    featureSlug,
-    valid: !err,
-    code: err?.code ?? "",
-    service: "customer",
-  })
-
-  if (err) {
-    switch (true) {
-      case err instanceof UnPriceCustomerError:
-        return {
-          access: false,
-          deniedReason: err.code,
-          message: err.message,
-        }
-      default:
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: `Error verifying feature: ${err.toString()}`,
-        })
-    }
+  if (error) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: error.message,
+    })
   }
 
-  return val
+  return result
 }

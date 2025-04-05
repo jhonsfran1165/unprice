@@ -18,7 +18,7 @@ import { VerifyDomainButton } from "./_components/domain-verify-button"
 export default async function PageDomains() {
   const { domains, error } = await api.domains.getAllByActiveWorkspace()
 
-  if (!error?.access) {
+  if (!error.success) {
     return <UpgradePlanError error={error} />
   }
 

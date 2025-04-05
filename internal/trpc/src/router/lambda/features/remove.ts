@@ -17,14 +17,13 @@ export const remove = protectedProjectProcedure
     const result = await featureGuard({
       customerId: project.workspace.unPriceCustomerId,
       featureSlug: "features",
-      ctx: opts.ctx,
-      skipCache: true,
-      // update usage when deleting a feature
-      updateUsage: true,
-      isInternal: project.workspace.isInternal,
+      metadata: {
+        action: "remove",
+      },
+      isMain: project.workspace.isMain,
     })
 
-    if (!result.access) {
+    if (!result.success) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: `You don't have access to this feature ${result.deniedReason}`,
@@ -50,9 +49,7 @@ export const remove = protectedProjectProcedure
         customerId: project.workspace.unPriceCustomerId,
         featureSlug: "features",
         usage: -1, // the deleted feature
-        ctx: opts.ctx,
-        isInternal: project.workspace.isInternal,
-        idempotenceKey: opts.ctx.requestId,
+        isMain: project.workspace.isMain,
       })
     )
 

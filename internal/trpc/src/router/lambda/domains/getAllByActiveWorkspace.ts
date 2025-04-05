@@ -20,19 +20,17 @@ export const getAllByActiveWorkspace = protectedWorkspaceProcedure
     const result = await featureGuard({
       customerId,
       featureSlug,
-      ctx: opts.ctx,
-      skipCache: true,
-      isInternal: workspace.isInternal,
+      isMain: workspace.isMain,
       metadata: {
         action: "getAllByActiveWorkspace",
       },
     })
 
-    if (!result.access) {
+    if (!result.success) {
       return {
         domains: [],
         error: {
-          access: result.access,
+          success: result.success,
           deniedReason: result.deniedReason,
         },
       }

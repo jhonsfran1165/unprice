@@ -12,6 +12,11 @@ export default auth((req) => {
   const { domain, path } = parse(req)
   const subdomain = getValidSubdomain(domain) ?? ""
 
+  // Bypass Vercel's required endpoint
+  if (path.startsWith("/.well-known/vercel/flags")) {
+    return NextResponse.next()
+  }
+
   // 1. we validate api routes
   if (API_HOSTNAMES.has(domain)) {
     return ApiMiddleware(req)

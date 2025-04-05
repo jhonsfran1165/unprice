@@ -1,8 +1,9 @@
-import { type FetchError, Ok, type Result } from "@unprice/error"
-import type { UnPriceCustomerError } from "@unprice/services/customers"
 import type {
   CanRequest,
+  CanResponse,
   EntitlementLimiter,
+  GetEntitlementsRequest,
+  GetEntitlementsResponse,
   ReportUsageRequest,
   ReportUsageResponse,
 } from "./interface"
@@ -22,19 +23,13 @@ export class NoopEntitlementLimiter implements EntitlementLimiter {
     return { success: true, message: "noop" }
   }
 
-  public async revalidateEntitlement(
-    _customerId: string,
-    _featureSlug: string,
-    _projectId: string,
-    _now: number
-  ): Promise<Result<void, FetchError | UnPriceCustomerError>> {
-    return Ok(undefined)
+  public async getEntitlements(_req: GetEntitlementsRequest): Promise<GetEntitlementsResponse> {
+    return {
+      entitlements: [],
+    }
   }
 
-  public async can(_req: CanRequest): Promise<{
-    success: boolean
-    message: string
-  }> {
+  public async can(_req: CanRequest): Promise<CanResponse> {
     return { success: true, message: "noop" }
   }
 }

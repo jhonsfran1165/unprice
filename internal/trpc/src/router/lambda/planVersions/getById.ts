@@ -36,15 +36,13 @@ export const getById = protectedProjectProcedure
     const result = await featureGuard({
       customerId: workspace.unPriceCustomerId,
       featureSlug: "plan-versions",
-      ctx: opts.ctx,
-      skipCache: true,
-      isInternal: workspace.isInternal,
+      isMain: workspace.isMain,
       metadata: {
         action: "getById",
       },
     })
 
-    if (!result.access) {
+    if (!result.success) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: `You don't have access to this feature ${result.deniedReason}`,

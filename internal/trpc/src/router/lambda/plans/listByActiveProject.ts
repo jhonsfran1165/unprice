@@ -47,12 +47,13 @@ export const listByActiveProject = protectedProjectProcedure
     const result = await featureGuard({
       customerId,
       featureSlug,
-      ctx: opts.ctx,
-      skipCache: true,
-      isInternal: workspace.isInternal,
+      metadata: {
+        action: "listByActiveProject",
+      },
+      isMain: workspace.isMain,
     })
 
-    if (!result.access) {
+    if (!result.success) {
       return {
         plans: [],
         error: result,

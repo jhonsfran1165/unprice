@@ -28,15 +28,13 @@ export const deleteInvite = protectedWorkspaceProcedure
     const result = await featureGuard({
       customerId: workspace.unPriceCustomerId,
       featureSlug: "access-pro",
-      ctx: opts.ctx,
-      skipCache: true,
-      isInternal: false,
+      isMain: workspace.isMain,
       metadata: {
         action: "deleteInvite",
       },
     })
 
-    if (!result.access) {
+    if (!result.success) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: `You don't have access to this feature ${result.deniedReason}`,

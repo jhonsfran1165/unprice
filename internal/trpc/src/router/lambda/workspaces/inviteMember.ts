@@ -33,16 +33,13 @@ export const inviteMember = protectedWorkspaceProcedure
     const result = await featureGuard({
       customerId: workspace.unPriceCustomerId,
       featureSlug,
-      ctx: opts.ctx,
-      skipCache: true,
-      includeCustom: true,
-      isInternal: workspace.isInternal,
+      isMain: workspace.isMain,
       metadata: {
         action: "inviteMember",
       },
     })
 
-    if (!result.access) {
+    if (!result.success) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: `You don't have access to this feature ${result.deniedReason}`,

@@ -156,14 +156,6 @@ export class DurableObjectUsagelimiter extends Server {
       return { valid: false, message: "entitlement expired", deniedReason: "ENTITLEMENT_EXPIRED" }
     }
 
-    if (entitlement.featureType === "flat") {
-      return {
-        valid: false,
-        message:
-          "feature is flat, limit is not applicable but events are billed. Please don't report usage for flat features to avoid overbilling.",
-      }
-    }
-
     if (Number(entitlement.usage) > Number(entitlement.limit)) {
       return {
         valid: false,
@@ -230,7 +222,6 @@ export class DurableObjectUsagelimiter extends Server {
     success: boolean
     message: string
     deniedReason?: DenyReason
-    entitlementNotFound?: boolean
   }> {
     // first get the entitlement
     const { valid, message, entitlement, deniedReason } = this.isValidEntitlement(data.featureSlug)
@@ -239,7 +230,7 @@ export class DurableObjectUsagelimiter extends Server {
       return {
         success: false,
         message: "entitlement not found",
-        entitlementNotFound: true,
+        deniedReason: deniedReason,
       }
     }
 
@@ -334,7 +325,18 @@ export class DurableObjectUsagelimiter extends Server {
       return {
         success: false,
         message,
-        entitlementNotFound: !entitlement,
+      }
+    }
+
+    // if the use is negative but the entitlement aggregationMethod is not in sum or sum_all
+    // we need to return an error
+    if (
+      Number(entitlement.usage) < 0 &&
+      !["sum", "sum_all"].includes(entitlement.aggregationMethod)
+    ) {
+      return {
+        success: false,
+        message: `Usage cannot be negative when the feature type is not sum or sum_all, got ${entitlement.aggregationMethod}. This will disturb aggregations.`,
       }
     }
 
@@ -346,7 +348,7 @@ export class DurableObjectUsagelimiter extends Server {
       .values({
         customerId: data.customerId,
         featureSlug: data.featureSlug,
-        usage: data.usage.toString(),
+        usage: entitlement.featureType === "flat" ? "0" : data.usage.toString(),
         timestamp: data.timestamp,
         idempotenceKey: data.idempotenceKey,
         requestId: data.requestId,
@@ -460,8 +462,9 @@ export class DurableObjectUsagelimiter extends Server {
     if (entitlement.featureType === "flat") {
       return {
         success: false,
-        message: "feature is flat, limit is not applicable",
-        usage: 1,
+        message:
+          "feature is flat, limit is not applicable, but events are billed. Please don't report usage for flat features to avoid overbilling.",
+        usage: 0,
         limit: 1,
       }
     }

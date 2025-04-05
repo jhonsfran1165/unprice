@@ -11,8 +11,8 @@ import serveEmojiFavicon from "stoker/middlewares/serve-emoji-favicon"
 export { DurableObjectUsagelimiter } from "~/entitlement/do"
 import { registerReportUsageV1 } from "~/routes/customer/reportUsageV1"
 import { registerCanV1 } from "./routes/customer/canV1"
+import { registerGetEntitlementsV1 } from "./routes/customer/getEntitlementsV1"
 import { registerResetEntitlementsV1 } from "./routes/customer/resetEntitlementsV1"
-import { registerRevalidateEntitlementV1 } from "./routes/customer/revalidateEntitlementV1"
 
 const app = newApp()
 
@@ -67,7 +67,7 @@ app.use(
 
 // Customer routes
 registerReportUsageV1(app)
-registerRevalidateEntitlementV1(app)
+registerGetEntitlementsV1(app)
 registerResetEntitlementsV1(app)
 registerCanV1(app)
 

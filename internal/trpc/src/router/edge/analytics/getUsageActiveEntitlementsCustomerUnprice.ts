@@ -1,6 +1,7 @@
-import { customerEntitlementSchema } from "@unprice/db/validators"
+import { customerEntitlementsSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
+import { TRPCError } from "@trpc/server"
 import { protectedWorkspaceProcedure } from "#trpc"
 import { getEntitlements } from "#utils/shared"
 
@@ -12,21 +13,24 @@ export const getUsageActiveEntitlementsCustomerUnprice = protectedWorkspaceProce
   )
   .output(
     z.object({
-      entitlements: customerEntitlementSchema.array(),
+      entitlements: customerEntitlementsSchema.array().nullable(),
     })
   )
   .query(async (opts) => {
-    const { customerId } = opts.input
-
-    const entitlements = await getEntitlements({
-      customerId,
+    const { err, val } = await getEntitlements({
+      customerId: opts.input.customerId,
+      projectId: opts.ctx.workspace.id,
       ctx: opts.ctx,
-      skipCache: true,
-      includeCustom: true,
-      updateUsage: true,
     })
 
+    if (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: err.message,
+      })
+    }
+
     return {
-      entitlements,
+      entitlements: val,
     }
   })

@@ -5,13 +5,25 @@ describe("client", () => {
   test("fetch can encode the params without throwing", async () => {
     const unprice = new Unprice({ token: "rawr" })
     expect(() => {
-      unprice.customers.can("meow", "meow")
+      unprice.customers.can({
+        customerId: "meow",
+        featureSlug: "meow",
+        metadata: {
+          meow: "meow",
+        },
+      })
     }).not.toThrow()
   })
 
   test("errors are correctly passed through to the caller", async () => {
     const unprice = new Unprice({ token: "rawr" })
-    const res = await unprice.customers.can("meow", "meow")
+    const res = await unprice.customers.can({
+      customerId: "meow",
+      featureSlug: "meow",
+      metadata: {
+        meow: "meow",
+      },
+    })
 
     expect(res.error).toBeDefined()
     expect(res.error!.code).toEqual("UNAUTHORIZED")

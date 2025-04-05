@@ -29,12 +29,10 @@ export const listByActiveProject = protectedProjectProcedure
     const result = await featureGuard({
       customerId: project.workspace.unPriceCustomerId,
       featureSlug: "apikeys",
-      ctx: opts.ctx,
-      skipCache: true,
-      isInternal: project.workspace.isInternal,
+      isMain: project.workspace.isMain,
     })
 
-    if (!result.access) {
+    if (!result.success) {
       return {
         apikeys: [],
         pageCount: 0,

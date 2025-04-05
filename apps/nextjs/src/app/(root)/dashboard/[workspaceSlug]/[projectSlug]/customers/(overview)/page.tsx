@@ -24,7 +24,7 @@ export default async function ProjectUsersPage(props: {
   const filters = filtersDataTableCache.parse(props.searchParams)
   const { customers, pageCount, error } = await api.customers.listByActiveProject(filters)
 
-  if (!error?.access) {
+  if (!error.success) {
     return <UpgradePlanError error={error} />
   }
 

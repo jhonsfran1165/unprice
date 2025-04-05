@@ -15,12 +15,10 @@ export const exists = protectedWorkspaceProcedure
     const result = await featureGuard({
       customerId,
       featureSlug,
-      ctx: opts.ctx,
-      skipCache: true,
-      isInternal: workspace.isInternal,
+      isMain: workspace.isMain,
     })
 
-    if (result.deniedReason === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
+    if (!result.success) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: `You don't have access to this feature ${result.deniedReason}`,

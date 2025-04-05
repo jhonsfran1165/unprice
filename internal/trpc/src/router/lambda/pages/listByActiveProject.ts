@@ -27,12 +27,13 @@ export const listByActiveProject = protectedProjectProcedure
     const result = await featureGuard({
       customerId,
       featureSlug,
-      ctx: opts.ctx,
-      skipCache: true,
-      isInternal: workspace.isInternal,
+      isMain: workspace.isMain,
+      metadata: {
+        action: "listByActiveProject",
+      },
     })
 
-    if (!result.access) {
+    if (!result.success) {
       return {
         pages: [],
         error: result,

@@ -1,17 +1,9 @@
 {
   "name": "@unprice/api",
   "private": false,
-  "version": "0.0.1",
-  "type": "module",
+  "version": "0.0.9",
   "main": "./dist/index.js",
-  "module": "./dist/index.cjs",
-  "exports": {
-    ".": {
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.cjs"
-    }
-  },
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "AGPL-3.0",
   "files": ["./dist/**"],
@@ -26,10 +18,9 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules dist",
     "typecheck": "tsc --noEmit",
-    "generate:openapi": "curl http://localhost:8787/openapi.json > openapi-spec.json",
+    "test": "vitest run",
     "generate": "openapi-typescript http://localhost:8787/openapi.json -o ./src/openapi.d.ts",
-    "build": "tsup",
-    "generate:sdk": "speakeasy generate sdk --schema openapi-spec.json --lang typescript --out ./sdk"
+    "build": "rm -rf dist && pnpm generate && tsup"
   },
   "dependencies": {},
   "devDependencies": {

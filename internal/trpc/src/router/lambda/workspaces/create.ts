@@ -40,21 +40,28 @@ export const create = protectedProcedure
 
     // check if the customer has access to the feature when is not a personal workspace
     if (!isPersonal) {
+      const customer = await opts.ctx.db.query.customers.findFirst({
+        with: {
+          project: {
+            with: {
+              workspace: true,
+            },
+          },
+        },
+        where: (customer, { eq }) => eq(customer.id, opts.input.unPriceCustomerId),
+      })
+
       // check if the customer has access to the feature
       const result = await featureGuard({
         customerId: opts.input.unPriceCustomerId,
         featureSlug,
-        ctx: opts.ctx,
-        skipCache: true,
-        updateUsage: true,
-        includeCustom: true,
-        isInternal: false,
+        isMain: customer?.project.workspace.isMain,
         metadata: {
           action: "create",
         },
       })
 
-      if (!result.access) {
+      if (!result.success) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: `You don't have access to this feature ${result.deniedReason}`,

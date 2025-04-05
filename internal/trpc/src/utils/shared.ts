@@ -1,66 +1,39 @@
 import { TRPCError } from "@trpc/server"
+import { Unprice } from "@unprice/api"
 import { members, workspaces } from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
 import type { WorkspaceInsert } from "@unprice/db/validators"
-import { CustomerService, UnPriceCustomerError } from "@unprice/services/customers"
+import { CustomerService } from "@unprice/services/customers"
+import uuid from "uuid-random"
+import { env } from "#env"
 import type { Context } from "#trpc"
 
 export const getEntitlements = async ({
   customerId,
   ctx,
-  includeCustom = true,
-  updateUsage = true,
-  skipCache = false,
+  projectId,
 }: {
   customerId: string
   ctx: Context
-  includeCustom?: boolean
-  updateUsage?: boolean
-  skipCache?: boolean
+  projectId: string
 }) => {
   const now = performance.now()
-  const customer = new CustomerService(ctx)
-
-  // use current date for now
-  const date = Date.now()
-
-  const { err, val } = await customer.getEntitlementsByDate({
-    customerId,
-    date: date,
-    includeCustom,
-    // update usage from analytics service on revalidation
-    updateUsage,
-    skipCache,
+  const customer = new CustomerService({
+    db: ctx.db,
+    logger: ctx.logger,
+    analytics: ctx.analytics,
+    waitUntil: ctx.waitUntil,
+    cache: ctx.cache,
+    metrics: ctx.metrics,
   })
 
-  const end = performance.now()
-
-  ctx.metrics.emit({
-    metric: "metric.db.read",
-    query: "getEntitlementsByDate",
-    duration: end - now,
+  const entitlements = await customer.getActiveEntitlements({
     customerId,
-    valid: !err,
-    code: err?.code ?? "",
-    service: "customer",
+    projectId,
+    now,
   })
 
-  if (err) {
-    switch (true) {
-      case err instanceof UnPriceCustomerError:
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: err.message,
-        })
-      default:
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: `Error verifying feature: ${err.toString()}`,
-        })
-    }
-  }
-
-  return val
+  return entitlements
 }
 
 // abstract the usage reporting to the feature service
@@ -69,52 +42,40 @@ export const reportUsageFeature = async ({
   customerId,
   featureSlug,
   usage,
-  ctx,
-  isInternal,
-  idempotenceKey,
-  now = Date.now(),
+  isMain,
 }: {
   customerId: string
   featureSlug: string
   usage: number
-  ctx: Context
-  isInternal?: boolean
-  idempotenceKey: string
-  now?: number
+  isMain?: boolean
 }) => {
-  // if the feature is internal, we don't need to report usage
-  if (isInternal) {
+  // if the feature is main, we don't need to report usage
+  if (isMain) {
     return {
       success: true,
     }
   }
 
-  const customer = new CustomerService(ctx)
+  const unprice = new Unprice({
+    token: env.UNPRICE_API_KEY,
+    baseUrl: "https://api.unprice.dev",
+  })
 
-  const { err, val } = await customer.reportUsage({
+  const { result, error } = await unprice.customers.reportUsage({
     customerId,
     featureSlug,
     usage,
-    date: now,
-    idempotenceKey,
+    idempotenceKey: uuid(),
   })
 
-  if (err) {
-    switch (true) {
-      case err instanceof UnPriceCustomerError:
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: err.code,
-        })
-      default:
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: `Error verifying feature: ${err.toString()}`,
-        })
-    }
+  if (error) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: error.code,
+    })
   }
 
-  return val
+  return result
 }
 
 export const createWorkspace = async ({

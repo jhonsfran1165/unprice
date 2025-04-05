@@ -18,7 +18,7 @@ export default async function WorkspaceOverviewPage(props: {
     workspaceSlug: props.params.workspaceSlug,
   })
 
-  if (!error?.access) {
+  if (!error.success) {
     return <UpgradePlanError error={error} />
   }
 

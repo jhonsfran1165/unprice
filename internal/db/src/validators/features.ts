@@ -34,7 +34,7 @@ export type InsertFeature = z.infer<typeof featureInsertBaseSchema>
 export type Feature = z.infer<typeof featureSelectBaseSchema>
 
 export const featureVerificationSchema = z.object({
-  access: z.boolean(),
+  success: z.boolean(),
   deniedReason: z.union([deniedReasonSchema, unpriceCustomerErrorSchema]).optional(),
   currentUsage: z.number().optional(),
   limit: z.number().optional(),

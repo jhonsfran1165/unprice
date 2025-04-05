@@ -77,7 +77,9 @@
         "VERCEL_TOKEN",
         "TINYBIRD_TOKEN",
         "RESEND_API_KEY",
-        "TINYBIRD_URL"
+        "TINYBIRD_URL",
+        "UNPRICE_API_KEY",
+        "FLAGS_SECRET"
       ]
     },
     "test": {

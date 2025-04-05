@@ -19,7 +19,7 @@ export default async function PageOverviewPage(props: {
 
   const { pages, error } = await api.pages.listByActiveProject({})
 
-  if (!error?.access) {
+  if (!error.success) {
     return <UpgradePlanError error={error} />
   }
 
