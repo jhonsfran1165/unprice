@@ -31,7 +31,6 @@ export const featureGuard = async ({
   }
 
   try {
-    // TODO: test this in a separate file to make sure it works
     const data = await unprice.customers.can({
       customerId,
       featureSlug,
@@ -46,11 +45,10 @@ export const featureGuard = async ({
     }
 
     return data.result
-  } catch (error) {
-    console.error("error", error)
+  } catch (e) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: "error",
+      message: e instanceof Error ? e.message : "Error checking feature access",
     })
   }
 }

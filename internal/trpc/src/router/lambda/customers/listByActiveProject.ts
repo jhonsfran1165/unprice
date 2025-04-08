@@ -3,14 +3,12 @@ import * as schema from "@unprice/db/schema"
 import {
   type Customer,
   customerSelectSchema,
-  featureVerificationSchema,
   searchParamsSchemaDataTable,
 } from "@unprice/db/validators"
 import { z } from "zod"
 
 import { withDateFilters, withPagination } from "@unprice/db/utils"
 import { protectedProjectProcedure } from "#trpc"
-import { featureGuard } from "#utils/feature-guard"
 
 export const listByActiveProject = protectedProjectProcedure
   .input(searchParamsSchemaDataTable)
@@ -18,7 +16,6 @@ export const listByActiveProject = protectedProjectProcedure
     z.object({
       customers: z.array(customerSelectSchema),
       pageCount: z.number(),
-      error: featureVerificationSchema,
     })
   )
   .query(async (opts) => {
@@ -26,23 +23,6 @@ export const listByActiveProject = protectedProjectProcedure
     const { project } = opts.ctx
     const columns = getTableColumns(schema.customers)
     const filter = `%${search}%`
-
-    const result = await featureGuard({
-      customerId: project.workspace.unPriceCustomerId,
-      featureSlug: "customers",
-      isMain: project.workspace.isMain,
-      metadata: {
-        action: "listByActiveProject",
-      },
-    })
-
-    if (!result.success) {
-      return {
-        customers: [],
-        pageCount: 0,
-        error: result,
-      }
-    }
 
     try {
       const expressions = [
@@ -84,14 +64,13 @@ export const listByActiveProject = protectedProjectProcedure
         return {
           data,
           total,
-          error: result,
         }
       })
 
       const pageCount = Math.ceil(total / page_size)
-      return { customers: data, pageCount, error: result }
+      return { customers: data, pageCount }
     } catch (err: unknown) {
       console.error(err)
-      return { customers: [], pageCount: 0, error: result }
+      return { customers: [], pageCount: 0 }
     }
   })

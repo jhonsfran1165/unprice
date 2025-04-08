@@ -1,8 +1,7 @@
-import { featureVerificationSchema, pageSelectBaseSchema } from "@unprice/db/validators"
+import { pageSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
 import { protectedProjectProcedure } from "#trpc"
-import { featureGuard } from "#utils/feature-guard"
 
 export const listByActiveProject = protectedProjectProcedure
   .input(
@@ -14,31 +13,12 @@ export const listByActiveProject = protectedProjectProcedure
   .output(
     z.object({
       pages: z.array(pageSelectBaseSchema.extend({})),
-      error: featureVerificationSchema,
     })
   )
   .query(async (opts) => {
     const { fromDate, toDate } = opts.input
     const project = opts.ctx.project
-    const workspace = opts.ctx.project.workspace
-    const customerId = workspace.unPriceCustomerId
-    const featureSlug = "pages"
 
-    const result = await featureGuard({
-      customerId,
-      featureSlug,
-      isMain: workspace.isMain,
-      metadata: {
-        action: "listByActiveProject",
-      },
-    })
-
-    if (!result.success) {
-      return {
-        pages: [],
-        error: result,
-      }
-    }
     const pages = await opts.ctx.db.query.pages.findMany({
       where: (page, { eq, and, between, gte, lte }) =>
         and(
@@ -51,6 +31,5 @@ export const listByActiveProject = protectedProjectProcedure
 
     return {
       pages,
-      error: result,
     }
   })

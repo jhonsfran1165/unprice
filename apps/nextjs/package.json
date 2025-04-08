@@ -40,7 +40,7 @@
     "@trpc/next": "11.0.0-rc.761",
     "@trpc/react-query": "11.0.0-rc.761",
     "@trpc/server": "11.0.0-rc.761",
-    "@unprice/api": "0.0.9",
+    "@unprice/api": "workspace:^",
     "@unprice/auth": "workspace:^",
     "@unprice/config": "workspace:^",
     "@unprice/db": "workspace:^",

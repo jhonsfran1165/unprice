@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     // Add cache control headers only in production
     if (!isDevelopment) {
-      response.headers.set("Cache-Control", "s-maxage=60, stale-while-revalidate=59")
+      response.headers.set("Cache-Control", "s-maxage=60")
     } else {
       // Prevent caching in development
       response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate")
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     // Add cache headers even for error responses in production
     if (!isDevelopment) {
-      response.headers.set("Cache-Control", "s-maxage=60, stale-while-revalidate=59")
+      response.headers.set("Cache-Control", "s-maxage=60")
     } else {
       response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate")
     }

@@ -42,10 +42,9 @@ const identify = dedupe(async (): Promise<UserEntitlement> => {
   }
 })
 
-export function createEntitlementFlag(key: string) {
-  return flag<boolean, UserEntitlement>({
+export async function entitlementFlag(key: string) {
+  const flagEntitlement = flag<boolean, UserEntitlement>({
     key,
-    description: "Feature entitlement flag",
     identify,
     decide({ entities }) {
       // if main workspace always return true
@@ -58,4 +57,6 @@ export function createEntitlementFlag(key: string) {
     },
     defaultValue: false,
   })
+
+  return flagEntitlement()
 }

@@ -11,6 +11,7 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
+import { entitlementFlag } from "~/lib/flags"
 import { filtersDataTableCache } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
 import { CustomerDialog } from "../_components/customers/customer-dialog"
@@ -22,11 +23,14 @@ export default async function ProjectUsersPage(props: {
   const { workspaceSlug, projectSlug } = props.params
   const baseUrl = `/${workspaceSlug}/${projectSlug}/customers`
   const filters = filtersDataTableCache.parse(props.searchParams)
-  const { customers, pageCount, error } = await api.customers.listByActiveProject(filters)
 
-  if (!error.success) {
-    return <UpgradePlanError error={error} />
+  const isCustomersEnabled = await entitlementFlag("customers")
+
+  if (!isCustomersEnabled) {
+    return <UpgradePlanError />
   }
+
+  const { customers, pageCount } = await api.customers.listByActiveProject(filters)
 
   return (
     <DashboardShell
