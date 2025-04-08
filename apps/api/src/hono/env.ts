@@ -6,6 +6,7 @@ import type { Analytics } from "@unprice/tinybird"
 import type { ApiKeysService } from "~/apikey/service"
 import type { EntitlementLimiter } from "~/entitlement"
 import type { Env } from "~/env"
+import type { ApiProjectService } from "~/project"
 
 export type ServiceContext = {
   version: string
@@ -15,6 +16,7 @@ export type ServiceContext = {
   logger: Logger
   metrics: Metrics
   apikey: ApiKeysService
+  project: ApiProjectService
   db: Database
 }
 

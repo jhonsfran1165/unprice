@@ -1,45 +1,57 @@
-import { auth } from "@unprice/auth/server"
-import { COOKIES_APP } from "@unprice/config"
 import { verifyAccess } from "flags"
-import { cookies } from "next/headers"
 import { type NextRequest, NextResponse } from "next/server"
-import { unprice } from "../../../../lib/flags"
+import { env } from "../../../../env"
+import { unprice } from "../../../../lib/unprice"
 export const runtime = "edge"
 export const dynamic = "force-dynamic" // defaults to auto
+
+// Helper to determine if we're in development
+const isDevelopment = env.NODE_ENV === "development"
 
 export async function GET(request: NextRequest) {
   const access = await verifyAccess(request.headers.get("Authorization"))
   if (!access) return NextResponse.json(null, { status: 401 })
 
-  const session = await auth()
+  try {
+    const { result } = await unprice.projects.getFeatures()
 
-  const activeWorkspaceSlug = cookies().get(COOKIES_APP.WORKSPACE)?.value ?? ""
+    // Transform features into definitions for flags/next
+    const definitions = result.features.reduce(
+      (acc, feature) => {
+        acc[feature.slug] = {
+          description: feature.description,
+          defaultValue: false,
+          type: "boolean",
+        }
+        return acc
+      },
+      {} as Record<string, { description: string; defaultValue: boolean; type: "boolean" }>
+    )
 
-  // Fetch live entitlements from Unprice
-  const workspace = session?.user?.workspaces.find(
-    (workspace) => workspace.slug === activeWorkspaceSlug
-  )
+    const response = NextResponse.json({ definitions })
 
-  const { result } = await unprice.customers
-    .getEntitlements(workspace?.unPriceCustomerId)
-    .catch((error) => {
-      return {
-        result: {
-          entitlements: [],
-        },
-        error: error,
-      }
+    // Add cache control headers only in production
+    if (!isDevelopment) {
+      response.headers.set("Cache-Control", "s-maxage=60, stale-while-revalidate=59")
+    } else {
+      // Prevent caching in development
+      response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate")
+    }
+
+    return response
+  } catch (error) {
+    console.error("error", error)
+    const response = NextResponse.json({
+      definitions: {}, // Empty definitions object when there's an error
     })
 
-  return NextResponse.json({
-    definitions: {
-      entitlements: {
-        description: "Customer access entitlements",
-        options: result.entitlements.map((entitlement) => ({
-          value: true,
-          label: entitlement.featureSlug,
-        })),
-      },
-    },
-  })
+    // Add cache headers even for error responses in production
+    if (!isDevelopment) {
+      response.headers.set("Cache-Control", "s-maxage=60, stale-while-revalidate=59")
+    } else {
+      response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate")
+    }
+
+    return response
+  }
 }

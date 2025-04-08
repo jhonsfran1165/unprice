@@ -9,6 +9,7 @@ import type { MiddlewareHandler } from "hono"
 import { ApiKeysService } from "~/apikey/service"
 import { EntitlementService } from "~/entitlement/service"
 import type { HonoEnv } from "~/hono/env"
+import { ApiProjectService } from "~/project"
 /**
  * These maps persist between worker executions and are used for caching
  */
@@ -90,6 +91,16 @@ export function init(): MiddlewareHandler<HonoEnv> {
       waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
     })
 
+    const project = new ApiProjectService({
+      cache,
+      analytics,
+      logger,
+      metrics,
+      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      db,
+      requestId,
+    })
+
     const apikey = new ApiKeysService({
       cache,
       analytics,
@@ -102,6 +113,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       version: "1.0.0",
       entitlement,
       analytics,
+      project,
       cache,
       logger,
       metrics,

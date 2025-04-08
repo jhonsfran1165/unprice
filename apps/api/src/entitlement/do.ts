@@ -141,7 +141,7 @@ export class DurableObjectUsagelimiter extends Server {
     if (!entitlement) {
       return {
         valid: false,
-        message: "entitlement not found in do",
+        message: "DO: Entitlement not found for this customer",
         deniedReason: "ENTITLEMENT_NOT_FOUND",
       }
     }
@@ -229,7 +229,7 @@ export class DurableObjectUsagelimiter extends Server {
     if (!entitlement) {
       return {
         success: false,
-        message: "entitlement not found",
+        message: message,
         deniedReason: deniedReason,
       }
     }

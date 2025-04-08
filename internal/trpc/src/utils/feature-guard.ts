@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server"
-import { Unprice } from "@unprice/api"
-import { env } from "#env"
+import { unprice } from "./unprice"
+
 /**
  * Shared logic for verifying feature access across procedures.
  * Uses UnPrice's own product to manage feature access internally,
@@ -30,27 +30,27 @@ export const featureGuard = async ({
     }
   }
 
-  const unprice = new Unprice({
-    token: env.UNPRICE_API_KEY,
-  })
+  try {
+    // TODO: test this in a separate file to make sure it works
+    const data = await unprice.customers.can({
+      customerId,
+      featureSlug,
+      metadata,
+    })
 
-  console.log("unprice", customerId, featureSlug, metadata)
+    if (data.error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: data.error.message,
+      })
+    }
 
-  const { result, error } = await unprice.customers.can({
-    customerId,
-    featureSlug,
-    metadata,
-  })
-
-  console.log("result", result)
-  console.log("error", error)
-
-  if (error) {
+    return data.result
+  } catch (error) {
+    console.error("error", error)
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: error.message,
+      message: "error",
     })
   }
-
-  return result
 }

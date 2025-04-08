@@ -1,46 +1,61 @@
-import { Unprice } from "@unprice/api"
-
+import { auth } from "@unprice/auth/server"
+import { COOKIES_APP } from "@unprice/config"
 import { dedupe, flag } from "flags/next"
-
-import { env } from "#env"
-
-import type { ReadonlyRequestCookies } from "flags"
-
-export const unprice = new Unprice({
-  token: env.UNPRICE_API_KEY,
-})
+import { cookies } from "next/headers"
+import { unprice } from "./unprice"
 
 export type UserEntitlement = {
-  customerId: string
+  isMain: boolean
   entitlements: {
-    slug: string
-    validUntil: number
+    featureSlug: string
+    validTo: number | null
     validFrom: number
   }[]
 }
 
-const identify = dedupe(
-  async ({ cookies }: { cookies: ReadonlyRequestCookies }): Promise<UserEntitlement> => {
-    const customerId = cookies.get("unPriceCustomerId")?.value
-    const { result, error } = await unprice.customers.getEntitlements(customerId ?? "")
+const identify = dedupe(async (): Promise<UserEntitlement> => {
+  const session = await auth()
 
-    if (error) {
-      return { customerId: customerId ?? "", entitlements: [] }
-    }
+  const workspaceSlug = cookies().get(COOKIES_APP.WORKSPACE)?.value
 
+  const currentWorkspace = session?.user.workspaces.find((w) => w.slug === workspaceSlug)
+
+  if (!currentWorkspace || currentWorkspace.isMain) {
     return {
-      customerId: customerId ?? "",
-      entitlements: result.entitlements as UserEntitlement["entitlements"],
+      isMain: currentWorkspace?.isMain ?? false,
+      entitlements: [],
     }
   }
-)
 
-export const entitlementsFlag = flag<boolean, UserEntitlement>({
-  key: "entitlements",
-  description: "An example feature flag",
-  identify,
-  decide({ entities }) {
-    return entities?.entitlements.some((entitlement) => entitlement.slug === "beta") ?? false
-  },
-  defaultValue: false,
+  const { result } = await unprice.customers.getEntitlements(currentWorkspace.unPriceCustomerId)
+
+  if (!result) {
+    return {
+      isMain: currentWorkspace.isMain,
+      entitlements: [],
+    }
+  }
+
+  return {
+    isMain: currentWorkspace.isMain,
+    entitlements: result.entitlements,
+  }
 })
+
+export function createEntitlementFlag(key: string) {
+  return flag<boolean, UserEntitlement>({
+    key,
+    description: "Feature entitlement flag",
+    identify,
+    decide({ entities }) {
+      // if main workspace always return true
+      if (entities?.isMain) {
+        return true
+      }
+
+      // If no override, use the entitlements logic
+      return entities?.entitlements.some((entitlement) => entitlement.featureSlug === key) ?? false
+    },
+    defaultValue: false,
+  })
+}

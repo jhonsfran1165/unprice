@@ -10,6 +10,7 @@
     "./customers": "./src/customers/index.ts",
     "./payment-provider": "./src/payment-provider/index.ts",
     "./cache": "./src/cache/index.ts",
+    "./projects": "./src/projects/index.ts",
     "./env": "./env.ts"
   },
   "typesVersions": {

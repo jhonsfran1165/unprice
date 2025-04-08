@@ -30,7 +30,7 @@ export default async function PlanVersionLayout(props: {
       header={
         <HeaderTab
           title="Plan Version Settings"
-          description="Configure features, addons and pricing for this plan version."
+          description="Configure features and pricing for this plan version."
           action={
             <StepperButton
               isPublished={planVersion.status === "published"}

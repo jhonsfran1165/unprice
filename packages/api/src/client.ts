@@ -255,4 +255,19 @@ export class Unprice {
       },
     }
   }
+
+  public get projects() {
+    return {
+      getFeatures: async (): Promise<
+        Result<
+          paths["/v1/project/getFeatures"]["get"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "project", "getFeatures"],
+          method: "GET",
+        })
+      },
+    }
+  }
 }

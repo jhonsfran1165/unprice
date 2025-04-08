@@ -1,5 +1,5 @@
 {
-  "name": "@unprice/tynibird-tooling",
+  "name": "@unprice/tiny-tools",
   "version": "1.0.0",
   "scripts": {
     "cookie": "tsx cookie.ts",
@@ -12,8 +12,8 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "@tinybirdco/mockingbird": "2.0.0-rc.0",
-    "@unprice/tinybird": "workspace:*",
-    "@unprice/api": "0.0.8",
+    "@unprice/api": "workspace:^",
+    "@unprice/tinybird": "workspace:^",
     "zod": "^3.24.2"
   },
   "devDependencies": {

@@ -62,11 +62,9 @@ export class CustomerService {
   private async getActiveSubscriptionData({
     customerId,
     projectId,
-    now,
   }: {
     customerId: string
     projectId: string
-    now: number
   }): Promise<SubcriptionCache | null> {
     const subscription = await this.db.query.subscriptions
       .findFirst({
@@ -85,9 +83,7 @@ export class CustomerService {
         where: and(
           eq(subscriptions.customerId, customerId),
           eq(subscriptions.active, true),
-          eq(subscriptions.projectId, projectId),
-          gte(subscriptions.currentCycleEndAt, now),
-          lte(subscriptions.currentCycleStartAt, now)
+          eq(subscriptions.projectId, projectId)
         ),
       })
       .catch((e) => {
@@ -124,7 +120,6 @@ export class CustomerService {
   public async getActiveSubscription(
     customerId: string,
     projectId: string,
-    now: number,
     opts?: {
       skipCache: boolean
     }
@@ -135,7 +130,6 @@ export class CustomerService {
           this.getActiveSubscriptionData({
             customerId,
             projectId,
-            now,
           }),
           (err) =>
             new FetchError({
@@ -156,7 +150,6 @@ export class CustomerService {
               this.getActiveSubscriptionData({
                 customerId,
                 projectId,
-                now,
               })
             ),
           (attempt, err) => {
@@ -205,15 +198,15 @@ export class CustomerService {
     }
 
     // take a look if the subscription is expired
-    const bufferPeriod = 24 * 60 * 60 * 1000 // 1 day
-    const validUntil = val.currentCycleEndAt + bufferPeriod
-    const validFrom = val.currentCycleStartAt
+    // const bufferPeriod = 24 * 60 * 60 * 1000 // 1 day
+    // const validUntil = val.currentCycleEndAt + bufferPeriod
+    // const validFrom = val.currentCycleStartAt
 
-    if (now < validFrom || now > validUntil) {
-      return Err(
-        new UnPriceCustomerError({ code: "SUBSCRIPTION_EXPIRED", message: "subscription expired" })
-      )
-    }
+    // if (now < validFrom || now > validUntil) {
+    //   return Err(
+    //     new UnPriceCustomerError({ code: "SUBSCRIPTION_EXPIRED", message: "subscription expired" })
+    //   )
+    // }
 
     return Ok(val)
   }

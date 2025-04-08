@@ -39,12 +39,22 @@ async function main() {
   const customerId = "cus_1H7KQFLr7RepUyQBKdnvY"
 
   // get the usage
-  const entitlements = await unprice.customers.reportUsage(customerId, {
+  const entitlements = await unprice.customers.reportUsage({
+    customerId,
     featureSlug: "tokens",
     usage: 100,
     idempotenceKey: randomUUID(),
   })
 
+  const can = await unprice.customers.can({
+    customerId,
+    featureSlug: "tokens",
+    metadata: {
+      usage: "100",
+    },
+  })
+
+  console.info(can)
   console.info(entitlements)
   console.info(`Time taken: ${performance.now() - now}ms`)
 }

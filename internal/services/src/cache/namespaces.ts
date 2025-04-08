@@ -2,6 +2,7 @@ import type {
   ApiKeyExtended,
   CustomerEntitlementExtended,
   CustomerEntitlementsExtended,
+  Feature,
   Subscription,
 } from "@unprice/db/validators"
 
@@ -26,8 +27,18 @@ export type SubcriptionCache =
     })
   | null
 
-export type CustomerEntitlementCache = Omit<CustomerEntitlementExtended, "createdAt" | "updatedAt">
+export type CustomerEntitlementCache = Omit<
+  CustomerEntitlementExtended,
+  "createdAtM" | "updatedAtM"
+>
 export type CustomerEntitlementsCache = CustomerEntitlementsExtended
+export type FeatureCache = Omit<Feature, "createdAtM" | "updatedAtM">
+export type ProjectFeatureCache = {
+  project: {
+    enabled: boolean
+  }
+  features: FeatureCache[]
+}
 
 export type UsageEntitlementCache = {
   success: boolean
@@ -42,6 +53,7 @@ export type CacheNamespaces = {
   customerSubscription: SubcriptionCache | null
   customerEntitlement: CustomerEntitlementCache | null
   customerEntitlements: CustomerEntitlementsCache[] | null
+  projectFeatures: ProjectFeatureCache | null
   idempotentRequestUsageByHash: UsageEntitlementCache | null
 }
 

@@ -13,10 +13,11 @@ import { registerReportUsageV1 } from "~/routes/customer/reportUsageV1"
 import { registerCanV1 } from "./routes/customer/canV1"
 import { registerGetEntitlementsV1 } from "./routes/customer/getEntitlementsV1"
 import { registerResetEntitlementsV1 } from "./routes/customer/resetEntitlementsV1"
+import { registerGetFeaturesV1 } from "./routes/project/getFeaturesV1"
 
 const app = newApp()
 
-app.use(serveEmojiFavicon("👁️‍🗨️"))
+app.use(serveEmojiFavicon("◎"))
 app.use("*", init())
 app.use("*", cors())
 
@@ -70,6 +71,9 @@ registerReportUsageV1(app)
 registerGetEntitlementsV1(app)
 registerResetEntitlementsV1(app)
 registerCanV1(app)
+
+// Project routes
+registerGetFeaturesV1(app)
 
 // Export handler
 const handler = {

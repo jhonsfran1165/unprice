@@ -72,6 +72,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/project/getFeatures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Get features for a project */
+        get: operations["project.getFeatures"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -641,6 +658,107 @@ export interface operations {
                         deniedReason?: "RATE_LIMITED" | "CUSTOMER_SUBSCRIPTION_NOT_FOUND" | "ENTITLEMENT_NOT_FOUND" | "LIMIT_EXCEEDED" | "ENTITLEMENT_EXPIRED" | "ENTITLEMENT_NOT_ACTIVE";
                         cacheHit?: boolean;
                         remaining?: number;
+                    };
+                };
+            };
+            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrBadRequest"];
+                };
+            };
+            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrUnauthorized"];
+                };
+            };
+            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrForbidden"];
+                };
+            };
+            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrNotFound"];
+                };
+            };
+            /** @description This response is sent when a request conflicts with the current state of the server. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrConflict"];
+                };
+            };
+            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+            412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrPreconditionFailed"];
+                };
+            };
+            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrTooManyRequests"];
+                };
+            };
+            /** @description The server has encountered a situation it does not know how to handle. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrInternalServerError"];
+                };
+            };
+        };
+    };
+    "project.getFeatures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The result of the get features */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        features: {
+                            id: string;
+                            projectId: string;
+                            slug: string;
+                            code: number;
+                            title: string;
+                            description: string | null;
+                        }[];
                     };
                 };
             };

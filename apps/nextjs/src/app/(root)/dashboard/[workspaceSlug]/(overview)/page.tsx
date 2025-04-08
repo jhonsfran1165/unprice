@@ -8,18 +8,20 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
+import { createEntitlementFlag } from "~/lib/flags"
 import { api } from "~/trpc/server"
 import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
-
 export default async function WorkspaceOverviewPage(props: {
   params: { workspaceSlug: string }
 }) {
-  const { projects, error } = await api.projects.listByWorkspace({
+  const isProjectsEnabled = await createEntitlementFlag("projects")()
+
+  const { projects } = await api.projects.listByWorkspace({
     workspaceSlug: props.params.workspaceSlug,
   })
 
-  if (!error.success) {
-    return <UpgradePlanError error={error} />
+  if (!isProjectsEnabled) {
+    return <UpgradePlanError />
   }
 
   return (

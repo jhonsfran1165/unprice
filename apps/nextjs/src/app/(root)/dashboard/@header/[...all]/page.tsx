@@ -1,11 +1,12 @@
 import { getSession } from "@unprice/auth/server-rsc"
 import { isSlug } from "@unprice/db/utils"
 import { Separator } from "@unprice/ui/separator"
+import { FlagValues } from "flags/react"
 import { Fragment, Suspense } from "react"
 import Header from "~/components/layout/header"
 import { Logo } from "~/components/layout/logo"
+import { unprice } from "~/lib/unprice"
 import { HydrateClient, trpc } from "~/trpc/server"
-import { Entitlements } from "../../_components/entitlements"
 import { ProjectSwitcher } from "../../_components/project-switcher"
 import { ProjectSwitcherSkeleton } from "../../_components/project-switcher-skeleton"
 import { UpdateClientCookie } from "../../_components/update-client-cookie"
@@ -35,10 +36,9 @@ export default async function Page(props: {
   let workspace: string | null = null
   let project: string | null = null
 
-  let activeWorkspace: {
-    unPriceCustomerId: string
-    isInternal: boolean
-  } | null = null
+  let customerEntitlements: Array<{
+    [key: string]: boolean
+  }> = []
 
   if (isSlug(workspaceSlug) || isSlug(all.at(0))) {
     const session = await getSession()
@@ -52,22 +52,17 @@ export default async function Page(props: {
     const atw = session?.user.workspaces.find((w) => w.slug === workspace)
 
     if (atw) {
-      activeWorkspace = {
-        unPriceCustomerId: atw.unPriceCustomerId,
-        isInternal: atw.isInternal,
-      }
-
       // prefetch entitlements only for non-internal workspaces
-      if (!activeWorkspace.isInternal) {
-        void trpc.customers.entitlements.prefetch(
-          {
-            customerId: activeWorkspace.unPriceCustomerId,
-            skipCache: true,
-          },
-          {
-            staleTime: 1000 * 60 * 5, // 5 minutes
-          }
+      if (!atw.isMain) {
+        const { result: entitlementsResult } = await unprice.customers.getEntitlements(
+          atw.unPriceCustomerId
         )
+
+        // convert to an array of objects
+        customerEntitlements =
+          entitlementsResult?.entitlements.map((entitlement) => ({
+            [entitlement.featureSlug]: true,
+          })) ?? []
       }
     }
   }
@@ -100,12 +95,7 @@ export default async function Page(props: {
             </Suspense>
           )}
 
-          {activeWorkspace && (
-            <Entitlements
-              unPriceCustomerId={activeWorkspace.unPriceCustomerId}
-              isInternal={activeWorkspace.isInternal}
-            />
-          )}
+          {customerEntitlements.length > 0 && <FlagValues values={customerEntitlements} />}
 
           {project && (
             <Fragment>

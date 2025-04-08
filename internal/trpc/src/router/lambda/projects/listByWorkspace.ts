@@ -1,12 +1,7 @@
-import {
-  featureVerificationSchema,
-  projectSelectBaseSchema,
-  workspaceSelectBase,
-} from "@unprice/db/validators"
+import { projectSelectBaseSchema, workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
 
 import { protectedWorkspaceProcedure } from "#trpc"
-import { featureGuard } from "#utils/feature-guard"
 import { getRandomPatternStyle } from "#utils/generate-pattern"
 
 export const listByWorkspace = protectedWorkspaceProcedure
@@ -24,30 +19,10 @@ export const listByWorkspace = protectedWorkspaceProcedure
           }),
         })
       ),
-      error: featureVerificationSchema,
     })
   )
   .query(async (opts) => {
     const workspace = opts.ctx.workspace
-    const customerId = workspace.unPriceCustomerId
-    const featureSlug = "projects"
-
-    // check if the customer has access to the feature
-    const result = await featureGuard({
-      customerId,
-      featureSlug,
-      isMain: workspace.isMain,
-      metadata: {
-        action: "listByWorkspace",
-      },
-    })
-
-    if (!result.success) {
-      return {
-        error: result,
-        projects: [],
-      }
-    }
 
     const workspaceProjects = await opts.ctx.db.query.workspaces.findFirst({
       with: {
@@ -61,7 +36,6 @@ export const listByWorkspace = protectedWorkspaceProcedure
     if (!workspaceProjects) {
       return {
         projects: [],
-        error: result,
       }
     }
 
@@ -73,6 +47,5 @@ export const listByWorkspace = protectedWorkspaceProcedure
         workspace: rest,
         styles: getRandomPatternStyle(project.id),
       })),
-      error: result,
     }
   })

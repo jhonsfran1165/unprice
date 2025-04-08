@@ -2,7 +2,7 @@ import { env } from "cloudflare:workers"
 import type { Database } from "@unprice/db"
 import { Err, type FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import type { Cache, CustomerEntitlementCache } from "@unprice/services/cache"
+import type { Cache, CustomerEntitlementCache, SubcriptionCache } from "@unprice/services/cache"
 import { CustomerService } from "@unprice/services/customers"
 import { UnPriceCustomerError } from "@unprice/services/customers"
 import type { Metrics } from "@unprice/services/metrics"
@@ -141,11 +141,10 @@ export class EntitlementService implements EntitlementLimiter {
 
   private async validateSubscription(
     customerId: string,
-    projectId: string,
-    now: number
-  ): Promise<Result<void, FetchError | UnPriceCustomerError>> {
+    projectId: string
+  ): Promise<Result<SubcriptionCache | null, FetchError | UnPriceCustomerError>> {
     const { err: subscriptionErr, val: subscription } =
-      await this.customerService.getActiveSubscription(customerId, projectId, now)
+      await this.customerService.getActiveSubscription(customerId, projectId)
 
     if (subscriptionErr) {
       return Err(subscriptionErr)
@@ -160,16 +159,7 @@ export class EntitlementService implements EntitlementLimiter {
       )
     }
 
-    if (subscription.status !== "active") {
-      return Err(
-        new UnPriceCustomerError({
-          code: "SUBSCRIPTION_NOT_ACTIVE",
-          message: "customer has no active subscription",
-        })
-      )
-    }
-
-    return Ok(undefined)
+    return Ok(subscription)
   }
 
   public async resetEntitlements(
@@ -179,15 +169,10 @@ export class EntitlementService implements EntitlementLimiter {
     success: boolean
     message: string
   }> {
-    const { err: subscriptionErr, val: subscription } =
-      await this.customerService.getActiveSubscription(customerId, projectId, Date.now())
+    const { err: subscriptionErr } = await this.validateSubscription(customerId, projectId)
 
     if (subscriptionErr) {
       return { success: false, message: subscriptionErr.message }
-    }
-
-    if (!subscription) {
-      return { success: false, message: "customer has no active subscription" }
     }
 
     const durableObject = this.getStub(this.getDurableObjectCustomerId(customerId))
@@ -214,8 +199,7 @@ export class EntitlementService implements EntitlementLimiter {
   public async can(data: CanRequest): Promise<CanResponse> {
     const { err: subscriptionErr } = await this.validateSubscription(
       data.customerId,
-      data.projectId,
-      data.now
+      data.projectId
     )
 
     if (subscriptionErr) {
@@ -267,8 +251,7 @@ export class EntitlementService implements EntitlementLimiter {
     try {
       const { err: subscriptionErr } = await this.validateSubscription(
         data.customerId,
-        data.projectId,
-        data.now
+        data.projectId
       )
 
       if (subscriptionErr) {
@@ -357,18 +340,10 @@ export class EntitlementService implements EntitlementLimiter {
   public async getEntitlements(req: GetEntitlementsRequest): Promise<GetEntitlementsResponse> {
     const { customerId, projectId, now } = req
 
-    const { err: subscriptionErr, val: subscription } =
-      await this.customerService.getActiveSubscription(customerId, projectId, now)
+    const { err: subscriptionErr } = await this.validateSubscription(customerId, projectId)
 
     if (subscriptionErr) {
       throw subscriptionErr
-    }
-
-    if (!subscription) {
-      throw new UnPriceCustomerError({
-        code: "CUSTOMER_SUBSCRIPTION_NOT_FOUND",
-        message: "customer has no active subscription",
-      })
     }
 
     const { err: entitlementsErr, val: entitlements } =
