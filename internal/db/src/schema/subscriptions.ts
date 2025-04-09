@@ -285,6 +285,10 @@ export const subscriptionItemRelations = relations(subscriptionItems, ({ one }) 
     fields: [subscriptionItems.subscriptionPhaseId, subscriptionItems.projectId],
     references: [subscriptionPhases.id, subscriptionPhases.projectId],
   }),
+  subscription: one(subscriptions, {
+    fields: [subscriptionItems.subscriptionId, subscriptionItems.projectId],
+    references: [subscriptions.id, subscriptions.projectId],
+  }),
 }))
 
 export const invoiceRelations = relations(invoices, ({ one }) => ({

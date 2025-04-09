@@ -183,11 +183,6 @@ async function main() {
   const end = Date.now()
 
   console.info(`✅ Migrations completed in ${end - start}ms`)
-
-  console.info("Project Id: ", project.id)
-  console.info("Workspace Id: ", workspace.id)
-  console.info("Customer Id: ", unpriceOwner.id)
-
   process.exit(0)
 }
 

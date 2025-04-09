@@ -500,7 +500,7 @@ export class SubscriptionService {
             renewAt: invoiceAt + 1,
             endAt: endAtToUse ?? undefined,
           })
-          .where(eq(subscriptions.id, subscriptionId))
+          .where(and(eq(subscriptions.id, subscriptionId), eq(subscriptions.projectId, projectId)))
       }
 
       // we set end date to the entitlements that are no longer valid
@@ -718,7 +718,7 @@ export class SubscriptionService {
     if (endAt && endAt < currentCycleEndAt) {
       return Err(
         new UnPriceSubscriptionError({
-          message: "The end date is less than the current billing cycle end date",
+          message: `The end date is less than the current billing cycle end date, set a date greater than ${new Date(currentCycleEndAt).toISOString()}`,
         })
       )
     }
@@ -752,8 +752,8 @@ export class SubscriptionService {
         for (const item of items) {
           sqlChunks.push(
             item.units === null
-              ? sql`when ${customerEntitlements.subscriptionItemId} = ${item.id} then NULL`
-              : sql`when ${customerEntitlements.subscriptionItemId} = ${item.id} then ${item.units}`
+              ? sql`when ${subscriptionItems.id} = ${item.id} then NULL`
+              : sql`when ${subscriptionItems.id} = ${item.id} then cast(${item.units} as int)`
           )
           ids.push(item.id)
         }
