@@ -1,0 +1,69 @@
+import { Pool, neonConfig } from "@neondatabase/serverless"
+import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
+import { withReplicas } from "drizzle-orm/pg-core"
+import ws from "ws"
+import * as schema from "./schema"
+
+export type ConnectionDatabaseOptions = {
+  env: "development" | "production" | "test"
+  primaryDatabaseUrl: string
+  read1DatabaseUrl?: string
+  read2DatabaseUrl?: string
+  logger: boolean
+}
+
+export function createConnection(opts: ConnectionDatabaseOptions) {
+  neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket : ws
+
+  if (opts.env === "development") {
+    neonConfig.wsProxy = (host) => {
+      return `${host}:5433/v1?address=db:5432`
+    }
+    neonConfig.useSecureWebSocket = false
+    neonConfig.pipelineTLS = false
+    neonConfig.pipelineConnect = false
+  }
+
+  const poolConfig = {
+    connectionString: opts.primaryDatabaseUrl,
+    connectionTimeoutMillis: 30000,
+    keepAlive: true,
+  }
+
+  const primary = drizzleNeon(
+    new Pool(poolConfig).on("error", (err) => {
+      console.error("Database error:", err)
+    }),
+    {
+      schema: schema,
+      logger: opts.logger,
+    }
+  )
+
+  const read1 = drizzleNeon(
+    new Pool({
+      connectionString: opts.read1DatabaseUrl,
+    }),
+    {
+      schema: schema,
+      logger: opts.logger,
+    }
+  )
+
+  const read2 = drizzleNeon(
+    new Pool({
+      connectionString: opts.read2DatabaseUrl,
+    }),
+    {
+      schema: schema,
+      logger: opts.logger,
+    }
+  )
+
+  const db =
+    opts.env === "production" && opts.read1DatabaseUrl && opts.read2DatabaseUrl
+      ? withReplicas(primary, [read1, read2])
+      : withReplicas(primary, [primary])
+
+  return db
+}

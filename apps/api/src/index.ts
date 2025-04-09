@@ -69,8 +69,8 @@ app.use(
 // Customer routes
 registerReportUsageV1(app)
 registerGetEntitlementsV1(app)
-registerResetEntitlementsV1(app)
 registerCanV1(app)
+registerResetEntitlementsV1(app)
 
 // Project routes
 registerGetFeaturesV1(app)

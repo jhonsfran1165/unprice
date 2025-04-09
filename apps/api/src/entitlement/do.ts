@@ -579,22 +579,30 @@ export class DurableObjectUsagelimiter extends Server {
 
               throw e
             })
-            .then((data) => {
+            .then(async (data) => {
               const rows = data?.successful_rows ?? 0
               const quarantined = data?.quarantined_rows ?? 0
 
               const total = rows + quarantined
 
               if (total >= ids.length) {
-                this.logger.info("deleted verifications", {
+                this.logger.info("deleted verifications from do", {
                   rows: total,
                 })
 
                 // Only delete events that were successfully sent
-                this.db.delete(verifications).where(inArray(verifications.id, ids))
+                await this.db
+                  .delete(verifications)
+                  .where(inArray(verifications.id, ids))
+                  .catch((e) => {
+                    this.logger.error("error deleting verifications from do", {
+                      error: e.message,
+                    })
+                  })
+
                 processedCount += ids.length
               } else {
-                this.logger.info("failed to send verifications to Tinybird", {
+                this.logger.info("failed to send verifications to Tinybird from do", {
                   data,
                 })
               }
@@ -722,6 +730,10 @@ export class DurableObjectUsagelimiter extends Server {
     }
 
     return this.ctx.blockConcurrencyWhile(async () => {
+      // send the current usage and verifications to tinybird
+      await this.sendUsageToTinybird()
+      await this.sendVerificationsToTinybird()
+
       // check if the are events in the db
       const events = await this.db
         .select({

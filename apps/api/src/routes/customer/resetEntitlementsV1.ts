@@ -11,7 +11,7 @@ import type { App } from "~/hono/app"
 const tags = ["customer"]
 
 export const route = createRoute({
-  path: "/v1/customer/{customerId}/reset-entitlements",
+  path: "/v1/customer/reset-entitlements",
   operationId: "customer.resetEntitlements",
   description: "Reset entitlements for a customer",
   method: "post",
@@ -70,9 +70,6 @@ export const registerResetEntitlementsV1 = (app: App) =>
         message: result.message,
       })
     }
-
-    // TODO: delete from db
-    // await db.delete(customers).where(eq(customers.id, customerId))
 
     return c.json(result, HttpStatusCodes.OK)
   })

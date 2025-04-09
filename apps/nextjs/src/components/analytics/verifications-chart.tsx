@@ -37,7 +37,7 @@ export function VerificationsChart() {
 
   // this is prefetched from the server
   const [data] = api.analytics.getVerifications.useSuspenseQuery({
-    start,
+    start: start - 1000 * 60 * 40,
     end,
   })
 

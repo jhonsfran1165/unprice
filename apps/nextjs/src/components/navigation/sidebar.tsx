@@ -1,19 +1,37 @@
 import { Fragment } from "react"
+import { entitlementFlag } from "~/lib/flags"
 import type { DashboardRoute, Shortcut } from "~/types"
 import { Logo } from "../layout/logo"
 import { ShortLink, Tab } from "../layout/tab"
 import MobileSidebar from "./mobile-sidebar"
 import { UserProfileDesktop, UserProfileMobile } from "./user-nav"
 
-export function Sidebar({
+export async function Sidebar({
   shortcuts,
   routes,
   baseUrl,
+  isMain,
 }: {
   shortcuts: Shortcut[]
   routes: DashboardRoute[]
   baseUrl: string
+  isMain: boolean
 }) {
+  // evaluate flags
+  const activeRoutes = await Promise.all(
+    routes.map(async (route) => {
+      if (!route.slug || isMain) {
+        return route // Return the route if no slug
+      }
+
+      const isActive = await entitlementFlag(route.slug)
+      return isActive ? route : null // Return the route if active, otherwise null
+    })
+  )
+
+  // Filter out null values
+  const filteredActiveRoutes = activeRoutes.filter((route) => route !== null)
+
   return (
     <Fragment>
       {/* sidebar (lg+) */}
@@ -22,7 +40,7 @@ export function Sidebar({
           <Logo />
           <nav aria-label="core navigation links" className="flex flex-1 flex-col space-y-10">
             <ul className="space-y-1">
-              {routes.map((item) => (
+              {filteredActiveRoutes.map((item) => (
                 <li key={item.name}>
                   <Tab
                     href={item.href}
@@ -82,7 +100,7 @@ export function Sidebar({
               className="flex flex-1 flex-col space-y-10"
             >
               <ul className="space-y-1.5">
-                {routes.map((item) => (
+                {filteredActiveRoutes.map((item) => (
                   <li key={item.name}>
                     <Tab
                       href={item.href}

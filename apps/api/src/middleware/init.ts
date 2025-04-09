@@ -1,4 +1,4 @@
-import { db } from "@unprice/db"
+import { createConnection } from "@unprice/db"
 import { newId } from "@unprice/id"
 import { ConsoleLogger } from "@unprice/logging"
 import { CacheService } from "@unprice/services/cache"
@@ -73,6 +73,14 @@ export function init(): MiddlewareHandler<HonoEnv> {
 
     await cacheService.init()
     const cache = cacheService.getCache()
+
+    const db = createConnection({
+      env: c.env.NODE_ENV,
+      primaryDatabaseUrl: c.env.DATABASE_URL,
+      read1DatabaseUrl: c.env.DATABASE_READ1_URL,
+      read2DatabaseUrl: c.env.DATABASE_READ2_URL,
+      logger: c.env.DRIZZLE_LOG,
+    })
 
     const analytics = new Analytics({
       emit: c.env.EMIT_METRICS_LOGS,

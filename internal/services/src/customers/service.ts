@@ -1,4 +1,4 @@
-import { type Database, type TransactionDatabase, and, eq, gte, lte } from "@unprice/db"
+import { type Database, type TransactionDatabase, and, eq, gte, isNull, lte, or } from "@unprice/db"
 
 import {
   customerEntitlements,
@@ -494,7 +494,7 @@ export class CustomerService {
           eq(customerEntitlements.projectId, projectId),
           eq(customerEntitlements.active, true),
           lte(customerEntitlements.validFrom, now),
-          gte(customerEntitlements.validTo, now)
+          or(isNull(customerEntitlements.validTo), gte(customerEntitlements.validTo, now))
         )
       )
       .then((e) => e[0])

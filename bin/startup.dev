@@ -42,8 +42,6 @@ docker-compose up -d
 # use the correct node version
 bash -ic 'nvm use'
 
-# CURRENT_GIT_BRANCH=$(git branch --show-current)
-
 # TODO: add tmux to start the services in different panes
 
 # take the first parameter as the mode id if not provided, use dev

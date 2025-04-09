@@ -1,4 +1,4 @@
-import { auth } from "@unprice/auth/server"
+import { getSession } from "@unprice/auth/server-rsc"
 import { COOKIES_APP } from "@unprice/config"
 import { dedupe, flag } from "flags/next"
 import { cookies } from "next/headers"
@@ -16,7 +16,7 @@ const identify = dedupe(
     isMain: boolean
     entitlements: UserEntitlement[]
   }> => {
-    const session = await auth()
+    const session = await getSession()
 
     const workspaceSlug = cookies().get(COOKIES_APP.WORKSPACE)?.value
 

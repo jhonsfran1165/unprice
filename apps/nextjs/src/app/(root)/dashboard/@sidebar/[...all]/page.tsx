@@ -1,10 +1,11 @@
+import { getSession } from "@unprice/auth/server-rsc"
 import { isSlug } from "@unprice/db/utils"
 import { Sidebar } from "~/components/navigation/sidebar"
 import { PROJECT_NAV, PROJECT_SHORTCUTS } from "~/constants/projects"
 import { WORKSPACE_NAV, WORKSPACE_SHORTCUTS } from "~/constants/workspaces"
 import type { DashboardRoute, Shortcut } from "~/types"
 
-export default function DashboardNavigationDesktopSlot(props: {
+export default async function DashboardNavigationDesktopSlot(props: {
   params: {
     all: string[]
   }
@@ -27,8 +28,14 @@ export default function DashboardNavigationDesktopSlot(props: {
   let routes = [] as DashboardRoute[]
   let shortcuts = [] as Shortcut[]
   let baseUrl = "/"
+  let isMain = false
 
   if (isSlug(workspaceSlug) || isSlug(all.at(0))) {
+    const session = await getSession()
+    isMain =
+      session?.user.workspaces.find((w) => w.slug === `${workspaceSlug ?? all.at(0)}`)?.isMain ??
+      false
+
     routes = WORKSPACE_NAV
     shortcuts = WORKSPACE_SHORTCUTS
     baseUrl += `${workspaceSlug ?? all.at(0)}`
@@ -45,5 +52,5 @@ export default function DashboardNavigationDesktopSlot(props: {
     return null
   }
 
-  return <Sidebar routes={routes} shortcuts={shortcuts} baseUrl={baseUrl} />
+  return <Sidebar routes={routes} shortcuts={shortcuts} baseUrl={baseUrl} isMain={isMain} />
 }

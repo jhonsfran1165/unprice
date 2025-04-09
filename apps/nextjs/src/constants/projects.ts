@@ -14,27 +14,32 @@ export const PROJECT_NAV: DashboardRoute[] = [
     href: "/plans",
     disabled: false,
     isNew: true,
+    slug: "plans",
   },
   {
     name: "Pages",
     icon: Sticker,
     href: "/pages",
+    slug: "pages",
   },
   {
     name: "Events",
     icon: BarChartIcon,
     href: "/ingestions",
     disabled: true,
+    slug: "ingestions",
   },
   {
     name: "Api Keys",
     href: "/apikeys",
     icon: Key,
+    slug: "apikeys",
   },
   {
     name: "Customers & Subs",
     href: "/customers",
     icon: Users,
+    slug: "customers",
   },
   {
     name: "Settings",

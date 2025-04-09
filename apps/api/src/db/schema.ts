@@ -47,7 +47,6 @@ export const entitlements = pgTableProject(
     index("entitlements_project_idx").on(table.projectId),
     index("entitlements_valid_from_idx").on(table.validFrom),
     index("entitlements_valid_to_idx").on(table.validTo),
-    index("entitlements_entitlement_id_idx").on(table.entitlementId),
   ]
 )
 

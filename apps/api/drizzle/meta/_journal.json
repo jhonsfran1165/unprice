@@ -22,6 +22,13 @@
       "when": 1742993651262,
       "tag": "0002_loud_robbie_robertson",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1744203145687,
+      "tag": "0003_rare_talon",
+      "breakpoints": true
     }
   ]
 }
