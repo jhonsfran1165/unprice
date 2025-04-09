@@ -1,10 +1,11 @@
 import { getSession } from "@unprice/auth/server-rsc"
 import { isSlug } from "@unprice/db/utils"
 import { Separator } from "@unprice/ui/separator"
-import { FlagValues } from "flags/react"
 import { Fragment, Suspense } from "react"
+import Flags from "~/components/layout/flags"
 import Header from "~/components/layout/header"
 import { Logo } from "~/components/layout/logo"
+import { entitlementFlag } from "~/lib/flags"
 import { unprice } from "~/lib/unprice"
 import { HydrateClient, trpc } from "~/trpc/server"
 import { ProjectSwitcher } from "../../_components/project-switcher"
@@ -35,10 +36,11 @@ export default async function Page(props: {
 
   let workspace: string | null = null
   let project: string | null = null
+  let customerEntitlements: {
+    [x: string]: boolean
+  }[] = []
 
-  let customerEntitlements: Array<{
-    [key: string]: boolean
-  }> = []
+  let isMain = false
 
   if (isSlug(workspaceSlug) || isSlug(all.at(0))) {
     const session = await getSession()
@@ -52,17 +54,19 @@ export default async function Page(props: {
     const atw = session?.user.workspaces.find((w) => w.slug === workspace)
 
     if (atw) {
-      // prefetch entitlements only for non-internal workspaces
-      if (!atw.isMain) {
-        const { result: entitlementsResult } = await unprice.customers.getEntitlements(
-          atw.unPriceCustomerId
-        )
+      isMain = atw.isMain
 
-        // convert to an array of objects
-        customerEntitlements =
-          entitlementsResult?.entitlements.map((entitlement) => ({
-            [entitlement.featureSlug]: true,
-          })) ?? []
+      // prefetch entitlements only for non-main workspaces
+      if (!atw.isMain) {
+        const { result: featuresResult } = await unprice.projects.getFeatures()
+
+        const features = featuresResult?.features ?? []
+
+        customerEntitlements = await Promise.all(
+          features.map(async (feature) => ({
+            [feature.slug]: await entitlementFlag(feature.slug),
+          }))
+        )
       }
     }
   }
@@ -95,7 +99,7 @@ export default async function Page(props: {
             </Suspense>
           )}
 
-          {customerEntitlements.length > 0 && <FlagValues values={customerEntitlements} />}
+          <Flags customerEntitlements={customerEntitlements} isMain={isMain} />
 
           {project && (
             <Fragment>

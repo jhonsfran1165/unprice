@@ -110,8 +110,6 @@ export class SubscriptionService {
 
     const ids = items.map((item) => item.id)
 
-    console.log(endAt)
-
     await (db ?? this.db)
       .update(customerEntitlements)
       .set({ validTo: endAt ?? null })

@@ -32,8 +32,8 @@ import { Warning } from "@unprice/ui/icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
 import { SubmitButton } from "~/components/submit-button"
-import { useEntitlement } from "~/hooks/use-entitlement"
 import { usePlanFeaturesList } from "~/hooks/use-features"
+import { useFlags } from "~/hooks/use-flags"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -59,7 +59,7 @@ export function FeatureConfigForm({
 
   const editMode = !!defaultValues.id
   const isPublished = planVersion?.status === "published"
-  const { access: isProAccess } = useEntitlement("access-pro")
+  const isProEnabled = useFlags("access-pro")
 
   // we set all possible values for the form so react-hook-form don't complain
   const controlledDefaultValues = {
@@ -197,7 +197,7 @@ export function FeatureConfigForm({
                 </FormDescription>
               </div>
               <FormControl>
-                {!isProAccess ? (
+                {isProEnabled ? (
                   <Switch
                     checked={field.value ?? false}
                     onCheckedChange={field.onChange}

@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { FilterScroll } from "~/components/filter-scroll"
 import { SuperLink } from "~/components/super-link"
-import { useEntitlement } from "~/hooks/use-entitlement"
+import { useFlags } from "~/hooks/use-flags"
 import { api } from "~/trpc/client"
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 
@@ -32,8 +32,8 @@ export function WorkspaceSwitcher({
   const router = useRouter()
   const [switcherOpen, setSwitcherOpen] = useState(false)
 
-  const { access: isProAccess } = useEntitlement("access-pro")
-  const { access: accessWorkspaces, remaining: workspacesRemaining } = useEntitlement("workspaces")
+  const isProEnabled = useFlags("access-pro")
+  const isWorkspacesEnabled = useFlags("workspaces")
 
   const [data] = api.workspaces.listWorkspacesByActiveUser.useSuspenseQuery(undefined, {
     staleTime: 1000 * 60 * 60, // 1 hour
@@ -174,7 +174,7 @@ export function WorkspaceSwitcher({
           <CommandSeparator />
           <CommandList>
             <CommandGroup>
-              {!isProAccess && !accessWorkspaces ? (
+              {!isProEnabled && !isWorkspacesEnabled ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <SuperLink href="/new" className="cursor-not-allowed">
@@ -187,9 +187,9 @@ export function WorkspaceSwitcher({
                   <TooltipContent align="start" side="bottom" sideOffset={10} alignOffset={-5}>
                     <div className="flex max-w-[200px] flex-col gap-4 py-2">
                       <Typography variant="p" className="text-center">
-                        {workspacesRemaining === 0
-                          ? "You have reached the limit of workspaces"
-                          : "You don't have access to this feature"}
+                        {isWorkspacesEnabled
+                          ? "You don't have access to this feature"
+                          : "You have reached the limit of workspaces"}
                       </Typography>
                       <Button variant="primary" size="sm" className="mx-auto w-2/3">
                         Upgrade

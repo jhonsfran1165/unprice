@@ -2,6 +2,7 @@
   "extends": "@unprice/tsconfig/base.json",
   "compilerOptions": {
     "jsx": "preserve",
+    "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],

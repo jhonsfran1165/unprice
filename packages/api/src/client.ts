@@ -1,3 +1,4 @@
+import { version } from "../package.json"
 import type { ErrorResponse } from "./errors"
 import type { paths } from "./openapi"
 import type { Telemetry } from "./telemetry"
@@ -52,6 +53,11 @@ export type UnpriceOptions = {
    * You can leave this blank unless you are building a wrapper around this SDK.
    */
   wrapperSdkVersion?: string
+
+  /**
+   * Additional headers to send with the request
+   */
+  headers?: Record<string, string>
 }
 
 type ApiRequest = {
@@ -84,7 +90,7 @@ export class Unprice {
   private readonly token: string
   private readonly cache?: RequestCache
   private readonly telemetry?: Telemetry | null
-
+  private readonly headers?: Record<string, string>
   public readonly retry: {
     attempts: number
     backoff: (retryCount: number) => number
@@ -97,6 +103,7 @@ export class Unprice {
       this.telemetry = getTelemetry(opts)
     }
 
+    this.headers = opts.headers ?? {}
     this.cache = opts.cache ?? "default"
     /**
      * Even though typescript should prevent this, some people still pass undefined or empty strings
@@ -117,7 +124,7 @@ export class Unprice {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${this.token}`,
-      "unprice-request-source": "sdk", // TODO: add version here
+      "unprice-request-source": `sdk@${version}`,
     }
     if (this.telemetry?.sdkVersions) {
       headers["Unprice-Telemetry-SDK"] = this.telemetry.sdkVersions.join(",")
@@ -128,7 +135,7 @@ export class Unprice {
     if (this.telemetry?.runtime) {
       headers["Unprice-Telemetry-Runtime"] = this.telemetry.runtime
     }
-    return headers
+    return { ...headers, ...this.headers }
   }
 
   private async fetch<TResult>(req: ApiRequest): Promise<Result<TResult>> {

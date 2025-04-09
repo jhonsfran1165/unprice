@@ -5,45 +5,54 @@ import { cookies } from "next/headers"
 import { unprice } from "./unprice"
 
 export type UserEntitlement = {
-  isMain: boolean
-  entitlements: {
-    featureSlug: string
-    validTo: number | null
-    validFrom: number
-  }[]
+  featureSlug: string
+  validTo: number | null
+  validFrom: number
+  featureType: "flat" | "usage" | "tier" | "package"
 }
 
-const identify = dedupe(async (): Promise<UserEntitlement> => {
-  const session = await auth()
+const identify = dedupe(
+  async (): Promise<{
+    isMain: boolean
+    entitlements: UserEntitlement[]
+  }> => {
+    const session = await auth()
 
-  const workspaceSlug = cookies().get(COOKIES_APP.WORKSPACE)?.value
+    const workspaceSlug = cookies().get(COOKIES_APP.WORKSPACE)?.value
 
-  const currentWorkspace = session?.user.workspaces.find((w) => w.slug === workspaceSlug)
+    const currentWorkspace = session?.user.workspaces.find((w) => w.slug === workspaceSlug)
 
-  if (!currentWorkspace || currentWorkspace.isMain) {
-    return {
-      isMain: currentWorkspace?.isMain ?? false,
-      entitlements: [],
+    if (!currentWorkspace || currentWorkspace.isMain) {
+      return {
+        isMain: currentWorkspace?.isMain ?? false,
+        entitlements: [],
+      }
     }
-  }
 
-  const { result } = await unprice.customers.getEntitlements(currentWorkspace.unPriceCustomerId)
+    const { result } = await unprice.customers.getEntitlements(currentWorkspace.unPriceCustomerId)
 
-  if (!result) {
+    if (!result) {
+      return {
+        isMain: currentWorkspace.isMain,
+        entitlements: [],
+      }
+    }
+
     return {
       isMain: currentWorkspace.isMain,
-      entitlements: [],
+      entitlements: result.entitlements,
     }
   }
-
-  return {
-    isMain: currentWorkspace.isMain,
-    entitlements: result.entitlements,
-  }
-})
+)
 
 export async function entitlementFlag(key: string) {
-  const flagEntitlement = flag<boolean, UserEntitlement>({
+  const flagEntitlement = flag<
+    boolean,
+    {
+      isMain: boolean
+      entitlements: UserEntitlement[]
+    }
+  >({
     key,
     identify,
     decide({ entities }) {
