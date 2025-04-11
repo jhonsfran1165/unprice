@@ -84,6 +84,7 @@ export const duplicate = protectedProjectProcedure
             billingConfig: planVersionData.billingConfig,
             autoRenew: planVersionData.autoRenew,
             paymentMethodRequired: planVersionData.paymentMethodRequired,
+            flatPrice: planVersionData.flatPrice,
             metadata: {
               // external Id shouldn't be duplicated
             },

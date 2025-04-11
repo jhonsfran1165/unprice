@@ -51,9 +51,9 @@ export const subscriptions = pgTableProject(
     // whether the subscription is active or not
     // normally is active if the status is active, trialing or past_due or changing
     // this simplifies the queries when we need to get the active subscriptions
-    active: boolean("active").notNull().default(false),
+    active: boolean("active").default(false).notNull(),
     // slug of the plan only for ui purposes
-    planSlug: text("plan_slug").default("FREE"),
+    planSlug: text("plan_slug").default("FREE").notNull(),
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
 
     // whether the subscription is locked or not

@@ -25,7 +25,6 @@
     "@unkey/cache": "^1.5.0",
     "@unprice/db": "workspace:^",
     "@unprice/error": "workspace:^",
-    "@unprice/id": "workspace:^",
     "@unprice/logging": "workspace:^",
     "@unprice/logs": "workspace:^",
     "@unprice/metrics": "workspace:^",

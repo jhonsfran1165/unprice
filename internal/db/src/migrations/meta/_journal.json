@@ -15,6 +15,20 @@
       "when": 1743532893975,
       "tag": "0001_calm_sleeper",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1744289992705,
+      "tag": "0002_goofy_morlun",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1744391407580,
+      "tag": "0003_perpetual_kabuki",
+      "breakpoints": true
     }
   ]
 }

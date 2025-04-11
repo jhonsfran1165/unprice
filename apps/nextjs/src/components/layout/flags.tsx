@@ -9,11 +9,13 @@ import { flagsAtom } from "~/hooks/use-flags"
 export default function Flags({
   customerEntitlements,
   isMain,
+  customerId,
 }: {
   customerEntitlements: {
     [x: string]: boolean
   }[]
   isMain: boolean
+  customerId: string
 }): React.ReactNode {
   useHydrateAtoms([
     [
@@ -21,6 +23,7 @@ export default function Flags({
       {
         entitlements: customerEntitlements,
         isMain,
+        customerId,
       },
     ],
   ])
@@ -31,6 +34,7 @@ export default function Flags({
     setData({
       entitlements: customerEntitlements,
       isMain,
+      customerId,
     })
   }, [isMain, customerEntitlements.length])
 

@@ -75,6 +75,10 @@ export class CacheService {
         this.context,
         defaultOpts
       ),
+      customerActivePhase: new Namespace<CacheNamespaces["customerActivePhase"]>(
+        this.context,
+        defaultOpts
+      ),
       customerEntitlements: new Namespace<CacheNamespaces["customerEntitlements"]>(
         this.context,
         defaultOpts

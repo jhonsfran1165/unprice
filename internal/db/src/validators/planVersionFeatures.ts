@@ -9,7 +9,6 @@ import { planVersionFeatures } from "../schema/planVersionFeatures"
 import { FEATURE_TYPES_MAPS, USAGE_MODES_MAP } from "../utils"
 import { featureSelectBaseSchema } from "./features"
 import { planVersionSelectBaseSchema } from "./planVersions"
-import { planSelectBaseSchema } from "./plans"
 import {
   aggregationMethodSchema,
   tierModeSchema,
@@ -451,16 +450,7 @@ export const planVersionFeatureDragDropSchema = planVersionFeatureSelectBaseSche
   feature: featureSelectBaseSchema,
 })
 
-// export const planVersionFeatureExtendedSchema = planVersionFeatureSelectBaseSchema.extend({
-//   feature: featureSelectBaseSchema,
-//   planVersion: planVersionSelectBaseSchema.extend({
-//     plan: planSelectBaseSchema,
-//   }),
-//   project: projectSelectBaseSchema,
-// })
-
 export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
-  plan: planSelectBaseSchema,
   planFeatures: z.array(
     planVersionFeatureSelectBaseSchema.extend({
       feature: featureSelectBaseSchema,
@@ -468,9 +458,7 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
   ),
 })
 
-export type PlanVersionFeature = z.infer<typeof planVersionFeatureInsertBaseSchema>
-
-// export type PlanVersionFeatureExtended = z.infer<typeof planVersionFeatureExtendedSchema>
+export type PlanVersionFeature = z.infer<typeof planVersionFeatureSelectBaseSchema>
 
 export type PlanVersionFeatureDragDrop = z.infer<typeof planVersionFeatureDragDropSchema>
 

@@ -745,30 +745,53 @@ export class SubscriptionService {
 
       // add items to the subscription
       if (items?.length) {
-        const sqlChunks: SQL[] = []
+        const sqlChunksItems: SQL[] = []
+        const sqlChunksEntitlements: SQL[] = []
+
         const ids: string[] = []
-        sqlChunks.push(sql`(case`)
+        sqlChunksItems.push(sql`(case`)
+        sqlChunksEntitlements.push(sql`(case`)
 
         for (const item of items) {
-          sqlChunks.push(
+          sqlChunksItems.push(
             item.units === null
               ? sql`when ${subscriptionItems.id} = ${item.id} then NULL`
               : sql`when ${subscriptionItems.id} = ${item.id} then cast(${item.units} as int)`
           )
+          sqlChunksEntitlements.push(
+            item.units === null
+              ? sql`when ${customerEntitlements.subscriptionItemId} = ${item.id} then NULL`
+              : sql`when ${customerEntitlements.subscriptionItemId} = ${item.id} then cast(${item.units} as int)`
+          )
           ids.push(item.id)
         }
 
-        sqlChunks.push(sql`end)`)
-        const finalSql: SQL = sql.join(sqlChunks, sql.raw(" "))
+        sqlChunksItems.push(sql`end)`)
+        sqlChunksEntitlements.push(sql`end)`)
+
+        const finalSqlItems: SQL = sql.join(sqlChunksItems, sql.raw(" "))
+        const finalSqlEntitlements: SQL = sql.join(sqlChunksEntitlements, sql.raw(" "))
 
         await (db ?? this.db)
           .update(subscriptionItems)
-          .set({ units: finalSql })
+          .set({ units: finalSqlItems })
           .where(inArray(subscriptionItems.id, ids))
           .catch((e) => {
             this.logger.error(e.message)
             throw new UnPriceSubscriptionError({
               message: `Error while updating subscription items: ${e.message}`,
+            })
+          })
+
+        // update the units for the entitlements
+        await (db ?? this.db)
+          .update(customerEntitlements)
+          .set({ units: finalSqlEntitlements })
+          .where(inArray(customerEntitlements.subscriptionItemId, ids))
+          .catch((e) => {
+            this.logger.error(e.message)
+            throw new UnPriceSubscriptionError({
+              message: `Error while updating customer entitlements: ${e.message}`,
             })
           })
       }

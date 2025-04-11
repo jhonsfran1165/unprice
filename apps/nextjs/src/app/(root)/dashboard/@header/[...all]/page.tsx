@@ -41,6 +41,7 @@ export default async function Page(props: {
   }[] = []
 
   let isMain = false
+  let customerId = ""
 
   if (isSlug(workspaceSlug) || isSlug(all.at(0))) {
     const session = await getSession()
@@ -55,6 +56,7 @@ export default async function Page(props: {
 
     if (atw) {
       isMain = atw.isMain
+      customerId = atw.unPriceCustomerId
 
       // prefetch entitlements only for non-main workspaces
       if (!atw.isMain) {
@@ -99,7 +101,11 @@ export default async function Page(props: {
             </Suspense>
           )}
 
-          <Flags customerEntitlements={customerEntitlements} isMain={isMain} />
+          <Flags
+            customerEntitlements={customerEntitlements}
+            isMain={isMain}
+            customerId={customerId}
+          />
 
           {project && (
             <Fragment>

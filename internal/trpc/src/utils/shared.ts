@@ -1,40 +1,11 @@
 import { TRPCError } from "@trpc/server"
-import { Unprice } from "@unprice/api"
 import { members, workspaces } from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
 import type { WorkspaceInsert } from "@unprice/db/validators"
 import { CustomerService } from "@unprice/services/customers"
 import uuid from "uuid-random"
-import { env } from "#env"
 import type { Context } from "#trpc"
-
-export const getEntitlements = async ({
-  customerId,
-  ctx,
-  projectId,
-}: {
-  customerId: string
-  ctx: Context
-  projectId: string
-}) => {
-  const now = performance.now()
-  const customer = new CustomerService({
-    db: ctx.db,
-    logger: ctx.logger,
-    analytics: ctx.analytics,
-    waitUntil: ctx.waitUntil,
-    cache: ctx.cache,
-    metrics: ctx.metrics,
-  })
-
-  const entitlements = await customer.getActiveEntitlements({
-    customerId,
-    projectId,
-    now,
-  })
-
-  return entitlements
-}
+import { unprice } from "./unprice"
 
 // abstract the usage reporting to the feature service
 // so we can use the same logic for edge and lambda endpoints
@@ -56,26 +27,28 @@ export const reportUsageFeature = async ({
     }
   }
 
-  const unprice = new Unprice({
-    token: env.UNPRICE_API_KEY,
-    baseUrl: "https://api.unprice.dev",
-  })
+  try {
+    const { result, error } = await unprice.customers.reportUsage({
+      customerId,
+      featureSlug,
+      usage,
+      idempotenceKey: uuid(),
+    })
 
-  const { result, error } = await unprice.customers.reportUsage({
-    customerId,
-    featureSlug,
-    usage,
-    idempotenceKey: uuid(),
-  })
+    if (error) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: error.code,
+      })
+    }
 
-  if (error) {
+    return result
+  } catch (e) {
     throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: error.code,
+      code: "INTERNAL_SERVER_ERROR",
+      message: e instanceof Error ? e.message : "Error checking feature access",
     })
   }
-
-  return result
 }
 
 export const createWorkspace = async ({

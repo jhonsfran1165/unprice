@@ -158,6 +158,7 @@ export const publish = protectedProjectProcedure
 
         // if the flat price is not zero, then the payment method is required
         const paymentMethodRequired = !isZero(totalPricePlan.dinero)
+        const flatPrice = totalPricePlan.displayAmount
 
         // set the latest version to false if there is a latest version for this plan
         await tx
@@ -184,6 +185,7 @@ export const publish = protectedProjectProcedure
             publishedBy: opts.ctx.userId,
             latest: true,
             paymentMethodRequired,
+            flatPrice,
           })
           .where(and(eq(schema.versions.id, planVersionData.id)))
           .returning()

@@ -101,6 +101,7 @@ export const create = protectedProjectProcedure
             whenToBill: whenToBill,
             metadata,
             version: Number(countVersionsPlan) + 1,
+            flatPrice: "0",
           })
           .returning()
           .catch((err) => {

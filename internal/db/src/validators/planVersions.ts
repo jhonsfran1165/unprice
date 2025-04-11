@@ -65,7 +65,7 @@ export const planVersionSelectBaseSchema = createSelectSchema(versions, {
   metadata: planVersionMetadataSchema,
   currency: currencySchema,
   billingConfig: billingConfigSchema,
-  trialDays: z.coerce.number(),
+  trialDays: z.coerce.number().int().min(0).default(0),
 })
 
 export const versionInsertBaseSchema = createInsertSchema(versions, {
@@ -73,7 +73,7 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
   metadata: planVersionMetadataSchema,
   currency: currencySchema,
   billingConfig: billingConfigSchema,
-  trialDays: z.coerce.number(),
+  trialDays: z.coerce.number().int().min(0).default(0),
 })
   .omit({
     createdAtM: true,

@@ -235,15 +235,41 @@ export class Unprice {
         })
       },
 
-      resetEntitlements: async (
-        req: paths["/v1/customer/{customerId}/reset-entitlements"]["post"]["requestBody"]["content"]["application/json"]
+      getSubscription: async (
+        customerId: string
       ): Promise<
         Result<
-          paths["/v1/customer/{customerId}/reset-entitlements"]["post"]["responses"]["200"]["content"]["application/json"]
+          paths["/v1/customer/{customerId}/getSubscription"]["get"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["v1", "customer", req.customerId, "reset-entitlements"],
+          path: ["v1", "customer", customerId, "getSubscription"],
+          method: "GET",
+        })
+      },
+
+      getPlanVersion: async (
+        planVersionId: string
+      ): Promise<
+        Result<
+          paths["/v1/plans/getPlanVersion/{planVersionId}"]["get"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "plans", "getPlanVersion", planVersionId],
+          method: "GET",
+        })
+      },
+
+      resetEntitlements: async (
+        req: paths["/v1/customer/reset-entitlements"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/v1/customer/reset-entitlements"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "customer", "reset-entitlements"],
           method: "POST",
           body: req,
         })
@@ -258,6 +284,19 @@ export class Unprice {
           path: ["v1", "customer", "can"],
           method: "POST",
           body: req,
+        })
+      },
+
+      getActivePhase: async (
+        customerId: string
+      ): Promise<
+        Result<
+          paths["/v1/customer/{customerId}/getActivePhase"]["get"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "customer", customerId, "getActivePhase"],
+          method: "GET",
         })
       },
     }

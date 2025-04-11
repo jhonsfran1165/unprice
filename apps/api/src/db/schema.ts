@@ -25,6 +25,7 @@ export const entitlements = pgTableProject(
     // accumulated usage in all time
     accumulatedUsage: numeric().notNull().default("0"),
     limit: integer(),
+    units: integer(),
     lastUsageUpdateAt: integer().notNull(),
     // current billing cycle start and end dates used to revalidate and reset the usage
     validFrom: integer().notNull(),

@@ -2,7 +2,6 @@ import { toDecimal } from "dinero.js"
 import { describe, expect, it } from "vitest"
 import type { Feature } from "../features"
 import type { PlanVersionExtended } from "../planVersionFeatures"
-import type { Plan } from "../plans"
 import { calculateFlatPricePlan } from "./prices"
 
 describe("calculateFlatPricePlan", () => {
@@ -12,12 +11,7 @@ describe("calculateFlatPricePlan", () => {
       currency: "USD",
       projectId: "project_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
       version: 1,
-      plan: {
-        slug: "free-plan",
-        defaultPlan: true,
-        enterprisePlan: false,
-        id: "plan_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
-      } as Plan,
+      flatPrice: "0",
       planId: "plan_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
       active: true,
       status: "published",

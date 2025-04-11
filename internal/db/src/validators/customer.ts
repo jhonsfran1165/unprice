@@ -5,6 +5,7 @@ import * as schema from "../schema"
 import {
   aggregationMethodSchema,
   currencySchema,
+  featureVersionType,
   paymentProviderSchema,
   typeFeatureSchema,
 } from "./shared"
@@ -85,9 +86,14 @@ export const stripePlanVersionSchema = z.object({
   paymentMethodRequired: z.boolean(),
 })
 
-export const customerEntitlementSchema = createSelectSchema(schema.customerEntitlements).omit({
-  createdAtM: true,
-  updatedAtM: true,
+export const customerEntitlementMetadataSchema = z.record(
+  z.string(),
+  z.union([z.string(), z.number(), z.boolean(), z.null()])
+)
+
+export const customerEntitlementSchema = createSelectSchema(schema.customerEntitlements, {
+  type: featureVersionType,
+  metadata: customerEntitlementMetadataSchema,
 })
 
 export const customerEntitlementInsertSchema = createInsertSchema(
@@ -108,6 +114,12 @@ export const customerEntitlementsSchema = customerEntitlementExtendedSchema.pick
   validFrom: true,
   validTo: true,
   featureType: true,
+  usage: true,
+  limit: true,
+  featurePlanVersionId: true,
+  aggregationMethod: true,
+  units: true,
+  id: true,
 })
 
 export type StripePlanVersion = z.infer<typeof stripePlanVersionSchema>

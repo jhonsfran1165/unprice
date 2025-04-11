@@ -9,10 +9,15 @@ import { init } from "~/middleware/init"
 import serveEmojiFavicon from "stoker/middlewares/serve-emoji-favicon"
 
 export { DurableObjectUsagelimiter } from "~/entitlement/do"
+
 import { registerReportUsageV1 } from "~/routes/customer/reportUsageV1"
 import { registerCanV1 } from "./routes/customer/canV1"
+import { registerGetActivePhaseV1 } from "./routes/customer/getActivePhaseV1"
 import { registerGetEntitlementsV1 } from "./routes/customer/getEntitlementsV1"
+import { registerGetSubscriptionV1 } from "./routes/customer/getSubscriptionV1"
+import { registerGetUsageV1 } from "./routes/customer/getUsageV1"
 import { registerResetEntitlementsV1 } from "./routes/customer/resetEntitlementsV1"
+import { registerGetPlanVersionV1 } from "./routes/plans/gePlanVersionV1"
 import { registerGetFeaturesV1 } from "./routes/project/getFeaturesV1"
 
 const app = newApp()
@@ -71,9 +76,14 @@ registerReportUsageV1(app)
 registerGetEntitlementsV1(app)
 registerCanV1(app)
 registerResetEntitlementsV1(app)
-
+registerGetSubscriptionV1(app)
+registerGetActivePhaseV1(app)
+registerGetUsageV1(app)
 // Project routes
 registerGetFeaturesV1(app)
+
+// Plans routes
+registerGetPlanVersionV1(app)
 
 // Export handler
 const handler = {

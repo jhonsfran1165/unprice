@@ -1,4 +1,11 @@
-import { customerEntitlementsSchema, deniedReasonSchema } from "@unprice/db/validators"
+import {
+  billingConfigSchema,
+  configFeatureSchema,
+  customerEntitlementsSchema,
+  deniedReasonSchema,
+  subscriptionStatusSchema,
+  typeFeatureSchema,
+} from "@unprice/db/validators"
 import { z } from "zod"
 
 export const reportUsageSchema = z.object({
@@ -60,18 +67,56 @@ export const getEntitlementsRequestSchema = z.object({
 })
 export type GetEntitlementsRequest = z.infer<typeof getEntitlementsRequestSchema>
 
-export interface EntitlementLimiter {
-  reportUsage(req: ReportUsageRequest): Promise<ReportUsageResponse>
+export const getUsageRequestSchema = z.object({
+  customerId: z.string(),
+  projectId: z.string(),
+  now: z.number(),
+})
+export type GetUsageRequest = z.infer<typeof getUsageRequestSchema>
 
-  resetEntitlements(
-    customerId: string,
-    projectId: string
-  ): Promise<{
-    success: boolean
-    message: string
-  }>
+export const getUsageResponseSchema = z.object({
+  planVersion: z.object({
+    flatPrice: z.string(),
+    flatPriceForecast: z.string(),
+    billingConfig: billingConfigSchema,
+  }),
+  subscription: z.object({
+    planSlug: z.string(),
+    status: subscriptionStatusSchema,
+    currentCycleEndAt: z.number(),
+    timezone: z.string(),
+    currentCycleStartAt: z.number(),
+    prorationFactor: z.number(),
+    prorated: z.boolean(),
+  }),
+  phase: z.object({
+    trialEndsAt: z.number().nullable(),
+    endAt: z.number().nullable(),
+    trialDays: z.number(),
+  }),
+  entitlement: z.array(
+    z
+      .object({
+        featureSlug: z.string(),
+        featureType: typeFeatureSchema,
+        limit: z.number().nullable(),
+        usage: z.number(),
+        forecast: z.number(),
+        freeUnits: z.number(),
+        units: z.number().nullable(),
+        included: z.number().nullable(),
+        featureVersion: z.object({
+          featureType: typeFeatureSchema,
+          config: configFeatureSchema.nullable(),
+          feature: z.object({
+            slug: z.string(),
+            name: z.string(),
+            description: z.string(),
+          }),
+        }),
+      })
+      .optional()
+  ),
+})
 
-  can(req: CanRequest): Promise<CanResponse>
-
-  getEntitlements(req: GetEntitlementsRequest): Promise<GetEntitlementsResponse>
-}
+export type GetUsageResponse = z.infer<typeof getUsageResponseSchema>

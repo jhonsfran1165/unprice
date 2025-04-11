@@ -854,4 +854,14 @@ export class DurableObjectUsagelimiter extends Server {
       }
     })
   }
+
+  async getEntitlements(): Promise<Entitlement[]> {
+    if (!this.initialized) {
+      return []
+    }
+
+    return this.ctx.blockConcurrencyWhile(async () => {
+      return this.db.select().from(entitlements)
+    })
+  }
 }

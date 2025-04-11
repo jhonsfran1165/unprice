@@ -1,9 +1,14 @@
 import { env } from "cloudflare:workers"
 import type { Database } from "@unprice/db"
+import {
+  calculateFreeUnits,
+  calculateTotalPricePlan,
+  configureBillingCycleSubscription,
+} from "@unprice/db/validators"
 import { Err, type FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Cache, CustomerEntitlementCache, SubcriptionCache } from "@unprice/services/cache"
-import { CustomerService } from "@unprice/services/customers"
+import type { CustomerService } from "@unprice/services/customers"
 import { UnPriceCustomerError } from "@unprice/services/customers"
 import type { Metrics } from "@unprice/services/metrics"
 import type { Analytics } from "@unprice/tinybird"
@@ -11,14 +16,15 @@ import type { DurableObjectUsagelimiter } from "./do"
 import type {
   CanRequest,
   CanResponse,
-  EntitlementLimiter,
   GetEntitlementsRequest,
   GetEntitlementsResponse,
+  GetUsageRequest,
+  GetUsageResponse,
   ReportUsageRequest,
   ReportUsageResponse,
 } from "./interface"
 
-export class EntitlementService implements EntitlementLimiter {
+export class EntitlementService {
   private readonly namespace: DurableObjectNamespace<DurableObjectUsagelimiter>
   private readonly logger: Logger
   private readonly metrics: Metrics
@@ -40,6 +46,7 @@ export class EntitlementService implements EntitlementLimiter {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     waitUntil: (promise: Promise<any>) => void
     db: Database
+    customer: CustomerService
   }) {
     this.namespace = opts.namespace
     this.logger = opts.logger
@@ -48,15 +55,7 @@ export class EntitlementService implements EntitlementLimiter {
     this.cache = opts.cache
     this.db = opts.db
     this.waitUntil = opts.waitUntil
-
-    this.customerService = new CustomerService({
-      logger: this.logger,
-      analytics: this.analytics,
-      waitUntil: this.waitUntil,
-      cache: this.cache,
-      metrics: this.metrics,
-      db: this.db,
-    })
+    this.customerService = opts.customer
   }
 
   private getStub(
@@ -92,7 +91,31 @@ export class EntitlementService implements EntitlementLimiter {
       active: entitlement.active === 1,
       realtime: entitlement.realtime === 1,
       isCustom: entitlement.isCustom === 1,
+      units: entitlement.units,
+      metadata: entitlement.metadata ? JSON.parse(entitlement.metadata) : null,
     })
+  }
+
+  private async getEntitlementsFromDO(
+    customerId: string
+  ): Promise<Result<CustomerEntitlementCache[] | null, FetchError | UnPriceCustomerError>> {
+    const durableObject = this.getStub(this.getDurableObjectCustomerId(customerId))
+    const entitlements = await durableObject.getEntitlements()
+
+    if (!entitlements) {
+      return Ok(null)
+    }
+
+    return Ok(
+      entitlements.map((entitlement) => ({
+        ...entitlement,
+        id: entitlement.entitlementId,
+        active: entitlement.active === 1,
+        realtime: entitlement.realtime === 1,
+        isCustom: entitlement.isCustom === 1,
+        metadata: entitlement.metadata ? JSON.parse(entitlement.metadata) : null,
+      }))
+    )
   }
 
   public async revalidateEntitlement(
@@ -142,7 +165,7 @@ export class EntitlementService implements EntitlementLimiter {
   private async validateSubscription(
     customerId: string,
     projectId: string
-  ): Promise<Result<SubcriptionCache | null, FetchError | UnPriceCustomerError>> {
+  ): Promise<Result<SubcriptionCache, FetchError | UnPriceCustomerError>> {
     const { err: subscriptionErr, val: subscription } =
       await this.customerService.getActiveSubscription(customerId, projectId)
 
@@ -364,8 +387,237 @@ export class EntitlementService implements EntitlementLimiter {
       })
     }
 
+    // get the entitlements from the DO
+    const { val: entitlementsDO } = await this.getEntitlementsFromDO(customerId)
+
+    if (entitlementsDO) {
+      // set the usage from the DO to the entitlements
+      entitlements.forEach((entitlement) => {
+        const entitlementDO = entitlementsDO.find((e) => e.featureSlug === entitlement.featureSlug)
+        if (entitlementDO) {
+          entitlement.usage = entitlementDO.usage
+        }
+      })
+    }
+
     return {
       entitlements,
     }
+  }
+
+  public async getUsage(req: GetUsageRequest): Promise<GetUsageResponse> {
+    const { customerId, projectId, now } = req
+
+    const { err: subscriptionErr, val: subscription } = await this.validateSubscription(
+      customerId,
+      projectId
+    )
+
+    if (subscriptionErr) {
+      throw subscriptionErr
+    }
+
+    const { err: phaseErr, val: phase } = await this.customerService.getActivePhase({
+      customerId,
+      projectId,
+      now,
+    })
+
+    if (phaseErr) {
+      throw phaseErr
+    }
+
+    if (!phase) {
+      throw new UnPriceCustomerError({
+        code: "CUSTOMER_PHASE_NOT_FOUND",
+        message: "customer has no active phase",
+      })
+    }
+
+    const { err: entitlementsErr, val: entitlements } =
+      await this.customerService.getActiveEntitlements({
+        customerId,
+        projectId,
+        now,
+      })
+
+    if (entitlementsErr) {
+      throw entitlementsErr
+    }
+
+    if (!entitlements) {
+      throw new UnPriceCustomerError({
+        code: "CUSTOMER_ENTITLEMENTS_NOT_FOUND",
+        message: "customer has no entitlements",
+      })
+    }
+
+    // get the entitlements from the DO
+    const { val: entitlementsDO } = await this.getEntitlementsFromDO(customerId)
+
+    if (entitlementsDO) {
+      // set the usage from the DO to the entitlements
+      entitlements.forEach((entitlement) => {
+        const entitlementDO = entitlementsDO.find((e) => e.featureSlug === entitlement.featureSlug)
+        if (entitlementDO) {
+          entitlement.usage = entitlementDO.usage
+        }
+      })
+    }
+
+    const quantities = entitlements.reduce(
+      (acc, entitlement) => {
+        acc[entitlement.id] =
+          entitlement.featureType === "usage"
+            ? (Number(entitlement.usage) ?? 0)
+            : (Number(entitlement.units) ?? 0)
+        return acc
+      },
+      {} as Record<string, number>
+    )
+
+    const quantitiesForecast = entitlements.reduce(
+      (acc, entitlement) => {
+        acc[entitlement.id] = this.forecastUsage(
+          entitlement.featureType === "usage"
+            ? (Number(entitlement.usage) ?? 0)
+            : (Number(entitlement.units) ?? 0)
+        )
+        return acc
+      },
+      {} as Record<string, number>
+    )
+
+    if (phase.customerEntitlements.length === 0) {
+      throw new UnPriceCustomerError({
+        code: "CUSTOMER_ENTITLEMENTS_NOT_FOUND",
+        message: "customer has no entitlements",
+      })
+    }
+
+    const calculatedBillingCycle = configureBillingCycleSubscription({
+      currentCycleStartAt: subscription.currentCycleStartAt,
+      billingConfig: phase.planVersion.billingConfig,
+      trialDays: phase.trialDays,
+      alignStartToDay: true,
+      alignEndToDay: true,
+      endAt: phase.endAt ?? undefined,
+      alignToCalendar: true,
+    })
+
+    const { val: totalPricePlan, err: totalPricePlanErr } = calculateTotalPricePlan({
+      features: phase.customerEntitlements.map((e) => e.featurePlanVersion),
+      quantities: quantities,
+      prorate: calculatedBillingCycle.prorationFactor,
+      currency: phase.planVersion.currency,
+    })
+
+    const { val: totalPricePlanForecast, err: totalPricePlanErrForecast } = calculateTotalPricePlan(
+      {
+        features: phase.customerEntitlements.map((e) => e.featurePlanVersion),
+        quantities: quantitiesForecast,
+        prorate: calculatedBillingCycle.prorationFactor,
+        currency: phase.planVersion.currency,
+      }
+    )
+
+    if (totalPricePlanErr || totalPricePlanErrForecast) {
+      throw totalPricePlanErr || totalPricePlanErrForecast
+    }
+
+    const result = {
+      planVersion: {
+        flatPrice: totalPricePlan?.displayAmount,
+        flatPriceForecast: totalPricePlanForecast?.displayAmount,
+        billingConfig: phase.planVersion.billingConfig,
+      },
+      subscription: {
+        planSlug: subscription.planSlug,
+        status: subscription.status,
+        currentCycleEndAt: subscription.currentCycleEndAt,
+        timezone: subscription.timezone,
+        currentCycleStartAt: subscription.currentCycleStartAt,
+        prorationFactor: 1,
+        prorated: false,
+      },
+      phase: {
+        trialEndsAt: phase.trialEndsAt,
+        endAt: phase.endAt,
+        trialDays: phase.trialDays,
+      },
+      entitlement: entitlements.map((e) => {
+        const entitlementPhase = phase.customerEntitlements.find((p) => e.id === p.id)
+
+        if (!entitlementPhase) {
+          return {
+            featureSlug: e.featureSlug,
+            featureType: e.featureType,
+            limit: e.limit,
+            usage: Number(e.usage),
+            units: e.units,
+            forecast: 0,
+            freeUnits: 0,
+            max: 100,
+            included: 0,
+            featureVersion: {
+              featureType: e.featureType,
+              config: null,
+              feature: {
+                slug: e.featureSlug,
+                name: e.featureSlug,
+                description: "",
+              },
+            },
+          }
+        }
+
+        const { config, featureType } = entitlementPhase.featurePlanVersion
+        const freeUnits = calculateFreeUnits({ config: config!, featureType: featureType })
+
+        return {
+          featureSlug: e.featureSlug,
+          featureType: e.featureType,
+          limit: e.limit,
+          usage: Number(e.usage),
+          units: e.units,
+          forecast: 0,
+          freeUnits,
+          included:
+            freeUnits === Number.POSITIVE_INFINITY
+              ? (e.limit ?? Number.POSITIVE_INFINITY)
+              : freeUnits,
+          price: {
+            totalPrice: totalPricePlan?.displayAmount,
+            totalPriceForecast: totalPricePlanForecast?.displayAmount,
+          },
+          max: 100,
+          featureVersion: {
+            featureType: featureType,
+            config: config,
+            feature: {
+              slug: entitlementPhase.featurePlanVersion.feature.slug,
+              name: entitlementPhase.featurePlanVersion.feature.title,
+              description: entitlementPhase.featurePlanVersion.feature.description ?? "",
+            },
+          },
+        }
+      }),
+    }
+
+    return result
+  }
+
+  private forecastUsage(currentUsage: number): number {
+    const t = new Date()
+    t.setUTCDate(1)
+    t.setUTCHours(0, 0, 0, 0)
+
+    const start = t.getTime()
+    t.setUTCMonth(t.getUTCMonth() + 1)
+    const end = t.getTime() - 1
+
+    const passed = (Date.now() - start) / (end - start)
+
+    return Math.round(currentUsage * (1 + 1 / passed))
   }
 }

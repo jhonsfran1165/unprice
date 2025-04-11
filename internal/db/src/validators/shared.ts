@@ -64,6 +64,7 @@ export const unpriceCustomerErrorSchema = z.enum([
   "SUBSCRIPTION_NOT_CREATED",
   "CUSTOMER_NOT_CREATED",
   "SUBSCRIPTION_NOT_CANCELED",
+  "CUSTOMER_PHASE_NOT_FOUND",
 ])
 
 export const unpriceProjectErrorSchema = z.enum([

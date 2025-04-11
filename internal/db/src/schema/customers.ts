@@ -84,6 +84,8 @@ export const customerEntitlements = pgTableProject(
     // ****************** defaults from plan version features ******************
     // limit is the limit of the feature that the customer is entitled to
     limit: integer("limit"),
+    // units is the units of the feature that the customer is entitled to
+    units: integer("units"),
     // usage is the usage of the feature that the customer has used
     usage: numeric("usage").notNull().default("0"),
     // accumulatedUsage is the accumulated usage of the feature that the customer has used

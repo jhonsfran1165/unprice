@@ -4,55 +4,50 @@ import { dedupe, flag } from "flags/next"
 import { cookies } from "next/headers"
 import { unprice } from "./unprice"
 
-export type UserEntitlement = {
-  featureSlug: string
-  validTo: number | null
-  validFrom: number
-  featureType: "flat" | "usage" | "tier" | "package"
+export type UserEntitlement = NonNullable<
+  Awaited<ReturnType<typeof unprice.customers.getEntitlements>>["result"]
+>["entitlements"][number]
+
+export type UserIdentity = {
+  isMain: boolean
+  entitlements: UserEntitlement[]
+  customerId: string
 }
 
-const identify = dedupe(
-  async (): Promise<{
-    isMain: boolean
-    entitlements: UserEntitlement[]
-  }> => {
-    const session = await getSession()
+const identify = dedupe(async (): Promise<UserIdentity> => {
+  const session = await getSession()
 
-    const workspaceSlug = cookies().get(COOKIES_APP.WORKSPACE)?.value
+  const workspaceSlug = cookies().get(COOKIES_APP.WORKSPACE)?.value
 
-    const currentWorkspace = session?.user.workspaces.find((w) => w.slug === workspaceSlug)
+  const currentWorkspace = session?.user.workspaces.find((w) => w.slug === workspaceSlug)
 
-    if (!currentWorkspace || currentWorkspace.isMain) {
-      return {
-        isMain: currentWorkspace?.isMain ?? false,
-        entitlements: [],
-      }
-    }
-
-    const { result } = await unprice.customers.getEntitlements(currentWorkspace.unPriceCustomerId)
-
-    if (!result) {
-      return {
-        isMain: currentWorkspace.isMain,
-        entitlements: [],
-      }
-    }
-
+  if (!currentWorkspace || currentWorkspace.isMain) {
     return {
-      isMain: currentWorkspace.isMain,
-      entitlements: result.entitlements,
+      isMain: currentWorkspace?.isMain ?? false,
+      entitlements: [],
+      customerId: currentWorkspace?.unPriceCustomerId ?? "",
     }
   }
-)
+
+  const { result } = await unprice.customers.getEntitlements(currentWorkspace.unPriceCustomerId)
+
+  if (!result) {
+    return {
+      isMain: currentWorkspace.isMain,
+      entitlements: [],
+      customerId: currentWorkspace.unPriceCustomerId,
+    }
+  }
+
+  return {
+    isMain: currentWorkspace.isMain,
+    entitlements: result.entitlements,
+    customerId: currentWorkspace.unPriceCustomerId,
+  }
+})
 
 export async function entitlementFlag(key: string) {
-  const flagEntitlement = flag<
-    boolean,
-    {
-      isMain: boolean
-      entitlements: UserEntitlement[]
-    }
-  >({
+  const flagEntitlement = flag<boolean, UserIdentity>({
     key,
     identify,
     decide({ entities }) {

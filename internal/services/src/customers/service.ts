@@ -18,6 +18,7 @@ import type {
   CustomerEntitlementCache,
   CustomerEntitlementsCache,
   SubcriptionCache,
+  SubscriptionPhaseCache,
 } from "../cache"
 import type { Cache } from "../cache/service"
 import type { Metrics } from "../metrics"
@@ -59,6 +60,63 @@ export class CustomerService {
     this.metrics = metrics
   }
 
+  private async getActivePhaseData({
+    customerId,
+    projectId,
+    now,
+  }: {
+    customerId: string
+    projectId: string
+    now: number
+  }): Promise<SubscriptionPhaseCache | null> {
+    const subscription = await this.db.query.subscriptions
+      .findFirst({
+        with: {
+          phases: {
+            with: {
+              planVersion: true,
+              customerEntitlements: {
+                with: {
+                  featurePlanVersion: {
+                    with: {
+                      feature: true,
+                    },
+                  },
+                },
+              },
+            },
+            where: (phase, { and, or, isNull, gte, lte }) =>
+              and(lte(phase.startAt, now), or(isNull(phase.endAt), gte(phase.endAt, now))),
+            limit: 1,
+          },
+        },
+        where: (subscription, { eq, and }) =>
+          and(
+            eq(subscription.customerId, customerId),
+            eq(subscription.active, true),
+            eq(subscription.projectId, projectId)
+          ),
+      })
+      .catch((e) => {
+        console.error("error getting active phase data", e)
+        throw e
+      })
+
+    // return explicitly null to avoid cache miss
+    // this is useful to avoid cache revalidation on keys that don't exist
+    if (!subscription) {
+      return null
+    }
+
+    const phase = subscription.phases[0]
+
+    if (!phase) {
+      return null
+    }
+
+    return phase
+  }
+
   private async getActiveSubscriptionData({
     customerId,
     projectId,
@@ -97,24 +155,7 @@ export class CustomerService {
       return null
     }
 
-    const result = {
-      id: subscription.id,
-      projectId: subscription.projectId,
-      customerId: subscription.customerId,
-      active: subscription.active,
-      status: subscription.status,
-      planSlug: subscription.planSlug,
-      currentCycleStartAt: subscription.currentCycleStartAt,
-      currentCycleEndAt: subscription.currentCycleEndAt,
-      project: {
-        enabled: subscription.project.enabled,
-      },
-      customer: {
-        active: subscription.customer.active,
-      },
-    }
-
-    return result
+    return subscription
   }
 
   public async getActiveSubscription(
@@ -211,7 +252,79 @@ export class CustomerService {
     return Ok(val)
   }
 
-  private async getUsageFromAnalytics({
+  public async getActivePhase({
+    customerId,
+    projectId,
+    now,
+    opts,
+  }: {
+    customerId: string
+    projectId: string
+    now: number
+    opts?: {
+      skipCache: boolean
+    }
+  }): Promise<Result<SubscriptionPhaseCache | null, FetchError | UnPriceCustomerError>> {
+    const { val, err } = opts?.skipCache
+      ? await wrapResult(
+          this.getActivePhaseData({
+            customerId,
+            projectId,
+            now,
+          }),
+          (err) =>
+            new FetchError({
+              message: "unable to query db for active phase",
+              retry: false,
+              context: {
+                error: err.message,
+                url: "",
+                customerId: customerId,
+                method: "getActivePhase",
+              },
+            })
+        )
+      : await retry(
+          3,
+          async () =>
+            this.cache.customerActivePhase.swr(`${customerId}`, () =>
+              this.getActivePhaseData({
+                customerId,
+                projectId,
+                now,
+              })
+            ),
+          (attempt, err) => {
+            this.logger.warn("Failed to fetch active phase data from cache, retrying...", {
+              customerId: customerId,
+              attempt,
+              error: err.message,
+            })
+          }
+        )
+
+    if (err) {
+      this.logger.error("error getting active phase", {
+        error: err.message,
+      })
+
+      return Err(
+        new FetchError({
+          message: err.message,
+          retry: false,
+          cause: err,
+        })
+      )
+    }
+
+    if (!val) {
+      return Ok(null)
+    }
+
+    return Ok(val)
+  }
+
+  private async getUsagePerFeatureFromAnalytics({
     customerId,
     projectId,
     featureSlug,
@@ -287,7 +400,7 @@ export class CustomerService {
 
     this.metrics.emit({
       metric: "metric.analytics.read",
-      query: "getUsageFromAnalytics",
+      query: "getUsagePerFeatureFromAnalytics",
       duration: end - start,
       service: "customer",
       customerId,
@@ -343,12 +456,22 @@ export class CustomerService {
                 slug: true,
               },
             },
+            planVersion: {
+              columns: {
+                flatPrice: true,
+              },
+            },
           },
         },
       },
       columns: {
+        id: true,
         validFrom: true,
         validTo: true,
+        usage: true,
+        limit: true,
+        featurePlanVersionId: true,
+        units: true,
       },
       where: (entitlement, { and, eq, gte, lte, isNull, or }) =>
         and(
@@ -380,6 +503,12 @@ export class CustomerService {
       featureSlug: entitlement.featurePlanVersion.feature.slug,
       validFrom: entitlement.validFrom,
       validTo: entitlement.validTo,
+      usage: entitlement.usage,
+      limit: entitlement.limit,
+      featurePlanVersionId: entitlement.featurePlanVersionId,
+      units: entitlement.units,
+      aggregationMethod: entitlement.featurePlanVersion.aggregationMethod,
+      id: entitlement.id,
     }))
 
     return result
@@ -396,6 +525,7 @@ export class CustomerService {
     now: number
     opts?: {
       skipCache?: boolean // skip cache to force revalidation
+      withLastUsage?: boolean // if true, we will get the last usage from analytics
     }
   }): Promise<Result<CustomerEntitlementsCache[] | null, FetchError | UnPriceCustomerError>> {
     // first try to get the entitlement from cache, if not found try to get it from DO,
@@ -531,7 +661,7 @@ export class CustomerService {
       opts?.withLastUsage ||
       entitlement.customerEntitlement.lastUsageUpdateAt < Date.now() - 60_000
     ) {
-      const { err, val } = await this.getUsageFromAnalytics({
+      const { err, val } = await this.getUsagePerFeatureFromAnalytics({
         customerId,
         projectId,
         featureSlug,

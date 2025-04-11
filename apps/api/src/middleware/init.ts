@@ -1,7 +1,8 @@
 import { createConnection } from "@unprice/db"
-import { newId } from "@unprice/id"
+import { newId } from "@unprice/db/utils"
 import { ConsoleLogger } from "@unprice/logging"
 import { CacheService } from "@unprice/services/cache"
+import { CustomerService } from "@unprice/services/customers"
 import { LogdrainMetrics, NoopMetrics } from "@unprice/services/metrics"
 import type { Metrics } from "@unprice/services/metrics"
 import { Analytics } from "@unprice/tinybird"
@@ -88,6 +89,15 @@ export function init(): MiddlewareHandler<HonoEnv> {
       tinybirdUrl: c.env.TINYBIRD_URL,
     })
 
+    const customer = new CustomerService({
+      logger,
+      analytics,
+      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      cache,
+      metrics,
+      db,
+    })
+
     const entitlement = new EntitlementService({
       namespace: c.env.usagelimit,
       requestId,
@@ -97,6 +107,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       cache,
       db,
       waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      customer,
     })
 
     const project = new ApiProjectService({
@@ -127,6 +138,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       metrics,
       apikey,
       db,
+      customer,
     })
 
     await next()

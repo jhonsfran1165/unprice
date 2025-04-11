@@ -3,29 +3,13 @@ import type {
   CustomerEntitlementExtended,
   CustomerEntitlementsExtended,
   Feature,
-  Subscription,
+  getActivePhaseResponseSchema,
+  getSubscriptionResponseSchema,
 } from "@unprice/db/validators"
+import type { z } from "zod"
 
-export type SubcriptionCache =
-  | (Pick<
-      Subscription,
-      | "id"
-      | "projectId"
-      | "customerId"
-      | "active"
-      | "status"
-      | "planSlug"
-      | "currentCycleStartAt"
-      | "currentCycleEndAt"
-    > & {
-      project: {
-        enabled: boolean
-      }
-      customer: {
-        active: boolean
-      }
-    })
-  | null
+export type SubscriptionPhaseCache = z.infer<typeof getActivePhaseResponseSchema>
+export type SubcriptionCache = z.infer<typeof getSubscriptionResponseSchema>
 
 export type CustomerEntitlementCache = Omit<
   CustomerEntitlementExtended,
@@ -51,6 +35,7 @@ export type UsageEntitlementCache = {
 export type CacheNamespaces = {
   apiKeyByHash: ApiKeyExtended | null
   customerSubscription: SubcriptionCache | null
+  customerActivePhase: SubscriptionPhaseCache | null
   customerEntitlement: CustomerEntitlementCache | null
   customerEntitlements: CustomerEntitlementsCache[] | null
   projectFeatures: ProjectFeatureCache | null

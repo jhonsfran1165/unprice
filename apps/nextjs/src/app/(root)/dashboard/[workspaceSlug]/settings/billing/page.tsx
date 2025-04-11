@@ -1,26 +1,26 @@
+import { getSession } from "@unprice/auth/server-rsc"
 import { APP_DOMAIN } from "@unprice/config"
+import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
+import { Badge } from "@unprice/ui/badge"
+import { Button } from "@unprice/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
+import { Typography } from "@unprice/ui/typography"
 import { differenceInCalendarDays } from "date-fns"
+import { AlertCircle } from "lucide-react"
 import { Fragment } from "react"
 import { PaymentMethodForm } from "~/components/forms/payment-method-form"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
-
-import type { RouterOutputs } from "@unprice/trpc"
-import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
-import { Badge } from "@unprice/ui/badge"
-import { Button } from "@unprice/ui/button"
-import { Typography } from "@unprice/ui/typography"
-import { AlertCircle } from "lucide-react"
 import { formatDate } from "~/lib/dates"
-import { api } from "~/trpc/server"
+import { unprice } from "#utils/unprice"
 import { SubscriptionChangePlanDialog } from "../../[projectSlug]/customers/_components/subscriptions/subscription-change-plan-dialog"
 import { BillingCard } from "./_components/billing"
 
 export default async function BillingPage({ params }: { params: { workspaceSlug: string } }) {
   const { workspaceSlug } = params
-
-  const { subscriptions, customerId } = await api.auth.mySubscriptions()
+  const session = await getSession()
+  const atw = session?.user.workspaces.find((w) => w.slug === workspaceSlug)
+  const customerId = atw?.unPriceCustomerId ?? ""
 
   return (
     <DashboardShell
@@ -32,9 +32,9 @@ export default async function BillingPage({ params }: { params: { workspaceSlug:
       }
     >
       <Fragment>
-        <SubscriptionCard subscriptions={subscriptions} />
+        <SubscriptionCard customerId={customerId} />
         <PaymentMethodCard workspaceSlug={workspaceSlug} customerId={customerId} />
-        <UsageCard />
+        <UsageCard customerId={customerId} />
       </Fragment>
     </DashboardShell>
   )
@@ -65,12 +65,22 @@ async function PaymentMethodCard({
 }
 
 async function SubscriptionCard({
-  subscriptions,
+  customerId,
 }: {
-  subscriptions: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"]
+  customerId: string
 }) {
   // TODO: customer can only have one subscription for now
-  const subscription = subscriptions[0]
+  const { subscription, error } = await unprice.customers.getSubscription(customerId)
+
+  if (error) {
+    return (
+      <Alert variant="info">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error fetching subscription</AlertTitle>
+        <AlertDescription>{error.message}</AlertDescription>
+      </Alert>
+    )
+  }
 
   if (!subscription) {
     return (
@@ -84,12 +94,7 @@ async function SubscriptionCard({
     )
   }
 
-  const activePhase = subscription.phases.find((phase) => {
-    const now = Date.now()
-    return phase.startAt <= now && (phase.endAt ? phase.endAt >= now : true)
-  })
-
-  if (!activePhase) return null
+  const activePhase = subscription.activePhase
 
   const autoRenewal = activePhase.planVersion.autoRenew
   const trialEndsAt = activePhase.trialEndsAt
@@ -188,22 +193,29 @@ async function SubscriptionCard({
   )
 }
 
-async function UsageCard() {
-  const { subscriptions } = await api.auth.mySubscriptions()
+async function UsageCard({ customerId }: { customerId: string }) {
+  const [activePhase, activeEntitlements, subscription] = await Promise.all([
+    unprice.customers.getActivePhase(customerId),
+    unprice.customers.getEntitlements(customerId),
+    unprice.customers.getSubscription(customerId),
+  ])
 
-  // TODO: customer can have multiple subscriptions
-  // for now only care the first one
-  const subscription = subscriptions[0]
-
-  if (!subscription) return null
-
-  const activePhase = subscription.phases.find((phase) => {
-    const now = Date.now()
-    return phase.startAt <= now && (phase.endAt ? phase.endAt >= now : true)
-  })
+  if (activePhase.error || activeEntitlements.error || subscription.error) {
+    return (
+      <Alert variant="info">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error fetching data</AlertTitle>
+        <AlertDescription>
+          {activePhase.error?.message ||
+            activeEntitlements.error?.message ||
+            subscription.error?.message}
+        </AlertDescription>
+      </Alert>
+    )
+  }
 
   // TODO: handle case where no active phase is found
-  if (!activePhase)
+  if (!activePhase.result || !activeEntitlements.result || !subscription.result)
     return (
       <Alert variant="info">
         <AlertTitle>No Active Phase</AlertTitle>
@@ -211,15 +223,11 @@ async function UsageCard() {
       </Alert>
     )
 
-  const { entitlements } = await api.analytics.getUsageActiveEntitlementsCustomerUnprice({
-    customerId: subscription.customerId,
-  })
-
   return (
     <BillingCard
-      subscription={subscription}
-      entitlements={entitlements}
-      activePhase={activePhase}
+      activePhase={activePhase.result}
+      activeEntitlements={activeEntitlements.result.entitlements}
+      subscription={subscription.result}
     />
   )
 }
