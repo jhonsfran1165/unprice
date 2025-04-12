@@ -299,6 +299,19 @@ export class Unprice {
           method: "GET",
         })
       },
+
+      getUsage: async (
+        customerId: string
+      ): Promise<
+        Result<
+          paths["/v1/customer/{customerId}/getUsage"]["get"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "customer", customerId, "getUsage"],
+          method: "GET",
+        })
+      },
     }
   }
 

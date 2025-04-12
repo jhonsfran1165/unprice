@@ -24,7 +24,8 @@ export function PriceFeature({
   // useCallback to prevent re-rendering calculatePricePerFeature
   const calculatePrice = useCallback(() => {
     return calculatePricePerFeature({
-      feature: feature,
+      featureType: feature.featureType,
+      config: feature.config,
       quantity: quantity,
     })
   }, [feature, quantity])

@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1742634679626,
-      "tag": "0000_living_amphibian",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1743532893975,
-      "tag": "0001_calm_sleeper",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1744289992705,
-      "tag": "0002_goofy_morlun",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1744391407580,
-      "tag": "0003_perpetual_kabuki",
+      "when": 1744457431051,
+      "tag": "0000_freezing_tusk",
       "breakpoints": true
     }
   ]

@@ -11,7 +11,11 @@ import {
   USAGE_MODES,
   USAGE_MODES_MAP,
 } from "@unprice/db/utils"
-import type { PlanVersion, PlanVersionFeature } from "@unprice/db/validators"
+import type {
+  PlanVersion,
+  PlanVersionFeature,
+  PlanVersionFeatureInsert,
+} from "@unprice/db/validators"
 import { planVersionFeatureInsertBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import {
@@ -49,7 +53,7 @@ export function FeatureConfigForm({
   planVersion,
   className,
 }: {
-  defaultValues: PlanVersionFeature
+  defaultValues: PlanVersionFeatureInsert
   planVersion: PlanVersion | null
   setDialogOpen?: (open: boolean) => void
   className?: string
@@ -139,7 +143,7 @@ export function FeatureConfigForm({
   const featureType = form.watch("featureType")
   const usageMode = form.watch("config.usageMode")
 
-  const onSubmitForm = async (data: PlanVersionFeature) => {
+  const onSubmitForm = async (data: PlanVersionFeatureInsert | PlanVersionFeature) => {
     if (defaultValues.id) {
       await updatePlanVersionFeatures.mutateAsync({
         ...data,

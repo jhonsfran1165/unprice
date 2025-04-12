@@ -186,44 +186,32 @@
       "indexes": {
         "entitlements_customer_idx": {
           "name": "entitlements_customer_idx",
-          "columns": [
-            "customerId"
-          ],
+          "columns": ["customerId"],
           "isUnique": false
         },
         "entitlements_feature_idx": {
           "name": "entitlements_feature_idx",
-          "columns": [
-            "featureSlug"
-          ],
+          "columns": ["featureSlug"],
           "isUnique": false
         },
         "entitlements_project_idx": {
           "name": "entitlements_project_idx",
-          "columns": [
-            "projectId"
-          ],
+          "columns": ["projectId"],
           "isUnique": false
         },
         "entitlements_valid_from_idx": {
           "name": "entitlements_valid_from_idx",
-          "columns": [
-            "validFrom"
-          ],
+          "columns": ["validFrom"],
           "isUnique": false
         },
         "entitlements_valid_to_idx": {
           "name": "entitlements_valid_to_idx",
-          "columns": [
-            "validTo"
-          ],
+          "columns": ["validTo"],
           "isUnique": false
         },
         "entitlements_entitlement_id_idx": {
           "name": "entitlements_entitlement_id_idx",
-          "columns": [
-            "entitlementId"
-          ],
+          "columns": ["entitlementId"],
           "isUnique": false
         }
       },
@@ -352,23 +340,17 @@
       "indexes": {
         "usage_records_customer_idx": {
           "name": "usage_records_customer_idx",
-          "columns": [
-            "customerId"
-          ],
+          "columns": ["customerId"],
           "isUnique": false
         },
         "usage_records_feature_idx": {
           "name": "usage_records_feature_idx",
-          "columns": [
-            "featureSlug"
-          ],
+          "columns": ["featureSlug"],
           "isUnique": false
         },
         "usage_records_timestamp_idx": {
           "name": "usage_records_timestamp_idx",
-          "columns": [
-            "timestamp"
-          ],
+          "columns": ["timestamp"],
           "isUnique": false
         }
       },
@@ -489,37 +471,27 @@
       "indexes": {
         "verifications_customer_idx": {
           "name": "verifications_customer_idx",
-          "columns": [
-            "customerId"
-          ],
+          "columns": ["customerId"],
           "isUnique": false
         },
         "verifications_feature_idx": {
           "name": "verifications_feature_idx",
-          "columns": [
-            "featureSlug"
-          ],
+          "columns": ["featureSlug"],
           "isUnique": false
         },
         "verifications_timestamp_idx": {
           "name": "verifications_timestamp_idx",
-          "columns": [
-            "timestamp"
-          ],
+          "columns": ["timestamp"],
           "isUnique": false
         },
         "verifications_request_id_idx": {
           "name": "verifications_request_id_idx",
-          "columns": [
-            "requestId"
-          ],
+          "columns": ["requestId"],
           "isUnique": false
         },
         "verifications_entitlement_idx": {
           "name": "verifications_entitlement_idx",
-          "columns": [
-            "entitlementId"
-          ],
+          "columns": ["entitlementId"],
           "isUnique": false
         }
       },

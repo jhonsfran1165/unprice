@@ -2,6 +2,7 @@ import { env } from "cloudflare:workers"
 import type { Database } from "@unprice/db"
 import {
   calculateFreeUnits,
+  calculatePricePerFeature,
   calculateTotalPricePlan,
   configureBillingCycleSubscription,
 } from "@unprice/db/validators"
@@ -445,7 +446,7 @@ export class EntitlementService {
       throw entitlementsErr
     }
 
-    if (!entitlements) {
+    if (!entitlements || entitlements.length === 0) {
       throw new UnPriceCustomerError({
         code: "CUSTOMER_ENTITLEMENTS_NOT_FOUND",
         message: "customer has no entitlements",
@@ -467,33 +468,14 @@ export class EntitlementService {
 
     const quantities = entitlements.reduce(
       (acc, entitlement) => {
-        acc[entitlement.id] =
+        acc[entitlement.featurePlanVersionId] =
           entitlement.featureType === "usage"
-            ? (Number(entitlement.usage) ?? 0)
-            : (Number(entitlement.units) ?? 0)
+            ? Number(entitlement.usage)
+            : Number(entitlement.units)
         return acc
       },
       {} as Record<string, number>
     )
-
-    const quantitiesForecast = entitlements.reduce(
-      (acc, entitlement) => {
-        acc[entitlement.id] = this.forecastUsage(
-          entitlement.featureType === "usage"
-            ? (Number(entitlement.usage) ?? 0)
-            : (Number(entitlement.units) ?? 0)
-        )
-        return acc
-      },
-      {} as Record<string, number>
-    )
-
-    if (phase.customerEntitlements.length === 0) {
-      throw new UnPriceCustomerError({
-        code: "CUSTOMER_ENTITLEMENTS_NOT_FOUND",
-        message: "customer has no entitlements",
-      })
-    }
 
     const calculatedBillingCycle = configureBillingCycleSubscription({
       currentCycleStartAt: subscription.currentCycleStartAt,
@@ -512,23 +494,15 @@ export class EntitlementService {
       currency: phase.planVersion.currency,
     })
 
-    const { val: totalPricePlanForecast, err: totalPricePlanErrForecast } = calculateTotalPricePlan(
-      {
-        features: phase.customerEntitlements.map((e) => e.featurePlanVersion),
-        quantities: quantitiesForecast,
-        prorate: calculatedBillingCycle.prorationFactor,
-        currency: phase.planVersion.currency,
-      }
-    )
-
-    if (totalPricePlanErr || totalPricePlanErrForecast) {
-      throw totalPricePlanErr || totalPricePlanErrForecast
+    if (totalPricePlanErr) {
+      throw totalPricePlanErr
     }
 
     const result = {
       planVersion: {
-        flatPrice: totalPricePlan?.displayAmount,
-        flatPriceForecast: totalPricePlanForecast?.displayAmount,
+        description: phase.planVersion.description,
+        flatPrice: phase.planVersion.flatPrice ?? "",
+        currentTotalPrice: totalPricePlan.displayAmount,
         billingConfig: phase.planVersion.billingConfig,
       },
       subscription: {
@@ -537,42 +511,47 @@ export class EntitlementService {
         currentCycleEndAt: subscription.currentCycleEndAt,
         timezone: subscription.timezone,
         currentCycleStartAt: subscription.currentCycleStartAt,
-        prorationFactor: 1,
-        prorated: false,
+        prorationFactor: calculatedBillingCycle.prorationFactor,
+        prorated: calculatedBillingCycle.prorationFactor !== 1,
       },
       phase: {
         trialEndsAt: phase.trialEndsAt,
         endAt: phase.endAt,
         trialDays: phase.trialDays,
+        isTrial: phase.trialEndsAt ? Date.now() < phase.trialEndsAt : false,
       },
       entitlement: entitlements.map((e) => {
         const entitlementPhase = phase.customerEntitlements.find((p) => e.id === p.id)
 
+        // if the entitlement is not found in the phase, it means it's a custom entitlement
+        // no need to add price information
         if (!entitlementPhase) {
+          const featureVersion = phase.customerEntitlements.find(
+            (p) => p.featurePlanVersionId === e.featurePlanVersionId
+          )
           return {
             featureSlug: e.featureSlug,
             featureType: e.featureType,
+            isCustom: true,
             limit: e.limit,
             usage: Number(e.usage),
             units: e.units,
-            forecast: 0,
             freeUnits: 0,
-            max: 100,
+            max: e.limit ?? Number.POSITIVE_INFINITY,
             included: 0,
-            featureVersion: {
-              featureType: e.featureType,
-              config: null,
-              feature: {
-                slug: e.featureSlug,
-                name: e.featureSlug,
-                description: "",
-              },
-            },
+            featureVersion: featureVersion?.featurePlanVersion!,
+            price: null,
           }
         }
 
         const { config, featureType } = entitlementPhase.featurePlanVersion
         const freeUnits = calculateFreeUnits({ config: config!, featureType: featureType })
+        const { val: price } = calculatePricePerFeature({
+          config: config!,
+          featureType: featureType,
+          quantity: quantities[entitlementPhase.featurePlanVersionId] ?? 0,
+          prorate: calculatedBillingCycle.prorationFactor,
+        })
 
         return {
           featureSlug: e.featureSlug,
@@ -580,44 +559,19 @@ export class EntitlementService {
           limit: e.limit,
           usage: Number(e.usage),
           units: e.units,
-          forecast: 0,
+          isCustom: false,
           freeUnits,
           included:
             freeUnits === Number.POSITIVE_INFINITY
               ? (e.limit ?? Number.POSITIVE_INFINITY)
               : freeUnits,
-          price: {
-            totalPrice: totalPricePlan?.displayAmount,
-            totalPriceForecast: totalPricePlanForecast?.displayAmount,
-          },
-          max: 100,
-          featureVersion: {
-            featureType: featureType,
-            config: config,
-            feature: {
-              slug: entitlementPhase.featurePlanVersion.feature.slug,
-              name: entitlementPhase.featurePlanVersion.feature.title,
-              description: entitlementPhase.featurePlanVersion.feature.description ?? "",
-            },
-          },
+          price: price?.totalPrice.displayAmount ?? "0",
+          max: e.limit ?? Number.POSITIVE_INFINITY,
+          featureVersion: entitlementPhase.featurePlanVersion,
         }
       }),
     }
 
     return result
-  }
-
-  private forecastUsage(currentUsage: number): number {
-    const t = new Date()
-    t.setUTCDate(1)
-    t.setUTCHours(0, 0, 0, 0)
-
-    const start = t.getTime()
-    t.setUTCMonth(t.getUTCMonth() + 1)
-    const end = t.getTime() - 1
-
-    const passed = (Date.now() - start) / (end - start)
-
-    return Math.round(currentUsage * (1 + 1 / passed))
   }
 }

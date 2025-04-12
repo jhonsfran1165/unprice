@@ -76,7 +76,7 @@ export const versions = pgTableProject(
     paymentProvider: paymentProviderEnum("payment_providers").notNull(),
 
     // due behaviour for the phase - cancel or downgrade
-    dueBehaviour: dueBehaviourEnum("due_behaviour").notNull().default("cancel"),
+    dueBehaviour: dueBehaviourEnum("due_behaviour").default("cancel").notNull(),
 
     // currency of the plan
     currency: currencyEnum("currency").notNull(),
@@ -93,9 +93,9 @@ export const versions = pgTableProject(
     collectionMethod: collectionMethodEnum("collection_method")
       .notNull()
       .default("charge_automatically"),
-    trialDays: integer("trial_days").notNull().default(0),
+    trialDays: integer("trial_days").default(0).notNull(),
     // auto renew the subscription every billing period
-    autoRenew: boolean("auto_renew").notNull().default(true),
+    autoRenew: boolean("auto_renew").default(true).notNull(),
     // ************ billing data defaults ************
 
     // metadata probably will be useful to save external data, etc.

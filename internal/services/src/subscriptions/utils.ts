@@ -588,7 +588,8 @@ const calculateInvoiceItemsPrice = async (payload: {
 
       // calculate the price depending on the type of feature
       const priceCalculation = calculatePricePerFeature({
-        feature: item.featurePlanVersion,
+        config: item.featurePlanVersion.config!,
+        featureType: item.featurePlanVersion.featureType,
         quantity: quantity,
         prorate: prorate,
       })

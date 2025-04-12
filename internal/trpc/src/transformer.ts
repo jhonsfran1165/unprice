@@ -1,4 +1,5 @@
-import type { Dinero, DineroSnapshot } from "dinero.js"
+import type { DineroSnapshot } from "@unprice/db/validators"
+import type { Dinero } from "dinero.js"
 import { dinero } from "dinero.js"
 import superjson from "superjson"
 import type { SuperJSONResult } from "superjson"
@@ -18,7 +19,7 @@ superjson.registerCustom(
       return val.toJSON() as SuperJSONResult["json"]
     },
     deserialize: (val) => {
-      return dinero(val as DineroSnapshot<number>)
+      return dinero(val as DineroSnapshot)
     },
   },
   "Dinero"

@@ -1,5 +1,5 @@
 {
-  "id": "b7c41259-24b9-47a4-a448-44765b225c77",
+  "id": "a61fe727-a7c9-46f8-82d6-5d04a16b3232",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -109,12 +109,8 @@
           "name": "unprice_apikeys_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_apikeys",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -122,10 +118,7 @@
       "compositePrimaryKeys": {
         "pk_apikeys": {
           "name": "pk_apikeys",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {},
@@ -210,12 +203,8 @@
           "name": "unprice_account_userId_unprice_user_id_fk",
           "tableFrom": "unprice_account",
           "tableTo": "unprice_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -223,10 +212,7 @@
       "compositePrimaryKeys": {
         "unprice_account_provider_providerAccountId_pk": {
           "name": "unprice_account_provider_providerAccountId_pk",
-          "columns": [
-            "provider",
-            "providerAccountId"
-          ]
+          "columns": ["provider", "providerAccountId"]
         }
       },
       "uniqueConstraints": {},
@@ -293,12 +279,8 @@
           "name": "unprice_authenticator_userId_unprice_user_id_fk",
           "tableFrom": "unprice_authenticator",
           "tableTo": "unprice_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -306,19 +288,14 @@
       "compositePrimaryKeys": {
         "unprice_authenticator_userId_credentialID_pk": {
           "name": "unprice_authenticator_userId_credentialID_pk",
-          "columns": [
-            "userId",
-            "credentialID"
-          ]
+          "columns": ["userId", "credentialID"]
         }
       },
       "uniqueConstraints": {
         "unprice_authenticator_credentialID_unique": {
           "name": "unprice_authenticator_credentialID_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "credentialID"
-          ]
+          "columns": ["credentialID"]
         }
       },
       "policies": {},
@@ -354,12 +331,8 @@
           "name": "unprice_session_userId_unprice_user_id_fk",
           "tableFrom": "unprice_session",
           "tableTo": "unprice_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -454,10 +427,7 @@
       "compositePrimaryKeys": {
         "unprice_verificationToken_identifier_token_pk": {
           "name": "unprice_verificationToken_identifier_token_pk",
-          "columns": [
-            "identifier",
-            "token"
-          ]
+          "columns": ["identifier", "token"]
         }
       },
       "uniqueConstraints": {},
@@ -556,12 +526,8 @@
           "name": "unprice_customer_credits_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_customer_credits",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -569,14 +535,8 @@
           "name": "customer_credits_customer_id_fkey",
           "tableFrom": "unprice_customer_credits",
           "tableTo": "unprice_customers",
-          "columnsFrom": [
-            "customer_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["customer_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -584,12 +544,8 @@
           "name": "project_id_fkey",
           "tableFrom": "unprice_customer_credits",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -597,10 +553,7 @@
       "compositePrimaryKeys": {
         "customer_credits_pkey": {
           "name": "customer_credits_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {},
@@ -674,17 +627,25 @@
           "primaryKey": false,
           "notNull": false
         },
+        "units": {
+          "name": "units",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "usage": {
           "name": "usage",
           "type": "numeric",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'0'"
         },
         "accumulated_usage": {
           "name": "accumulated_usage",
           "type": "numeric",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'0'"
         },
         "realtime": {
           "name": "realtime",
@@ -711,7 +672,7 @@
           "name": "valid_to",
           "type": "bigint",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "buffer_period_days": {
           "name": "buffer_period_days",
@@ -760,12 +721,8 @@
           "name": "unprice_customer_entitlements_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_customer_entitlements",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -773,14 +730,8 @@
           "name": "feature_plan_version_id_fkey",
           "tableFrom": "unprice_customer_entitlements",
           "tableTo": "unprice_plan_versions_features",
-          "columnsFrom": [
-            "feature_plan_version_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["feature_plan_version_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -788,14 +739,8 @@
           "name": "subscription_item_id_fkey",
           "tableFrom": "unprice_customer_entitlements",
           "tableTo": "unprice_subscription_items",
-          "columnsFrom": [
-            "subscription_item_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["subscription_item_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -803,14 +748,8 @@
           "name": "customer_id_fkey",
           "tableFrom": "unprice_customer_entitlements",
           "tableTo": "unprice_customers",
-          "columnsFrom": [
-            "customer_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["customer_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -818,29 +757,17 @@
           "name": "subscription_phase_id_fkey",
           "tableFrom": "unprice_customer_entitlements",
           "tableTo": "unprice_subscription_phases",
-          "columnsFrom": [
-            "subscription_phase_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
-          "onDelete": "no action",
+          "columnsFrom": ["subscription_phase_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "subscription_id_fkey": {
           "name": "subscription_id_fkey",
           "tableFrom": "unprice_customer_entitlements",
           "tableTo": "unprice_subscriptions",
-          "columnsFrom": [
-            "subscription_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["subscription_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -848,12 +775,8 @@
           "name": "project_id_fkey",
           "tableFrom": "unprice_customer_entitlements",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -861,10 +784,7 @@
       "compositePrimaryKeys": {
         "pk_customer_entitlement": {
           "name": "pk_customer_entitlement",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {},
@@ -981,14 +901,14 @@
           "name": "active",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": true
         },
         "is_main": {
           "name": "is_main",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": false
         },
         "default_currency": {
@@ -1029,12 +949,8 @@
           "name": "unprice_customers_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_customers",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1042,12 +958,8 @@
           "name": "project_id_fkey",
           "tableFrom": "unprice_customers",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1055,19 +967,14 @@
       "compositePrimaryKeys": {
         "pk_customer": {
           "name": "pk_customer",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
         "stripe_customer_unique": {
           "name": "stripe_customer_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "stripe_customer_id"
-          ]
+          "columns": ["stripe_customer_id"]
         }
       },
       "policies": {},
@@ -1146,12 +1053,8 @@
           "name": "fk_domain_workspace",
           "tableFrom": "unprice_domains",
           "tableTo": "unprice_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1161,9 +1064,7 @@
         "unprice_domains_name_unique": {
           "name": "unprice_domains_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -1253,12 +1154,8 @@
           "name": "unprice_features_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_features",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1266,10 +1163,7 @@
       "compositePrimaryKeys": {
         "features_pkey": {
           "name": "features_pkey",
-          "columns": [
-            "project_id",
-            "id"
-          ]
+          "columns": ["project_id", "id"]
         }
       },
       "uniqueConstraints": {},
@@ -1344,12 +1238,8 @@
           "name": "unprice_ingestions_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_ingestions",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1357,14 +1247,8 @@
           "name": "ingestions_apikey_id_fkey",
           "tableFrom": "unprice_ingestions",
           "tableTo": "unprice_apikeys",
-          "columnsFrom": [
-            "apikey_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["apikey_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1372,10 +1256,7 @@
       "compositePrimaryKeys": {
         "ingestions_pkey": {
           "name": "ingestions_pkey",
-          "columns": [
-            "project_id",
-            "id"
-          ]
+          "columns": ["project_id", "id"]
         }
       },
       "uniqueConstraints": {},
@@ -1527,12 +1408,8 @@
           "name": "unprice_pages_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_pages",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1540,26 +1417,19 @@
       "compositePrimaryKeys": {
         "page_pkey": {
           "name": "page_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
         "unprice_pages_custom_domain_unique": {
           "name": "unprice_pages_custom_domain_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "custom_domain"
-          ]
+          "columns": ["custom_domain"]
         },
         "unprice_pages_subdomain_unique": {
           "name": "unprice_pages_subdomain_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "subdomain"
-          ]
+          "columns": ["subdomain"]
         }
       },
       "policies": {},
@@ -1652,12 +1522,8 @@
           "name": "unprice_payment_provider_config_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_payment_provider_config",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1665,10 +1531,7 @@
       "compositePrimaryKeys": {
         "pk_ppconfig": {
           "name": "pk_ppconfig",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1774,12 +1637,8 @@
           "name": "unprice_plans_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_plans",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1787,10 +1646,7 @@
       "compositePrimaryKeys": {
         "plans_pkey": {
           "name": "plans_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1900,12 +1756,8 @@
           "name": "unprice_plan_versions_features_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_plan_versions_features",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1913,14 +1765,8 @@
           "name": "plan_versions_id_fkey",
           "tableFrom": "unprice_plan_versions_features",
           "tableTo": "unprice_plan_versions",
-          "columnsFrom": [
-            "plan_version_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["plan_version_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1928,14 +1774,8 @@
           "name": "features_id_fkey",
           "tableFrom": "unprice_plan_versions_features",
           "tableTo": "unprice_features",
-          "columnsFrom": [
-            "feature_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["feature_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1943,22 +1783,14 @@
       "compositePrimaryKeys": {
         "plan_versions_pkey": {
           "name": "plan_versions_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
         "unique_version_feature": {
           "name": "unique_version_feature",
           "nullsNotDistinct": true,
-          "columns": [
-            "plan_version_id",
-            "feature_id",
-            "project_id",
-            "order"
-          ]
+          "columns": ["plan_version_id", "feature_id", "project_id", "order"]
         }
       },
       "policies": {},
@@ -2032,6 +1864,13 @@
           "primaryKey": false,
           "notNull": false,
           "default": true
+        },
+        "flat_price": {
+          "name": "flat_price",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
         },
         "plan_version_status": {
           "name": "plan_version_status",
@@ -2164,12 +2003,8 @@
           "name": "unprice_plan_versions_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_plan_versions",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2177,12 +2012,8 @@
           "name": "unprice_plan_versions_published_by_unprice_user_id_fk",
           "tableFrom": "unprice_plan_versions",
           "tableTo": "unprice_user",
-          "columnsFrom": [
-            "published_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["published_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2190,12 +2021,8 @@
           "name": "unprice_plan_versions_archived_by_unprice_user_id_fk",
           "tableFrom": "unprice_plan_versions",
           "tableTo": "unprice_user",
-          "columnsFrom": [
-            "archived_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["archived_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2203,14 +2030,8 @@
           "name": "plan_versions_plan_id_pkey",
           "tableFrom": "unprice_plan_versions",
           "tableTo": "unprice_plans",
-          "columnsFrom": [
-            "plan_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["plan_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2218,10 +2039,7 @@
       "compositePrimaryKeys": {
         "plan_versions_plan_id_fkey": {
           "name": "plan_versions_plan_id_fkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {},
@@ -2351,12 +2169,8 @@
           "name": "fk_project_workspace",
           "tableFrom": "unprice_projects",
           "tableTo": "unprice_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2366,9 +2180,7 @@
         "unique_slug": {
           "name": "unique_slug",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -2589,12 +2401,8 @@
           "name": "unprice_invoices_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_invoices",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2602,14 +2410,8 @@
           "name": "invoices_subscription_id_fkey",
           "tableFrom": "unprice_invoices",
           "tableTo": "unprice_subscriptions",
-          "columnsFrom": [
-            "subscription_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["subscription_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2617,14 +2419,8 @@
           "name": "invoices_subscription_phase_id_fkey",
           "tableFrom": "unprice_invoices",
           "tableTo": "unprice_subscription_phases",
-          "columnsFrom": [
-            "subscription_phase_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["subscription_phase_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2632,12 +2428,8 @@
           "name": "invoices_project_id_fkey",
           "tableFrom": "unprice_invoices",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2645,14 +2437,8 @@
           "name": "invoices_customer_credit_id_fkey",
           "tableFrom": "unprice_invoices",
           "tableTo": "unprice_customer_credits",
-          "columnsFrom": [
-            "customer_credit_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["customer_credit_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2660,10 +2446,7 @@
       "compositePrimaryKeys": {
         "invoices_pkey": {
           "name": "invoices_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {},
@@ -2732,12 +2515,8 @@
           "name": "unprice_subscription_items_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_subscription_items",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2745,14 +2524,8 @@
           "name": "subscription_items_plan_version_id_fkey",
           "tableFrom": "unprice_subscription_items",
           "tableTo": "unprice_plan_versions_features",
-          "columnsFrom": [
-            "feature_plan_version_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["feature_plan_version_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2760,12 +2533,8 @@
           "name": "subscription_items_project_id_fkey",
           "tableFrom": "unprice_subscription_items",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2773,14 +2542,8 @@
           "name": "subscription_items_subscription_phase_id_fkey",
           "tableFrom": "unprice_subscription_items",
           "tableTo": "unprice_subscription_phases",
-          "columnsFrom": [
-            "subscription_phase_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["subscription_phase_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2788,14 +2551,8 @@
           "name": "subscription_items_subscription_id_fkey",
           "tableFrom": "unprice_subscription_items",
           "tableTo": "unprice_subscriptions",
-          "columnsFrom": [
-            "subscription_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["subscription_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2803,10 +2560,7 @@
       "compositePrimaryKeys": {
         "subscription_items_pkey": {
           "name": "subscription_items_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {},
@@ -2907,12 +2661,8 @@
           "name": "unprice_subscription_phases_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_subscription_phases",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2920,14 +2670,8 @@
           "name": "subscription_phases_plan_version_id_fkey",
           "tableFrom": "unprice_subscription_phases",
           "tableTo": "unprice_plan_versions",
-          "columnsFrom": [
-            "plan_version_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["plan_version_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2935,12 +2679,8 @@
           "name": "subscription_phases_project_id_fkey",
           "tableFrom": "unprice_subscription_phases",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2948,14 +2688,8 @@
           "name": "subscription_phases_subscription_id_fkey",
           "tableFrom": "unprice_subscription_phases",
           "tableTo": "unprice_subscriptions",
-          "columnsFrom": [
-            "subscription_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["subscription_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2963,10 +2697,7 @@
       "compositePrimaryKeys": {
         "subscription_phases_pkey": {
           "name": "subscription_phases_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {},
@@ -3029,7 +2760,7 @@
           "name": "plan_slug",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "'FREE'"
         },
         "timezone": {
@@ -3123,12 +2854,8 @@
           "name": "unprice_subscriptions_project_id_unprice_projects_id_fk",
           "tableFrom": "unprice_subscriptions",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3136,14 +2863,8 @@
           "name": "subscriptions_customer_id_fkey",
           "tableFrom": "unprice_subscriptions",
           "tableTo": "unprice_customers",
-          "columnsFrom": [
-            "customers_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["customers_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3151,12 +2872,8 @@
           "name": "subscriptions_project_id_fkey",
           "tableFrom": "unprice_subscriptions",
           "tableTo": "unprice_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3164,10 +2881,7 @@
       "compositePrimaryKeys": {
         "subscriptions_pkey": {
           "name": "subscriptions_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {},
@@ -3226,12 +2940,8 @@
           "name": "invites_workspace_id_fkey",
           "tableFrom": "unprice_invites",
           "tableTo": "unprice_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3239,10 +2949,7 @@
       "compositePrimaryKeys": {
         "invites_pkey": {
           "name": "invites_pkey",
-          "columns": [
-            "email",
-            "workspace_id"
-          ]
+          "columns": ["email", "workspace_id"]
         }
       },
       "uniqueConstraints": {},
@@ -3295,12 +3002,8 @@
           "name": "members_user_id_fkey",
           "tableFrom": "unprice_members",
           "tableTo": "unprice_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3308,12 +3011,8 @@
           "name": "members_workspace_id_fkey",
           "tableFrom": "unprice_members",
           "tableTo": "unprice_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3321,10 +3020,7 @@
       "compositePrimaryKeys": {
         "members_pkey": {
           "name": "members_pkey",
-          "columns": [
-            "user_id",
-            "workspace_id"
-          ]
+          "columns": ["user_id", "workspace_id"]
         }
       },
       "uniqueConstraints": {},
@@ -3444,12 +3140,8 @@
           "name": "unprice_workspaces_created_by_unprice_user_id_fk",
           "tableFrom": "unprice_workspaces",
           "tableTo": "unprice_user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3459,16 +3151,12 @@
         "unprice_workspaces_slug_unique": {
           "name": "unprice_workspaces_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         },
         "unprice_customer_id": {
           "name": "unprice_customer_id",
           "nullsNotDistinct": false,
-          "columns": [
-            "unprice_customer_id"
-          ]
+          "columns": ["unprice_customer_id"]
         }
       },
       "policies": {},
@@ -3480,104 +3168,57 @@
     "public.aggregation_method": {
       "name": "aggregation_method",
       "schema": "public",
-      "values": [
-        "sum",
-        "sum_all",
-        "last_during_period",
-        "count",
-        "count_all",
-        "max",
-        "max_all"
-      ]
+      "values": ["sum", "sum_all", "last_during_period", "count", "count_all", "max", "max_all"]
     },
     "public.billing_interval": {
       "name": "billing_interval",
       "schema": "public",
-      "values": [
-        "month",
-        "year",
-        "day",
-        "minute",
-        "onetime"
-      ]
+      "values": ["month", "year", "day", "minute", "onetime"]
     },
     "public.collection_method": {
       "name": "collection_method",
       "schema": "public",
-      "values": [
-        "charge_automatically",
-        "send_invoice"
-      ]
+      "values": ["charge_automatically", "send_invoice"]
     },
     "public.currency": {
       "name": "currency",
       "schema": "public",
-      "values": [
-        "USD",
-        "EUR"
-      ]
+      "values": ["USD", "EUR"]
     },
     "public.due_behaviour": {
       "name": "due_behaviour",
       "schema": "public",
-      "values": [
-        "cancel",
-        "downgrade"
-      ]
+      "values": ["cancel", "downgrade"]
     },
     "public.invoice_status": {
       "name": "invoice_status",
       "schema": "public",
-      "values": [
-        "unpaid",
-        "paid",
-        "waiting",
-        "void",
-        "draft",
-        "failed"
-      ]
+      "values": ["unpaid", "paid", "waiting", "void", "draft", "failed"]
     },
     "public.invoice_type": {
       "name": "invoice_type",
       "schema": "public",
-      "values": [
-        "flat",
-        "usage",
-        "hybrid"
-      ]
+      "values": ["flat", "usage", "hybrid"]
     },
     "public.payment_providers": {
       "name": "payment_providers",
       "schema": "public",
-      "values": [
-        "stripe",
-        "lemonsqueezy"
-      ]
+      "values": ["stripe", "lemonsqueezy"]
     },
     "public.plan_type": {
       "name": "plan_type",
       "schema": "public",
-      "values": [
-        "recurring",
-        "onetime"
-      ]
+      "values": ["recurring", "onetime"]
     },
     "public.app_stages": {
       "name": "app_stages",
       "schema": "public",
-      "values": [
-        "prod",
-        "test",
-        "dev"
-      ]
+      "values": ["prod", "test", "dev"]
     },
     "public.plan_version_status": {
       "name": "plan_version_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "published"
-      ]
+      "values": ["draft", "published"]
     },
     "public.subscription_status": {
       "name": "subscription_status",
@@ -3601,54 +3242,32 @@
     "public.team_roles": {
       "name": "team_roles",
       "schema": "public",
-      "values": [
-        "OWNER",
-        "ADMIN",
-        "MEMBER"
-      ]
+      "values": ["OWNER", "ADMIN", "MEMBER"]
     },
     "public.tier_mode": {
       "name": "tier_mode",
       "schema": "public",
-      "values": [
-        "volume",
-        "graduated"
-      ]
+      "values": ["volume", "graduated"]
     },
     "public.feature_types": {
       "name": "feature_types",
       "schema": "public",
-      "values": [
-        "flat",
-        "tier",
-        "package",
-        "usage"
-      ]
+      "values": ["flat", "tier", "package", "usage"]
     },
     "public.feature_version_types": {
       "name": "feature_version_types",
       "schema": "public",
-      "values": [
-        "feature",
-        "addon"
-      ]
+      "values": ["feature", "addon"]
     },
     "public.usage_mode": {
       "name": "usage_mode",
       "schema": "public",
-      "values": [
-        "tier",
-        "package",
-        "unit"
-      ]
+      "values": ["tier", "package", "unit"]
     },
     "public.when_to_bill": {
       "name": "when_to_bill",
       "schema": "public",
-      "values": [
-        "pay_in_advance",
-        "pay_in_arrear"
-      ]
+      "values": ["pay_in_advance", "pay_in_arrear"]
     }
   },
   "schemas": {},

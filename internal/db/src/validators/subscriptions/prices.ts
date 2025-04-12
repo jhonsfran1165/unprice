@@ -6,21 +6,20 @@ import { z } from "zod"
 import type { Result } from "@unprice/error"
 import { Err, Ok, type SchemaError } from "@unprice/error"
 import { calculatePercentage, formatMoney } from "../../utils"
-import type { Currency, typeFeatureSchema } from "../shared"
+import { type Currency, typeFeatureSchema } from "../shared"
 import { UnPriceCalculationError } from "./../errors"
-import type {
-  PlanVersionExtended,
-  PlanVersionFeature,
+import {
+  type PlanVersionExtended,
+  type PlanVersionFeature,
   configFeatureSchema,
-  dineroSchema,
-  tiersSchema,
+  type dineroSchema,
+  type tiersSchema,
 } from "./../planVersionFeatures"
 import {
   configFlatSchema,
   configPackageSchema,
   configTierSchema,
   configUsageSchema,
-  planVersionFeatureInsertBaseSchema,
   priceSchema,
 } from "./../planVersionFeatures"
 
@@ -39,7 +38,8 @@ export interface CalculatedPrice {
 
 const calculatePricePerFeatureSchema = z.object({
   quantity: unitsSchema,
-  feature: planVersionFeatureInsertBaseSchema,
+  featureType: typeFeatureSchema,
+  config: configFeatureSchema,
   /**
    * number between 0 and 1 to indicate how much to charge
    * if they have had a fixed cost item for 15/30 days, this should be 0.5
@@ -65,7 +65,8 @@ export const calculateFlatPricePlan = ({
     // flat features are always quantity 1
     if (["flat"].includes(feature.featureType)) {
       const { val: price, err } = calculatePricePerFeature({
-        feature: feature,
+        config: feature.config!,
+        featureType: feature.featureType,
         quantity: 1,
         prorate,
       })
@@ -113,7 +114,8 @@ export const calculateTotalPricePlan = ({
     // flat features are always quantity 1
     if (["flat"].includes(feature.featureType)) {
       const { val: price, err } = calculatePricePerFeature({
-        feature: feature,
+        config: feature.config!,
+        featureType: feature.featureType,
         quantity: 1,
         prorate,
       })
@@ -127,7 +129,8 @@ export const calculateTotalPricePlan = ({
 
     if (["tier", "package", "usage"].includes(feature.featureType)) {
       const { val: price, err } = calculatePricePerFeature({
-        feature: feature,
+        config: feature.config!,
+        featureType: feature.featureType,
         quantity: quantities[feature.id] ?? 0,
         prorate,
       })
@@ -560,18 +563,18 @@ export const calculatePricePerFeature = (
 ): Result<CalculatedPrice, UnPriceCalculationError | SchemaError> => {
   // set default units to 0 if it's not provided
   // proration only applies to fix costs per billing period
-  const { feature, quantity, prorate } = data
+  const { config, featureType, quantity, prorate } = data
   const defaultQuantity = quantity || 0
 
-  switch (feature.featureType) {
+  switch (featureType) {
     case "flat": {
-      const { price } = configFlatSchema.parse(feature.config)
+      const { price } = configFlatSchema.parse(config)
       // flat features have a single price independent of the units
       return calculateUnitPrice({ price, quantity: 1, isUsageBased: false, prorate, isFlat: true })
     }
 
     case "tier": {
-      const { tiers, tierMode } = configTierSchema.parse(feature.config)
+      const { tiers, tierMode } = configTierSchema.parse(config)
       return calculateTierPrice({
         tiers,
         quantity: defaultQuantity,
@@ -582,7 +585,7 @@ export const calculatePricePerFeature = (
     }
 
     case "usage": {
-      const { tiers, usageMode, units, price, tierMode } = configUsageSchema.parse(feature.config)
+      const { tiers, usageMode, units, price, tierMode } = configUsageSchema.parse(config)
 
       if (usageMode === "tier" && tierMode && tiers && tiers.length > 0) {
         return calculateTierPrice({
@@ -610,7 +613,7 @@ export const calculatePricePerFeature = (
     }
 
     case "package": {
-      const { units, price } = configPackageSchema.parse(feature.config)
+      const { units, price } = configPackageSchema.parse(config)
 
       return calculatePackagePrice({
         price,

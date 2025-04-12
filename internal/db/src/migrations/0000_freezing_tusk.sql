@@ -105,12 +105,13 @@ CREATE TABLE "unprice_customer_entitlements" (
 	"subscription_item_id" varchar(36),
 	"subscription_phase_id" varchar(36),
 	"limit" integer,
-	"usage" numeric,
-	"accumulated_usage" numeric,
+	"units" integer,
+	"usage" numeric DEFAULT '0' NOT NULL,
+	"accumulated_usage" numeric DEFAULT '0' NOT NULL,
 	"realtime" boolean DEFAULT false NOT NULL,
 	"type" "feature_version_types" DEFAULT 'feature' NOT NULL,
 	"valid_from" bigint NOT NULL,
-	"valid_to" bigint NOT NULL,
+	"valid_to" bigint,
 	"buffer_period_days" integer DEFAULT 1 NOT NULL,
 	"reseted_at" bigint NOT NULL,
 	"active" boolean DEFAULT true NOT NULL,
@@ -138,8 +139,8 @@ CREATE TABLE "unprice_customers" (
 	"description" text,
 	"metadata" json,
 	"stripe_customer_id" text,
-	"active" boolean DEFAULT true,
-	"is_main" boolean DEFAULT false,
+	"active" boolean DEFAULT true NOT NULL,
+	"is_main" boolean DEFAULT false NOT NULL,
 	"default_currency" "currency" DEFAULT 'USD' NOT NULL,
 	"timezone" varchar(32) DEFAULT 'UTC' NOT NULL,
 	CONSTRAINT "pk_customer" PRIMARY KEY("id","project_id"),
@@ -257,6 +258,7 @@ CREATE TABLE "unprice_plan_versions" (
 	"title" varchar(50) NOT NULL,
 	"tags" json,
 	"active" boolean DEFAULT true,
+	"flat_price" text DEFAULT '0',
 	"plan_version_status" "plan_version_status" DEFAULT 'draft',
 	"published_at_m" bigint,
 	"published_by" varchar(36),
@@ -366,7 +368,7 @@ CREATE TABLE "unprice_subscriptions" (
 	"customers_id" varchar(36) NOT NULL,
 	"status" "subscription_status" DEFAULT 'idle' NOT NULL,
 	"active" boolean DEFAULT false NOT NULL,
-	"plan_slug" text DEFAULT 'FREE',
+	"plan_slug" text DEFAULT 'FREE' NOT NULL,
 	"timezone" varchar(32) DEFAULT 'UTC' NOT NULL,
 	"locked" boolean DEFAULT false NOT NULL,
 	"locked_at_m" bigint,
@@ -431,7 +433,7 @@ ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "unprice_customer_ent
 ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "feature_plan_version_id_fkey" FOREIGN KEY ("feature_plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions_features"("id","project_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "subscription_item_id_fkey" FOREIGN KEY ("subscription_item_id","project_id") REFERENCES "public"."unprice_subscription_items"("id","project_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "customer_id_fkey" FOREIGN KEY ("customer_id","project_id") REFERENCES "public"."unprice_customers"("id","project_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "subscription_phase_id_fkey" FOREIGN KEY ("subscription_phase_id","project_id") REFERENCES "public"."unprice_subscription_phases"("id","project_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "subscription_phase_id_fkey" FOREIGN KEY ("subscription_phase_id","project_id") REFERENCES "public"."unprice_subscription_phases"("id","project_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "subscription_id_fkey" FOREIGN KEY ("subscription_id","project_id") REFERENCES "public"."unprice_subscriptions"("id","project_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unprice_customers" ADD CONSTRAINT "unprice_customers_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -474,7 +476,7 @@ ALTER TABLE "unprice_members" ADD CONSTRAINT "members_workspace_id_fkey" FOREIGN
 ALTER TABLE "unprice_workspaces" ADD CONSTRAINT "unprice_workspaces_created_by_unprice_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."unprice_user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "key" ON "unprice_apikeys" USING btree ("key");--> statement-breakpoint
 CREATE UNIQUE INDEX "hash" ON "unprice_apikeys" USING btree ("hash");--> statement-breakpoint
-CREATE UNIQUE INDEX "customer_credits_customer_id_active_key" ON "unprice_customer_credits" USING btree ("customer_id","active") WHERE "unprice_customer_credits"."active" = 'true';--> statement-breakpoint
+CREATE UNIQUE INDEX "customer_credits_customer_id_active_key" ON "unprice_customer_credits" USING btree ("customer_id","active") WHERE "unprice_customer_credits"."active" = true;--> statement-breakpoint
 CREATE INDEX "email" ON "unprice_customers" USING btree ("email");--> statement-breakpoint
 CREATE INDEX "name" ON "unprice_domains" USING btree ("name");--> statement-breakpoint
 CREATE UNIQUE INDEX "slug_feature" ON "unprice_features" USING btree ("slug","project_id");--> statement-breakpoint
@@ -483,6 +485,6 @@ CREATE INDEX "subdomain_index" ON "unprice_pages" USING btree ("subdomain");--> 
 CREATE INDEX "custom_domain_index" ON "unprice_pages" USING btree ("custom_domain");--> statement-breakpoint
 CREATE UNIQUE INDEX "unique_payment_provider_config" ON "unprice_payment_provider_config" USING btree ("payment_provider","project_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "slug_plan" ON "unprice_plans" USING btree ("slug","project_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "main_project" ON "unprice_projects" USING btree ("is_main") WHERE "unprice_projects"."is_main" = 'true';--> statement-breakpoint
+CREATE UNIQUE INDEX "main_project" ON "unprice_projects" USING btree ("is_main") WHERE "unprice_projects"."is_main" = true;--> statement-breakpoint
 CREATE INDEX "slug_index" ON "unprice_projects" USING btree ("slug");--> statement-breakpoint
-CREATE UNIQUE INDEX "main_workspace" ON "unprice_workspaces" USING btree ("is_main") WHERE "unprice_workspaces"."is_main" = 'true';
+CREATE UNIQUE INDEX "main_workspace" ON "unprice_workspaces" USING btree ("is_main") WHERE "unprice_workspaces"."is_main" = true;

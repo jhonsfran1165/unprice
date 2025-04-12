@@ -53,8 +53,8 @@
       ".output",
       "./internal/db/src/migrations",
       "./internal/jobs/.trigger",
-      "./apps/api/drizzle/migrations",
-      "./apps/api-cloudflare/worker-configuration.d.ts"
+      "./apps/api/drizzle",
+      "./apps/api/worker-configuration.d.ts"
     ]
   },
   "formatter": {

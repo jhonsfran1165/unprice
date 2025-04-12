@@ -38,7 +38,7 @@ export const planVersionFeatures = pgTableProject(
     // type of the feature - flat, tier, usage, etc.
     featureType: typeFeatureEnum("feature_type").notNull(),
     // configuration of the feature
-    config: json("features_config").$type<z.infer<typeof configFeatureSchema>>(),
+    config: json("features_config").$type<z.infer<typeof configFeatureSchema>>().notNull(),
     // metadata probably will be useful to save external data, etc.
     metadata: json("metadata").$type<z.infer<typeof planVersionFeatureMetadataSchema>>(),
     // the method to aggregate the feature quantity - use for calculated the current usage of the feature

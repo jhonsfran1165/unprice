@@ -1,6 +1,6 @@
+import { fileURLToPath } from "node:url"
 import withVercelToolbar from "@vercel/toolbar/plugins/next"
 import { createJiti } from "jiti"
-import { fileURLToPath } from "node:url"
 
 const jiti = createJiti(fileURLToPath(import.meta.url))
 

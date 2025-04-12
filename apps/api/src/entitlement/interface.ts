@@ -1,8 +1,9 @@
 import {
   billingConfigSchema,
-  configFeatureSchema,
   customerEntitlementsSchema,
   deniedReasonSchema,
+  featureSelectBaseSchema,
+  planVersionFeatureSelectBaseSchema,
   subscriptionStatusSchema,
   typeFeatureSchema,
 } from "@unprice/db/validators"
@@ -76,8 +77,9 @@ export type GetUsageRequest = z.infer<typeof getUsageRequestSchema>
 
 export const getUsageResponseSchema = z.object({
   planVersion: z.object({
+    description: z.string(),
     flatPrice: z.string(),
-    flatPriceForecast: z.string(),
+    currentTotalPrice: z.string(),
     billingConfig: billingConfigSchema,
   }),
   subscription: z.object({
@@ -93,27 +95,24 @@ export const getUsageResponseSchema = z.object({
     trialEndsAt: z.number().nullable(),
     endAt: z.number().nullable(),
     trialDays: z.number(),
+    isTrial: z.boolean(),
   }),
   entitlement: z.array(
     z
       .object({
         featureSlug: z.string(),
         featureType: typeFeatureSchema,
+        isCustom: z.boolean(),
         limit: z.number().nullable(),
         usage: z.number(),
-        forecast: z.number(),
         freeUnits: z.number(),
+        max: z.number(),
         units: z.number().nullable(),
-        included: z.number().nullable(),
-        featureVersion: z.object({
-          featureType: typeFeatureSchema,
-          config: configFeatureSchema.nullable(),
-          feature: z.object({
-            slug: z.string(),
-            name: z.string(),
-            description: z.string(),
-          }),
+        included: z.number(),
+        featureVersion: planVersionFeatureSelectBaseSchema.extend({
+          feature: featureSelectBaseSchema,
         }),
+        price: z.string().nullable(),
       })
       .optional()
   ),

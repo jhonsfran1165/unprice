@@ -30,6 +30,7 @@ const isPublishedSchema = planVersionSelectBaseSchema.partial().required({
   id: true,
   projectId: true,
   billingConfig: true,
+  trialDays: true,
 })
 
 export type PublishedPlanVersion = z.infer<typeof isPublishedSchema>

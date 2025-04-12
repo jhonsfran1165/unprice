@@ -1,13 +1,4 @@
 "use client"
-
-import {
-  calculateFlatPricePlan,
-  calculateFreeUnits,
-  calculatePricePerFeature,
-  calculateTotalPricePlan,
-  configureBillingCycleSubscription,
-} from "@unprice/db/validators"
-import type { RouterOutputs } from "@unprice/trpc"
 import {
   Card,
   CardContent,
@@ -22,127 +13,54 @@ import { ProgressBar } from "~/components/analytics/progress"
 import { PricingItem } from "~/components/forms/pricing-item"
 import { formatDate } from "~/lib/dates"
 import { nFormatter } from "~/lib/nformatter"
+import type { unprice } from "~/lib/unprice"
+
+type Usage = NonNullable<Awaited<ReturnType<typeof unprice.customers.getUsage>>["result"]>
 
 export function BillingCard({
-  subscription,
-  entitlements,
-  activePhase,
+  usage,
 }: {
-  subscription: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"][number]
-  entitlements: RouterOutputs["analytics"]["getUsageActiveEntitlementsCustomerUnprice"]["entitlements"]
-  activePhase: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"][number]["phases"][number]
+  usage: Usage
 }) {
-  const planVersion = activePhase.planVersion
-
-  // TODO: get current cycle
-  const calculatedBillingCycle = configureBillingCycleSubscription({
-    currentCycleStartAt: activePhase.startAt,
-    billingConfig: planVersion.billingConfig,
-    trialDays: activePhase.trialDays,
-    alignStartToDay: true,
-    alignEndToDay: true,
-    endAt: activePhase.endAt ?? undefined,
-    alignToCalendar: true,
-  })
-
-  const { err, val: flatPricePlan } = calculateFlatPricePlan({
-    planVersion: planVersion,
-    prorate: calculatedBillingCycle.prorationFactor,
-  })
-
-  const quantities = entitlements.reduce(
-    (acc, entitlement) => {
-      acc[entitlement.id] =
-        entitlement.featureType === "usage" ? (entitlement.usage ?? 0) : (entitlement.units ?? 0)
-      return acc
-    },
-    {} as Record<string, number>
-  )
-
-  const quantitiesForecast = entitlements.reduce(
-    (acc, entitlement) => {
-      acc[entitlement.id] =
-        entitlement.featureType === "usage"
-          ? forecastUsage(entitlement.usage ?? 0)
-          : (entitlement.units ?? 0)
-      return acc
-    },
-    {} as Record<string, number>
-  )
-
-  const { val: totalPricePlan, err: totalPricePlanErr } = calculateTotalPricePlan({
-    planVersion: planVersion,
-    quantities: quantities,
-    prorate: calculatedBillingCycle.prorationFactor,
-  })
-
-  const { val: totalPricePlanForecast, err: totalPricePlanErrForecast } = calculateTotalPricePlan({
-    planVersion: planVersion,
-    quantities: quantitiesForecast,
-    prorate: calculatedBillingCycle.prorationFactor,
-  })
-
-  const isTrial = activePhase.trialEndsAt ? activePhase.trialEndsAt > Date.now() : false
-
-  if (err || totalPricePlanErr || totalPricePlanErrForecast) {
-    return (
-      <div className="text-danger">
-        {err?.message || totalPricePlanErr?.message || totalPricePlanErrForecast?.message}
-      </div>
-    )
-  }
-
   return (
     <Card className="mt-4">
       <CardHeader>
         <CardTitle>Subscription Entitlements</CardTitle>
-        {isTrial && (
+        {usage.phase.isTrial && (
           <CardDescription>
-            {activePhase.trialEndsAt &&
-              subscription.currentCycleEndAt &&
-              `You currently are on the trial of the ${<span className="font-bold text-primary">{planVersion.plan.slug}</span>} plan. After the trial ends on ${formatDate(
-                activePhase.trialEndsAt,
-                subscription.timezone,
+            {usage.phase.trialEndsAt &&
+              usage.phase.endAt &&
+              `You currently are on the trial of the ${<span className="font-bold">{usage.subscription.planSlug}</span>} plan. After the trial ends on ${formatDate(
+                usage.phase.trialEndsAt,
+                usage.subscription.timezone,
                 "MMM d, yy"
               )}, you will be billed in the next billing cycle on ${formatDate(
-                subscription.currentCycleEndAt,
-                subscription.timezone,
+                usage.subscription.currentCycleEndAt,
+                usage.subscription.timezone,
                 "MMM d, yy"
               )} the following price.`}
           </CardDescription>
         )}
         <div className="flex items-center justify-between py-6 text-content-subtle">
-          <div className={cn("inline-flex w-4/5 items-center gap-2")}>
-            Plan {isTrial ? "trial" : ""}{" "}
-            <span className="font-bold text-primary">{planVersion.plan.slug}</span>
+          <div className={cn("w-4/5 items-center gap-2")}>
+            <span className="font-bold">
+              Plan {usage.phase.isTrial ? "trial" : ""} {usage.subscription.planSlug}
+            </span>
             <Typography variant="p" affects="removePaddingMargin">
-              {activePhase.planVersion.billingConfig.name}{" "}
-              {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
+              {usage.planVersion.description}
             </Typography>
           </div>
           <div className={cn("w-1/5 text-end font-semibold text-md tabular-nums")}>
-            {flatPricePlan.displayAmount}
+            {usage.planVersion.flatPrice}
           </div>
         </div>
       </CardHeader>
 
       <CardContent>
         <div className="flex flex-col gap-4 space-y-4">
-          {entitlements.map((entitlement) => {
-            const planVersionFeature = planVersion.planFeatures.find(
-              (e) => e.id === entitlement.featurePlanVersionId
-            )
-
-            if (!planVersionFeature) return null
-
-            return (
-              <LineUsageItem
-                key={entitlement.id}
-                entitlement={entitlement}
-                planVersionFeature={planVersionFeature}
-              />
-            )
-          })}
+          {usage.entitlement.map((entitlement) => (
+            <LineUsageItem key={entitlement.featureSlug} entitlement={entitlement} />
+          ))}
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-4 border-t py-4">
@@ -150,22 +68,11 @@ export function BillingCard({
           <span className="inline-flex items-center gap-1 font-semibold text-content text-sm">
             Current Total
             <Typography variant="p" affects="removePaddingMargin" className="text-xs">
-              {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
+              {usage.subscription.prorationFactor < 1 ? "(prorated)" : ""}
             </Typography>
           </span>
           <span className="font-semibold text-content text-md tabular-nums">
-            {totalPricePlan.displayAmount}
-          </span>
-        </div>
-        <div className="flex w-full items-center justify-between">
-          <span className="inline-flex items-center gap-1 text-content-subtle text-muted-foreground text-xs">
-            Estimated by end of month{" "}
-            <Typography variant="p" affects="removePaddingMargin" className="text-xs">
-              {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
-            </Typography>
-          </span>
-          <span className="text-content-subtle text-muted-foreground text-xs tabular-nums">
-            {totalPricePlanForecast.displayAmount}
+            {usage.planVersion.currentTotalPrice}
           </span>
         </div>
       </CardFooter>
@@ -174,32 +81,11 @@ export function BillingCard({
 }
 
 const LineUsageItem: React.FC<{
-  entitlement: RouterOutputs["analytics"]["getUsageActiveEntitlementsCustomer"]["entitlements"][number]
-  planVersionFeature: RouterOutputs["planVersions"]["getById"]["planVersion"]["planFeatures"][number]
+  entitlement: Usage["entitlement"][number]
 }> = (props) => {
-  const { entitlement, planVersionFeature } = props
-
+  const { entitlement } = props
   const isFlat = entitlement.featureType === "flat"
-
-  // separate logic for tiers and packages and usage features
-  const max = ["tier", "package"].includes(entitlement.featureType)
-    ? (entitlement.units ?? 0)
-    : (entitlement.limit ?? Number.POSITIVE_INFINITY)
-
   const used = entitlement.usage ?? 0
-
-  const { val: price, err } = calculatePricePerFeature({
-    feature: planVersionFeature,
-    // tier and package features are calculated based on units which are the units the customer has purchased
-    // usage features are calculated based on usage which is the usage of the feature
-    quantity: ["tier", "package"].includes(entitlement.featureType)
-      ? (entitlement.units ?? 0)
-      : (entitlement.usage ?? 0),
-  })
-
-  if (err) {
-    return <div className="text-danger">{err.message}</div>
-  }
 
   if (isFlat) {
     return (
@@ -207,7 +93,7 @@ const LineUsageItem: React.FC<{
         <div className={cn("flex w-4/5 flex-col gap-2")}>
           <div className="flex items-center justify-between">
             <PricingItem
-              feature={planVersionFeature}
+              feature={entitlement.featureVersion}
               className="font-semibold text-content text-md"
               noCheckIcon
             />
@@ -215,61 +101,37 @@ const LineUsageItem: React.FC<{
               Flat feature
             </span>
           </div>
-          <ProgressBar value={used} max={max} />
+          <ProgressBar value={used} max={entitlement.max} />
           <div className="flex items-center justify-between">
             <span className="text-content-subtle text-muted-foreground text-xs">N/A usage</span>
           </div>
         </div>
-        <span className={cn("text-sm tabular-nums")}>{price.totalPrice.displayAmount}</span>
+        <span className={cn("text-sm tabular-nums")}>{entitlement.price}</span>
       </div>
     )
   }
-
-  const freeUnits = calculateFreeUnits({ feature: planVersionFeature })
-  const forecast = forecastUsage(used)
-  const included =
-    freeUnits === Number.POSITIVE_INFINITY
-      ? (planVersionFeature.limit ?? Number.POSITIVE_INFINITY)
-      : freeUnits
 
   return (
     <div className="flex items-center justify-between">
       <div className={cn("flex w-4/5 flex-col gap-2")}>
         <div className="flex items-center justify-between">
           <PricingItem
-            feature={planVersionFeature}
+            feature={entitlement.featureVersion}
             className="font-semibold text-content text-md"
             noCheckIcon
           />
           <span className="text-right text-content-subtle text-muted-foreground text-xs">
-            {nFormatter(included)} included
+            {nFormatter(entitlement.included ?? 0)} included
           </span>
         </div>
-        <ProgressBar value={used} max={max} />
+        <ProgressBar value={used} max={entitlement.max} />
         <div className="flex items-center justify-between">
           <span className="text-content-subtle text-muted-foreground text-xs">
             Used {nFormatter(used)}
           </span>
-          <span className="text-content-subtle text-muted-foreground text-xs">
-            {nFormatter(forecast)} forecasted
-          </span>
         </div>
       </div>
-      <span className={cn("text-sm tabular-nums")}>{price.totalPrice.displayAmount}</span>
+      <span className={cn("text-sm tabular-nums")}>{entitlement.price}</span>
     </div>
   )
-}
-
-function forecastUsage(currentUsage: number): number {
-  const t = new Date()
-  t.setUTCDate(1)
-  t.setUTCHours(0, 0, 0, 0)
-
-  const start = t.getTime()
-  t.setUTCMonth(t.getUTCMonth() + 1)
-  const end = t.getTime() - 1
-
-  const passed = (Date.now() - start) / (end - start)
-
-  return Math.round(currentUsage * (1 + 1 / passed))
 }

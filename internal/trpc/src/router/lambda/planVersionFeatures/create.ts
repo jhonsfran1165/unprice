@@ -75,7 +75,7 @@ export const create = protectedProjectProcedure
         projectId: project.id,
         planVersionId: planVersionData.id,
         featureType,
-        config,
+        config: config!,
         metadata,
         order: order ?? "1024",
         defaultQuantity: defaultQuantity === 0 ? null : defaultQuantity,

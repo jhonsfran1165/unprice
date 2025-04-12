@@ -4,10 +4,7 @@
   "engines": {
     "node": "20.x"
   },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "workspaces": ["apps/*", "packages/*"],
   "engineStrict": true,
   "packageManager": "pnpm@8.15.4",
   "scripts": {
@@ -44,9 +41,7 @@
     "typescript": "^5.3.3"
   },
   "lint-staged": {
-    "*": [
-      "pnpm validate"
-    ]
+    "*": ["pnpm validate"]
   },
   "config": {
     "commitizen": {

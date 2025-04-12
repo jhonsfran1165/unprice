@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "8564d2f9-5305-46a6-a6e1-b3bc0e1b02bd",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "3a09dc69-9980-4217-b1a2-c8d68df770de",
+  "prevId": "e2c8a483-f30b-43bd-96d9-ffd1beb8104d",
   "tables": {
     "unpricedo_v1_entitlements": {
       "name": "unpricedo_v1_entitlements",
@@ -88,7 +88,7 @@
           "name": "usage",
           "type": "numeric",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "'0'"
         },
@@ -96,12 +96,19 @@
           "name": "accumulatedUsage",
           "type": "numeric",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "'0'"
         },
         "limit": {
           "name": "limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "units": {
+          "name": "units",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -125,7 +132,7 @@
           "name": "validTo",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "bufferPeriodDays": {
@@ -212,7 +219,7 @@
         "entitlements_entitlement_id_idx": {
           "name": "entitlements_entitlement_id_idx",
           "columns": ["entitlementId"],
-          "isUnique": false
+          "isUnique": true
         }
       },
       "foreignKeys": {},

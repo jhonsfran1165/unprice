@@ -171,8 +171,9 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
         }
 
         const { val: price, err } = calculatePricePerFeature({
-          feature: feature,
           quantity: field.units ?? 0,
+          featureType: feature.featureType,
+          config: feature.config,
         })
 
         if (err) return total
@@ -245,7 +246,10 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                   itemConfig.min ||
                   0
 
-                const freeUnits = calculateFreeUnits({ feature })
+                const freeUnits = calculateFreeUnits({
+                  config: feature.config,
+                  featureType: feature.featureType,
+                })
 
                 const freeUnitsText =
                   freeUnits === Number.POSITIVE_INFINITY

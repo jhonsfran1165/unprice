@@ -2,7 +2,7 @@
 
 import type { UseFormReturn } from "react-hook-form"
 
-import type { Currency, PlanVersionFeature } from "@unprice/db/validators"
+import type { Currency, PlanVersionFeatureInsert } from "@unprice/db/validators"
 
 import { PriceFormField } from "./fields-form"
 
@@ -11,7 +11,7 @@ export function FlatFormFields({
   currency,
   isDisabled,
 }: {
-  form: UseFormReturn<PlanVersionFeature>
+  form: UseFormReturn<PlanVersionFeatureInsert>
   currency: Currency
   isDisabled?: boolean
 }) {

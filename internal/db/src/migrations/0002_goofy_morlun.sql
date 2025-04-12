@@ -1,1 +1,0 @@
-ALTER TABLE "unprice_plan_versions" ADD COLUMN "flat_price" text DEFAULT '0';
