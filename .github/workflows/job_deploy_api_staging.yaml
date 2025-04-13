@@ -40,7 +40,7 @@ jobs:
           wrangler --version
 
       - name: Deploy with Wrangler
-        uses: cloudflare/wrangler-action@3.14.1
+        uses: cloudflare/wrangler-action@v3.14.1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_KEY }}
           wranglerVersion: "4.3.0"
