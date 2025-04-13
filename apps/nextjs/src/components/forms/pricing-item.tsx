@@ -40,7 +40,7 @@ export function PricingItem({
   const { err, val: pricePerFeature } = useMemo(
     () =>
       calculatePricePerFeature({
-        config: feature.config,
+        config: feature.config!,
         featureType: feature.featureType,
         quantity: quantityDebounce,
       }),
@@ -66,7 +66,7 @@ export function PricingItem({
   }
 
   const freeUnits = calculateFreeUnits({
-    config: feature.config,
+    config: feature.config!,
     featureType: feature.featureType,
   })
 

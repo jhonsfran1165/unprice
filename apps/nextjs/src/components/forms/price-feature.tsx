@@ -25,7 +25,7 @@ export function PriceFeature({
   const calculatePrice = useCallback(() => {
     return calculatePricePerFeature({
       featureType: feature.featureType,
-      config: feature.config,
+      config: feature.config!,
       quantity: quantity,
     })
   }, [feature, quantity])
