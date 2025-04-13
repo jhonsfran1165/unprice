@@ -48,7 +48,7 @@ jobs:
           packageManager: "pnpm"
           workingDirectory: "apps/api"
           # Pass secrets to Worker
-          secrets: |
+          vars: |
             CLOUDFLARE_API_TOKEN
             TINYBIRD_TOKEN
             TINYBIRD_URL
