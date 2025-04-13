@@ -15,13 +15,6 @@ concurrency:
 jobs:
   build-lint:
     uses: ./.github/workflows/job_build.yaml
-    with:
-      pull_secrets: true
-      project_slug: unprice-zq-xm
-      env_slug: prod
-    secrets:
-      MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
-      MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
 
   deploy-prod-tinybird:
     uses: ./.github/workflows/job_tinybird_cd.yml

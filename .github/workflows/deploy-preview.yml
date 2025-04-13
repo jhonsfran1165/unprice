@@ -15,20 +15,20 @@ jobs:
   build-lint:
     if: "!contains(github.head_ref, 'renovate/')"
     uses: ./.github/workflows/job_build.yaml
-    with:
-      pull_secrets: true
-      project_slug: unprice-zq-xm
-      env_slug: preview
-    secrets:
-      MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
-      MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
 
+  deploy-preview-api:
+    if: "!contains(github.head_ref, 'renovate/')"
+    uses: ./.github/workflows/job_deploy_api_staging.yaml
+    needs:
+      - build-lint
+    secrets: inherit
 
   deploy-preview-tinybird:
     if: "!contains(github.head_ref, 'renovate/')"
     uses: ./.github/workflows/job_tinybird_ci.yml
     needs:
       - build-lint
+      - deploy-preview-api
 
   deploy-preview-neon:
     if: "!contains(github.head_ref, 'renovate/')"

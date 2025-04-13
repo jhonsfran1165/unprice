@@ -20,7 +20,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "generate": "openapi-typescript http://localhost:8787/openapi.json -o ./src/openapi.d.ts",
-    "build": "rm -rf dist && pnpm generate && tsup"
+    "build:generate": "rm -rf dist && pnpm generate && tsup",
+    "build": "rm -rf dist && tsup"
   },
   "dependencies": {},
   "devDependencies": {
