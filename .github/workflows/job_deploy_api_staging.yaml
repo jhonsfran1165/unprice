@@ -35,3 +35,11 @@ jobs:
         working-directory: apps/api
         env:
           CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
+          TINYBIRD_TOKEN: ${{ env.TINYBIRD_TOKEN }}
+          TINYBIRD_URL: ${{ env.TINYBIRD_URL }}
+          COOKIE_ENCRYPTION_KEY: ${{ env.COOKIE_ENCRYPTION_KEY }}
+          AUTH_SECRET: ${{ env.AUTH_SECRET }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          DATABASE_READ1_URL: ${{ env.DATABASE_READ1_URL }}
+          DATABASE_READ2_URL: ${{ env.DATABASE_READ2_URL }}
+          EMIT_METRICS_LOGS: ${{ env.EMIT_METRICS_LOGS }}
