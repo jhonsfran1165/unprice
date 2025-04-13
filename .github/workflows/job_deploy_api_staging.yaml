@@ -42,7 +42,7 @@ jobs:
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3.14.1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
           wranglerVersion: "4.3.0"
           environment: "preview"
           packageManager: "pnpm"
