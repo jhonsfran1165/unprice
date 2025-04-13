@@ -37,7 +37,6 @@ jobs:
         uses: cloudflare/wrangler-action@3.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_KEY }}
-          wranglerVersion: none
           workingDirectory: "apps/api"
           environment: "preview"
           packageManager: "pnpm"
