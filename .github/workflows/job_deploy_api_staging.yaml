@@ -40,6 +40,7 @@ jobs:
           wranglerVersion: "4.3.0"
           workingDirectory: apps/api
           environment: preview
+          packageManager: pnpm
           # Pass secrets to Worker
           secrets: |
             CLOUDFLARE_API_KEY
