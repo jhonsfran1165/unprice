@@ -10,9 +10,6 @@
   "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
   "env": {
     "preview": {
-      "vars": {
-        "NODE_ENV": "preview"
-      },
       "route": {
         "pattern": "preview-api.unprice.dev",
         "custom_domain": true
@@ -33,9 +30,6 @@
       ]
     },
     "development": {
-      "vars": {
-        "NODE_ENV": "development"
-      },
       "route": {
         "pattern": "localhost:8787",
         "custom_domain": false
