@@ -8,6 +8,18 @@
   "main": "src/index.ts",
   "compatibility_date": "2025-03-19",
   "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
+  "env": {
+    "preview": {
+      "vars": {
+        "ENVIRONMENT": "preview",
+        "EMIT_METRICS_LOGS": "false"
+      },
+      "route": {
+        "pattern": "preview-api.unprice.dev",
+        "custom_domain": true
+      }
+    }
+  },
   "durable_objects": {
     "bindings": [
       {
