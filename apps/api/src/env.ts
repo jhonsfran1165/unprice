@@ -8,7 +8,7 @@ import type { DurableObjectUsagelimiter } from "~/entitlement/do"
 
 export const env = createEnv({
   shared: {
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    NODE_ENV: z.enum(["development", "test", "production", "preview"]).default("development"),
   },
   server: {
     AUTH_SECRET: z.string(),

@@ -11,12 +11,34 @@
   "env": {
     "preview": {
       "vars": {
-        "ENVIRONMENT": "preview",
-        "EMIT_METRICS_LOGS": "false"
+        "NODE_ENV": "preview"
       },
       "route": {
         "pattern": "preview-api.unprice.dev",
         "custom_domain": true
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "usagelimit",
+            "class_name": "DurableObjectUsagelimiter"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["DurableObjectUsagelimiter"]
+        }
+      ]
+    },
+    "development": {
+      "vars": {
+        "NODE_ENV": "development"
+      },
+      "route": {
+        "pattern": "localhost:8787",
+        "custom_domain": false
       },
       "durable_objects": {
         "bindings": [
