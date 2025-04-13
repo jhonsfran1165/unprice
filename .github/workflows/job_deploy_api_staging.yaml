@@ -31,7 +31,7 @@ jobs:
         run: pnpm turbo run build --filter='./apps/api'
 
       - name: Version
-        run: echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Install Wrangler
         shell: bash
