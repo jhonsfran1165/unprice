@@ -34,6 +34,7 @@ jobs:
         run: echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Install Wrangler
+        shell: bash
         run: |
           npm i -g wrangler@4.3.0
           wrangler --version
