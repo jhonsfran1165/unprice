@@ -17,23 +17,23 @@
       "route": {
         "pattern": "preview-api.unprice.dev",
         "custom_domain": true
-      }
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "usagelimit",
+            "class_name": "DurableObjectUsagelimiter"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["DurableObjectUsagelimiter"]
+        }
+      ]
     }
   },
-  "durable_objects": {
-    "bindings": [
-      {
-        "name": "usagelimit",
-        "class_name": "DurableObjectUsagelimiter"
-      }
-    ]
-  },
-  "migrations": [
-    {
-      "tag": "v1",
-      "new_sqlite_classes": ["DurableObjectUsagelimiter"]
-    }
-  ],
   "observability": {
     "enabled": false
   },
