@@ -33,11 +33,17 @@ jobs:
       - name: Version
         run: echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+      - name: Install Wrangler
+        run: |
+          npm i -g wrangler@4.3.0
+          wrangler --version
+
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@3.0.0
+        working-directory: apps/api
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_KEY }}
-          workingDirectory: "apps/api"
+          wranglerVersion: "4.3.0"
           environment: "preview"
           packageManager: "pnpm"
           # Pass secrets to Worker
