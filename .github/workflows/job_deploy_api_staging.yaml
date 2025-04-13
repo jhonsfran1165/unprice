@@ -42,14 +42,14 @@ jobs:
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3.14.1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_KEY }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           wranglerVersion: "4.3.0"
           environment: "preview"
           packageManager: "pnpm"
           workingDirectory: "apps/api"
           # Pass secrets to Worker
           secrets: |
-            CLOUDFLARE_API_KEY
+            CLOUDFLARE_API_TOKEN
             TINYBIRD_TOKEN
             TINYBIRD_URL
             AUTH_SECRET
@@ -61,7 +61,7 @@ jobs:
             VERSION
             NODE_ENV
         env:
-          CLOUDFLARE_API_KEY: ${{ env.CLOUDFLARE_API_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
           TINYBIRD_TOKEN: ${{ env.TINYBIRD_TOKEN }}
           TINYBIRD_URL: ${{ env.TINYBIRD_URL }}
           COOKIE_ENCRYPTION_KEY: ${{ env.COOKIE_ENCRYPTION_KEY }}

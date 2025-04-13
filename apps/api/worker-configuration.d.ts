@@ -2,7 +2,7 @@
 // Runtime types generated with workerd@1.20250319.0 2024-11-11 nodejs_compat
 declare namespace Cloudflare {
   interface Env {
-    CLOUDFLARE_API_KEY: string
+    CLOUDFLARE_API_TOKEN: string
     AUTH_SECRET: string
     CLOUDFLARE_ZONE_ID: string
     TINYBIRD_URL: string

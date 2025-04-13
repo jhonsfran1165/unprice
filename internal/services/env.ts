@@ -9,7 +9,7 @@ export const env = createEnv({
   },
   server: {
     CLOUDFLARE_ZONE_ID: z.string().optional(),
-    CLOUDFLARE_API_KEY: z.string().optional(),
+    CLOUDFLARE_API_TOKEN: z.string().optional(),
     ENCRYPTION_KEY: z.string().min(1),
   },
 

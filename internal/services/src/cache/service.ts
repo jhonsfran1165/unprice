@@ -46,9 +46,9 @@ export class CacheService {
     stores.push(memory)
 
     const cloudflare: Store<CacheNamespace, CacheNamespaces[CacheNamespace]> | undefined =
-      env.CLOUDFLARE_ZONE_ID && env.CLOUDFLARE_API_KEY
+      env.CLOUDFLARE_ZONE_ID && env.CLOUDFLARE_API_TOKEN
         ? new CloudflareStore({
-            cloudflareApiKey: env.CLOUDFLARE_API_KEY,
+            cloudflareApiKey: env.CLOUDFLARE_API_TOKEN,
             zoneId: env.CLOUDFLARE_ZONE_ID,
             domain: "cache.unprice.dev",
             cacheBuster: "v1",
