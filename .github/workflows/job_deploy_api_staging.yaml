@@ -30,11 +30,31 @@ jobs:
       - name: Build
         run: pnpm turbo run build --filter='./apps/api'
 
-      - name: Deploy
-        run: wrangler deploy --env=preview --var VERSION:$(git rev-parse --short HEAD)
-        working-directory: apps/api
+      - name: Version
+        run: echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Deploy with Wrangler
+        uses: cloudflare/wrangler-action@3.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_KEY }}
+          wranglerVersion: "4.3.0"
+          workingDirectory: apps/api
+          environment: preview
+          # Pass secrets to Worker
+          secrets: |
+            CLOUDFLARE_API_KEY
+            TINYBIRD_TOKEN
+            TINYBIRD_URL
+            AUTH_SECRET
+            COOKIE_ENCRYPTION_KEY
+            DATABASE_URL
+            DATABASE_READ1_URL
+            DATABASE_READ2_URL
+            EMIT_METRICS_LOGS
+            VERSION
+            NODE_ENV
         env:
-          CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_KEY: ${{ env.CLOUDFLARE_API_KEY }}
           TINYBIRD_TOKEN: ${{ env.TINYBIRD_TOKEN }}
           TINYBIRD_URL: ${{ env.TINYBIRD_URL }}
           COOKIE_ENCRYPTION_KEY: ${{ env.COOKIE_ENCRYPTION_KEY }}
@@ -43,3 +63,5 @@ jobs:
           DATABASE_READ1_URL: ${{ env.DATABASE_READ1_URL }}
           DATABASE_READ2_URL: ${{ env.DATABASE_READ2_URL }}
           EMIT_METRICS_LOGS: ${{ env.EMIT_METRICS_LOGS }}
+          VERSION: ${{ env.VERSION }}
+          NODE_ENV: ${{ env.NODE_ENV }}

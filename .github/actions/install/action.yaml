@@ -57,4 +57,3 @@ runs:
       shell: bash
       run: |
         pnpm install --recursive
-        npm i -g wrangler@latest
