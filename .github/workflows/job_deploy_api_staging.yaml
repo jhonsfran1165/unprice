@@ -6,6 +6,10 @@ on:
         required: true
       DATABASE_URL_ENCRYPTED:
         required: true
+      MACHINE_IDENTITY_CLIENT_ID:
+        required: true
+      MACHINE_IDENTITY_CLIENT_SECRET:
+        required: true
 
 
 env:
