@@ -50,7 +50,7 @@ export class ApiKeysService {
         hash: keyHash,
       })
       .catch((e) => {
-        this.logger.error(`Error fetching apikey from db: ${JSON.stringify(e)}`)
+        this.logger.error(`Error fetching apikey from db: ${e.message}`)
         return null
       })
 
