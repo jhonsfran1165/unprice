@@ -49,6 +49,7 @@ export class EntitlementService {
     db: Database
     customer: CustomerService
   }) {
+    console.log("EntitlementService", opts.namespace)
     this.namespace = opts.namespace
     this.logger = opts.logger
     this.metrics = opts.metrics
@@ -100,7 +101,10 @@ export class EntitlementService {
   private async getEntitlementsFromDO(
     customerId: string
   ): Promise<Result<CustomerEntitlementCache[] | null, FetchError | UnPriceCustomerError>> {
+    console.log("getEntitlementsFromDO", customerId)
     const durableObject = this.getStub(this.getDurableObjectCustomerId(customerId))
+
+    console.log("getEntitlementsFromDO", customerId, durableObject)
     const entitlements = await durableObject.getEntitlements()
 
     if (!entitlements) {
