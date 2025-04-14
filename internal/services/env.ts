@@ -5,7 +5,7 @@ import { z } from "zod"
 
 export const env = createEnv({
   shared: {
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    NODE_ENV: z.enum(["development", "test", "production", "preview"]).default("development"),
   },
   server: {
     CLOUDFLARE_ZONE_ID: z.string().optional(),
