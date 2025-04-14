@@ -21,7 +21,6 @@ jobs:
     uses: ./.github/workflows/job_tinybird_ci.yml
     needs:
       - build-lint
-      - deploy-preview-api
 
   deploy-preview-neon:
     if: "!contains(github.head_ref, 'renovate/')"
@@ -33,7 +32,6 @@ jobs:
 
     needs:
       - deploy-preview-tinybird
-      - build-lint
 
     permissions:
       pull-requests: write
