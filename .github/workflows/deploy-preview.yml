@@ -126,6 +126,8 @@ jobs:
 
   deploy-preview-api:
     if: "!contains(github.head_ref, 'renovate/')"
+    needs:
+      - deploy-preview-neon
     uses: ./.github/workflows/job_deploy_api_staging.yaml
     secrets:
       DATABASE_URL_ENCRYPTED: ${{ needs.deploy-preview-neon.outputs.db_url }}
