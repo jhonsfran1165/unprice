@@ -13,6 +13,7 @@
     "clean:workspaces": "turbo clean --parallel",
     "dev": "cross-env FORCE_COLOR=1 turbo run dev --parallel",
     "with-infisical": "infisical run --env=preview --path=/ --recursive --",
+    "with-infisical-prod": "infisical run --env=prod --path=/ --recursive --",
     "typecheck": "turbo run typecheck",
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip --include files,dependencies",

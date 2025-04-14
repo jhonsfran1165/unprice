@@ -1,6 +1,9 @@
 name: Deploy API Staging
 on:
   workflow_call:
+    secrets:
+      DATABASE_URL:
+        required: true
 
 env:
   SKIP_ENV_VALIDATION: 1
@@ -48,22 +51,23 @@ jobs:
           packageManager: "pnpm"
           workingDirectory: "apps/api"
           # Pass secrets to Worker
-          vars: |
+          secrets: |
             CLOUDFLARE_API_TOKEN
             TINYBIRD_TOKEN
             TINYBIRD_URL
             AUTH_SECRET
-            DRIZZLE_LOG
             COOKIE_ENCRYPTION_KEY
             CLOUDFLARE_ZONE_ID
             DATABASE_URL
             DATABASE_READ1_URL
             DATABASE_READ2_URL
-            EMIT_METRICS_LOGS
+            ENCRYPTION_KEY
+          vars: |
             VERSION
             NODE_ENV
             VERCEL_ENV
-            ENCRYPTION_KEY
+            EMIT_METRICS_LOGS
+            DRIZZLE_LOG
         env:
           CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
@@ -71,9 +75,7 @@ jobs:
           TINYBIRD_URL: ${{ env.TINYBIRD_URL }}
           COOKIE_ENCRYPTION_KEY: ${{ env.COOKIE_ENCRYPTION_KEY }}
           AUTH_SECRET: ${{ env.AUTH_SECRET }}
-          DATABASE_URL: ${{ env.DATABASE_URL }}
-          DATABASE_READ1_URL: ${{ env.DATABASE_READ1_URL }}
-          DATABASE_READ2_URL: ${{ env.DATABASE_READ2_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           EMIT_METRICS_LOGS: ${{ env.EMIT_METRICS_LOGS }}
           VERSION: ${{ env.VERSION }}
           NODE_ENV: ${{ env.NODE_ENV }}
