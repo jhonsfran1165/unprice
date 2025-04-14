@@ -2,15 +2,17 @@ name: Deploy API Staging
 on:
   workflow_call:
     secrets:
-      DATABASE_URL:
+      PASSWORD_ENCRYPT:
         required: true
+      DATABASE_URL_ENCRYPTED:
+        required: true
+
 
 env:
   SKIP_ENV_VALIDATION: 1
 
 jobs:
   deploy:
-    environment: Preview
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +21,14 @@ jobs:
         uses: ./.github/actions/install
         with:
           ts: true
+
+      - uses: cloudposse/github-action-secret-outputs@main
+        id: db-url
+        with:
+          ## PASSWORD is a gpg passphrase stored in Github Secrets.
+          secret: ${{ secrets.PASSWORD_ENCRYPT }}
+          op: decode
+          in: ${{ secrets.DATABASE_URL_ENCRYPTED }}
 
       - uses: Infisical/secrets-action@v1.0.7
         name: Pull secrets from Infisical
@@ -76,7 +86,7 @@ jobs:
           COOKIE_ENCRYPTION_KEY: ${{ env.COOKIE_ENCRYPTION_KEY }}
           AUTH_SECRET: ${{ env.AUTH_SECRET }}
           # we are passing the preview database url to the deploy action
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ steps.db-url.outputs.out }}
           EMIT_METRICS_LOGS: ${{ env.EMIT_METRICS_LOGS }}
           VERSION: ${{ env.VERSION }}
           NODE_ENV: ${{ env.NODE_ENV }}

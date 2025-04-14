@@ -21,6 +21,7 @@ jobs:
     uses: ./.github/workflows/job_tinybird_ci.yml
     needs:
       - build-lint
+      - deploy-preview-api
 
   deploy-preview-neon:
     if: "!contains(github.head_ref, 'renovate/')"
@@ -125,23 +126,10 @@ jobs:
 
   deploy-preview-api:
     if: "!contains(github.head_ref, 'renovate/')"
-    name: Deploy Preview API
-    runs-on: ubuntu-latest
-    needs:
-      - deploy-preview-neon
-    steps:
-      - uses: cloudposse/github-action-secret-outputs@main
-        id: db-url
-        with:
-          ## PASSWORD is a gpg passphrase stored in Github Secrets.
-          secret: ${{ secrets.PASSWORD_ENCRYPT }}
-          op: decode
-          in: ${{ needs.deploy-preview-neon.outputs.db_url }}
-
-      - name: Deploy API
-        uses: ./.github/workflows/job_deploy_api_staging.yaml
-        secrets:
-          DATABASE_URL: ${{ steps.db-url.outputs.out }}
+    uses: ./.github/workflows/job_deploy_api_staging.yaml
+    secrets:
+      DATABASE_URL_ENCRYPTED: ${{ needs.deploy-preview-neon.outputs.db_url }}
+      PASSWORD_ENCRYPT: ${{ secrets.PASSWORD_ENCRYPT }}
 
   deploy-preview-vercel:
     if: "!contains(github.head_ref, 'renovate/')"
