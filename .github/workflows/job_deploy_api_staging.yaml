@@ -75,6 +75,7 @@ jobs:
           TINYBIRD_URL: ${{ env.TINYBIRD_URL }}
           COOKIE_ENCRYPTION_KEY: ${{ env.COOKIE_ENCRYPTION_KEY }}
           AUTH_SECRET: ${{ env.AUTH_SECRET }}
+          # we are passing the preview database url to the deploy action
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           EMIT_METRICS_LOGS: ${{ env.EMIT_METRICS_LOGS }}
           VERSION: ${{ env.VERSION }}
