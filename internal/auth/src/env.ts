@@ -17,4 +17,7 @@ export const env = createEnv({
   runtimeEnv: process.env,
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
   extends: [dbEnv],
+  onValidationError: (issues) => {
+    throw new Error(`Invalid environment variables in Auth: ${JSON.stringify(issues, null, 2)}`)
+  },
 })

@@ -9,4 +9,7 @@ export const env = createEnv({
   server: {},
   runtimeEnv: process.env,
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
+  onValidationError: (issues) => {
+    throw new Error(`Invalid environment variables in Stripe: ${JSON.stringify(issues, null, 2)}`)
+  },
 })
