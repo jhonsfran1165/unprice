@@ -5,7 +5,7 @@ import ws from "ws"
 import * as schema from "./schema"
 
 export type ConnectionDatabaseOptions = {
-  env: "development" | "production" | "test"
+  env: "development" | "production" | "test" | "preview"
   primaryDatabaseUrl: string
   read1DatabaseUrl?: string
   read2DatabaseUrl?: string
