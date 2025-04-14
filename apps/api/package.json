@@ -3,8 +3,8 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "sh dev.sh",
-    "dev:wrangler": "wrangler dev",
-    "start": "wrangler dev",
+    "dev:wrangler": "wrangler dev -e development",
+    "start": "wrangler dev -e development",
     "generate-types": "wrangler types",
     "db:generate": "drizzle-kit generate",
     "type-check": "generate-types && tsc --noEmit"
