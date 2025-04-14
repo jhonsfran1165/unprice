@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Tinybird CLI
         if: steps.should-deploy.outputs.skip != '1'
-        run: curl -LsSf https://api.tinybird.co/static/install.sh | sh
+        run: curl https://tinybird.co | sh
 
       - uses: Infisical/secrets-action@v1.0.7
         name: Pull secrets from Infisical
@@ -44,6 +44,10 @@ jobs:
       - name: Authenticate
         if: steps.should-deploy.outputs.skip != '1'
         run: tb auth --host https://api.europe-west2.gcp.tinybird.co  --token ${{ env.TB_ADMIN_TOKEN }}
+
+      - name: Verify project
+        if: steps.should-deploy.outputs.skip != '1'
+        run: tb --cloud deploy --check
 
       - name: Deploy project
         if: steps.should-deploy.outputs.skip != '1'

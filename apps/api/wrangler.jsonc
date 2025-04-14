@@ -51,7 +51,8 @@
     }
   },
   "observability": {
-    "enabled": false
+    "enabled": true,
+    "head_sampling_rate": 0.01 // 1% of requests
   },
   "rules": [
     {
