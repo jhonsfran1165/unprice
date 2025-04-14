@@ -23,8 +23,7 @@ export const env = createEnv({
   extends: [envServices, envDb, envAnalytics, envLogging],
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
   onValidationError: (issues: readonly StandardSchemaV1.Issue[]) => {
-    console.error("❌ Invalid environment variables in API:", issues)
-    throw new Error("Invalid environment variables in API")
+    throw new Error(`Invalid environment variables in API: ${JSON.stringify(issues, null, 2)}`)
   },
 })
 
