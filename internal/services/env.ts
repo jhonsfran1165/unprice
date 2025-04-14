@@ -43,4 +43,7 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
   extends: [envDb, envStripe],
+  onValidationError: (issues) => {
+    throw new Error(`Invalid environment variables in Services: ${JSON.stringify(issues, null, 2)}`)
+  },
 })
