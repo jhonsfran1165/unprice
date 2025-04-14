@@ -53,6 +53,7 @@ jobs:
             TINYBIRD_TOKEN
             TINYBIRD_URL
             AUTH_SECRET
+            DRIZZLE_LOG
             COOKIE_ENCRYPTION_KEY
             DATABASE_URL
             DATABASE_READ1_URL
@@ -60,6 +61,7 @@ jobs:
             EMIT_METRICS_LOGS
             VERSION
             NODE_ENV
+            VERCEL_ENV
         env:
           CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
           TINYBIRD_TOKEN: ${{ env.TINYBIRD_TOKEN }}
@@ -72,3 +74,5 @@ jobs:
           EMIT_METRICS_LOGS: ${{ env.EMIT_METRICS_LOGS }}
           VERSION: ${{ env.VERSION }}
           NODE_ENV: ${{ env.NODE_ENV }}
+          DRIZZLE_LOG: ${{ env.DRIZZLE_LOG }}
+          VERCEL_ENV: ${{ env.VERCEL_ENV }}
