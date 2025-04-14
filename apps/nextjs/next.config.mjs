@@ -1,6 +1,6 @@
-import { fileURLToPath } from "node:url"
 import withVercelToolbar from "@vercel/toolbar/plugins/next"
 import { createJiti } from "jiti"
+import { fileURLToPath } from "node:url"
 
 const jiti = createJiti(fileURLToPath(import.meta.url))
 
@@ -11,7 +11,7 @@ import path from "node:path"
 const __dirname = path.resolve()
 
 // import MillionLint from "@million/lint"
-// import createMDX from "@next/mdx"
+import createMDX from "@next/mdx"
 
 /**
  * @type {import('next').NextConfig}
@@ -56,10 +56,10 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: true },
 }
 
-// const withMDX = createMDX()
+const withMDX = createMDX()
 
 // Export the combined config
-export default withVercelToolbar()(nextConfig)
+export default withVercelToolbar()(withMDX(nextConfig))
 
 // TODO: try to use million
 // export default MillionLint.next({
