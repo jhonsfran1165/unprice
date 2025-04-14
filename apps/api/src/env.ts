@@ -1,4 +1,4 @@
-import { createEnv } from "@t3-oss/env-core"
+import { type StandardSchemaV1, createEnv } from "@t3-oss/env-core"
 import { env as envDb } from "@unprice/db/env"
 import { env as envLogging } from "@unprice/logging/env"
 import { env as envServices } from "@unprice/services/env"
@@ -22,6 +22,10 @@ export const env = createEnv({
   runtimeEnv: process.env,
   extends: [envServices, envDb, envAnalytics, envLogging],
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
+  onValidationError: (issues: readonly StandardSchemaV1.Issue[]) => {
+    console.error("❌ Invalid environment variables in API:", issues)
+    throw new Error("Invalid environment variables in API")
+  },
 })
 
 export const cloudflareRatelimiter = z.custom<{

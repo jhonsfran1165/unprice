@@ -1,4 +1,4 @@
-import { createEnv } from "@t3-oss/env-core"
+import { type StandardSchemaV1, createEnv } from "@t3-oss/env-core"
 import { env as authEnv } from "@unprice/auth/env"
 import { env as stripeEnv } from "@unprice/stripe/env"
 import { env as trpcEnv } from "@unprice/trpc/env"
@@ -22,4 +22,8 @@ export const env = createEnv({
   client: {},
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
   extends: [authEnv, stripeEnv, trpcEnv],
+  onValidationError: (issues: readonly StandardSchemaV1.Issue[]) => {
+    console.error("❌ Invalid environment variables in NextJS:", issues)
+    throw new Error("Invalid environment variables in NextJS")
+  },
 })
