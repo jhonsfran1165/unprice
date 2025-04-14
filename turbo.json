@@ -36,7 +36,15 @@
         "AUTH_REDIRECT_PROXY_URL",
         "ENCRYPTION_KEY",
         "VERCEL_ENV",
-        "NODE_ENV"
+        "NODE_ENV",
+        "TRIGGER_SECRET_KEY",
+        "BASELIME_APIKEY",
+        "TINYBIRD_TOKEN",
+        "RESEND_API_KEY",
+        "TINYBIRD_URL",
+        "COOKIE_ENCRYPTION_KEY",
+        "UNPRICE_API_KEY",
+        "FLAGS_SECRET"
       ]
     },
     "fmt": {
@@ -70,8 +78,6 @@
         "CLOUDFLARE_ZONE_ID",
         "BASELIME_APIKEY",
         "TRIGGER_SECRET_KEY",
-        "UPSTASH_REDIS_REST_TOKEN",
-        "UPSTASH_REDIS_REST_URL",
         "VERCEL_PROJECT_UNPRICE_ID",
         "VERCEL_TEAM_ID",
         "VERCEL_TOKEN",

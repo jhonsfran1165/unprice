@@ -58,9 +58,9 @@ if [ "$MODE_ID" = "dev" ]; then
 
   # override tinybird host
   TB_HOST="http://localhost:7181"
-  REDIS_URL="http://localhost:8079"
+  # REDIS_URL="http://localhost:8079"
   AUTH_REDIRECT_PROXY_URL="http://localhost:3100/auth"
-  REDIS_TOKEN="example_token"
+  # REDIS_TOKEN="example_token"
   TB_RESTARTED=$RESTART_TINYBIRD
 
   # loging to tb
@@ -113,7 +113,7 @@ if [ "$MODE_ID" = "dev" ]; then
   cd ../../
 
   echo "Starting the application"
-  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" AUTH_REDIRECT_PROXY_URL="$AUTH_REDIRECT_PROXY_URL" UPSTASH_REDIS_REST_URL="$REDIS_URL" UPSTASH_REDIS_REST_TOKEN="$REDIS_TOKEN" pnpm run dev
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" AUTH_REDIRECT_PROXY_URL="$AUTH_REDIRECT_PROXY_URL" pnpm run dev
 
 elif [ "$MODE_ID" = "preview" ]; then
   # banner to show the user that we are using the preview environment
