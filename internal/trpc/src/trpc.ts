@@ -103,25 +103,25 @@ export const createTRPCContext = async (opts: {
         apiKey: env.BASELIME_APIKEY,
         requestId,
         defaultFields: { userId, region, country, source, ip, pathname, userAgent },
-        namespace: "unprice-api",
-        dataset: "unprice-api",
-        service: "api", // default service name
+        namespace: "unprice-trpc",
+        dataset: "unprice-trpc",
+        service: "trpc", // default service name
         flushAfterMs: 3000, // flush after 3 secs
         ctx: {
           waitUntil, // flush will be executed as a background task
         },
         environment: env.NODE_ENV,
-        application: "api",
+        application: "trpc",
       })
     : new ConsoleLogger({
         requestId,
         environment: env.NODE_ENV,
-        application: "api",
+        application: "trpc",
         defaultFields: { userId, region, country, source, ip, pathname },
       })
 
   const metrics: Metrics = env.EMIT_METRICS_LOGS
-    ? new LogdrainMetrics({ requestId, logger, environment: env.NODE_ENV, application: "api" })
+    ? new LogdrainMetrics({ requestId, logger, environment: env.NODE_ENV, application: "trpc" })
     : new NoopMetrics()
 
   const cacheService = new CacheService(

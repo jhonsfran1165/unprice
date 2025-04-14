@@ -52,7 +52,7 @@
   },
   "observability": {
     "enabled": true,
-    "head_sampling_rate": 0.01 // 1% of requests
+    "head_sampling_rate": 1.0 // 100% of requests
   },
   "rules": [
     {
