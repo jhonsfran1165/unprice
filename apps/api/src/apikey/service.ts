@@ -193,6 +193,10 @@ export class ApiKeysService {
 
       if (result.err) {
         // TODO: emit error log
+        this.logger.error(`Error verifying apikey ${result.err.message}`, {
+          error: result.err,
+        })
+
         return result
       }
 
