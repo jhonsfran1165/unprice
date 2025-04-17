@@ -38,8 +38,11 @@ export function newApp() {
         url: "http://localhost:8787",
         description: "Development",
       },
+      {
+        url: "https://api-preview.unprice.dev",
+        description: "Preview",
+      },
     ],
-
     "x-speakeasy-retries": {
       strategy: "backoff",
       backoff: {
@@ -62,6 +65,7 @@ export function newApp() {
         targetKey: "shell",
         clientKey: "curl",
       },
+      pageTitle: "Unprice API",
       theme: "deepSpace",
       url: "/openapi.json",
       authentication: {

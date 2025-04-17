@@ -76,12 +76,14 @@ jobs:
             DATABASE_READ1_URL
             DATABASE_READ2_URL
             ENCRYPTION_KEY
+            BASELIME_APIKEY
           vars: |
             VERSION
             NODE_ENV
             VERCEL_ENV
             EMIT_METRICS_LOGS
             DRIZZLE_LOG
+            VERCEL_ENV
         env:
           CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
@@ -92,6 +94,8 @@ jobs:
           # we are passing the preview database url to the deploy action
           DATABASE_URL: ${{ steps.db-url.outputs.out }}
           EMIT_METRICS_LOGS: ${{ env.EMIT_METRICS_LOGS }}
+          BASELIME_APIKEY: ${{ env.BASELIME_APIKEY }}
+          VERCEL_ENV: ${{ env.VERCEL_ENV }}
           VERSION: ${{ env.VERSION }}
           NODE_ENV: ${{ env.NODE_ENV }}
           DRIZZLE_LOG: ${{ env.DRIZZLE_LOG }}

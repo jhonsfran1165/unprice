@@ -78,7 +78,7 @@ export class ApiKeysService {
           revokedAt: true,
           hash: true,
         },
-        where: (apikey, { and, eq }) => and(eq(apikey.hash, keyHash)),
+        where: (apikey, { eq }) => eq(apikey.hash, keyHash),
       })
       .catch((e) => {
         this.logger.error(`Error fetching apikey from db: ${e.message}`, {
@@ -103,7 +103,7 @@ export class ApiKeysService {
 
     if (opts?.skipCache) {
       this.logger.info("force skipping cache", {
-        keyHash: keyHash,
+        keyHash,
       })
     }
 
@@ -241,6 +241,7 @@ export class ApiKeysService {
 
       c.set("workspaceId", result.val.project.workspaceId)
       c.set("projectId", result.val.project.id)
+      c.set("unPriceCustomerId", result.val.project.workspace.unPriceCustomerId)
 
       return Ok(apiKey)
     } catch (e) {

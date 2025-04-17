@@ -33,11 +33,13 @@ let isolateCreatedAt: number | undefined = undefined
 export function init(): MiddlewareHandler<HonoEnv> {
   return async (c, next) => {
     if (!isolateId) {
-      isolateId = crypto.randomUUID()
+      isolateId = newId("isolate")
     }
+
     if (!isolateCreatedAt) {
       isolateCreatedAt = Date.now()
     }
+
     c.set("isolateId", isolateId)
     c.set("isolateCreatedAt", isolateCreatedAt)
 
@@ -49,43 +51,44 @@ export function init(): MiddlewareHandler<HonoEnv> {
 
     c.res.headers.set("unprice-request-id", requestId)
 
-    const logger = c.env.EMIT_METRICS_LOGS
-      ? new BaseLimeLogger({
-          apiKey: c.env.BASELIME_APIKEY,
-          requestId,
-          defaultFields: {
-            isolateId: c.get("isolateId"),
-            isolateCreatedAt: c.get("isolateCreatedAt"),
-            requestId: c.get("requestId"),
-            requestStartedAt: c.get("requestStartedAt"),
-            performanceStart: c.get("performanceStart"),
-            location: c.get("location"),
-            workspaceId: c.get("workspaceId"),
-            projectId: c.get("projectId"),
-            userAgent: c.get("userAgent"),
-          },
-          namespace: "unprice-api",
-          dataset: "unprice-api",
-          service: "api", // default service name
-          flushAfterMs: 3000, // flush after 3 secs
-          ctx: {
-            waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
-          },
-          environment: c.env.NODE_ENV,
-          application: "api",
-        })
-      : new ConsoleLogger({
-          requestId,
-          environment: c.env.NODE_ENV,
-          application: "api",
-          defaultFields: {
-            isolateId: c.get("isolateId"),
-            isolateCreatedAt: c.get("isolateCreatedAt"),
-            requestId: c.get("requestId"),
-            requestStartedAt: c.get("requestStartedAt"),
-            performanceStart: c.get("performanceStart"),
-          },
-        })
+    const logger =
+      c.env.EMIT_METRICS_LOGS && c.env.NODE_ENV !== "development"
+        ? new BaseLimeLogger({
+            apiKey: c.env.BASELIME_APIKEY,
+            requestId,
+            defaultFields: {
+              isolateId: c.get("isolateId"),
+              isolateCreatedAt: c.get("isolateCreatedAt"),
+              requestId: c.get("requestId"),
+              requestStartedAt: c.get("requestStartedAt"),
+              performanceStart: c.get("performanceStart"),
+              location: c.get("location"),
+              workspaceId: c.get("workspaceId"),
+              projectId: c.get("projectId"),
+              userAgent: c.get("userAgent"),
+            },
+            namespace: "unprice-api",
+            dataset: "unprice-api",
+            service: "api", // default service name
+            flushAfterMs: 3000, // flush after 3 secs
+            ctx: {
+              waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+            },
+            environment: c.env.NODE_ENV,
+            application: "api",
+          })
+        : new ConsoleLogger({
+            requestId,
+            environment: c.env.NODE_ENV,
+            application: "api",
+            defaultFields: {
+              isolateId: c.get("isolateId"),
+              isolateCreatedAt: c.get("isolateCreatedAt"),
+              requestId: c.get("requestId"),
+              requestStartedAt: c.get("requestStartedAt"),
+              performanceStart: c.get("performanceStart"),
+            },
+          })
 
     const metrics: Metrics = c.env.EMIT_METRICS_LOGS
       ? new LogdrainMetrics({

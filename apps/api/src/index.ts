@@ -2,6 +2,7 @@ import { env } from "cloudflare:workers"
 import { getToken } from "@auth/core/jwt"
 import { partyserverMiddleware } from "hono-party"
 import { cors } from "hono/cors"
+import { prettyJSON } from "hono/pretty-json"
 import type { Env } from "~/env"
 import { newApp } from "~/hono/app"
 import { init } from "~/middleware/init"
@@ -25,6 +26,7 @@ const app = newApp()
 app.use(serveEmojiFavicon("◎"))
 app.use("*", init())
 app.use("*", cors())
+app.use("*", prettyJSON())
 
 // Handle websocket connections for Durable Objects
 app.use(

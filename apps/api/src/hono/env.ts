@@ -30,6 +30,7 @@ export type HonoEnv = {
     requestId: string
     requestStartedAt: number
     performanceStart: number
+    unPriceCustomerId?: string
     workspaceId?: string
     projectId?: string
     services: ServiceContext

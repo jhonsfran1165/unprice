@@ -15,7 +15,7 @@ export async function keyAuth(c: Context<HonoEnv>) {
     throw new UnpriceApiError({ code: "UNAUTHORIZED", message: "key required" })
   }
 
-  const { apikey, analytics } = c.get("services")
+  const { apikey } = c.get("services")
   const { val: key, err } = await apikey.verifyApiKey(c, {
     key: authorization,
   })
@@ -34,7 +34,7 @@ export async function keyAuth(c: Context<HonoEnv>) {
     })
   }
 
-  if (!key?.key) {
+  if (!key) {
     throw new UnpriceApiError({
       code: "UNAUTHORIZED",
       message: "key not found",
@@ -42,22 +42,22 @@ export async function keyAuth(c: Context<HonoEnv>) {
   }
 
   // TODO: send analytics event
-  c.executionCtx.waitUntil(
-    analytics.ingestFeaturesVerification({
-      projectId: key.projectId,
-      customerId: "",
-      entitlementId: "",
-      featureSlug: "",
-      timestamp: Date.now(),
-      requestId: c.get("requestId"),
-      featurePlanVersionId: "",
-      subscriptionItemId: "",
-      subscriptionPhaseId: "",
-      subscriptionId: "",
-      deniedReason: "",
-      metadata: {},
-    })
-  )
+  // c.executionCtx.waitUntil(
+  //   analytics.ingestFeaturesVerification({
+  //     projectId: key.projectId,
+  //     customerId: "",
+  //     entitlementId: "",
+  //     featureSlug: "",
+  //     timestamp: Date.now(),
+  //     requestId: c.get("requestId"),
+  //     featurePlanVersionId: "",
+  //     subscriptionItemId: "",
+  //     subscriptionPhaseId: "",
+  //     subscriptionId: "",
+  //     deniedReason: "",
+  //     metadata: {},
+  //   })
+  // )
 
   return key
 }
