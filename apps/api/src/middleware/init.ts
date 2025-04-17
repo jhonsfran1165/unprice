@@ -70,7 +70,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
             namespace: "unprice-api",
             dataset: "unprice-api",
             service: "api", // default service name
-            flushAfterMs: 3000, // flush after 3 secs
+            flushAfterMs: 1000, // flush after 1 secs
             ctx: {
               waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
             },

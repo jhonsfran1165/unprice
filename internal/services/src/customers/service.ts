@@ -165,6 +165,13 @@ export class CustomerService {
       skipCache: boolean
     }
   ): Promise<Result<SubcriptionCache | null, FetchError | UnPriceCustomerError>> {
+    if (opts?.skipCache) {
+      this.logger.info("skipping cache for active subscription", {
+        customerId,
+        projectId,
+      })
+    }
+
     // swr handle cache stampede and other problems for us :)
     const { val, err } = opts?.skipCache
       ? await wrapResult(

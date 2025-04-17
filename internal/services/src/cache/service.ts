@@ -51,7 +51,7 @@ export class CacheService {
             cloudflareApiKey: env.CLOUDFLARE_API_TOKEN,
             zoneId: env.CLOUDFLARE_ZONE_ID,
             domain: "cache.unprice.dev",
-            cacheBuster: "v1",
+            cacheBuster: "v2",
           })
         : undefined
 
@@ -92,13 +92,10 @@ export class CacheService {
           stale: 1000 * 60, // delete after 1 minutes
         }
       ),
-      customerSubscription: new Namespace<CacheNamespaces["customerSubscription"]>(this.context, {
-        ...defaultOpts,
-        // update the cache every 1 day
-        fresh: 1000 * 60 * 60 * 24, // 1 day
-        // cache the entitlements for 30 days with revalidation in the background every 1 day
-        stale: 1000 * 60 * 60 * 24 * 30, // 30 days
-      }),
+      customerSubscription: new Namespace<CacheNamespaces["customerSubscription"]>(
+        this.context,
+        defaultOpts
+      ),
     })
   }
 
