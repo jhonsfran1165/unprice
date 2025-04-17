@@ -39,7 +39,7 @@ export function newApp() {
         description: "Development",
       },
       {
-        url: "https://api-preview.unprice.dev",
+        url: "https://preview-api.unprice.dev",
         description: "Preview",
       },
     ],

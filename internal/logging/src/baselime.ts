@@ -110,9 +110,11 @@ export class BaseLimeLogger implements Logger {
       },
     })
   }
+
   public async flush(): Promise<void> {
     this.client.flush()
   }
+
   public setRequestId(requestId: string): void {
     this.requestId = requestId
   }

@@ -73,6 +73,7 @@ registerResetEntitlementsV1(app)
 registerGetSubscriptionV1(app)
 registerGetActivePhaseV1(app)
 registerGetUsageV1(app)
+
 // Project routes
 registerGetFeaturesV1(app)
 
