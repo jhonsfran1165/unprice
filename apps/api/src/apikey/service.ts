@@ -1,4 +1,3 @@
-import { createApiKeyQuery } from "@unprice/db/queries"
 import { hashStringSHA256 } from "@unprice/db/utils"
 import type { ApiKeyExtended } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result, type SchemaError, wrapResult } from "@unprice/error"
@@ -45,12 +44,47 @@ export class ApiKeysService {
   }
 
   private async getData(keyHash: string): Promise<ApiKeyExtended | null> {
-    const data = await createApiKeyQuery(this.db)
-      .execute({
-        hash: keyHash,
+    const data = await this.db.query.apikeys
+      .findFirst({
+        with: {
+          project: {
+            columns: {
+              workspaceId: true,
+              id: true,
+              enabled: true,
+              slug: true,
+              defaultCurrency: true,
+              isMain: true,
+              isInternal: true,
+            },
+            with: {
+              workspace: {
+                columns: {
+                  enabled: true,
+                  unPriceCustomerId: true,
+                  isPersonal: true,
+                  isInternal: true,
+                  isMain: true,
+                },
+              },
+            },
+          },
+        },
+        columns: {
+          id: true,
+          projectId: true,
+          key: true,
+          expiresAt: true,
+          revokedAt: true,
+          hash: true,
+        },
+        where: (apikey, { and, eq }) => and(eq(apikey.hash, keyHash)),
       })
       .catch((e) => {
-        this.logger.error(`Error fetching apikey from db: ${e.message}`)
+        this.logger.error(`Error fetching apikey from db: ${e.message}`, {
+          error: e,
+          keyHash,
+        })
         return null
       })
 
