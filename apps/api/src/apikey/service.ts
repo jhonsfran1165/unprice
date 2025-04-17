@@ -149,6 +149,7 @@ export class ApiKeysService {
       )
     }
 
+    console.log("data", data)
     if (!data) {
       return Err(
         new UnPriceApiKeyError({
@@ -175,7 +176,7 @@ export class ApiKeysService {
           key,
         },
         {
-          skipCache: false,
+          skipCache: true,
         }
       ).catch(async (err) => {
         this.logger.error("verify error, retrying without cache", {
@@ -191,6 +192,8 @@ export class ApiKeysService {
           }
         )
       })
+
+      console.info("result", result)
 
       if (result.err) {
         // TODO: emit error log

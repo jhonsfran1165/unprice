@@ -91,6 +91,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
     //       })
 
     // TODO: remove this once we have a logger that supports logpush
+    // https://baselime.io/docs/sending-data/platforms/cloudflare/logpush/
     const logger =
       c.env.EMIT_METRICS_LOGS && c.env.NODE_ENV !== "development"
         ? new ConsoleLogger({
