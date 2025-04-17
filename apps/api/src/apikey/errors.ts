@@ -20,11 +20,13 @@ export class UnPriceApiKeyError extends BaseError<{ customerId: string }> {
 
   constructor({
     code,
+    message,
   }: {
     code: ApiKeyError
+    message?: string
   }) {
     super({
-      message: "Apikey API error",
+      message: `Apikey API error: ${message}`,
     })
     this.code = code
   }

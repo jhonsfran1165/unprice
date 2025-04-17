@@ -153,6 +153,7 @@ export class ApiKeysService {
       return Err(
         new UnPriceApiKeyError({
           code: "NOT_FOUND",
+          message: "apikey not found",
         })
       )
     }
@@ -206,6 +207,7 @@ export class ApiKeysService {
         return Err(
           new UnPriceApiKeyError({
             code: "REVOKED",
+            message: "apikey revoked",
           })
         )
       }
@@ -214,6 +216,7 @@ export class ApiKeysService {
         return Err(
           new UnPriceApiKeyError({
             code: "EXPIRED",
+            message: "apikey expired",
           })
         )
       }
@@ -222,6 +225,7 @@ export class ApiKeysService {
         return Err(
           new UnPriceApiKeyError({
             code: "PROJECT_DISABLED",
+            message: "apikey project disabled",
           })
         )
       }
@@ -230,6 +234,7 @@ export class ApiKeysService {
         return Err(
           new UnPriceApiKeyError({
             code: "WORKSPACE_DISABLED",
+            message: "apikey workspace disabled",
           })
         )
       }
@@ -247,6 +252,7 @@ export class ApiKeysService {
       return Err(
         new UnPriceApiKeyError({
           code: "UNHANDLED_ERROR",
+          message: "unhandled error",
         })
       )
     }

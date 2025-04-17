@@ -31,7 +31,7 @@ jobs:
       db_url: ${{ steps.db-url.outputs.out }}
 
     needs:
-      - deploy-preview-tinybird
+      - build-lint
 
     permissions:
       pull-requests: write
@@ -121,11 +121,12 @@ jobs:
           op: encode
           in: ${{ steps.branch-name.outputs.current_branch }}
 
-
   deploy-preview-api:
     if: "!contains(github.head_ref, 'renovate/')"
     needs:
       - deploy-preview-neon
+      - deploy-preview-tinybird
+
     uses: ./.github/workflows/job_deploy_api_staging.yaml
     secrets:
       DATABASE_URL_ENCRYPTED: ${{ needs.deploy-preview-neon.outputs.db_url }}
@@ -133,12 +134,13 @@ jobs:
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
 
-  deploy-preview-vercel:
+  deploy-auth-preview-vercel:
     if: "!contains(github.head_ref, 'renovate/')"
     runs-on: ubuntu-latest
 
     needs:
       - deploy-preview-neon
+      - deploy-preview-tinybird
 
     permissions:
       pull-requests: write
@@ -200,6 +202,61 @@ jobs:
           vercel-args: '--prod --env VERCEL_ENV=production --env NODE_ENV=production --build-env NODE_ENV=production'
           working-directory: ./
 
+  deploy-app-preview-vercel:
+    if: "!contains(github.head_ref, 'renovate/')"
+    runs-on: ubuntu-latest
+
+    needs:
+      - deploy-preview-neon
+      - deploy-preview-tinybird
+
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: cloudposse/github-action-secret-outputs@main
+        id: db-url
+        with:
+          ## PASSWORD is a gpg passphrase stored in Github Secrets.
+          secret: ${{ secrets.PASSWORD_ENCRYPT }}
+          op: decode
+          in: ${{ needs.deploy-preview-neon.outputs.db_url }}
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: "preview"
+          project-slug: "unprice-zq-xm"
+          export-type: "file"
+          file-output-path: "/.env"
+          secret-path: "/"
+          recursive: true
+
+      - uses: ./.github/actions/install
+        with:
+          ts: "true"
+          python: "false"
+
+      - uses: cardinalby/export-env-action@v2
+        with:
+          envFile: '.env'
+          export: true
+          # export everything except DATABASE_URL using regex
+          filter: ^(?!DATABASE_URL$).*$
+          mask: true
+
+      - name: Check for changes
+        id: turbo-ignore
+        continue-on-error: true
+        run: npx turbo-ignore -d apps/auth-proxy
+
       # deploy preview unprice to vercel
       - uses: amondnet/vercel-action@v25.2.0 #deploy
         name: Deploy Preview Unprice to Vercel
@@ -214,9 +271,3 @@ jobs:
             pr-${{ github.event.number }}-unprice.vercel.app
             app-pr-${{ github.event.number }}-unprice.vercel.app
             api-pr-${{ github.event.number }}-unprice.vercel.app
-
-      - name: Delete Secret
-        if: always()
-        run: |
-          rm -rf .env || true
-          rm -rf .tinyenv || true
