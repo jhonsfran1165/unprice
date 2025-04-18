@@ -77,7 +77,7 @@ jobs:
           pnpm generate
           pnpm migrate:custom
         env:
-          VERCEL_ENV: preview
+          VERCEL_ENV: development
           NODE_ENV: development
           DATABASE_URL: ${{ steps.create-branch.outputs.db_url_with_pooler }}
 
