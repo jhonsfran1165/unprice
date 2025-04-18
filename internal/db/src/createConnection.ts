@@ -19,6 +19,7 @@ export function createConnection(opts: ConnectionDatabaseOptions) {
     neonConfig.wsProxy = (host) => {
       return `${host}:5433/v1?address=db:5432`
     }
+
     neonConfig.useSecureWebSocket = false
     neonConfig.pipelineTLS = false
     neonConfig.pipelineConnect = false
