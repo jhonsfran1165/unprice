@@ -176,7 +176,7 @@ export class ApiKeysService {
           key,
         },
         {
-          skipCache: true,
+          skipCache: false,
         }
       ).catch(async (err) => {
         this.logger.error("verify error, retrying without cache", {
@@ -192,8 +192,6 @@ export class ApiKeysService {
           }
         )
       })
-
-      console.info("result", result)
 
       if (result.err) {
         // TODO: emit error log

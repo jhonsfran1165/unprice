@@ -13,9 +13,9 @@ export type ConnectionDatabaseOptions = {
 }
 
 export function createConnection(opts: ConnectionDatabaseOptions) {
-  neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket : ws
-
   if (opts.env === "development") {
+    neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket : ws
+
     neonConfig.wsProxy = (host) => {
       return `${host}:5433/v1?address=db:5432`
     }
