@@ -588,7 +588,7 @@ export class DurableObjectUsagelimiter extends Server {
           await this.analytics
             .ingestFeaturesVerification(transformedEvents)
             .catch((e) => {
-              this.logger.error("Failed to send verifications to Tinybird:", {
+              this.logger.error(`Failed to send verifications to Tinybird from do ${e.message}`, {
                 error: e.message,
               })
 
@@ -601,10 +601,6 @@ export class DurableObjectUsagelimiter extends Server {
               const total = rows + quarantined
 
               if (total >= ids.length) {
-                this.logger.info("deleted verifications from do", {
-                  rows: total,
-                })
-
                 // Only delete events that were successfully sent
                 await this.db
                   .delete(verifications)
@@ -616,16 +612,28 @@ export class DurableObjectUsagelimiter extends Server {
                   })
 
                 processedCount += ids.length
-              } else {
-                this.logger.info("failed to send verifications to Tinybird from do", {
-                  data,
+
+                this.logger.info(`deleted ${total} verifications from do`, {
+                  rows: total,
                 })
+
+                this.logger.info(`Processed ${processedCount} verifications in this batch`)
+              } else {
+                this.logger.info(
+                  "the total of verifications sent to tinybird are not the same as the total of verifications in the db",
+                  {
+                    total,
+                  }
+                )
               }
             })
         } catch (error) {
-          this.logger.error("Failed to send verifications to Tinybird:", {
-            error: error instanceof Error ? error.message : "unknown error",
-          })
+          this.logger.error(
+            `Failed to send verifications to Tinybird from do ${error instanceof Error ? error.message : "unknown error"}`,
+            {
+              error: error instanceof Error ? error.message : "unknown error",
+            }
+          )
           // Don't delete events if sending failed
           // We'll try again in the next alarm
           break
@@ -634,8 +642,6 @@ export class DurableObjectUsagelimiter extends Server {
       // Update the last processed ID for the next batch
       lastProcessedId = verificationEvents[verificationEvents.length - 1]?.id ?? lastProcessedId
     }
-
-    this.logger.info(`Processed ${processedCount} verifications in this batch`)
   }
 
   async sendUsageToTinybird() {
@@ -690,14 +696,19 @@ export class DurableObjectUsagelimiter extends Server {
               const total = rows + quarantined
 
               if (total >= ids.length) {
-                this.logger.info("deleted usage records", {
+                this.logger.info(`deleted ${total} usage records from do`, {
                   rows: total,
                 })
               } else {
-                this.logger.info("failed to send usage to Tinybird", {
-                  data,
-                })
+                this.logger.info(
+                  "the total of usage records sent to tinybird are not the same as the total of usage records in the db",
+                  {
+                    total,
+                  }
+                )
               }
+
+              this.logger.info(`Processed ${processedCount} usage events in this batch`)
 
               // Only delete events that were successfully sent
               await this.db.delete(usageRecords).where(inArray(usageRecords.id, ids))
@@ -715,8 +726,6 @@ export class DurableObjectUsagelimiter extends Server {
       // Update the last processed ID for the next batch
       lastProcessedId = events[events.length - 1]?.id ?? lastProcessedId
     }
-
-    this.logger.info(`Processed ${processedCount} usage events in this batch`)
   }
 
   // websocket message handler

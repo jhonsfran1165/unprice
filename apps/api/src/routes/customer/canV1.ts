@@ -54,10 +54,11 @@ export type CanResponse = z.infer<
 export const registerCanV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { customerId, featureSlug, metadata } = c.req.valid("json")
-    const { entitlement } = c.get("services")
+    const { entitlement, metrics } = c.get("services")
     const requestId = c.get("requestId")
     const performanceStart = c.get("performanceStart")
 
+    const metricsStart = performance.now()
     // validate the request
     const key = await keyAuth(c)
 
@@ -68,6 +69,15 @@ export const registerCanV1 = (app: App) =>
       })
     }
 
+    metrics.emit({
+      metric: "metric.http.request",
+      path: "/v1/customer/can1",
+      method: "POST",
+      status: HttpStatusCodes.OK,
+      duration: performance.now() - metricsStart,
+      service: "api",
+    })
+
     // validate usage from db
     const result = await entitlement.can({
       customerId,
@@ -77,6 +87,15 @@ export const registerCanV1 = (app: App) =>
       performanceStart: performanceStart,
       now: Date.now(),
       metadata,
+    })
+
+    metrics.emit({
+      metric: "metric.http.request",
+      path: "/v1/customer/can2",
+      method: "POST",
+      status: HttpStatusCodes.OK,
+      duration: performance.now() - metricsStart,
+      service: "api",
     })
 
     return c.json(result, HttpStatusCodes.OK)
