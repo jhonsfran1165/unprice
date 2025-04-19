@@ -42,6 +42,7 @@ export const metricSchema = z.discriminatedUnion("metric", [
       project: z.number(),
       apikey: z.number(),
       customer: z.number(),
+      metrics: z.number(),
     }),
   }),
   z.object({

@@ -21,6 +21,8 @@ jobs:
     needs:
       - build-lint
     secrets: inherit
+    with:
+      env: "prod"
 
   deploy-prod:
     runs-on: ubuntu-latest

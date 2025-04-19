@@ -2,6 +2,10 @@ name: Tinybird - CD Workflow
 
 on:
   workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
 
 jobs:
   cd:
@@ -36,7 +40,7 @@ jobs:
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: "prod"
+          env-slug: ${{ inputs.env }}
           project-slug: "unprice-zq-xm"
           secret-path: "/ci"
           recursive: true

@@ -8,8 +8,6 @@ const SITES_DOMAIN = "builderai.sh"
 // sometimes we need to use the vercel env from the client
 const VERCEL_ENV = env.NEXT_PUBLIC_VERCEL_ENV || env.VERCEL_ENV
 
-console.info("VERCEL_ENV", VERCEL_ENV, env.NEXT_PUBLIC_VERCEL_ENV)
-
 export const BASE_DOMAIN =
   VERCEL_ENV === "production"
     ? MAIN_DOMAIN

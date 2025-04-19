@@ -122,7 +122,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
             },
           })
 
-    const loggerTime = performance.now() - performanceStart
+    const loggerTime = performanceStart - performance.now()
 
     const metrics: Metrics = c.env.EMIT_METRICS_LOGS
       ? new LogdrainMetrics({
@@ -133,7 +133,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
         })
       : new NoopMetrics()
 
-    const metricsTime = performance.now() - loggerTime
+    const metricsTime = performanceStart - performance.now()
     const cacheService = new CacheService(
       {
         waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
@@ -141,9 +141,9 @@ export function init(): MiddlewareHandler<HonoEnv> {
       metrics
     )
 
-    const cacheTime = performance.now() - metricsTime
+    const cacheTime = performanceStart - performance.now()
     await cacheService.init()
-    const cacheInitTime = performance.now() - cacheTime
+    const cacheInitTime = performanceStart - performance.now()
     const cache = cacheService.getCache()
 
     const db = createConnection({
@@ -154,7 +154,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       logger: c.env.DRIZZLE_LOG || false,
     })
 
-    const dbTime = performance.now() - cacheInitTime
+    const dbTime = performanceStart - performance.now()
 
     const analytics = new Analytics({
       emit: c.env.EMIT_METRICS_LOGS,
@@ -162,7 +162,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       tinybirdUrl: c.env.TINYBIRD_URL,
     })
 
-    const analyticsTime = performance.now() - dbTime
+    const analyticsTime = performanceStart - performance.now()
 
     const customer = new CustomerService({
       logger,
@@ -173,7 +173,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       db,
     })
 
-    const customerTime = performance.now() - analyticsTime
+    const customerTime = performanceStart - performance.now()
 
     const entitlement = new EntitlementService({
       namespace: c.env.usagelimit,
@@ -187,7 +187,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       customer,
     })
 
-    const entitlementTime = performance.now() - customerTime
+    const entitlementTime = performanceStart - performance.now()
 
     const project = new ApiProjectService({
       cache,
@@ -199,7 +199,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       requestId,
     })
 
-    const projectInitTime = performance.now() - entitlementTime
+    const projectInitTime = performanceStart - performance.now()
 
     const apikey = new ApiKeysService({
       cache,
@@ -209,7 +209,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       db,
     })
 
-    const apikeyInitTime = performance.now() - projectInitTime
+    const apikeyInitTime = performanceStart - performance.now()
 
     c.set("services", {
       version: "1.0.0",
@@ -231,6 +231,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
         metric: "metric.init",
         duration: {
           database: dbTime,
+          metrics: metricsTime,
           cacheTime: cacheInitTime,
           cache: cacheTime,
           logger: loggerTime,
