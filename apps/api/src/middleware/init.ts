@@ -255,6 +255,12 @@ export function init(): MiddlewareHandler<HonoEnv> {
       customer,
     })
 
+    // emit the init event
+    metrics.emit({
+      metric: "metric.init",
+      duration: performance.now() - performanceStart,
+    })
+
     try {
       await next()
     } finally {

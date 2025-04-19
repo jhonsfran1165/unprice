@@ -32,7 +32,7 @@ app.use("*", cors())
 
 // Handle websocket connections for Durable Objects
 app.use(
-  "*",
+  "/broadcast",
   partyserverMiddleware({
     onError: (error) => console.error(error),
     options: {
