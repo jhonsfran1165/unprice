@@ -14,6 +14,7 @@ export type ConnectionDatabaseOptions = {
 
 export function createConnection(opts: ConnectionDatabaseOptions) {
   if (opts.env === "development") {
+    // only for development when using node 20
     neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket : ws
 
     neonConfig.wsProxy = (host) => {
@@ -37,7 +38,7 @@ export function createConnection(opts: ConnectionDatabaseOptions) {
     }),
     {
       schema: schema,
-      logger: opts.logger,
+      logger: opts.logger || false,
     }
   )
 
@@ -47,7 +48,7 @@ export function createConnection(opts: ConnectionDatabaseOptions) {
     }),
     {
       schema: schema,
-      logger: opts.logger,
+      logger: opts.logger || false,
     }
   )
 
@@ -57,7 +58,7 @@ export function createConnection(opts: ConnectionDatabaseOptions) {
     }),
     {
       schema: schema,
-      logger: opts.logger,
+      logger: opts.logger || false,
     }
   )
 

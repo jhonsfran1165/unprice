@@ -85,10 +85,15 @@ export class ApiKeysService {
           error: e,
           keyHash,
         })
-        return null
+
+        throw e
       })
 
-    return data ?? null
+    if (!data) {
+      return null
+    }
+
+    return data
   }
 
   private async _getApiKey(
@@ -112,7 +117,7 @@ export class ApiKeysService {
           this.getData(keyHash),
           (err) =>
             new FetchError({
-              message: "unable to query db",
+              message: `unable to query db, ${err.message}`,
               retry: false,
               context: {
                 error: err.message,
@@ -135,21 +140,15 @@ export class ApiKeysService {
         )
 
     if (err) {
-      this.logger.error(err.message, {
-        hash: keyHash,
-        error: err,
-      })
-
       return Err(
         new FetchError({
-          message: "unable to fetch required data",
-          retry: true,
+          message: `unable to fetch apikey, ${err.message}`,
+          retry: false,
           cause: err,
         })
       )
     }
 
-    console.log("data", data)
     if (!data) {
       return Err(
         new UnPriceApiKeyError({
@@ -179,9 +178,10 @@ export class ApiKeysService {
           skipCache: false,
         }
       ).catch(async (err) => {
-        this.logger.error("verify error, retrying without cache", {
+        this.logger.error(`verify error, retrying without cache, ${err.message}`, {
           error: err.message,
         })
+
         await this.cache.apiKeyByHash.remove(await this.hash(req.key))
         return await this._getApiKey(
           {
@@ -195,7 +195,7 @@ export class ApiKeysService {
 
       if (result.err) {
         // TODO: emit error log
-        this.logger.error(`Error verifying apikey ${result.err.message}`, {
+        this.logger.error("Error verifying apikey after retrying without cache", {
           error: result.err,
         })
 

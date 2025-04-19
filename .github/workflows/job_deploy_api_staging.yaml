@@ -53,14 +53,14 @@ jobs:
       - name: Install Wrangler
         shell: bash
         run: |
-          npm i -g wrangler@4.3.0
+          npm i -g wrangler@4.12.0
           wrangler --version
 
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3.14.1
         with:
           apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
-          wranglerVersion: "4.3.0"
+          wranglerVersion: "4.12.0"
           environment: "preview"
           packageManager: "pnpm"
           workingDirectory: "apps/api"

@@ -3,7 +3,6 @@ import type { Logger } from "@unprice/logging"
 import type { Cache } from "@unprice/services/cache"
 import type { Metrics } from "@unprice/services/metrics"
 import { ProjectService } from "@unprice/services/projects"
-import { UnPriceProjectError } from "@unprice/services/projects"
 import type { Analytics } from "@unprice/tinybird"
 import type { GetProjectFeaturesRequest, GetProjectFeaturesResponse } from "./interface"
 
@@ -53,7 +52,7 @@ export class ApiProjectService {
     const { err, val } = await this.projectService.getProjectFeatures({
       projectId,
       opts: {
-        skipCache: true,
+        skipCache: false,
       },
     })
 
@@ -62,10 +61,9 @@ export class ApiProjectService {
     }
 
     if (!val) {
-      throw new UnPriceProjectError({
-        code: "PROJECT_NOT_FOUND",
-        message: "project not found",
-      })
+      return {
+        features: [],
+      }
     }
 
     return {

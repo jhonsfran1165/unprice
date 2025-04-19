@@ -49,16 +49,20 @@ export class ProjectService {
     const start = performance.now()
 
     // if not found in DO, then we query the db
-    const features = await this.db.query.features.findMany({
-      with: {
-        project: {
-          columns: {
-            enabled: true,
+    const features = await this.db.query.features
+      .findMany({
+        with: {
+          project: {
+            columns: {
+              enabled: true,
+            },
           },
         },
-      },
-      where: (feature, { eq }) => eq(feature.projectId, projectId),
-    })
+        where: (feature, { eq }) => eq(feature.projectId, projectId),
+      })
+      .catch((err) => {
+        throw err
+      })
 
     const end = performance.now()
 
@@ -70,11 +74,15 @@ export class ProjectService {
       projectId,
     })
 
-    if (!features || features.length === 0) {
+    if (features.length === 0) {
       return null
     }
 
     const project = features[0]!.project ?? false
+
+    if (!project) {
+      return null
+    }
 
     return {
       project,
@@ -99,7 +107,7 @@ export class ProjectService {
           }),
           (err) =>
             new FetchError({
-              message: "unable to query features from db",
+              message: `unable to query features from db, ${err.message}`,
               retry: false,
               context: {
                 error: err.message,
@@ -127,7 +135,7 @@ export class ProjectService {
         )
 
     if (err) {
-      this.logger.error("error getting entitlements", {
+      this.logger.error("error getting project features", {
         error: err.message,
       })
 
@@ -149,6 +157,7 @@ export class ProjectService {
       return Err(
         new UnPriceProjectError({
           code: "PROJECT_NOT_ENABLED",
+          message: "Project is not enabled",
         })
       )
     }

@@ -11,7 +11,7 @@ set -o posix    # more strict failures in subshells
 # set -x          # enable debugging
 
 # add only the variables listed on .dev.vars.example to .dev.vars
-env | grep -f .dev.vars.example > .dev.vars
+# env | grep -f .dev.vars.example > .dev.vars
 
 # Run the development command
 pnpm dev:wrangler

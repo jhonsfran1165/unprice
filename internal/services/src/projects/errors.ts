@@ -1,9 +1,8 @@
 import type { z } from "zod"
 
-import type { deniedReasonSchema, unpriceProjectErrorSchema } from "@unprice/db/validators"
+import type { unpriceProjectErrorSchema } from "@unprice/db/validators"
 import { BaseError } from "@unprice/error"
 
-export type DenyReason = z.infer<typeof deniedReasonSchema>
 export type UnpriceProjectError = z.infer<typeof unpriceProjectErrorSchema>
 
 export class UnPriceProjectError extends BaseError<{ projectId?: string }> {
