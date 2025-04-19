@@ -57,8 +57,6 @@ export class DurableObjectUsagelimiter extends Server {
       environment: env.NODE_ENV,
     })
 
-    console.log("env", env)
-
     // block concurrency while initializing
     this.ctx.blockConcurrencyWhile(async () => {
       // all happen in a try catch to avoid crashing the do

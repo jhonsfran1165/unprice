@@ -167,7 +167,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       primaryDatabaseUrl: c.env.DATABASE_URL,
       read1DatabaseUrl: c.env.DATABASE_READ1_URL,
       read2DatabaseUrl: c.env.DATABASE_READ2_URL,
-      logger: c.env.DRIZZLE_LOG || false,
+      logger: c.env.DRIZZLE_LOG,
     })
 
     endTime(c, "initDb")
