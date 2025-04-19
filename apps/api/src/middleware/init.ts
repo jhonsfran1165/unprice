@@ -25,6 +25,41 @@ import { ApiProjectService } from "~/project"
 let isolateId: string | undefined = undefined
 let isolateCreatedAt: number | undefined = undefined
 
+// At the top of init.ts, create singleton instances
+let db: ReturnType<typeof createConnection>
+let analytics: Analytics
+let cacheService: CacheService
+
+// Initialize core services once
+function initializeGlobalServices(env: HonoEnv["Bindings"]) {
+  if (!db) {
+    db = createConnection({
+      env: env.NODE_ENV,
+      primaryDatabaseUrl: env.DATABASE_URL,
+      read1DatabaseUrl: env.DATABASE_READ1_URL,
+      read2DatabaseUrl: env.DATABASE_READ2_URL,
+      logger: env.DRIZZLE_LOG || false,
+    })
+  }
+
+  if (!analytics) {
+    analytics = new Analytics({
+      emit: env.EMIT_METRICS_LOGS,
+      tinybirdToken: env.TINYBIRD_TOKEN,
+      tinybirdUrl: env.TINYBIRD_URL,
+    })
+  }
+
+  if (!cacheService) {
+    cacheService = new CacheService(
+      {
+        waitUntil: () => {}, // Default no-op, will be overridden per-request
+      },
+      new NoopMetrics() // Default metrics, will be overridden per-request
+    )
+  }
+}
+
 /**
  * Initialize all services.
  *
@@ -32,23 +67,29 @@ let isolateCreatedAt: number | undefined = undefined
  */
 export function init(): MiddlewareHandler<HonoEnv> {
   return async (c, next) => {
+    // Initialize global services if not already done
+    initializeGlobalServices(c.env)
+
     if (!isolateId) {
       isolateId = newId("isolate")
+      isolateCreatedAt = Date.now()
     }
 
     if (!isolateCreatedAt) {
       isolateCreatedAt = Date.now()
     }
 
+    const requestId = newId("request")
+    const requestStartedAt = Date.now()
+    const performanceStart = performance.now()
+
     c.set("isolateId", isolateId)
     c.set("isolateCreatedAt", isolateCreatedAt)
-
-    const requestId = newId("request")
     c.set("requestId", requestId)
+    c.set("requestStartedAt", requestStartedAt)
+    c.set("performanceStart", performanceStart)
 
-    c.set("requestStartedAt", Date.now())
-    c.set("performanceStart", performance.now())
-
+    // Set request ID header
     c.res.headers.set("unprice-request-id", requestId)
 
     // const logger =
@@ -128,29 +169,14 @@ export function init(): MiddlewareHandler<HonoEnv> {
         })
       : new NoopMetrics()
 
-    const cacheService = new CacheService(
-      {
-        waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
-      },
-      metrics
-    )
+    // Update cache service with request-specific context
+    cacheService.updateContext({
+      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      metrics,
+    })
 
     await cacheService.init()
     const cache = cacheService.getCache()
-
-    const db = createConnection({
-      env: c.env.NODE_ENV,
-      primaryDatabaseUrl: c.env.DATABASE_URL,
-      read1DatabaseUrl: c.env.DATABASE_READ1_URL,
-      read2DatabaseUrl: c.env.DATABASE_READ2_URL,
-      logger: c.env.DRIZZLE_LOG || false,
-    })
-
-    const analytics = new Analytics({
-      emit: c.env.EMIT_METRICS_LOGS,
-      tinybirdToken: c.env.TINYBIRD_TOKEN,
-      tinybirdUrl: c.env.TINYBIRD_URL,
-    })
 
     const customer = new CustomerService({
       logger,
@@ -204,6 +230,15 @@ export function init(): MiddlewareHandler<HonoEnv> {
       customer,
     })
 
-    await next()
+    try {
+      await next()
+    } finally {
+      // Log request duration
+      const duration = performance.now() - c.get("performanceStart")
+      metrics.emit({
+        metric: "metric.init",
+        duration,
+      })
+    }
   }
 }

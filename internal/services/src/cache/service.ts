@@ -14,14 +14,17 @@ export type Cache = C<CacheNamespaces>
 
 export class CacheService {
   private cache: Cache | null = null
-  private readonly context: Context
-  private readonly metrics: Metrics
+  private context: Context
+  private metrics: Metrics
 
   constructor(context: Context, metrics: Metrics) {
     this.context = context
     this.metrics = metrics
   }
 
+  /**
+   * Initialize the cache service
+   */
   async init(): Promise<void> {
     if (this.cache) return
 
@@ -99,6 +102,22 @@ export class CacheService {
     })
   }
 
+  updateContext({
+    waitUntil,
+    metrics,
+  }: {
+    waitUntil: Context["waitUntil"]
+    metrics: Metrics
+  }) {
+    this.context = {
+      waitUntil,
+    }
+    this.metrics = metrics
+  }
+
+  /**
+   * Get the cache
+   */
   getCache(): Cache {
     if (!this.cache) {
       throw new Error("Cache not initialized. Call init() first.")

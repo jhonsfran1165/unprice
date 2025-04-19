@@ -31,6 +31,10 @@ export const metricSchema = z.discriminatedUnion("metric", [
     size: z.number(),
   }),
   z.object({
+    metric: z.literal("metric.init"),
+    duration: z.number(),
+  }),
+  z.object({
     metric: z.literal("metric.feature.verification"),
     valid: z.boolean(),
     code: z.string(),
