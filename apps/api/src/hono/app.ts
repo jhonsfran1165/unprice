@@ -1,6 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi"
 import { apiReference } from "@scalar/hono-api-reference"
 import type { Context as GenericContext } from "hono"
+import { prettyJSON } from "hono/pretty-json"
 import { handleError, handleZodError } from "~/errors"
 import type { HonoEnv } from "~/hono/env"
 
@@ -9,6 +10,7 @@ export function newApp() {
     defaultHook: handleZodError,
   })
 
+  app.use(prettyJSON())
   app.onError(handleError)
   app.use("*", (c, next) => {
     c.set(

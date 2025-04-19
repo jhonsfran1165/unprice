@@ -247,8 +247,40 @@ export class DurableObjectUsagelimiter extends Server {
     const performanceStart = data.performanceStart ?? 0
 
     if (!valid) {
-      // insert verification
-      await this.insertVerification(
+      // insert async verification
+      this.ctx.waitUntil(
+        this.insertVerification(
+          {
+            entitlementId: entitlement.entitlementId,
+            customerId: data.customerId,
+            projectId: data.projectId,
+            featureSlug: data.featureSlug,
+            requestId: data.requestId,
+            metadata: JSON.stringify(data.metadata),
+            featurePlanVersionId: entitlement.featurePlanVersionId,
+            subscriptionItemId: entitlement.subscriptionItemId,
+            subscriptionPhaseId: entitlement.subscriptionPhaseId,
+            subscriptionId: entitlement.subscriptionId,
+          },
+          data,
+          performance.now() - performanceStart,
+          deniedReason
+        )
+      )
+
+      return {
+        success: false,
+        message,
+        deniedReason,
+      }
+    }
+
+    // at this point we basically validate the user has access to the feature
+    const result = this.checkLimit(entitlement)
+
+    // insert verification
+    this.ctx.waitUntil(
+      this.insertVerification(
         {
           entitlementId: entitlement.entitlementId,
           customerId: data.customerId,
@@ -263,36 +295,8 @@ export class DurableObjectUsagelimiter extends Server {
         },
         data,
         performance.now() - performanceStart,
-        deniedReason
+        result.deniedReason
       )
-
-      return {
-        success: false,
-        message,
-        deniedReason,
-      }
-    }
-
-    // at this point we basically validate the user has access to the feature
-    const result = this.checkLimit(entitlement)
-
-    // insert verification
-    await this.insertVerification(
-      {
-        entitlementId: entitlement.entitlementId,
-        customerId: data.customerId,
-        projectId: data.projectId,
-        featureSlug: data.featureSlug,
-        requestId: data.requestId,
-        metadata: JSON.stringify(data.metadata),
-        featurePlanVersionId: entitlement.featurePlanVersionId,
-        subscriptionItemId: entitlement.subscriptionItemId,
-        subscriptionPhaseId: entitlement.subscriptionPhaseId,
-        subscriptionId: entitlement.subscriptionId,
-      },
-      data,
-      performance.now() - performanceStart,
-      result.deniedReason
     )
 
     return {

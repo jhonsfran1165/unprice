@@ -34,15 +34,6 @@ export const metricSchema = z.discriminatedUnion("metric", [
     metric: z.literal("metric.init"),
     duration: z.object({
       total: z.number(),
-      database: z.number(),
-      cache: z.number(),
-      logger: z.number(),
-      analytics: z.number(),
-      entitlement: z.number(),
-      project: z.number(),
-      apikey: z.number(),
-      customer: z.number(),
-      metrics: z.number(),
     }),
   }),
   z.object({

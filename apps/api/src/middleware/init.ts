@@ -32,19 +32,6 @@ let isolateCreatedAt: number | undefined = undefined
  */
 export function init(): MiddlewareHandler<HonoEnv> {
   return async (c, next) => {
-    const initStart = performance.now()
-    const timings = {
-      database: 0,
-      cache: 0,
-      logger: 0,
-      analytics: 0,
-      entitlement: 0,
-      project: 0,
-      apikey: 0,
-      customer: 0,
-      metrics: 0,
-    }
-
     if (!isolateId) {
       isolateId = newId("isolate")
       isolateCreatedAt = Date.now()
@@ -106,8 +93,6 @@ export function init(): MiddlewareHandler<HonoEnv> {
     //         },
     //       })
 
-    // Logger timing
-    const loggerStart = performance.now()
     // TODO: remove this once we have a logger that supports logpush
     // https://baselime.io/docs/sending-data/platforms/cloudflare/logpush/
     const logger =
@@ -137,9 +122,6 @@ export function init(): MiddlewareHandler<HonoEnv> {
             },
           })
 
-    timings.logger = performance.now() - loggerStart
-
-    const metricsStart = performance.now()
     const metrics: Metrics = c.env.EMIT_METRICS_LOGS
       ? new LogdrainMetrics({
           requestId,
@@ -148,10 +130,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
           application: "api",
         })
       : new NoopMetrics()
-    timings.metrics = performance.now() - metricsStart
 
-    // Cache timing
-    const cacheStart = performance.now()
     const cacheService = new CacheService(
       {
         waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
@@ -161,9 +140,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
 
     await cacheService.init()
     const cache = cacheService.getCache()
-    timings.cache = performance.now() - cacheStart
 
-    const dbStart = performance.now()
     const db = createConnection({
       env: c.env.NODE_ENV,
       primaryDatabaseUrl: c.env.DATABASE_URL,
@@ -171,18 +148,13 @@ export function init(): MiddlewareHandler<HonoEnv> {
       read2DatabaseUrl: c.env.DATABASE_READ2_URL,
       logger: c.env.DRIZZLE_LOG || false,
     })
-    timings.database = performance.now() - dbStart
 
-    const analyticsStart = performance.now()
     const analytics = new Analytics({
       emit: c.env.EMIT_METRICS_LOGS,
       tinybirdToken: c.env.TINYBIRD_TOKEN,
       tinybirdUrl: c.env.TINYBIRD_URL,
     })
 
-    timings.analytics = performance.now() - analyticsStart
-
-    const customerStart = performance.now()
     const customer = new CustomerService({
       logger,
       analytics,
@@ -192,9 +164,6 @@ export function init(): MiddlewareHandler<HonoEnv> {
       db,
     })
 
-    timings.customer = performance.now() - customerStart
-
-    const entitlementStart = performance.now()
     const entitlement = new EntitlementService({
       namespace: c.env.usagelimit,
       requestId,
@@ -207,9 +176,6 @@ export function init(): MiddlewareHandler<HonoEnv> {
       customer,
     })
 
-    timings.entitlement = performance.now() - entitlementStart
-
-    const projectStart = performance.now()
     const project = new ApiProjectService({
       cache,
       analytics,
@@ -220,9 +186,6 @@ export function init(): MiddlewareHandler<HonoEnv> {
       requestId,
     })
 
-    timings.project = performance.now() - projectStart
-
-    const apikeyStart = performance.now()
     const apikey = new ApiKeysService({
       cache,
       analytics,
@@ -230,8 +193,6 @@ export function init(): MiddlewareHandler<HonoEnv> {
       metrics,
       db,
     })
-
-    timings.apikey = performance.now() - apikeyStart
 
     c.set("services", {
       version: "1.0.0",
@@ -246,16 +207,13 @@ export function init(): MiddlewareHandler<HonoEnv> {
       customer,
     })
 
-    try {
-      await next()
-    } finally {
-      metrics.emit({
-        metric: "metric.init",
-        duration: {
-          total: performance.now() - initStart,
-          ...timings,
-        },
-      })
-    }
+    metrics.emit({
+      metric: "metric.init",
+      duration: {
+        total: performance.now() - performanceStart,
+      },
+    })
+
+    await next()
   }
 }

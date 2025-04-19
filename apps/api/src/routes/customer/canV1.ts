@@ -58,7 +58,16 @@ export const registerCanV1 = (app: App) =>
     const requestId = c.get("requestId")
     const performanceStart = c.get("performanceStart")
 
-    const metricsStart = performance.now()
+    metrics.emit({
+      metric: "metric.http.request",
+      path: "/v1/customer/performanceStart",
+      method: "POST",
+      status: HttpStatusCodes.OK,
+      duration: performance.now() - performanceStart,
+      service: "api",
+    })
+
+    const keyStart = performance.now()
     // validate the request
     const key = await keyAuth(c)
 
@@ -71,13 +80,14 @@ export const registerCanV1 = (app: App) =>
 
     metrics.emit({
       metric: "metric.http.request",
-      path: "/v1/customer/can1",
+      path: "/v1/customer/keyStart",
       method: "POST",
       status: HttpStatusCodes.OK,
-      duration: performance.now() - metricsStart,
+      duration: performance.now() - keyStart,
       service: "api",
     })
 
+    const entitlementStart = performance.now()
     // validate usage from db
     const result = await entitlement.can({
       customerId,
@@ -91,10 +101,10 @@ export const registerCanV1 = (app: App) =>
 
     metrics.emit({
       metric: "metric.http.request",
-      path: "/v1/customer/can2",
+      path: "/v1/customer/entitlementStart",
       method: "POST",
       status: HttpStatusCodes.OK,
-      duration: performance.now() - metricsStart,
+      duration: performance.now() - entitlementStart,
       service: "api",
     })
 
