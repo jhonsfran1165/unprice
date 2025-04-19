@@ -204,9 +204,6 @@ export function init(): MiddlewareHandler<HonoEnv> {
       customer,
     })
 
-    // flush the logger after the request is processed
-    c.executionCtx.waitUntil(logger.flush())
-
     await next()
   }
 }

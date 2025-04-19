@@ -1,4 +1,5 @@
 import { Pool, neonConfig } from "@neondatabase/serverless"
+import { DefaultLogger } from "drizzle-orm"
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
 import { withReplicas } from "drizzle-orm/pg-core"
 import ws from "ws"
@@ -32,13 +33,15 @@ export function createConnection(opts: ConnectionDatabaseOptions) {
     keepAlive: true,
   }
 
+  const logger = opts.logger ? new DefaultLogger() : false
+
   const primary = drizzleNeon(
     new Pool(poolConfig).on("error", (err) => {
       console.error("Database error:", err)
     }),
     {
       schema: schema,
-      logger: opts.logger,
+      logger,
     }
   )
 
@@ -48,7 +51,7 @@ export function createConnection(opts: ConnectionDatabaseOptions) {
     }),
     {
       schema: schema,
-      logger: opts.logger,
+      logger,
     }
   )
 
@@ -58,7 +61,7 @@ export function createConnection(opts: ConnectionDatabaseOptions) {
     }),
     {
       schema: schema,
-      logger: opts.logger,
+      logger,
     }
   )
 
