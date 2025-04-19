@@ -594,6 +594,8 @@ export class DurableObjectUsagelimiter extends Server {
             featurePlanVersionId: event.featurePlanVersionId,
           }))
 
+          console.log("transformedEvents", transformedEvents)
+
           await this.analytics
             .ingestFeaturesVerification(transformedEvents)
             .catch((e) => {
