@@ -153,14 +153,20 @@ export class DurableObjectUsagelimiter extends Server {
       : null
 
     if (validUntil && now > validUntil) {
-      return { valid: false, message: "entitlement expired", deniedReason: "ENTITLEMENT_EXPIRED" }
+      return {
+        valid: false,
+        message: "entitlement expired",
+        deniedReason: "ENTITLEMENT_EXPIRED",
+        entitlement,
+      }
     }
 
-    if (Number(entitlement.usage) > Number(entitlement.limit)) {
+    if (entitlement.limit && Number(entitlement.usage) > Number(entitlement.limit)) {
       return {
         valid: false,
         message: "entitlement limit exceeded",
         deniedReason: "LIMIT_EXCEEDED",
+        entitlement,
       }
     }
 
@@ -472,7 +478,7 @@ export class DurableObjectUsagelimiter extends Server {
     limit?: number
   }> {
     const threshold = 80 // notify when the usage is 80% or more
-    const limit = Number(entitlement.limit)
+    const limit = entitlement.limit ? Number(entitlement.limit) : undefined
 
     let message = ""
     let notifyUsage = false
