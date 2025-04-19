@@ -70,7 +70,6 @@ jobs:
             TINYBIRD_TOKEN
             TINYBIRD_URL
             AUTH_SECRET
-            COOKIE_ENCRYPTION_KEY
             CLOUDFLARE_ZONE_ID
             DATABASE_URL
             DATABASE_READ1_URL
@@ -83,17 +82,18 @@ jobs:
             EMIT_METRICS_LOGS
             DRIZZLE_LOG
             VERCEL_ENV
+            EMIT_ANALYTICS
         env:
           CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
           TINYBIRD_TOKEN: ${{ env.TINYBIRD_TOKEN }}
           TINYBIRD_URL: ${{ env.TINYBIRD_URL }}
-          COOKIE_ENCRYPTION_KEY: ${{ env.COOKIE_ENCRYPTION_KEY }}
           AUTH_SECRET: ${{ env.AUTH_SECRET }}
           # we are passing the preview database url to the deploy action
           DATABASE_URL: ${{ steps.db-url.outputs.out }}
           EMIT_METRICS_LOGS: ${{ env.EMIT_METRICS_LOGS }}
           BASELIME_APIKEY: ${{ env.BASELIME_APIKEY }}
+          EMIT_ANALYTICS: ${{ env.EMIT_ANALYTICS }}
           VERSION: ${{ env.VERSION }}
           NODE_ENV: ${{ env.NODE_ENV }}
           DRIZZLE_LOG: ${{ env.DRIZZLE_LOG }}

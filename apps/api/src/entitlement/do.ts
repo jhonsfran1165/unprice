@@ -46,17 +46,18 @@ export class DurableObjectUsagelimiter extends Server {
     this.db = drizzle(ctx.storage, { logger: false })
 
     this.analytics = new Analytics({
-      emit: env.EMIT_METRICS_LOGS,
+      emit: env.EMIT_ANALYTICS,
       tinybirdToken: env.TINYBIRD_TOKEN,
       tinybirdUrl: env.TINYBIRD_URL,
     })
 
-    // TODO: set a proper console log here
     this.logger = new ConsoleLogger({
       requestId: this.ctx.id.toString(),
       application: "usagelimiter",
       environment: env.NODE_ENV,
     })
+
+    console.log("env", env)
 
     // block concurrency while initializing
     this.ctx.blockConcurrencyWhile(async () => {
@@ -598,8 +599,8 @@ export class DurableObjectUsagelimiter extends Server {
           await this.analytics
             .ingestFeaturesVerification(transformedEvents)
             .catch((e) => {
-              this.logger.error(`Failed to send verifications to Tinybird from do ${e.message}`, {
-                error: e.message,
+              this.logger.error(`Failed in ingestFeaturesVerification from do ${e.message}`, {
+                error: JSON.stringify(e),
               })
 
               throw e
@@ -641,7 +642,7 @@ export class DurableObjectUsagelimiter extends Server {
           this.logger.error(
             `Failed to send verifications to Tinybird from do ${error instanceof Error ? error.message : "unknown error"}`,
             {
-              error: error instanceof Error ? error.message : "unknown error",
+              error: error instanceof Error ? JSON.stringify(error) : "unknown error",
             }
           )
           // Don't delete events if sending failed

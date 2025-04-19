@@ -1,3 +1,5 @@
+TOKEN "web-apps" APPEND
+
 DESCRIPTION >
     This table stores features usage metrics per customer, entitlement, project and date, optimized for time-series analytics with deduplication support
 
