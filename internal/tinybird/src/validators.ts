@@ -40,6 +40,7 @@ export const nullableJsonToString = anyObject.nullable().transform((s) => {
   }
 })
 
+export const stringToUInt32 = z.union([z.string(), z.number()]).transform((s) => Number(s))
 export const booleanToUInt8 = z.boolean().transform((b) => (b ? 1 : 0))
 
 export const featureVerificationSchemaV1 = z.object({
@@ -79,7 +80,7 @@ export const featureUsageSchemaV1 = z.object({
     .describe("timestamp of when this usage record should be billed"),
   projectId: z.string(),
   featurePlanVersionId: z.string(),
-  usage: z.number(),
+  usage: stringToUInt32,
   createdAt: z
     .number()
     .default(Date.now())
