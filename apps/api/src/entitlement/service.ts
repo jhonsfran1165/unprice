@@ -212,8 +212,15 @@ export class EntitlementService {
       return { success: false, message: result.message }
     }
 
+    const keys = result.slugs?.map((slug) => `${customerId}:${slug}`)
+
     // delete the cache
-    this.waitUntil(Promise.all([this.cache.customerSubscription.remove(customerId)]))
+    this.waitUntil(
+      Promise.all([
+        this.cache.customerEntitlement.remove(keys ?? []),
+        this.cache.customerSubscription.remove(customerId),
+      ])
+    )
 
     return { success: true, message: "customer object deleted" }
   }

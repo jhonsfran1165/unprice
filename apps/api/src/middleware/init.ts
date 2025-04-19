@@ -25,41 +25,6 @@ import { ApiProjectService } from "~/project"
 let isolateId: string | undefined = undefined
 let isolateCreatedAt: number | undefined = undefined
 
-// At the top of init.ts, create singleton instances
-let db: ReturnType<typeof createConnection>
-let analytics: Analytics
-let cacheService: CacheService
-
-// Initialize core services once
-function initializeGlobalServices(env: HonoEnv["Bindings"]) {
-  if (!db) {
-    db = createConnection({
-      env: env.NODE_ENV,
-      primaryDatabaseUrl: env.DATABASE_URL,
-      read1DatabaseUrl: env.DATABASE_READ1_URL,
-      read2DatabaseUrl: env.DATABASE_READ2_URL,
-      logger: env.DRIZZLE_LOG || false,
-    })
-  }
-
-  if (!analytics) {
-    analytics = new Analytics({
-      emit: env.EMIT_METRICS_LOGS,
-      tinybirdToken: env.TINYBIRD_TOKEN,
-      tinybirdUrl: env.TINYBIRD_URL,
-    })
-  }
-
-  if (!cacheService) {
-    cacheService = new CacheService(
-      {
-        waitUntil: () => {}, // Default no-op, will be overridden per-request
-      },
-      new NoopMetrics() // Default metrics, will be overridden per-request
-    )
-  }
-}
-
 /**
  * Initialize all services.
  *
@@ -67,9 +32,6 @@ function initializeGlobalServices(env: HonoEnv["Bindings"]) {
  */
 export function init(): MiddlewareHandler<HonoEnv> {
   return async (c, next) => {
-    // Initialize global services if not already done
-    initializeGlobalServices(c.env)
-
     if (!isolateId) {
       isolateId = newId("isolate")
       isolateCreatedAt = Date.now()
@@ -160,6 +122,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
             },
           })
 
+    const loggerTime = performance.now() - performanceStart
+
     const metrics: Metrics = c.env.EMIT_METRICS_LOGS
       ? new LogdrainMetrics({
           requestId,
@@ -169,14 +133,36 @@ export function init(): MiddlewareHandler<HonoEnv> {
         })
       : new NoopMetrics()
 
-    // Update cache service with request-specific context
-    cacheService.updateContext({
-      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
-      metrics,
+    const metricsTime = performance.now() - loggerTime
+    const cacheService = new CacheService(
+      {
+        waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      },
+      metrics
+    )
+
+    const cacheTime = performance.now() - metricsTime
+    await cacheService.init()
+    const cacheInitTime = performance.now() - cacheTime
+    const cache = cacheService.getCache()
+
+    const db = createConnection({
+      env: c.env.NODE_ENV,
+      primaryDatabaseUrl: c.env.DATABASE_URL,
+      read1DatabaseUrl: c.env.DATABASE_READ1_URL,
+      read2DatabaseUrl: c.env.DATABASE_READ2_URL,
+      logger: c.env.DRIZZLE_LOG || false,
     })
 
-    await cacheService.init()
-    const cache = cacheService.getCache()
+    const dbTime = performance.now() - cacheInitTime
+
+    const analytics = new Analytics({
+      emit: c.env.EMIT_METRICS_LOGS,
+      tinybirdToken: c.env.TINYBIRD_TOKEN,
+      tinybirdUrl: c.env.TINYBIRD_URL,
+    })
+
+    const analyticsTime = performance.now() - dbTime
 
     const customer = new CustomerService({
       logger,
@@ -186,6 +172,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       metrics,
       db,
     })
+
+    const customerTime = performance.now() - analyticsTime
 
     const entitlement = new EntitlementService({
       namespace: c.env.usagelimit,
@@ -199,6 +187,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       customer,
     })
 
+    const entitlementTime = performance.now() - customerTime
+
     const project = new ApiProjectService({
       cache,
       analytics,
@@ -209,6 +199,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       requestId,
     })
 
+    const projectInitTime = performance.now() - entitlementTime
+
     const apikey = new ApiKeysService({
       cache,
       analytics,
@@ -216,6 +208,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       metrics,
       db,
     })
+
+    const apikeyInitTime = performance.now() - projectInitTime
 
     c.set("services", {
       version: "1.0.0",
@@ -233,11 +227,19 @@ export function init(): MiddlewareHandler<HonoEnv> {
     try {
       await next()
     } finally {
-      // Log request duration
-      const duration = performance.now() - c.get("performanceStart")
       metrics.emit({
         metric: "metric.init",
-        duration,
+        duration: {
+          database: dbTime,
+          cacheTime: cacheInitTime,
+          cache: cacheTime,
+          logger: loggerTime,
+          analytics: analyticsTime,
+          entitlement: entitlementTime,
+          project: projectInitTime,
+          apikey: apikeyInitTime,
+          customer: customerTime,
+        },
       })
     }
   }

@@ -32,7 +32,17 @@ export const metricSchema = z.discriminatedUnion("metric", [
   }),
   z.object({
     metric: z.literal("metric.init"),
-    duration: z.number(),
+    duration: z.object({
+      database: z.number(),
+      cacheTime: z.number(),
+      cache: z.number(),
+      logger: z.number(),
+      analytics: z.number(),
+      entitlement: z.number(),
+      project: z.number(),
+      apikey: z.number(),
+      customer: z.number(),
+    }),
   }),
   z.object({
     metric: z.literal("metric.feature.verification"),
