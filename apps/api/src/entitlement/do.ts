@@ -588,7 +588,7 @@ export class DurableObjectUsagelimiter extends Server {
             subscriptionItemId: event.subscriptionItemId,
             timestamp: event.timestamp,
             status: event.deniedReason,
-            metadata: event.metadata ? JSON.parse(event.metadata) : null,
+            metadata: event.metadata ?? undefined,
             latency: event.latency ? Number(event.latency) : 0,
             requestId: event.requestId,
             featurePlanVersionId: event.featurePlanVersionId,
