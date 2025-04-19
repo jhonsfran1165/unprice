@@ -70,7 +70,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
     //         namespace: "unprice-api",
     //         dataset: "unprice-api",
     //         service: "api", // default service name
-    //         flushAfterMs: 1000, // flush after 1 secs
+    //         flushAfterMs: 5000, // flush after 5 secs
     //         ctx: {
     //           waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
     //         },
@@ -143,7 +143,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       primaryDatabaseUrl: c.env.DATABASE_URL,
       read1DatabaseUrl: c.env.DATABASE_READ1_URL,
       read2DatabaseUrl: c.env.DATABASE_READ2_URL,
-      logger: c.env.DRIZZLE_LOG,
+      logger: c.env.DRIZZLE_LOG || false,
     })
 
     const analytics = new Analytics({
@@ -203,6 +203,9 @@ export function init(): MiddlewareHandler<HonoEnv> {
       db,
       customer,
     })
+
+    // flush the logger after the request is processed
+    c.executionCtx.waitUntil(logger.flush())
 
     await next()
   }

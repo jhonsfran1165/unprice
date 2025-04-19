@@ -30,7 +30,7 @@
     "@unprice/metrics": "workspace:^",
     "@unprice/services": "workspace:^",
     "@unprice/tinybird": "workspace:^",
-    "drizzle-orm": "^0.40.0",
+    "drizzle-orm": "^0.42.0",
     "hono": "^4.7.4",
     "hono-party": "^0.0.6",
     "partyserver": "^0.0.65",

@@ -12,7 +12,7 @@
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
     "@unprice/db": "^0.1.0",
-    "drizzle-orm": "^0.40.0",
+    "drizzle-orm": "^0.42.0",
     "ws": "^8.17.1"
   },
   "devDependencies": {

@@ -38,7 +38,7 @@ export function createConnection(opts: ConnectionDatabaseOptions) {
     }),
     {
       schema: schema,
-      logger: opts.logger || false,
+      logger: opts.logger,
     }
   )
 
@@ -48,7 +48,7 @@ export function createConnection(opts: ConnectionDatabaseOptions) {
     }),
     {
       schema: schema,
-      logger: opts.logger || false,
+      logger: opts.logger,
     }
   )
 
@@ -58,7 +58,7 @@ export function createConnection(opts: ConnectionDatabaseOptions) {
     }),
     {
       schema: schema,
-      logger: opts.logger || false,
+      logger: opts.logger,
     }
   )
 

@@ -36,6 +36,9 @@ export class EntitlementService {
   private readonly waitUntil: (promise: Promise<any>) => void
   private readonly customerService: CustomerService
 
+  // TODO: add in memory cache for overused entitlements
+  // https://github.com/unkeyed/unkey/blob/main/apps/api/src/pkg/ratelimit/do_client.ts#L31
+
   constructor(opts: {
     namespace: DurableObjectNamespace<DurableObjectUsagelimiter>
     requestId: string
@@ -168,7 +171,9 @@ export class EntitlementService {
     projectId: string
   ): Promise<Result<SubcriptionCache, FetchError | UnPriceCustomerError>> {
     const { err: subscriptionErr, val: subscription } =
-      await this.customerService.getActiveSubscription(customerId, projectId)
+      await this.customerService.getActiveSubscription(customerId, projectId, {
+        skipCache: false,
+      })
 
     if (subscriptionErr) {
       return Err(subscriptionErr)
@@ -207,15 +212,8 @@ export class EntitlementService {
       return { success: false, message: result.message }
     }
 
-    const keys = result.slugs?.map((slug) => `${customerId}:${slug}`)
-
     // delete the cache
-    this.waitUntil(
-      Promise.all([
-        this.cache.customerEntitlement.remove(keys ?? []),
-        this.cache.customerSubscription.remove(customerId),
-      ])
-    )
+    this.waitUntil(Promise.all([this.cache.customerSubscription.remove(customerId)]))
 
     return { success: true, message: "customer object deleted" }
   }
@@ -234,18 +232,12 @@ export class EntitlementService {
       }
     }
 
-    // Fast path: read from DO
-    const { err: entitlementErr, val: entitlement } = await this.getActiveEntitlementFromDO(
-      data.customerId,
-      data.featureSlug
-    )
+    // after this point we can report the verification event
+    const durableObject = this.getStub(this.getDurableObjectCustomerId(data.customerId))
 
-    if (entitlementErr) {
-      return { success: false, message: entitlementErr.message }
-    }
+    const result = await durableObject.can(data)
 
-    // not found in DO, we need to revalidate the entitlement
-    if (!entitlement) {
+    if (result.deniedReason === "ENTITLEMENT_NOT_FOUND") {
       // revalidate the entitlement
       const { err: revalidateErr } = await this.revalidateEntitlement(
         data.customerId,
@@ -261,12 +253,10 @@ export class EntitlementService {
           deniedReason: "ENTITLEMENT_NOT_FOUND",
         }
       }
+
+      // try again
+      return await durableObject.can(data)
     }
-
-    // after this point we can report the verification event
-    const durableObject = this.getStub(this.getDurableObjectCustomerId(data.customerId))
-
-    const result = await durableObject.can(data)
 
     return result
   }
@@ -296,37 +286,42 @@ export class EntitlementService {
         return sent
       }
 
-      // Fast path: get the entitlement from the cache
-      const { err: entitlementErr, val } = await this.getActiveEntitlementFromDO(
-        data.customerId,
-        data.featureSlug
-      )
+      const durableObject = this.getStub(this.getDurableObjectCustomerId(data.customerId))
+      const result = await durableObject.reportUsage(data)
 
-      let entitlement = val
-      if (entitlementErr) {
-        return { success: false, message: entitlementErr.message }
-      }
-
-      if (!entitlement) {
+      if (result.message === "ENTITLEMENT_NOT_FOUND") {
         // revalidate the entitlement
-        const { err: revalidateErr, val: revalidatedEntitlement } =
-          await this.revalidateEntitlement(
-            data.customerId,
-            data.featureSlug,
-            data.projectId,
-            data.now
-          )
+        const { err: revalidateErr } = await this.revalidateEntitlement(
+          data.customerId,
+          data.featureSlug,
+          data.projectId,
+          data.now
+        )
 
         if (revalidateErr) {
           return { success: false, message: revalidateErr.message }
         }
 
-        entitlement = revalidatedEntitlement
-      }
+        // try again
+        const result = await durableObject.reportUsage(data)
 
-      // Report usage path: send the usage to the DO
-      const d = this.getStub(this.getDurableObjectCustomerId(data.customerId))
-      const result = await d.reportUsage(data)
+        const response = {
+          success: result.success,
+          message: result.message,
+          limit: Number(result.limit),
+          usage: Number(result.usage),
+          notifyUsage: result.notifyUsage,
+        }
+
+        this.waitUntil(
+          // cache the result for the next time
+          // update the cache with the new usage so we can check limit in the next request
+          // without calling the DO again
+          Promise.all([this.cache.idempotentRequestUsageByHash.set(idempotentKey, response)])
+        )
+
+        return response
+      }
 
       const response = {
         success: result.success,
@@ -340,14 +335,7 @@ export class EntitlementService {
         // cache the result for the next time
         // update the cache with the new usage so we can check limit in the next request
         // without calling the DO again
-        Promise.all([
-          this.cache.idempotentRequestUsageByHash.set(idempotentKey, response),
-          entitlement &&
-            this.cache.customerEntitlement.set(`${data.customerId}:${data.featureSlug}`, {
-              ...entitlement,
-              usage: result.usage?.toString() ?? "0",
-            }),
-        ])
+        Promise.all([this.cache.idempotentRequestUsageByHash.set(idempotentKey, response)])
       )
 
       return response

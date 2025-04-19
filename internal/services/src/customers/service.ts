@@ -145,7 +145,10 @@ export class CustomerService {
         ),
       })
       .catch((e) => {
-        console.error("error getting active subscription data", e)
+        this.logger.error("error getting active subscription data", {
+          error: e.message,
+        })
+
         throw e
       })
 
@@ -181,7 +184,7 @@ export class CustomerService {
           }),
           (err) =>
             new FetchError({
-              message: "unable to query db for active subscription",
+              message: `unable to query db for active subscription, ${err.message}`,
               retry: false,
               context: {
                 error: err.message,
@@ -210,7 +213,7 @@ export class CustomerService {
         )
 
     if (err) {
-      this.logger.error("error getting customer", {
+      this.logger.error("error getting customer subscription", {
         error: err.message,
       })
 

@@ -87,8 +87,8 @@ importers:
         specifier: workspace:^
         version: link:../../internal/tinybird
       drizzle-orm:
-        specifier: ^0.40.0
-        version: 0.40.0(@cloudflare/workers-types@4.20250320.0)
+        specifier: ^0.42.0
+        version: 0.42.0(@cloudflare/workers-types@4.20250320.0)
       hono:
         specifier: ^4.7.4
         version: 4.7.4
@@ -500,11 +500,11 @@ importers:
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
       drizzle-orm:
-        specifier: ^0.40.0
-        version: 0.40.0(@neondatabase/serverless@0.10.4)
+        specifier: ^0.42.0
+        version: 0.42.0(@neondatabase/serverless@0.10.4)
       drizzle-zod:
         specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.40.0)(zod@3.24.2)
+        version: 0.5.1(drizzle-orm@0.42.0)(zod@3.24.2)
       random-word-slugs:
         specifier: ^0.1.7
         version: 0.1.7
@@ -1107,8 +1107,8 @@ importers:
         specifier: ^0.1.0
         version: link:../../internal/db
       drizzle-orm:
-        specifier: ^0.40.0
-        version: 0.40.0(@neondatabase/serverless@0.10.4)
+        specifier: ^0.42.0
+        version: 0.42.0(@neondatabase/serverless@0.10.4)
       ws:
         specifier: ^8.17.1
         version: 8.18.1
@@ -12812,8 +12812,8 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.40.0(@cloudflare/workers-types@4.20250320.0):
-    resolution: {integrity: sha512-7ptk/HQiMSrEZHnAsSlBESXWj52VwgMmyTEfoNmpNN2ZXpcz13LwHfXTIghsAEud7Z5UJhDOp8U07ujcqme7wg==}
+  /drizzle-orm@0.42.0(@cloudflare/workers-types@4.20250320.0):
+    resolution: {integrity: sha512-pS8nNJm2kBNZwrOjTHJfdKkaU+KuUQmV/vk5D57NojDq4FG+0uAYGMulXtYT///HfgsMF0hnFFvu1ezI3OwOkg==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
@@ -12823,7 +12823,7 @@ packages:
       '@neondatabase/serverless': '>=0.10.0'
       '@op-engineering/op-sqlite': '>=2'
       '@opentelemetry/api': ^1.4.1
-      '@planetscale/database': '>=1'
+      '@planetscale/database': '>=1.13'
       '@prisma/client': '*'
       '@tidbcloud/serverless': '*'
       '@types/better-sqlite3': '*'
@@ -12904,8 +12904,8 @@ packages:
       '@cloudflare/workers-types': 4.20250320.0
     dev: false
 
-  /drizzle-orm@0.40.0(@neondatabase/serverless@0.10.4):
-    resolution: {integrity: sha512-7ptk/HQiMSrEZHnAsSlBESXWj52VwgMmyTEfoNmpNN2ZXpcz13LwHfXTIghsAEud7Z5UJhDOp8U07ujcqme7wg==}
+  /drizzle-orm@0.42.0(@neondatabase/serverless@0.10.4):
+    resolution: {integrity: sha512-pS8nNJm2kBNZwrOjTHJfdKkaU+KuUQmV/vk5D57NojDq4FG+0uAYGMulXtYT///HfgsMF0hnFFvu1ezI3OwOkg==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
@@ -12915,7 +12915,7 @@ packages:
       '@neondatabase/serverless': '>=0.10.0'
       '@op-engineering/op-sqlite': '>=2'
       '@opentelemetry/api': ^1.4.1
-      '@planetscale/database': '>=1'
+      '@planetscale/database': '>=1.13'
       '@prisma/client': '*'
       '@tidbcloud/serverless': '*'
       '@types/better-sqlite3': '*'
@@ -12996,13 +12996,13 @@ packages:
       '@neondatabase/serverless': 0.10.4
     dev: false
 
-  /drizzle-zod@0.5.1(drizzle-orm@0.40.0)(zod@3.24.2):
+  /drizzle-zod@0.5.1(drizzle-orm@0.42.0)(zod@3.24.2):
     resolution: {integrity: sha512-C/8bvzUH/zSnVfwdSibOgFjLhtDtbKYmkbPbUCq46QZyZCH6kODIMSOgZ8R7rVjoI+tCj3k06MRJMDqsIeoS4A==}
     peerDependencies:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.40.0(@neondatabase/serverless@0.10.4)
+      drizzle-orm: 0.42.0(@neondatabase/serverless@0.10.4)
       zod: 3.24.2
     dev: false
 
