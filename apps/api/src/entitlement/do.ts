@@ -580,7 +580,7 @@ export class DurableObjectUsagelimiter extends Server {
         try {
           const transformedEvents = verificationEvents.map((event) => ({
             featureSlug: event.featureSlug,
-            entitlementId: event.entitlementId.toString(),
+            entitlementId: event.entitlementId,
             customerId: event.customerId,
             projectId: event.projectId,
             subscriptionId: event.subscriptionId,
@@ -588,8 +588,7 @@ export class DurableObjectUsagelimiter extends Server {
             subscriptionItemId: event.subscriptionItemId,
             timestamp: event.timestamp,
             status: event.deniedReason,
-            // TODO: fix this
-            // metadata: event.metadata ?? undefined,
+            metadata: event.metadata,
             latency: event.latency ? Number(event.latency) : 0,
             requestId: event.requestId,
             featurePlanVersionId: event.featurePlanVersionId,
@@ -686,14 +685,7 @@ export class DurableObjectUsagelimiter extends Server {
       }
 
       const deduplicatedEvents = Array.from(uniqueEvents.values())
-      const ids = deduplicatedEvents.map((e) => {
-        // TODO: fix this
-        const { metadata, ...rest } = e
-        return {
-          ...rest,
-          metadata: undefined,
-        }
-      })
+      const ids = deduplicatedEvents.map((e) => e.id)
 
       if (deduplicatedEvents.length > 0) {
         try {

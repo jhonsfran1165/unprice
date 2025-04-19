@@ -63,7 +63,7 @@ export const featureVerificationSchemaV1 = z.object({
   featureSlug: z.string(),
   customerId: z.string(),
   requestId: z.string(),
-  metadata: z.string().optional(),
+  metadata: z.string().nullable(),
 })
 
 export const featureUsageSchemaV1 = z.object({
@@ -87,7 +87,7 @@ export const featureUsageSchemaV1 = z.object({
     .describe("timestamp of when this usage record was created"),
   requestId: z.string(),
   deleted: z.number().int().min(0).max(1).default(0),
-  metadata: z.string().optional(),
+  metadata: z.string().nullable(),
 })
 
 export const auditLogSchemaV1 = z.object({
