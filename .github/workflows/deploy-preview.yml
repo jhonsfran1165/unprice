@@ -89,7 +89,7 @@ jobs:
             git config --global user.email "unprice-bot@unprice.com"
             git config --global user.name "Unprice Bot"
             git add .
-            git commit -m "skip: migrations for preview"
+            git commit -m "chore: migrations for preview [skip ci]"
             git push --set-upstream origin ${{ steps.branch-name.outputs.current_branch }}
           else
             echo "No changes detected in db folder, skipping commit"
@@ -138,13 +138,13 @@ jobs:
       - deploy-preview-tinybird
 
     uses: ./.github/workflows/job_deploy_api.yaml
-    with:
-      env: "preview"
     secrets:
       DATABASE_URL_ENCRYPTED: ${{ needs.deploy-preview-neon.outputs.db_url }}
       PASSWORD_ENCRYPT: ${{ secrets.PASSWORD_ENCRYPT }}
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+    with:
+      env: "preview"
 
   deploy-auth-preview-vercel:
     if: "!contains(github.head_ref, 'renovate/')"

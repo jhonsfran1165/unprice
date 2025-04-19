@@ -65,7 +65,7 @@ jobs:
             git config --global user.email "unprice-bot@unprice.com"
             git config --global user.name "Unprice Bot"
             git add .
-            git commit -m "skip: migrations for preview"
+            git commit -m "chore: migrations for production [skip ci]"
             git push --set-upstream origin ${{ steps.branch-name.outputs.current_branch }}
           else
             echo "No changes detected in db folder, skipping commit"
@@ -85,11 +85,11 @@ jobs:
       - deploy-production-tinybird
 
     uses: ./.github/workflows/job_deploy_api.yaml
-    with:
-      env: "prod"
     secrets:
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+    with:
+      env: "prod"
 
   deploy-auth-production:
     runs-on: ubuntu-latest
