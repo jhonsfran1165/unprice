@@ -237,6 +237,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
     } finally {
       metrics.emit({
         metric: "metric.server.latency",
+        path: c.req.path,
         platform: "cloudflare",
         status: c.res.status,
         country: (c.req.raw?.cf?.country as string) ?? "unknown",
