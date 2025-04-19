@@ -3,14 +3,17 @@ on:
   workflow_call:
     secrets:
       PASSWORD_ENCRYPT:
-        required: true
+        required: false
       DATABASE_URL_ENCRYPTED:
-        required: true
+        required: false
       MACHINE_IDENTITY_CLIENT_ID:
         required: true
       MACHINE_IDENTITY_CLIENT_SECRET:
         required: true
-
+    inputs:
+      env:
+        required: true
+        default: "preview"
 
 env:
   SKIP_ENV_VALIDATION: 1
@@ -26,7 +29,25 @@ jobs:
         with:
           ts: true
 
+      - name: Check if we need to decrypt the database url
+        if: inputs.env == 'preview'
+        run: |
+          if [ -n "${{ inputs.env }}" ]; then
+            # validate that the database url is encrypted
+            if [ -z "${{ secrets.DATABASE_URL_ENCRYPTED }}" ]; then
+              echo "DATABASE_URL_ENCRYPTED is not set"
+              exit 1
+            fi
+
+            # validate that the password is set
+            if [ -z "${{ secrets.PASSWORD_ENCRYPT }}" ]; then
+              echo "PASSWORD_ENCRYPT is not set"
+              exit 1
+            fi
+          fi
+
       - uses: cloudposse/github-action-secret-outputs@main
+        if: inputs.env == 'preview'
         id: db-url
         with:
           ## PASSWORD is a gpg passphrase stored in Github Secrets.
@@ -39,7 +60,7 @@ jobs:
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: "preview"
+          env-slug: ${{ inputs.env }}
           project-slug: "unprice-zq-xm"
           secret-path: "/"
           recursive: true
@@ -61,7 +82,7 @@ jobs:
         with:
           apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
           wranglerVersion: "4.12.0"
-          environment: "preview"
+          environment: ${{ inputs.env }}
           packageManager: "pnpm"
           workingDirectory: "apps/api"
           # Pass secrets to Worker
@@ -90,7 +111,7 @@ jobs:
           TINYBIRD_URL: ${{ env.TINYBIRD_URL }}
           AUTH_SECRET: ${{ env.AUTH_SECRET }}
           # we are passing the preview database url to the deploy action
-          DATABASE_URL: ${{ steps.db-url.outputs.out }}
+          DATABASE_URL: ${{ inputs.env == 'preview' ? steps.db-url.outputs.out : env.DATABASE_URL }}
           EMIT_METRICS_LOGS: ${{ env.EMIT_METRICS_LOGS }}
           BASELIME_APIKEY: ${{ env.BASELIME_APIKEY }}
           EMIT_ANALYTICS: ${{ env.EMIT_ANALYTICS }}

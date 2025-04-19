@@ -16,20 +16,138 @@ jobs:
   build-lint:
     uses: ./.github/workflows/job_build.yaml
 
-  deploy-prod-tinybird:
-    uses: ./.github/workflows/job_tinybird_cd.yml
+  ci-production-tinybird:
+    if: "!contains(github.head_ref, 'renovate/')"
+    uses: ./.github/workflows/job_tinybird_ci.yml
     needs:
       - build-lint
-    secrets: inherit
-    with:
-      env: "prod"
 
-  deploy-prod:
+  deploy-production-neon:
     runs-on: ubuntu-latest
 
     needs:
       - build-lint
-      - deploy-prod-tinybird
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: "preview"
+          project-slug: "unprice-zq-xm"
+          secret-path: "/ci"
+          recursive: true
+
+      - uses: ./.github/actions/install
+        name: Install dependencies
+        with:
+          ts: "true"
+          python: "false"
+
+      - name: Run Migrations
+        working-directory: internal/db
+        run: |
+          pnpm generate
+          pnpm migrate:custom
+        env:
+          VERCEL_ENV: production
+          NODE_ENV: production
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: commit migrations
+        working-directory: internal/db
+        run: |
+          if [ -n "$(git status --porcelain ./)" ]; then
+            echo "Changes detected in db folder, committing..."
+            git config --global user.email "unprice-bot@unprice.com"
+            git config --global user.name "Unprice Bot"
+            git add .
+            git commit -m "skip: migrations for preview"
+            git push --set-upstream origin ${{ steps.branch-name.outputs.current_branch }}
+          else
+            echo "No changes detected in db folder, skipping commit"
+          fi
+
+  deploy-production-tinybird:
+    uses: ./.github/workflows/job_tinybird_cd.yml
+    needs:
+      - deploy-production-neon
+      - ci-production-tinybird
+    secrets: inherit
+    with:
+      env: "prod"
+
+  deploy-production-api:
+    needs:
+      - deploy-production-tinybird
+
+    uses: ./.github/workflows/job_deploy_api.yaml
+    with:
+      env: "prod"
+    secrets:
+      MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+      MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+
+  deploy-auth-production:
+    runs-on: ubuntu-latest
+
+    needs:
+      - deploy-production-tinybird
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: "prod"
+          project-slug: "unprice-zq-xm"
+          export-type: "file"
+          file-output-path: "/.env"
+          secret-path: "/"
+          recursive: true
+
+      - uses: ./.github/actions/install
+        with:
+          ts: "true"
+          python: "false"
+
+      - uses: cardinalby/export-env-action@v2
+        with:
+          envFile: '.env'
+          export: true
+          mask: true
+
+      - name: Check for changes
+        id: turbo-ignore
+        continue-on-error: true
+        run: npx turbo-ignore -d apps/auth-proxy
+
+      - uses: amondnet/vercel-action@v25.2.0 #deploy
+        name: Deploy Unprice auth to Vercel
+        id: deploy-auth
+        # if turbo-ignore fails,that means there are no changes in the auth-proxy folder
+        if: steps.turbo-ignore.outcome == 'failure'
+        with:
+          vercel-token: ${{ env.VERCEL_TOKEN }} # Required
+          vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
+          vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID }} #Required
+          # always prod because the auth proxy link has to be stable
+          vercel-args: '--env VERCEL_ENV=production --env NODE_ENV=production --prod --build-env VERCEL_ENV=production --build-env NODE_ENV=production'
+          working-directory: ./
+
+  deploy-production:
+    runs-on: ubuntu-latest
+
+    needs:
+      - deploy-production-tinybird
 
     permissions:
       pull-requests: write
@@ -63,32 +181,6 @@ jobs:
           export: true
           mask: true
 
-      - name: Apply Migrations
-        working-directory: internal/db
-        run: |
-          pnpm migrate:custom
-        env:
-          VERCEL_ENV: production
-          NODE_ENV: production
-
-      - name: Check for changes
-        id: turbo-ignore
-        continue-on-error: true
-        run: npx turbo-ignore -d apps/auth-proxy
-
-      - uses: amondnet/vercel-action@v25.2.0 #deploy
-        name: Deploy Unprice auth to Vercel
-        id: deploy-auth
-        # if turbo-ignore fails,that means there are no changes in the auth-proxy folder
-        if: steps.turbo-ignore.outcome == 'failure'
-        with:
-          vercel-token: ${{ env.VERCEL_TOKEN }} # Required
-          vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
-          vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID }} #Required
-          # always prod because the auth proxy link has to be stable
-          vercel-args: '--env VERCEL_ENV=production --env NODE_ENV=production --prod --build-env VERCEL_ENV=production --build-env NODE_ENV=production'
-          working-directory: ./
-
       # deploy unprice to vercel
       - uses: amondnet/vercel-action@v25.2.0 #deploy
         name: Deploy Unprice to Vercel
@@ -102,7 +194,3 @@ jobs:
           alias-domains: |
             unprice.vercel.app
 
-      - name: Delete Secret
-        if: always()
-        run: |
-          rm -rf .env || true
