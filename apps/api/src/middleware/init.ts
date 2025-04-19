@@ -11,6 +11,9 @@ import { ApiKeysService } from "~/apikey/service"
 import { EntitlementService } from "~/entitlement/service"
 import type { HonoEnv } from "~/hono/env"
 import { ApiProjectService } from "~/project"
+
+import { endTime, startTime } from "hono/timing"
+
 /**
  * These maps persist between worker executions and are used for caching
  */
@@ -93,6 +96,9 @@ export function init(): MiddlewareHandler<HonoEnv> {
     //         },
     //       })
 
+    // start a new timer
+    startTime(c, "initLogger")
+
     // TODO: remove this once we have a logger that supports logpush
     // https://baselime.io/docs/sending-data/platforms/cloudflare/logpush/
     const logger =
@@ -122,6 +128,11 @@ export function init(): MiddlewareHandler<HonoEnv> {
             },
           })
 
+    endTime(c, "initLogger")
+
+    // start a new timer
+    startTime(c, "initMetrics")
+
     const metrics: Metrics = c.env.EMIT_METRICS_LOGS
       ? new LogdrainMetrics({
           requestId,
@@ -130,6 +141,11 @@ export function init(): MiddlewareHandler<HonoEnv> {
           application: "api",
         })
       : new NoopMetrics()
+
+    endTime(c, "initMetrics")
+
+    // start a new timer
+    startTime(c, "initCache")
 
     const cacheService = new CacheService(
       {
@@ -141,6 +157,11 @@ export function init(): MiddlewareHandler<HonoEnv> {
     await cacheService.init()
     const cache = cacheService.getCache()
 
+    endTime(c, "initCache")
+
+    // start a new timer
+    startTime(c, "initDb")
+
     const db = createConnection({
       env: c.env.NODE_ENV,
       primaryDatabaseUrl: c.env.DATABASE_URL,
@@ -149,11 +170,21 @@ export function init(): MiddlewareHandler<HonoEnv> {
       logger: c.env.DRIZZLE_LOG || false,
     })
 
+    endTime(c, "initDb")
+
+    // start a new timer
+    startTime(c, "initAnalytics")
+
     const analytics = new Analytics({
       emit: c.env.EMIT_METRICS_LOGS,
       tinybirdToken: c.env.TINYBIRD_TOKEN,
       tinybirdUrl: c.env.TINYBIRD_URL,
     })
+
+    endTime(c, "initAnalytics")
+
+    // start a new timer
+    startTime(c, "initCustomer")
 
     const customer = new CustomerService({
       logger,
@@ -163,6 +194,11 @@ export function init(): MiddlewareHandler<HonoEnv> {
       metrics,
       db,
     })
+
+    endTime(c, "initCustomer")
+
+    // start a new timer
+    startTime(c, "initEntitlement")
 
     const entitlement = new EntitlementService({
       namespace: c.env.usagelimit,
@@ -176,6 +212,11 @@ export function init(): MiddlewareHandler<HonoEnv> {
       customer,
     })
 
+    endTime(c, "initEntitlement")
+
+    // start a new timer
+    startTime(c, "initProject")
+
     const project = new ApiProjectService({
       cache,
       analytics,
@@ -186,6 +227,11 @@ export function init(): MiddlewareHandler<HonoEnv> {
       requestId,
     })
 
+    endTime(c, "initProject")
+
+    // start a new timer
+    startTime(c, "initApikey")
+
     const apikey = new ApiKeysService({
       cache,
       analytics,
@@ -193,6 +239,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       metrics,
       db,
     })
+
+    endTime(c, "initApikey")
 
     c.set("services", {
       version: "1.0.0",
@@ -207,13 +255,18 @@ export function init(): MiddlewareHandler<HonoEnv> {
       customer,
     })
 
-    metrics.emit({
-      metric: "metric.init",
-      duration: {
-        total: performance.now() - performanceStart,
-      },
-    })
-
-    await next()
+    try {
+      await next()
+    } finally {
+      metrics.emit({
+        metric: "metric.server.latency",
+        platform: "cloudflare",
+        status: c.res.status,
+        country: (c.req.raw?.cf?.country as string) ?? "unknown",
+        continent: (c.req.raw?.cf?.continent as string) ?? "unknown",
+        colo: (c.req.raw?.cf?.colo as string) ?? "unknown",
+        latency: performance.now() - performanceStart,
+      })
+    }
   }
 }

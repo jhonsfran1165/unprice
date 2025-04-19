@@ -89,6 +89,15 @@ export const metricSchema = z.discriminatedUnion("metric", [
     start: z.number().optional(),
     end: z.number().optional(),
   }),
+  z.object({
+    metric: z.literal("metric.server.latency"),
+    status: z.number(),
+    country: z.string(),
+    continent: z.string(),
+    latency: z.number(),
+    platform: z.string(),
+    colo: z.string(),
+  }),
 ])
 
 export type Metric = z.infer<typeof metricSchema>

@@ -1,3 +1,6 @@
+import { env } from "cloudflare:workers"
+import { getToken } from "@auth/core/jwt"
+import { partyserverMiddleware } from "hono-party"
 import { cors } from "hono/cors"
 import type { Env } from "~/env"
 import { newApp } from "~/hono/app"
@@ -17,49 +20,52 @@ import { registerResetEntitlementsV1 } from "./routes/customer/resetEntitlements
 import { registerGetPlanVersionV1 } from "./routes/plans/gePlanVersionV1"
 import { registerGetFeaturesV1 } from "./routes/project/getFeaturesV1"
 
+import { timing } from "hono/timing"
+
 const app = newApp()
 
 app.use(serveEmojiFavicon("◎"))
+
+app.use(timing())
 app.use("*", init())
 app.use("*", cors())
-// app.use("*", prettyJSON())
 
-// // Handle websocket connections for Durable Objects
-// app.use(
-//   "*",
-//   partyserverMiddleware({
-//     onError: (error) => console.error(error),
-//     options: {
-//       prefix: "broadcast",
-//       onBeforeConnect: async (req) => {
-//         const token = await getToken({
-//           req,
-//           secret: env.AUTH_SECRET,
-//           raw: false,
-//           salt:
-//             env.NODE_ENV === "production"
-//               ? "__Secure-authjs.session-token"
-//               : "authjs.session-token",
-//           secureCookie: env.NODE_ENV === "production",
-//         })
+// Handle websocket connections for Durable Objects
+app.use(
+  "*",
+  partyserverMiddleware({
+    onError: (error) => console.error(error),
+    options: {
+      prefix: "broadcast",
+      onBeforeConnect: async (req) => {
+        const token = await getToken({
+          req,
+          secret: env.AUTH_SECRET,
+          raw: false,
+          salt:
+            env.NODE_ENV === "production"
+              ? "__Secure-authjs.session-token"
+              : "authjs.session-token",
+          secureCookie: env.NODE_ENV === "production",
+        })
 
-//         if (!token) return new Response("Unauthorized", { status: 401 })
+        if (!token) return new Response("Unauthorized", { status: 401 })
 
-//         // validate exp
-//         if (token?.exp && token.exp < Date.now() / 1000) {
-//           return new Response("Unauthorized", { status: 401 })
-//         }
+        // validate exp
+        if (token?.exp && token.exp < Date.now() / 1000) {
+          return new Response("Unauthorized", { status: 401 })
+        }
 
-//         const userId = token?.id as string | undefined
+        const userId = token?.id as string | undefined
 
-//         // if id doesn't start with "usr_" throw an error
-//         if (!userId?.startsWith("usr_")) {
-//           return new Response("Unauthorized", { status: 401 })
-//         }
-//       },
-//     },
-//   })
-// )
+        // if id doesn't start with "usr_" throw an error
+        if (!userId?.startsWith("usr_")) {
+          return new Response("Unauthorized", { status: 401 })
+        }
+      },
+    },
+  })
+)
 
 // Customer routes
 registerReportUsageV1(app)

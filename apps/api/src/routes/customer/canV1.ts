@@ -1,4 +1,6 @@
 import { createRoute } from "@hono/zod-openapi"
+import { endTime } from "hono/timing"
+import { startTime } from "hono/timing"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
 
@@ -54,20 +56,13 @@ export type CanResponse = z.infer<
 export const registerCanV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { customerId, featureSlug, metadata } = c.req.valid("json")
-    const { entitlement, metrics } = c.get("services")
+    const { entitlement } = c.get("services")
     const requestId = c.get("requestId")
     const performanceStart = c.get("performanceStart")
 
-    metrics.emit({
-      metric: "metric.http.request",
-      path: "/v1/customer/performanceStart",
-      method: "POST",
-      status: HttpStatusCodes.OK,
-      duration: performance.now() - performanceStart,
-      service: "api",
-    })
+    // start a new timer
+    startTime(c, "keyAuth")
 
-    const keyStart = performance.now()
     // validate the request
     const key = await keyAuth(c)
 
@@ -77,17 +72,11 @@ export const registerCanV1 = (app: App) =>
         message: "Invalid API key",
       })
     }
+    endTime(c, "keyAuth")
 
-    metrics.emit({
-      metric: "metric.http.request",
-      path: "/v1/customer/keyStart",
-      method: "POST",
-      status: HttpStatusCodes.OK,
-      duration: performance.now() - keyStart,
-      service: "api",
-    })
+    // start a new timer
+    startTime(c, "can")
 
-    const entitlementStart = performance.now()
     // validate usage from db
     const result = await entitlement.can({
       customerId,
@@ -99,14 +88,8 @@ export const registerCanV1 = (app: App) =>
       metadata,
     })
 
-    metrics.emit({
-      metric: "metric.http.request",
-      path: "/v1/customer/entitlementStart",
-      method: "POST",
-      status: HttpStatusCodes.OK,
-      duration: performance.now() - entitlementStart,
-      service: "api",
-    })
+    // end the timer
+    endTime(c, "can")
 
     return c.json(result, HttpStatusCodes.OK)
   })

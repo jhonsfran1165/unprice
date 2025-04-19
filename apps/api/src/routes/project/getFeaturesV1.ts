@@ -1,4 +1,5 @@
 import { createRoute } from "@hono/zod-openapi"
+import { endTime, startTime } from "hono/timing"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent } from "stoker/openapi/helpers"
 
@@ -34,6 +35,9 @@ export const registerGetFeaturesV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { project } = c.get("services")
 
+    // start a new timer
+    startTime(c, "keyAuth")
+
     // validate the request
     const key = await keyAuth(c)
 
@@ -44,10 +48,19 @@ export const registerGetFeaturesV1 = (app: App) =>
       })
     }
 
+    // end the timer
+    endTime(c, "keyAuth")
+
+    // start a new timer
+    startTime(c, "getFeatures")
+
     // validate usage from db
     const result = await project.getProjectFeatures({
       projectId: key.projectId,
     })
+
+    // end the timer
+    endTime(c, "getFeatures")
 
     return c.json(result, HttpStatusCodes.OK)
   })
