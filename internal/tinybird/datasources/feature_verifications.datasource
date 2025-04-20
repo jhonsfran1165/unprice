@@ -25,6 +25,3 @@ ENGINE MergeTree
 ENGINE_PARTITION_KEY toYYYYMM(fromUnixTimestamp64Milli(timestamp))
 ENGINE_SORTING_KEY (timestamp, projectId, customerId, entitlementId, featureSlug)
 ENGINE_TTL toDate(fromUnixTimestamp64Milli(timestamp)) + INTERVAL 6 MONTH
-
-FORWARD_QUERY >
-  SELECT timestamp, createdAt, featureSlug, customerId, latency, defaultValueOfTypeName('String') AS featurePlanVersionId, requestId, projectId, entitlementId, subscriptionId, subscriptionItemId, subscriptionPhaseId, deniedReason, metadata

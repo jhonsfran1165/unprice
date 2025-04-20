@@ -28,6 +28,3 @@ ENGINE_PARTITION_KEY toYYYYMM(fromUnixTimestamp64Milli(timestamp))
 ENGINE_SORTING_KEY idempotenceKey
 ENGINE_TTL toDate(fromUnixTimestamp64Milli(timestamp)) + INTERVAL 6 MONTH
 ENGINE_VER timestamp
-
-FORWARD_QUERY >
-  SELECT timestamp, featureSlug, customerId, usage, requestId, defaultValueOfTypeName('String') AS idempotenceKey, projectId, entitlementId, defaultValueOfTypeName('String') AS featurePlanVersionId, subscriptionId, subscriptionItemId, subscriptionPhaseId, createdAt, metadata, deleted
