@@ -2,9 +2,8 @@ import { NextResponse } from "next/server"
 
 import { auth } from "@unprice/auth/server"
 
-import { API_HOSTNAMES, APP_HOSTNAMES } from "@unprice/config"
+import { APP_HOSTNAMES } from "@unprice/config"
 import { getValidSubdomain, parse } from "~/lib/domains"
-import ApiMiddleware from "~/middleware/api"
 import AppMiddleware from "~/middleware/app"
 import SitesMiddleware from "~/middleware/sites"
 
@@ -17,10 +16,10 @@ export default auth((req) => {
     return NextResponse.next()
   }
 
-  // 1. we validate api routes
-  if (API_HOSTNAMES.has(domain)) {
-    return ApiMiddleware(req)
-  }
+  // // 1. we validate api routes
+  // if (API_HOSTNAMES.has(domain)) {
+  //   return ApiMiddleware(req)
+  // }
 
   // 2. we validate app routes inside the dashboard
   if (APP_HOSTNAMES.has(domain)) {

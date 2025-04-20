@@ -9,7 +9,35 @@
   "compatibility_date": "2025-03-19",
   "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
   "env": {
+    "production": {
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1.0 // 100% of requests
+      },
+      "route": {
+        "pattern": "api.unprice.dev",
+        "custom_domain": true
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "usagelimit",
+            "class_name": "DurableObjectUsagelimiter"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["DurableObjectUsagelimiter"]
+        }
+      ]
+    },
     "preview": {
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1.0 // 100% of requests
+      },
       "route": {
         "pattern": "preview-api.unprice.dev",
         "custom_domain": true
@@ -49,10 +77,6 @@
         }
       ]
     }
-  },
-  "observability": {
-    "enabled": true,
-    "head_sampling_rate": 1.0 // 100% of requests
   },
   "rules": [
     {

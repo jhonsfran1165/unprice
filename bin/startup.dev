@@ -62,6 +62,8 @@ if [ "$MODE_ID" = "dev" ]; then
   AUTH_REDIRECT_PROXY_URL="http://localhost:3100/auth"
   # REDIS_TOKEN="example_token"
   TB_RESTARTED=$RESTART_TINYBIRD
+  UNPRICE_API_URL="http://localhost:8787"
+  DRIZZLE_LOG="false"
 
   # loging to tb
   cd internal/tinybird
@@ -113,7 +115,7 @@ if [ "$MODE_ID" = "dev" ]; then
   cd ../../
 
   echo "Starting the application"
-  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" AUTH_REDIRECT_PROXY_URL="$AUTH_REDIRECT_PROXY_URL" pnpm run dev
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" AUTH_REDIRECT_PROXY_URL="$AUTH_REDIRECT_PROXY_URL" UNPRICE_API_URL="$UNPRICE_API_URL" DRIZZLE_LOG="$DRIZZLE_LOG" pnpm run dev
 
 elif [ "$MODE_ID" = "preview" ]; then
   # banner to show the user that we are using the preview environment
@@ -127,6 +129,8 @@ elif [ "$MODE_ID" = "preview" ]; then
   TB_HOST=$(infisical secrets get TINYBIRD_URL --env=preview --path=/app --raw-value)
   # get the admin token from infisical
   TB_ADMIN_TOKEN=$(infisical secrets get TB_ADMIN_TOKEN --env=preview --path=/ci --raw-value)
+  NODE_ENV="preview"
+  VERCEL_ENV="preview"
 
   cd internal/tinybird
 
@@ -136,7 +140,7 @@ elif [ "$MODE_ID" = "preview" ]; then
   cd ../../
 
   # override the token in the env
-  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_ADMIN_TOKEN" TINYBIRD_URL="$TB_HOST" pnpm run dev
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_ADMIN_TOKEN" NODE_ENV="$NODE_ENV" VERCEL_ENV="$VERCEL_ENV" TINYBIRD_URL="$TB_HOST" pnpm run dev
 else
   echo "Invalid mode: $MODE_ID"
   exit 1

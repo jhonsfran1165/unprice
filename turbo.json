@@ -44,6 +44,7 @@
         "TINYBIRD_URL",
         "COOKIE_ENCRYPTION_KEY",
         "UNPRICE_API_KEY",
+        "UNPRICE_API_URL",
         "FLAGS_SECRET"
       ]
     },
@@ -85,6 +86,7 @@
         "RESEND_API_KEY",
         "TINYBIRD_URL",
         "UNPRICE_API_KEY",
+        "UNPRICE_API_URL",
         "FLAGS_SECRET"
       ]
     },
