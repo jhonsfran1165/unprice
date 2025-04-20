@@ -597,6 +597,7 @@ export class DurableObjectUsagelimiter extends Server {
           await this.analytics
             .ingestFeaturesVerification(transformedEvents)
             .catch((e) => {
+              console.error(e)
               this.logger.error(`Failed in ingestFeaturesVerification from do ${e.message}`, {
                 error: JSON.stringify(e),
               })
@@ -794,7 +795,7 @@ export class DurableObjectUsagelimiter extends Server {
       } else {
         return {
           success: false,
-          message: `DO has ${events?.count} events and ${verification_events?.count} verification events, not deleting.`,
+          message: `DO has ${events?.count} events and ${verification_events?.count} verification events, can't delete.`,
         }
       }
 
