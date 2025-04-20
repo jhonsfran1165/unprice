@@ -11,7 +11,11 @@ import {
   USAGE_MODES,
   USAGE_MODES_MAP,
 } from "@unprice/db/utils"
-import type { PlanVersion, PlanVersionFeature } from "@unprice/db/validators"
+import type {
+  PlanVersion,
+  PlanVersionFeature,
+  PlanVersionFeatureInsert,
+} from "@unprice/db/validators"
 import { planVersionFeatureInsertBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import {
@@ -32,8 +36,8 @@ import { Warning } from "@unprice/ui/icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
 import { SubmitButton } from "~/components/submit-button"
-import { useEntitlement } from "~/hooks/use-entitlement"
 import { usePlanFeaturesList } from "~/hooks/use-features"
+import { useFlags } from "~/hooks/use-flags"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -49,7 +53,7 @@ export function FeatureConfigForm({
   planVersion,
   className,
 }: {
-  defaultValues: PlanVersionFeature
+  defaultValues: PlanVersionFeatureInsert
   planVersion: PlanVersion | null
   setDialogOpen?: (open: boolean) => void
   className?: string
@@ -59,7 +63,7 @@ export function FeatureConfigForm({
 
   const editMode = !!defaultValues.id
   const isPublished = planVersion?.status === "published"
-  const { access: isProAccess } = useEntitlement("access-pro")
+  const isProEnabled = useFlags("access-pro")
 
   // we set all possible values for the form so react-hook-form don't complain
   const controlledDefaultValues = {
@@ -139,7 +143,7 @@ export function FeatureConfigForm({
   const featureType = form.watch("featureType")
   const usageMode = form.watch("config.usageMode")
 
-  const onSubmitForm = async (data: PlanVersionFeature) => {
+  const onSubmitForm = async (data: PlanVersionFeatureInsert | PlanVersionFeature) => {
     if (defaultValues.id) {
       await updatePlanVersionFeatures.mutateAsync({
         ...data,
@@ -197,7 +201,7 @@ export function FeatureConfigForm({
                 </FormDescription>
               </div>
               <FormControl>
-                {!isProAccess ? (
+                {isProEnabled ? (
                   <Switch
                     checked={field.value ?? false}
                     onCheckedChange={field.onChange}

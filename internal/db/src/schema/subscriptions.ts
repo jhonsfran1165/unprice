@@ -12,14 +12,14 @@ import {
 import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
-import { cuid, timestamps } from "../utils/fields.sql"
+import { cuid, timestamps } from "../utils/fields"
 import { projectID } from "../utils/sql"
 import type {
   invoiceMetadataSchema,
   subscriptionMetadataSchema,
   subscriptionPhaseMetadataSchema,
 } from "../validators/subscriptions"
-import { customerCredits, customers } from "./customers"
+import { customerCredits, customerEntitlements, customers } from "./customers"
 import {
   collectionMethodEnum,
   currencyEnum,
@@ -51,9 +51,9 @@ export const subscriptions = pgTableProject(
     // whether the subscription is active or not
     // normally is active if the status is active, trialing or past_due or changing
     // this simplifies the queries when we need to get the active subscriptions
-    active: boolean("active").notNull().default(false),
+    active: boolean("active").default(false).notNull(),
     // slug of the plan only for ui purposes
-    planSlug: text("plan_slug").default("FREE"),
+    planSlug: text("plan_slug").default("FREE").notNull(),
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
 
     // whether the subscription is locked or not
@@ -285,6 +285,10 @@ export const subscriptionItemRelations = relations(subscriptionItems, ({ one }) 
     fields: [subscriptionItems.subscriptionPhaseId, subscriptionItems.projectId],
     references: [subscriptionPhases.id, subscriptionPhases.projectId],
   }),
+  subscription: one(subscriptions, {
+    fields: [subscriptionItems.subscriptionId, subscriptionItems.projectId],
+    references: [subscriptions.id, subscriptions.projectId],
+  }),
 }))
 
 export const invoiceRelations = relations(invoices, ({ one }) => ({
@@ -316,6 +320,7 @@ export const subscriptionRelations = relations(subscriptions, ({ one, many }) =>
     references: [customers.id, customers.projectId],
   }),
   phases: many(subscriptionPhases),
+  customerEntitlements: many(customerEntitlements),
 }))
 
 export const subscriptionPhaseRelations = relations(subscriptionPhases, ({ one, many }) => ({
@@ -332,4 +337,5 @@ export const subscriptionPhaseRelations = relations(subscriptionPhases, ({ one, 
     references: [versions.id, versions.projectId],
   }),
   items: many(subscriptionItems),
+  customerEntitlements: many(customerEntitlements),
 }))

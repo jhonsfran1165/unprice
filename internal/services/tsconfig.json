@@ -1,0 +1,13 @@
+{
+  "extends": "@unprice/tsconfig/base.json",
+  "compilerOptions": {
+    // this is used to speed up build times
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    /* Specify what module code is generated. */
+    "module": "esnext",
+    /* Specify how TypeScript looks up a file from a given module specifier. */
+    "moduleResolution": "bundler"
+  },
+  "include": ["src/**/*", "env.ts"],
+  "exclude": ["node_modules"]
+}

@@ -250,12 +250,16 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
               <div className="mt-2 flex w-full flex-row items-center justify-between gap-2">
                 <div className="flex flex-row gap-1">
                   <Badge variant={"secondary"}>{planFeatureVersion.featureType}</Badge>
-                  {planFeatureVersion.config?.usageMode && (
-                    <Badge>{planFeatureVersion.config.usageMode}</Badge>
-                  )}
-                  <Badge>{planFeatureVersion.aggregationMethod}</Badge>
-                  {planFeatureVersion.config?.tierMode && (
-                    <Badge>{planFeatureVersion.config.tierMode}</Badge>
+                  {planFeatureVersion.featureType !== "flat" && (
+                    <>
+                      {planFeatureVersion.config?.usageMode && (
+                        <Badge>{planFeatureVersion.config.usageMode}</Badge>
+                      )}
+                      <Badge>{planFeatureVersion.aggregationMethod}</Badge>
+                      {planFeatureVersion.config?.tierMode && (
+                        <Badge>{planFeatureVersion.config.tierMode}</Badge>
+                      )}
+                    </>
                   )}
                 </div>
                 <div className="line-clamp-1 pr-3 font-light text-xs">

@@ -11,7 +11,7 @@ import {
 } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { cuid, timestamps } from "../utils/fields.sql"
+import { cuid, timestamps } from "../utils/fields"
 import { projectID } from "../utils/sql"
 import type { BillingConfig, PlanVersionMetadata } from "../validators/planVersions"
 import { users } from "./auth"
@@ -58,6 +58,9 @@ export const versions = pgTableProject(
     // active: whether the plan version is active or not, if not active, it won't be available for purchase
     active: boolean("active").default(true),
 
+    // price of the plan version
+    flatPrice: text("flat_price").default("0"),
+
     // status of the plan version - draft, published
     status: statusPlanEnum("plan_version_status").default("draft"),
     // date when the plan version was published
@@ -73,7 +76,7 @@ export const versions = pgTableProject(
     paymentProvider: paymentProviderEnum("payment_providers").notNull(),
 
     // due behaviour for the phase - cancel or downgrade
-    dueBehaviour: dueBehaviourEnum("due_behaviour").notNull().default("cancel"),
+    dueBehaviour: dueBehaviourEnum("due_behaviour").default("cancel").notNull(),
 
     // currency of the plan
     currency: currencyEnum("currency").notNull(),
@@ -90,9 +93,9 @@ export const versions = pgTableProject(
     collectionMethod: collectionMethodEnum("collection_method")
       .notNull()
       .default("charge_automatically"),
-    trialDays: integer("trial_days").notNull().default(0),
+    trialDays: integer("trial_days").default(0).notNull(),
     // auto renew the subscription every billing period
-    autoRenew: boolean("auto_renew").notNull().default(true),
+    autoRenew: boolean("auto_renew").default(true).notNull(),
     // ************ billing data defaults ************
 
     // metadata probably will be useful to save external data, etc.

@@ -6,6 +6,7 @@ import {
   index,
   integer,
   json,
+  numeric,
   primaryKey,
   text,
   uniqueIndex,
@@ -16,7 +17,7 @@ import type { z } from "zod"
 import { pgTableProject } from "../utils/_table"
 import { projectID } from "../utils/sql"
 
-import { cuid, id, timestamps } from "../utils/fields.sql"
+import { cuid, id, timestamps } from "../utils/fields"
 import type {
   customerCreditMetadataSchema,
   customerMetadataSchema,
@@ -24,10 +25,10 @@ import type {
   stripeSetupSchema,
 } from "../validators/customer"
 
-import { aggregationMethodEnum, currencyEnum, typeFeatureEnum } from "./enums"
+import { currencyEnum, typeFeatureVersionEnum } from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
 import { projects } from "./projects"
-import { subscriptionItems, subscriptions } from "./subscriptions"
+import { subscriptionItems, subscriptionPhases, subscriptions } from "./subscriptions"
 
 export const customers = pgTableProject(
   "customers",
@@ -39,10 +40,10 @@ export const customers = pgTableProject(
     description: text("description"),
     metadata: json("metadata").$type<z.infer<typeof customerMetadataSchema>>(),
     stripeCustomerId: text("stripe_customer_id").unique("stripe_customer_unique"),
-    active: boolean("active").default(true),
-    isMain: boolean("is_main").default(false),
+    active: boolean("active").notNull().default(true),
+    isMain: boolean("is_main").notNull().default(false),
     // all customers will have a default currency - normally the currency of the project
-    defaultCurrency: currencyEnum("default_currency").default("USD").notNull(),
+    defaultCurrency: currencyEnum("default_currency").notNull().default("USD"),
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
     // beta features
   },
@@ -62,50 +63,68 @@ export const customers = pgTableProject(
 
 // entitlements are the actual features that are assigned to a customer
 // normally this would match with subscription items but we need to add a way to
-// add entitlements to a plan version without having to create a subscription item
+// add entitlements to a plan version/customer without having to create a subscription item
 // since the subscription item is more of a billing concept and the entitlement is more of a
-// usage concept.
+// usage/access concept.
 export const customerEntitlements = pgTableProject(
   "customer_entitlements",
   {
     ...projectID,
     ...timestamps,
     customerId: cuid("customer_id").notNull(),
-    // subscriptionItemId is the id of the subscription item that the customer is entitled to
-    subscriptionItemId: cuid("subscription_item_id"),
-    // TODO: we need to add a subscriptionId to the entitlement?
+    // subscriptionId the subscription that the customer is entitled to
+    subscriptionId: cuid("subscription_id").notNull(),
     // featurePlanVersionId is the id of the feature plan version that the customer is entitled to
     featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
+    // subscriptionItemId is the id of the subscription item that the customer is entitled to
+    subscriptionItemId: cuid("subscription_item_id"),
+    // subscriptionPhaseId is the id of the subscription phase that the customer is entitled to
+    subscriptionPhaseId: cuid("subscription_phase_id"),
 
     // ****************** defaults from plan version features ******************
-    // These fields are duplicate but this improves the performance when checking the usage
-    // This table is cached in redis as well. All events usage are sent to tynibird and this table
-    // is restored with events in the subscription. The good thing about this is once a feature version
-    // is created, it never changes, so we don't need to worry about potential data inconsistency
-    // amount of units of the feature that the customer is entitled to
-    units: integer("units"),
     // limit is the limit of the feature that the customer is entitled to
     limit: integer("limit"),
+    // units is the units of the feature that the customer is entitled to
+    units: integer("units"),
     // usage is the usage of the feature that the customer has used
-    usage: integer("usage"),
-    // featureSlug is the slug of the feature that the customer is entitled to
-    featureSlug: text("feature_slug").notNull(),
-    // featureType is the type of the feature that the customer is entitled to
-    featureType: typeFeatureEnum("feature_type").notNull(),
-    // aggregationMethod is the method to aggregate the feature quantity - use for calculated the current usage of the feature
-    aggregationMethod: aggregationMethodEnum("aggregation_method").default("sum").notNull(),
+    usage: numeric("usage").notNull().default("0"),
+    // accumulatedUsage is the accumulated usage of the feature that the customer has used
+    accumulatedUsage: numeric("accumulated_usage").notNull().default("0"),
     // realtime features are updated in realtime, others are updated periodically
     realtime: boolean("realtime").notNull().default(false),
     // type of the feature plan version - feature or addon
-    type: text("type").notNull().default("feature"),
+    type: typeFeatureVersionEnum("type").notNull().default("feature"),
     // ****************** end defaults from plan version features ******************
 
-    // We need to know when the entitlement start and when it ends
-    startAt: bigint("start_at", { mode: "number" }).notNull(),
-    endAt: bigint("end_at", { mode: "number" }),
+    // // Phase dates when the entitlement starts and ends
+    // startAt: bigint("start_at", { mode: "number" }).notNull(),
+    // endAt: bigint("end_at", { mode: "number" }),
+
+    // // current billing cycle start and end dates used to revalidate and reset the usage
+    // currentCycleStartAt: bigint("current_cycle_start_at", { mode: "number" }).notNull(),
+    // currentCycleEndAt: bigint("current_cycle_end_at", { mode: "number" }).notNull(),
+    // // days of grace period to allow the customer to use the feature after the end of the cycle
+    // // this is used to avoid overage charges also give us a windows to revalidate the entitlement when the subscription renew is triggered
+    // gracePeriod: integer("grace_period").notNull().default(1),
+
+    // normally represent the current billing cycle start and end dates
+    // but for custom entitlements can be different, for instance if the customer has a custom entitlement for 1000 users
+    // for 1 year.
+    validFrom: bigint("valid_from", { mode: "number" }).notNull(),
+    validTo: bigint("valid_to", { mode: "number" }),
+    // buffer is the period of time that the entitlement is valid after the validTo date
+    // this is used to avoid overage charges also give us a windows to revalidate the entitlement when the subscription renew is triggered
+    bufferPeriodDays: integer("buffer_period_days").notNull().default(1),
+    // resetedAt is the date when the entitlement was reseted
+    // normally this is set by the subscription renew event
+    resetedAt: bigint("reseted_at", { mode: "number" }).notNull(),
+
+    // active is true if the entitlement is active
+    active: boolean("active").notNull().default(true),
 
     // if it's a custom entitlement, it's not tied to a subscription phase and it's not billed
     isCustom: boolean("is_custom").notNull().default(false),
+
     // entitlements are updated on a regular basis
     lastUsageUpdateAt: bigint("last_usage_update_at", { mode: "number" })
       .notNull()
@@ -136,11 +155,22 @@ export const customerEntitlements = pgTableProject(
       foreignColumns: [customers.id, customers.projectId],
       name: "customer_id_fkey",
     }),
+    subscriptionPhasefk: foreignKey({
+      columns: [table.subscriptionPhaseId, table.projectId],
+      foreignColumns: [subscriptionPhases.id, subscriptionPhases.projectId],
+      name: "subscription_phase_id_fkey",
+    }).onDelete("cascade"),
+    subscriptionfk: foreignKey({
+      columns: [table.subscriptionId, table.projectId],
+      foreignColumns: [subscriptions.id, subscriptions.projectId],
+      name: "subscription_id_fkey",
+    }),
     projectfk: foreignKey({
       columns: [table.projectId],
       foreignColumns: [projects.id],
       name: "project_id_fkey",
     }),
+    // featureSlugIndex: index("feature_slug_index").on(table.featureSlug),
   })
 )
 
@@ -197,6 +227,14 @@ export const customerEntitlementsRelations = relations(customerEntitlements, ({ 
   featurePlanVersion: one(planVersionFeatures, {
     fields: [customerEntitlements.featurePlanVersionId, customerEntitlements.projectId],
     references: [planVersionFeatures.id, planVersionFeatures.projectId],
+  }),
+  subscription: one(subscriptions, {
+    fields: [customerEntitlements.subscriptionId, customerEntitlements.projectId],
+    references: [subscriptions.id, subscriptions.projectId],
+  }),
+  subscriptionPhase: one(subscriptionPhases, {
+    fields: [customerEntitlements.subscriptionPhaseId, customerEntitlements.projectId],
+    references: [subscriptionPhases.id, subscriptionPhases.projectId],
   }),
   customer: one(customers, {
     fields: [customerEntitlements.customerId, customerEntitlements.projectId],

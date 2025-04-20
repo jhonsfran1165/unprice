@@ -5,71 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1740838721305,
-      "tag": "0000_massive_ronan",
+      "when": 1744457431051,
+      "tag": "0000_freezing_tusk",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1740862760639,
-      "tag": "0001_sloppy_squadron_supreme",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1740912868701,
-      "tag": "0002_burly_ink",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1740915735300,
-      "tag": "0003_volatile_carlie_cooper",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1740995393014,
-      "tag": "0004_good_gladiator",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1741018438500,
-      "tag": "0005_last_raza",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1741210647348,
-      "tag": "0006_eager_bruce_banner",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1741244488729,
-      "tag": "0007_chubby_silver_sable",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1741268182598,
-      "tag": "0008_unique_human_robot",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1741268563724,
-      "tag": "0009_panoramic_rictor",
+      "when": 1744649718976,
+      "tag": "0001_faulty_harpoon",
       "breakpoints": true
     }
   ]

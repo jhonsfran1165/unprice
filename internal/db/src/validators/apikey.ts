@@ -32,6 +32,7 @@ export const apiKeyExtendedSelectSchema = selectApiKeySchema
     key: true,
     expiresAt: true,
     revokedAt: true,
+    hash: true,
   })
   .extend({
     project: projectExtendedSelectSchema,

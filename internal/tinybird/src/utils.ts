@@ -1,5 +1,4 @@
 export const DEFAULT_INTERVALS = {
-  "5m": "Last 5 Minutes",
   "60m": "Last 60 Minutes",
   "24h": "Last 24 Hours",
   "7d": "Last 7 Days",
@@ -15,16 +14,6 @@ export function prepareInterval(interval: Interval) {
   const now = new Date()
 
   switch (interval) {
-    case "5m": {
-      const end = now.setUTCMinutes(now.getUTCMinutes() + 1, 0, 0)
-      const intervalMs = 1000 * 60 * 5
-      return {
-        start: end - intervalMs,
-        end,
-        intervalMs,
-        granularity: 1000 * 60,
-      }
-    }
     case "60m": {
       const end = now.setUTCMinutes(now.getUTCMinutes() + 1, 0, 0)
       const intervalMs = 1000 * 60 * 60

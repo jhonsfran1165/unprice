@@ -65,7 +65,7 @@ export const planVersionSelectBaseSchema = createSelectSchema(versions, {
   metadata: planVersionMetadataSchema,
   currency: currencySchema,
   billingConfig: billingConfigSchema,
-  trialDays: z.coerce.number(),
+  trialDays: z.coerce.number().int().min(0).default(0),
 })
 
 export const versionInsertBaseSchema = createInsertSchema(versions, {
@@ -73,25 +73,24 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
   metadata: planVersionMetadataSchema,
   currency: currencySchema,
   billingConfig: billingConfigSchema,
-  trialDays: z.coerce.number(),
+  trialDays: z.coerce.number().int().min(0).default(0),
 })
-  .omit({
-    createdAtM: true,
-    updatedAtM: true,
-  })
-  .partial({
-    projectId: true,
-    id: true,
-  })
   .required({
     planId: true,
     currency: true,
     paymentProvider: true,
     paymentMethodRequired: true,
-    trialDays: true,
     whenToBill: true,
     billingConfig: true,
     autoRenew: true,
+  })
+  .partial({
+    projectId: true,
+    id: true,
+  })
+  .omit({
+    createdAtM: true,
+    updatedAtM: true,
   })
 
 export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>

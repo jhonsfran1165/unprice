@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table"
 
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Badge } from "@unprice/ui/badge"
 import { Checkbox } from "@unprice/ui/checkbox"
 import { Separator } from "@unprice/ui/separator"

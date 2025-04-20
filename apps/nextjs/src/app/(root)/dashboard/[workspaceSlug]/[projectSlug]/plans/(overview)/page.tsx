@@ -7,6 +7,7 @@ import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
+import { entitlementFlag } from "~/lib/flags"
 import { api } from "~/trpc/server"
 import { PlanDialog } from "../_components/plan-dialog"
 import { PlanCard, PlanCardSkeleton } from "./_components/plan-card"
@@ -17,11 +18,13 @@ export default async function PlansPage(props: {
 }) {
   const { projectSlug, workspaceSlug } = props.params
 
-  const { plans, error } = await api.plans.listByActiveProject({})
+  const isPlansEnabled = await entitlementFlag("plans")
 
-  if (!error?.access) {
-    return <UpgradePlanError error={error} />
+  if (!isPlansEnabled) {
+    return <UpgradePlanError />
   }
+
+  const { plans } = await api.plans.listByActiveProject({})
 
   return (
     <DashboardShell

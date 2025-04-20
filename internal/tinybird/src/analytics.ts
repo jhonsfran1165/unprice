@@ -104,7 +104,7 @@ export class Analytics {
     })
   }
 
-  public get getFeaturesUsage() {
+  public get getFeaturesUsagePeriod() {
     return this.readClient.buildPipe({
       pipe: "get_feature_usage_period",
       parameters: z.object({
@@ -112,8 +112,8 @@ export class Analytics {
         customerId: z.string().optional(),
         featureSlug: z.string().optional(),
         entitlementId: z.string().optional(),
-        start: z.number().optional(),
-        end: z.number().optional(),
+        start: z.number(),
+        end: z.number(),
       }),
       data: z.object({
         projectId: z.string(),
@@ -123,6 +123,35 @@ export class Analytics {
         count: z.number(),
         sum: z.number(),
         max: z.number(),
+        last_during_period: z.number(),
+      }),
+      opts: {
+        cache: "no-store",
+        // cache for 1 day
+        // next: {
+        //   revalidate: 60 * 60 * 24, // 1 day
+        // },
+      },
+    })
+  }
+
+  public get getFeaturesUsageTotal() {
+    return this.readClient.buildPipe({
+      pipe: "get_feature_usage_total",
+      parameters: z.object({
+        projectId: z.string(),
+        customerId: z.string(),
+        featureSlug: z.string().optional(),
+        entitlementId: z.string().optional(),
+      }),
+      data: z.object({
+        projectId: z.string(),
+        customerId: z.string(),
+        entitlementId: z.string().optional(),
+        featureSlug: z.string(),
+        count_all: z.number(),
+        sum_all: z.number(),
+        max_all: z.number(),
         last_during_period: z.number(),
       }),
       opts: {

@@ -13,16 +13,22 @@ export const logSchema = z.discriminatedUnion("type", [
     time: z.number(),
     message: z.string(),
     context: z.record(z.any()).optional(),
+    environment: z.enum(["development", "test", "production", "preview"]).default("development"),
+    application: z.string(),
   }),
   z.object({
     type: z.literal("metric"),
     requestId: z.string(),
     time: z.number(),
     metric: metricSchema,
+    environment: z.enum(["development", "test", "production", "preview"]).default("development"),
+    application: z.string(),
   }),
 ])
 
-export class Log<TLog extends z.infer<typeof logSchema>> {
+export type LogSchema = z.infer<typeof logSchema>
+
+export class Log<TLog extends LogSchema = LogSchema> {
   public readonly log: TLog
 
   constructor(log: TLog) {

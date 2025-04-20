@@ -98,7 +98,7 @@ if [ "$MODE_ID" = "dev" ]; then
 
   cd ../../
 
-  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" UPSTASH_REDIS_REST_URL="$REDIS_URL" UPSTASH_REDIS_REST_TOKEN="$REDIS_TOKEN" pnpm --filter jobs run dev:trigger
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" pnpm --filter jobs run dev:trigger
 
 
 elif [ "$MODE_ID" = "preview" ]; then

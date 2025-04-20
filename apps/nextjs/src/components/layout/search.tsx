@@ -37,6 +37,7 @@ export function SearchTool({
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && e.metaKey) {
+        e.preventDefault()
         setOpen((open) => !open)
       }
     }

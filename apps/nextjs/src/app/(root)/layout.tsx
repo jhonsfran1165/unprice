@@ -6,6 +6,7 @@ import { ViewTransitions } from "next-view-transitions"
 import "~/styles/globals.css"
 import "~/styles/prosemirror.css"
 
+import { VercelToolbar } from "@vercel/toolbar/next"
 import { ThemeProvider } from "~/components/layout/theme-provider"
 import { siteConfig } from "~/constants/layout"
 import { fontMapper } from "~/styles/fonts"
@@ -41,6 +42,8 @@ export const viewport: Viewport = {
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
+  const shouldInjectToolbar = process.env.NODE_ENV === "development"
+
   return (
     <ViewTransitions>
       <html lang="en" suppressHydrationWarning>
@@ -61,6 +64,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             {props.children}
+            {shouldInjectToolbar && <VercelToolbar />}
           </ThemeProvider>
           {/* <Analytics /> */}
           <Analytics />

@@ -2,17 +2,20 @@ import GitHub from "@auth/core/providers/github"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import type { NextAuthConfig } from "next-auth"
 
-import { and, db, eq, sql } from "@unprice/db"
-import { workspacesByUserPrepared } from "@unprice/db/queries"
+import { and, eq, sql } from "@unprice/db"
+import { db } from "@unprice/db"
+import { createWorkspacesByUserQuery } from "@unprice/db/queries"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import type { WorkspacesJWTPayload } from "@unprice/db/validators"
 
-const useSecureCookies = process.env.VERCEL_ENV === "production"
+import { env } from "./env"
+
+const useSecureCookies = env.VERCEL_ENV === "production"
 const log = console // TODO: create a logger for this
 
-export const authConfig = {
-  trustHost: Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
+export const authConfig: NextAuthConfig = {
+  trustHost: Boolean(env.VERCEL_ENV) || env.NODE_ENV === "development",
   logger: {
     debug: (message, metadata) => log.debug(message, { metadata }),
     error: (error) => log.error(error),
@@ -24,7 +27,7 @@ export const authConfig = {
       log.warn(message)
     },
   },
-  redirectProxyUrl: process.env.AUTH_REDIRECT_PROXY_URL,
+  redirectProxyUrl: env.AUTH_REDIRECT_PROXY_URL,
   session: {
     strategy: "jwt",
     updateAge: 24 * 60 * 60, // 24 hours for update session
@@ -45,6 +48,7 @@ export const authConfig = {
   },
   debug: process.env.NODE_ENV === "development",
   adapter: {
+    // @ts-expect-error - Type mismatch between DrizzleAdapter and the database connection
     ...DrizzleAdapter(db.$primary, {
       usersTable: schema.users,
       accountsTable: schema.accounts,
@@ -155,7 +159,7 @@ export const authConfig = {
           return token
         }
 
-        const userWithWorkspaces = await workspacesByUserPrepared.execute({
+        const userWithWorkspaces = await createWorkspacesByUserQuery(db).execute({
           userId,
         })
 

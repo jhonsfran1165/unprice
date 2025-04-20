@@ -40,11 +40,12 @@ export const nullableJsonToString = anyObject.nullable().transform((s) => {
   }
 })
 
+export const stringToUInt32 = z.union([z.string(), z.number()]).transform((s) => Number(s))
 export const booleanToUInt8 = z.boolean().transform((b) => (b ? 1 : 0))
 
 export const featureVerificationSchemaV1 = z.object({
   projectId: z.string(),
-  planVersionFeatureId: z.string(),
+  featurePlanVersionId: z.string(),
   subscriptionItemId: z.string().nullable(),
   subscriptionPhaseId: z.string().nullable(),
   subscriptionId: z.string().nullable(),
@@ -62,12 +63,11 @@ export const featureVerificationSchemaV1 = z.object({
   featureSlug: z.string(),
   customerId: z.string(),
   requestId: z.string(),
-  workspaceId: z.string(),
-  metadata: nullableJsonToString.default(null),
-  __tb__deployment: z.string().optional(),
+  metadata: z.string().nullable(),
 })
 
 export const featureUsageSchemaV1 = z.object({
+  idempotenceKey: z.string(),
   subscriptionItemId: z.string().nullable(),
   subscriptionPhaseId: z.string().nullable(),
   subscriptionId: z.string().nullable(),
@@ -79,16 +79,15 @@ export const featureUsageSchemaV1 = z.object({
     .default(Date.now())
     .describe("timestamp of when this usage record should be billed"),
   projectId: z.string(),
-  planVersionFeatureId: z.string(),
-  usage: z.number(),
+  featurePlanVersionId: z.string(),
+  usage: stringToUInt32,
   createdAt: z
     .number()
     .default(Date.now())
     .describe("timestamp of when this usage record was created"),
-  workspaceId: z.string(),
   requestId: z.string(),
-  deleted: booleanToUInt8.default(false).describe("1 if the usage record was deleted, 0 otherwise"),
-  metadata: nullableJsonToString.default(null),
+  deleted: z.number().int().min(0).max(1).default(0),
+  metadata: z.string().nullable(),
 })
 
 export const auditLogSchemaV1 = z.object({

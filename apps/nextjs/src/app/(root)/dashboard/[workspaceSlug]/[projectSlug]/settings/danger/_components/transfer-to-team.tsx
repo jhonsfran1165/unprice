@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation"
 import { use } from "react"
 
-import type { RouterOutputs } from "@unprice/api"
 import type { ProjectTransferToWorkspace } from "@unprice/db/validators"
 import { transferToWorkspaceSchema } from "@unprice/db/validators"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Button } from "@unprice/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import {

@@ -1,4 +1,4 @@
-import { env } from "./env.mjs"
+import { env } from "./env"
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {

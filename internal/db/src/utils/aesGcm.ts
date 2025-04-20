@@ -1,4 +1,4 @@
-import { base64 } from "./base64"
+import { base64 } from "./hash"
 
 export class AesGCM {
   public readonly key: CryptoKey
@@ -11,7 +11,7 @@ export class AesGCM {
   static async withBase64Key(base64Key: string): Promise<AesGCM> {
     const key = await crypto.subtle.importKey(
       "raw",
-      base64.decode(base64Key),
+      base64.decodeBase64(base64Key),
       { name: AesGCM.algorithm, length: 256 },
       false,
       ["encrypt", "decrypt"]
@@ -31,17 +31,17 @@ export class AesGCM {
     )
 
     // @ts-ignore
-    return { iv: base64.encode(iv), ciphertext: base64.encode(ciphertext) }
+    return { iv: base64.encodeBase64(iv), ciphertext: base64.encodeBase64(ciphertext) }
   }
 
   public async decrypt(req: { iv: string; ciphertext: string }): Promise<string> {
     const decryptedBuffer = await crypto.subtle.decrypt(
       {
         name: AesGCM.algorithm,
-        iv: base64.decode(req.iv),
+        iv: base64.decodeBase64(req.iv),
       },
       this.key,
-      base64.decode(req.ciphertext)
+      base64.decodeBase64(req.ciphertext)
     )
 
     return new TextDecoder().decode(decryptedBuffer)

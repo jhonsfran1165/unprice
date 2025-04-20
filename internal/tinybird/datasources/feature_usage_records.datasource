@@ -1,3 +1,5 @@
+TOKEN "web-apps" APPEND
+
 DESCRIPTION >
     This table stores features usage metrics per customer, entitlement, project and date, optimized for time-series analytics with deduplication support
 
@@ -9,10 +11,10 @@ SCHEMA >
     `customerId` String `json:$.customerId`,
     `usage` Int32 `json:$.usage`,
     `requestId` String `json:$.requestId`,
-    `workspaceId` String `json:$.workspaceId`,
+    `idempotenceKey` String `json:$.idempotenceKey`,
     `projectId` String `json:$.projectId`,
     `entitlementId` String `json:$.entitlementId`,
-    `planVersionFeatureId` String `json:$.planVersionFeatureId`,
+    `featurePlanVersionId` String `json:$.featurePlanVersionId`,
     `subscriptionId` Nullable(String) `json:$.subscriptionId`,
     `subscriptionItemId` Nullable(String) `json:$.subscriptionItemId`,
     `subscriptionPhaseId` Nullable(String) `json:$.subscriptionPhaseId`,
@@ -23,6 +25,6 @@ SCHEMA >
 ENGINE ReplacingMergeTree
 ENGINE_IS_DELETED deleted
 ENGINE_PARTITION_KEY toYYYYMM(fromUnixTimestamp64Milli(timestamp))
-ENGINE_SORTING_KEY requestId
-ENGINE_TTL toDate(fromUnixTimestamp64Milli(timestamp)) + INTERVAL 12 MONTH
+ENGINE_SORTING_KEY idempotenceKey
+ENGINE_TTL toDate(fromUnixTimestamp64Milli(timestamp)) + INTERVAL 6 MONTH
 ENGINE_VER timestamp

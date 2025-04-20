@@ -1,9 +1,9 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
-import { and, db, eq } from "@unprice/db"
+import { and, eq } from "@unprice/db"
+import { db } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
-import { ratelimitOrThrow } from "~/lib/ratelimit"
 import { api } from "~/trpc/server"
 
 export const runtime = "edge"
@@ -15,8 +15,6 @@ export const preferredRegion = ["fra1"]
 // then we redirect the user to the success URL
 export async function GET(req: NextRequest) {
   try {
-    await ratelimitOrThrow(req, "stripe-signup")
-
     const sessionId = req.nextUrl.searchParams.get("session_id")
     const projId = req.nextUrl.searchParams.get("project_id")
 

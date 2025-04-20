@@ -1,5 +1,4 @@
 import * as currencies from "@dinero.js/currencies"
-import type { DineroSnapshot } from "dinero.js"
 import { dinero } from "dinero.js"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
@@ -9,7 +8,6 @@ import { planVersionFeatures } from "../schema/planVersionFeatures"
 import { FEATURE_TYPES_MAPS, USAGE_MODES_MAP } from "../utils"
 import { featureSelectBaseSchema } from "./features"
 import { planVersionSelectBaseSchema } from "./planVersions"
-import { planSelectBaseSchema } from "./plans"
 import {
   aggregationMethodSchema,
   tierModeSchema,
@@ -22,9 +20,21 @@ export const priceSchema = z.coerce
   .string()
   .regex(/^\d{1,10}(\.\d{1,10})?$/, "Invalid price format")
 
+export const dineroSnapshotSchema = z.object({
+  amount: z.number(),
+  currency: z.object({
+    code: z.string(),
+    base: z.union([z.number(), z.number().array().readonly()]),
+    exponent: z.number(),
+  }),
+  scale: z.number(),
+})
+
+export type DineroSnapshot = z.infer<typeof dineroSnapshotSchema>
+
 export const dineroSchema = z
   .object({
-    dinero: z.custom<DineroSnapshot<number>>(),
+    dinero: dineroSnapshotSchema,
     displayAmount: priceSchema,
   })
   .transform((data, ctx) => {
@@ -451,16 +461,7 @@ export const planVersionFeatureDragDropSchema = planVersionFeatureSelectBaseSche
   feature: featureSelectBaseSchema,
 })
 
-// export const planVersionFeatureExtendedSchema = planVersionFeatureSelectBaseSchema.extend({
-//   feature: featureSelectBaseSchema,
-//   planVersion: planVersionSelectBaseSchema.extend({
-//     plan: planSelectBaseSchema,
-//   }),
-//   project: projectSelectBaseSchema,
-// })
-
 export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
-  plan: planSelectBaseSchema,
   planFeatures: z.array(
     planVersionFeatureSelectBaseSchema.extend({
       feature: featureSelectBaseSchema,
@@ -468,10 +469,8 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
   ),
 })
 
-export type PlanVersionFeature = z.infer<typeof planVersionFeatureInsertBaseSchema>
-
-// export type PlanVersionFeatureExtended = z.infer<typeof planVersionFeatureExtendedSchema>
-
+export type PlanVersionFeature = z.infer<typeof planVersionFeatureSelectBaseSchema>
+export type PlanVersionFeatureInsert = z.infer<typeof planVersionFeatureInsertBaseSchema>
 export type PlanVersionFeatureDragDrop = z.infer<typeof planVersionFeatureDragDropSchema>
 
 export type PlanVersionExtended = z.infer<typeof planVersionExtendedSchema>

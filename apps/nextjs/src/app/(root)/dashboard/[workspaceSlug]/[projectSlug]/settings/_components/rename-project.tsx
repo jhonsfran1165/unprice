@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation"
 import { use } from "react"
 
-import type { RouterOutputs } from "@unprice/api"
 import type { RenameProject } from "@unprice/db/validators"
 import { renameProjectSchema } from "@unprice/db/validators"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Button } from "@unprice/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"

@@ -2,41 +2,40 @@
   "tinybird.dataProjectSubdir": "internal/tinybird",
   "tinybird.venvActivate": "bin/activate",
   "tinybird.venv": ".venv",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "never",
+    "source.sortImports": "never",
+    "source.fixAll": "explicit",
+    "quickfix.biome": "explicit",
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "next/router.d.ts",
+    "next/dist/client/router.d.ts"
+  ],
+  "terminal.integrated.localEchoStyle": "dim",
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
   "[json]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "editor.defaultFormatter": "biomejs.biome",
-  "editor.formatOnSave": true,
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
-    "quickfix.biome": "explicit",
-    "source.fixAll.eslint": "explicit",
-    "source.organizeImports.biome": "explicit"
-  },
-  "[javascript]": {
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit",
-      "source.fixAll": "explicit"
-    },
-    "editor.formatOnSave": true
-  },
-  "[typescript]": {
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit",
-      "source.fixAll": "explicit"
-    },
-    "editor.formatOnSave": true
-  },
-  "[typescriptreact]": {
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit",
-      "source.fixAll": "explicit"
-    },
-    "editor.formatOnSave": true
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
   },
   "cSpell.words": [
     "apikey",
@@ -106,8 +105,21 @@
     "**/tsconfig.tsbuildinfo": true,
     "**/.venv": true
   },
-  "[html]": {
-    "editor.defaultFormatter": "vscode.html-language-features"
+  "typescript.tsserver.maxTsServerMemory": 8192,
+  "typescript.tsserver.watchOptions": {
+    "watchFile": "useFsEvents",
+    "watchDirectory": "useFsEvents",
+    "fallbackPolling": "dynamicPriorityPolling"
   },
-  "CodeGPT.apiKey": "Ollama"
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.hg/store/**": true,
+    "**/dist/**": true,
+    "**/.turbo/**": true,
+    "**/coverage/**": true
+  },
+  "typescript.preferences.importModuleSpecifier": "shortest"
 }

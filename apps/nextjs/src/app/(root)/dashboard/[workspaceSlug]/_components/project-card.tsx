@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Card, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import { cn } from "@unprice/ui/utils"
 import { SuperLink } from "~/components/super-link"

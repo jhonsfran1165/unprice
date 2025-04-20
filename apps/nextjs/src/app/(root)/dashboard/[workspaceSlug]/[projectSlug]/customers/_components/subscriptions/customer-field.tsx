@@ -25,6 +25,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { cn } from "@unprice/ui/utils"
 import { CheckIcon, ChevronDown } from "lucide-react"
 import { useState } from "react"
+import { CopyButton } from "~/components/copy-button"
 import { FilterScroll } from "~/components/filter-scroll"
 import { api } from "~/trpc/client"
 
@@ -55,7 +56,12 @@ export default function CustomerFormField({
       name="customerId"
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>Customer</FormLabel>
+          <FormLabel>
+            Customer{" "}
+            {selectedCustomer && (
+              <CopyButton value={selectedCustomer.id ?? ""} className="size-3" />
+            )}
+          </FormLabel>
           <FormDescription>Select the customer to create the subscription</FormDescription>
           <Popover
             modal={true}

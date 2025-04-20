@@ -1,6 +1,6 @@
 {
-  "id": "1151e487-e282-4106-8a11-423ac05c0f3c",
-  "prevId": "2a738b6f-fdaf-4bba-a99f-4e5a957965c7",
+  "id": "2d3fa7d1-bf0c-42d3-a265-deb5e3e2107d",
+  "prevId": "a61fe727-a7c9-46f8-82d6-5d04a16b3232",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -644,11 +644,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "subscription_item_id": {
-          "name": "subscription_item_id",
+        "subscription_id": {
+          "name": "subscription_id",
           "type": "varchar(36)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "feature_plan_version_id": {
           "name": "feature_plan_version_id",
@@ -656,9 +656,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "units": {
-          "name": "units",
-          "type": "integer",
+        "subscription_item_id": {
+          "name": "subscription_item_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subscription_phase_id": {
+          "name": "subscription_phase_id",
+          "type": "varchar(36)",
           "primaryKey": false,
           "notNull": false
         },
@@ -668,32 +674,25 @@
           "primaryKey": false,
           "notNull": false
         },
-        "usage": {
-          "name": "usage",
+        "units": {
+          "name": "units",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "feature_slug": {
-          "name": "feature_slug",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "feature_type": {
-          "name": "feature_type",
-          "type": "feature_types",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "aggregation_method": {
-          "name": "aggregation_method",
-          "type": "aggregation_method",
-          "typeSchema": "public",
+        "usage": {
+          "name": "usage",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": true,
-          "default": "'sum'"
+          "default": "'0'"
+        },
+        "accumulated_usage": {
+          "name": "accumulated_usage",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
         },
         "realtime": {
           "name": "realtime",
@@ -704,22 +703,43 @@
         },
         "type": {
           "name": "type",
-          "type": "text",
+          "type": "feature_version_types",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
           "default": "'feature'"
         },
-        "start_at": {
-          "name": "start_at",
+        "valid_from": {
+          "name": "valid_from",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
-        "end_at": {
-          "name": "end_at",
+        "valid_to": {
+          "name": "valid_to",
           "type": "bigint",
           "primaryKey": false,
           "notNull": false
+        },
+        "buffer_period_days": {
+          "name": "buffer_period_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "reseted_at": {
+          "name": "reseted_at",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
         },
         "is_custom": {
           "name": "is_custom",
@@ -793,6 +813,36 @@
           "tableTo": "unprice_customers",
           "columnsFrom": [
             "customer_id",
+            "project_id"
+          ],
+          "columnsTo": [
+            "id",
+            "project_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "subscription_phase_id_fkey": {
+          "name": "subscription_phase_id_fkey",
+          "tableFrom": "unprice_customer_entitlements",
+          "tableTo": "unprice_subscription_phases",
+          "columnsFrom": [
+            "subscription_phase_id",
+            "project_id"
+          ],
+          "columnsTo": [
+            "id",
+            "project_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "subscription_id_fkey": {
+          "name": "subscription_id_fkey",
+          "tableFrom": "unprice_customer_entitlements",
+          "tableTo": "unprice_subscriptions",
+          "columnsFrom": [
+            "subscription_id",
             "project_id"
           ],
           "columnsTo": [
@@ -939,14 +989,14 @@
           "name": "active",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": true
         },
         "is_main": {
           "name": "is_main",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": false
         },
         "default_currency": {
@@ -1681,7 +1731,7 @@
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "metadata": {
           "name": "metadata",
@@ -1809,7 +1859,7 @@
           "name": "features_config",
           "type": "json",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "metadata": {
           "name": "metadata",
@@ -1991,6 +2041,13 @@
           "notNull": false,
           "default": true
         },
+        "flat_price": {
+          "name": "flat_price",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
         "plan_version_status": {
           "name": "plan_version_status",
           "type": "plan_version_status",
@@ -2037,14 +2094,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "plan_type": {
-          "name": "plan_type",
-          "type": "plan_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'recurring'"
-        },
         "due_behaviour": {
           "name": "due_behaviour",
           "type": "due_behaviour",
@@ -2060,27 +2109,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "billing_interval": {
-          "name": "billing_interval",
-          "type": "billing_interval",
-          "typeSchema": "public",
+        "billing_config": {
+          "name": "billing_config",
+          "type": "json",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'month'"
-        },
-        "billing_interval_count": {
-          "name": "billing_interval_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "billing_anchor": {
-          "name": "billing_anchor",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
+          "notNull": true
         },
         "when_to_bill": {
           "name": "when_to_bill",
@@ -2094,7 +2127,7 @@
           "name": "grace_period",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": 0
         },
         "collection_method": {
@@ -2406,6 +2439,12 @@
           "notNull": true,
           "default": false
         },
+        "payment_method_id": {
+          "name": "payment_method_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "status": {
           "name": "status",
           "type": "invoice_status",
@@ -2520,14 +2559,14 @@
           "notNull": true,
           "default": "'charge_automatically'"
         },
-        "invoice_id": {
-          "name": "invoice_id",
+        "invoice_payment_provider_id": {
+          "name": "invoice_payment_provider_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "invoice_url": {
-          "name": "invoice_url",
+        "invoice_payment_provider_url": {
+          "name": "invoice_payment_provider_url",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -2694,6 +2733,12 @@
           "type": "varchar(36)",
           "primaryKey": false,
           "notNull": true
+        },
+        "subscription_id": {
+          "name": "subscription_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
@@ -2745,6 +2790,21 @@
           "tableTo": "unprice_subscription_phases",
           "columnsFrom": [
             "subscription_phase_id",
+            "project_id"
+          ],
+          "columnsTo": [
+            "id",
+            "project_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "subscription_items_subscription_id_fkey": {
+          "name": "subscription_items_subscription_id_fkey",
+          "tableFrom": "unprice_subscription_items",
+          "tableTo": "unprice_subscriptions",
+          "columnsFrom": [
+            "subscription_id",
             "project_id"
           ],
           "columnsTo": [
@@ -2819,6 +2879,13 @@
         },
         "trial_days": {
           "name": "trial_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "billing_anchor": {
+          "name": "billing_anchor",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -2964,20 +3031,20 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'active'"
+          "default": "'idle'"
         },
         "active": {
           "name": "active",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
-          "default": true
+          "default": false
         },
         "plan_slug": {
           "name": "plan_slug",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "'FREE'"
         },
         "timezone": {
@@ -2986,6 +3053,19 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'UTC'"
+        },
+        "locked": {
+          "name": "locked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "locked_at_m": {
+          "name": "locked_at_m",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
         },
         "current_cycle_start_at_m": {
           "name": "current_cycle_start_at_m",
@@ -2999,8 +3079,20 @@
           "primaryKey": false,
           "notNull": true
         },
-        "next_invoice_at_m": {
-          "name": "next_invoice_at_m",
+        "previous_cycle_start_at_m": {
+          "name": "previous_cycle_start_at_m",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "previous_cycle_end_at_m": {
+          "name": "previous_cycle_end_at_m",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "invoice_at_m": {
+          "name": "invoice_at_m",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true,
@@ -3018,6 +3110,20 @@
           "type": "bigint",
           "primaryKey": false,
           "notNull": false
+        },
+        "last_renew_at_m": {
+          "name": "last_renew_at_m",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "last_invoice_at_m": {
+          "name": "last_invoice_at_m",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "metadata": {
           "name": "metadata",
@@ -3492,6 +3598,7 @@
       "name": "subscription_status",
       "schema": "public",
       "values": [
+        "idle",
         "renewing",
         "changing",
         "canceling",

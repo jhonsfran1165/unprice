@@ -4,10 +4,17 @@ import { z } from "zod"
 
 import type { Result } from "@unprice/error"
 import { subscriptionPhases, subscriptions } from "../../schema/subscriptions"
+import { customerEntitlementSchema, customerSelectSchema } from "../customer"
+import { featureSelectBaseSchema } from "../features"
 import { planVersionSelectBaseSchema } from "../planVersions"
+import { projectSelectBaseSchema } from "../project"
 import { UnPriceCalculationError } from "./../errors"
 import type { PlanVersionExtended } from "./../planVersionFeatures"
-import { configPackageSchema, planVersionExtendedSchema } from "./../planVersionFeatures"
+import {
+  configPackageSchema,
+  planVersionExtendedSchema,
+  planVersionFeatureSelectBaseSchema,
+} from "./../planVersionFeatures"
 import { subscriptionStatusSchema } from "./../shared"
 import {
   type SubscriptionItem,
@@ -72,6 +79,7 @@ export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   metadata: subscriptionMetadataSchema,
   timezone: z.string().min(1),
   status: subscriptionStatusSchema,
+  planSlug: z.string().min(1),
 })
 
 export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhases, {
@@ -234,6 +242,26 @@ export const subscriptionChangePlanSchema = subscriptionSelectSchema
     config: subscriptionItemsConfigSchema.optional(),
     whenToChange: z.enum(["immediately", "end_of_cycle"]).optional(),
   })
+
+export const getActivePhaseResponseSchema = subscriptionPhaseSelectSchema.extend({
+  planVersion: planVersionSelectBaseSchema,
+  customerEntitlements: z.array(
+    customerEntitlementSchema.extend({
+      featurePlanVersion: planVersionFeatureSelectBaseSchema.extend({
+        feature: featureSelectBaseSchema,
+      }),
+    })
+  ),
+})
+
+export const getSubscriptionResponseSchema = subscriptionSelectSchema.extend({
+  project: projectSelectBaseSchema.pick({
+    enabled: true,
+  }),
+  customer: customerSelectSchema.pick({
+    active: true,
+  }),
+})
 
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>

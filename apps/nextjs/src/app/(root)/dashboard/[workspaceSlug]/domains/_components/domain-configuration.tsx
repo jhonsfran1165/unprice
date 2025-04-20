@@ -1,6 +1,6 @@
 import { use } from "react"
 
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Skeleton } from "@unprice/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
 import { cn } from "@unprice/ui/utils"

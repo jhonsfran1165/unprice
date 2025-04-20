@@ -11,6 +11,7 @@ export const WORKSPACE_NAV: DashboardRoute[] = [
     icon: Globe,
     name: "Domains",
     href: "/domains",
+    slug: "domains",
   },
   {
     icon: Settings,

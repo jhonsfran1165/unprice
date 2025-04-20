@@ -1,6 +1,6 @@
 import { TooltipProvider } from "@unprice/ui/tooltip"
 
-import { allEndpointsProcedures } from "@unprice/api/routes"
+import { allEndpointsProcedures } from "@unprice/trpc/routes"
 import { Provider } from "jotai"
 import { cookies } from "next/headers"
 import { Fragment, type ReactNode } from "react"

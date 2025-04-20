@@ -1,7 +1,7 @@
 import { ExternalLink, Globe } from "lucide-react"
 import { Suspense } from "react"
 
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Badge } from "@unprice/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@unprice/ui/card"
 
@@ -10,17 +10,20 @@ import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
+import { entitlementFlag } from "~/lib/flags"
 import { api } from "~/trpc/server"
 import DomainConfiguration from "./_components/domain-configuration"
 import { DomainDialog } from "./_components/domain-dialog"
 import { VerifyDomainButton } from "./_components/domain-verify-button"
 
 export default async function PageDomains() {
-  const { domains, error } = await api.domains.getAllByActiveWorkspace()
+  const isDomainsEnabled = await entitlementFlag("domains")
 
-  if (!error?.access) {
-    return <UpgradePlanError error={error} />
+  if (!isDomainsEnabled) {
+    return <UpgradePlanError />
   }
+
+  const { domains } = await api.domains.getAllByActiveWorkspace()
 
   return (
     <DashboardShell

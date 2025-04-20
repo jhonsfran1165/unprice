@@ -7,6 +7,7 @@ import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
+import { entitlementFlag } from "~/lib/flags"
 import { api } from "~/trpc/server"
 import { PageCard, PageCardSkeleton } from "../_components/page-card"
 import { PageDialog } from "../_components/page-dialog"
@@ -17,11 +18,13 @@ export default async function PageOverviewPage(props: {
 }) {
   const { projectSlug, workspaceSlug } = props.params
 
-  const { pages, error } = await api.pages.listByActiveProject({})
+  const isPagesEnabled = await entitlementFlag("pages")
 
-  if (!error?.access) {
-    return <UpgradePlanError error={error} />
+  if (!isPagesEnabled) {
+    return <UpgradePlanError />
   }
+
+  const { pages } = await api.pages.listByActiveProject({})
 
   return (
     <DashboardShell

@@ -1,0 +1,122 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "api",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-19",
+  "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
+  "env": {
+    "prod": {
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1.0 // 100% of requests
+      },
+      "route": {
+        "pattern": "api.unprice.dev",
+        "custom_domain": true
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "usagelimit",
+            "class_name": "DurableObjectUsagelimiter"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["DurableObjectUsagelimiter"]
+        }
+      ]
+    },
+    "preview": {
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1.0 // 100% of requests
+      },
+      "route": {
+        "pattern": "preview-api.unprice.dev",
+        "custom_domain": true
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "usagelimit",
+            "class_name": "DurableObjectUsagelimiter"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["DurableObjectUsagelimiter"]
+        }
+      ]
+    },
+    "dev": {
+      "route": {
+        "pattern": "localhost:8787",
+        "custom_domain": false
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "usagelimit",
+            "class_name": "DurableObjectUsagelimiter"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["DurableObjectUsagelimiter"]
+        }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "type": "Text",
+      "globs": ["**/*.sql"],
+      "fallthrough": true
+    }
+  ]
+  /**
+   * Smart Placement
+   * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
+   */
+  // "placement": { "mode": "smart" },
+
+  /**
+   * Bindings
+   * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
+   * databases, object storage, AI inference, real-time communication and more.
+   * https://developers.cloudflare.com/workers/runtime-apis/bindings/
+   */
+
+  /**
+   * Environment Variables
+   * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
+   */
+  // "vars": { "MY_VARIABLE": "production_value" },
+  /**
+   * Note: Use secrets to store sensitive data.
+   * https://developers.cloudflare.com/workers/configuration/secrets/
+   */
+
+  /**
+   * Static Assets
+   * https://developers.cloudflare.com/workers/static-assets/binding/
+   */
+  // "assets": { "directory": "./public/", "binding": "ASSETS" },
+
+  /**
+   * Service Bindings (communicate between multiple Workers)
+   * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
+   */
+  // "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
+}

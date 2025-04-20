@@ -2,7 +2,7 @@ import { Pool, neonConfig } from "@neondatabase/serverless"
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
 import { withReplicas } from "drizzle-orm/pg-core"
 import ws from "ws"
-import { env } from "../env.mjs"
+import { env } from "../env"
 import * as schema from "./schema"
 
 neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket : ws
@@ -33,7 +33,7 @@ export const primary = drizzleNeon(
   }),
   {
     schema: schema,
-    logger: env.DRIZZLE_LOG === "true",
+    logger: env.DRIZZLE_LOG,
   }
 )
 
@@ -43,7 +43,7 @@ export const read1 = drizzleNeon(
   }),
   {
     schema: schema,
-    logger: env.DRIZZLE_LOG === "true",
+    logger: env.DRIZZLE_LOG,
   }
 )
 
@@ -53,7 +53,7 @@ export const read2 = drizzleNeon(
   }),
   {
     schema: schema,
-    logger: env.DRIZZLE_LOG === "true",
+    logger: env.DRIZZLE_LOG,
   }
 )
 
@@ -62,8 +62,8 @@ export const db =
     ? withReplicas(primary, [read1, read2])
     : withReplicas(primary, [primary])
 
-// TODO: add custom logger https://orm.drizzle.team/docs/goodies#logging
 export * from "drizzle-orm"
 export { pgTableProject as tableCreator } from "./utils"
 export type Database = typeof db
 export type TransactionDatabase = Parameters<Parameters<Database["transaction"]>[0]>[0]
+export { createConnection } from "./createConnection"

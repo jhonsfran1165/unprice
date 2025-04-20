@@ -1,0 +1,35 @@
+{
+  "name": "@unprice/api",
+  "private": false,
+  "version": "0.0.9",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "license": "AGPL-3.0",
+  "files": ["./dist/**"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": ["unprice", "client", "api"],
+  "bugs": {
+    "url": "https://github.com/jhonsfran1165/unprice/issues"
+  },
+  "homepage": "https://github.com/jhonsfran1165/unprice#readme",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "generate": "openapi-typescript http://localhost:8787/openapi.json -o ./src/openapi.d.ts",
+    "build:generate": "rm -rf dist && pnpm generate && tsup",
+    "build": "rm -rf dist && tsup"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "20.11.24",
+    "@unprice/tsconfig": "^0.1.0",
+    "openapi-typescript": "7.0.0-next.7",
+    "tsup": "^8.2.4",
+    "typescript": "^5.3.3",
+    "vitest": "^2.0.5"
+  }
+}

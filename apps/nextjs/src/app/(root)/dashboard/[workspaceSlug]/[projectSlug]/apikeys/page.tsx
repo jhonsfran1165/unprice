@@ -5,6 +5,7 @@ import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
+import { entitlementFlag } from "~/lib/flags"
 import { filtersDataTableCache } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
 import NewApiKeyDialog from "./_components/new-api-key-dialog"
@@ -16,12 +17,14 @@ export default async function ApiKeysPage(props: {
   params: { projectSlug: string; workspaceSlug: string }
   searchParams: SearchParams
 }) {
-  const filters = filtersDataTableCache.parse(props.searchParams)
-  const { apikeys, pageCount, error } = await api.apikeys.listByActiveProject(filters)
+  const isApiKeysEnabled = await entitlementFlag("apikeys")
 
-  if (!error?.access) {
-    return <UpgradePlanError error={error} />
+  if (!isApiKeysEnabled) {
+    return <UpgradePlanError />
   }
+
+  const filters = filtersDataTableCache.parse(props.searchParams)
+  const { apikeys, pageCount } = await api.apikeys.listByActiveProject(filters)
 
   return (
     <DashboardShell

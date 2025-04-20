@@ -3,7 +3,7 @@ import { boolean, json, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-cor
 import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
-import { timestamps } from "../utils/fields.sql"
+import { timestamps } from "../utils/fields"
 import { projectID } from "../utils/sql"
 import type { planMetadataSchema } from "../validators"
 import { versions } from "./planVersions"

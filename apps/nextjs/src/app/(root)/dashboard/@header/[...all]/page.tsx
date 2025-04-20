@@ -2,10 +2,12 @@ import { getSession } from "@unprice/auth/server-rsc"
 import { isSlug } from "@unprice/db/utils"
 import { Separator } from "@unprice/ui/separator"
 import { Fragment, Suspense } from "react"
+import Flags from "~/components/layout/flags"
 import Header from "~/components/layout/header"
 import { Logo } from "~/components/layout/logo"
+import { entitlementFlag } from "~/lib/flags"
+import { unprice } from "~/lib/unprice"
 import { HydrateClient, trpc } from "~/trpc/server"
-import { Entitlements } from "../../_components/entitlements"
 import { ProjectSwitcher } from "../../_components/project-switcher"
 import { ProjectSwitcherSkeleton } from "../../_components/project-switcher-skeleton"
 import { UpdateClientCookie } from "../../_components/update-client-cookie"
@@ -34,11 +36,12 @@ export default async function Page(props: {
 
   let workspace: string | null = null
   let project: string | null = null
+  let customerEntitlements: {
+    [x: string]: boolean
+  }[] = []
 
-  let activeWorkspace: {
-    unPriceCustomerId: string
-    isInternal: boolean
-  } | null = null
+  let isMain = false
+  let customerId = ""
 
   if (isSlug(workspaceSlug) || isSlug(all.at(0))) {
     const session = await getSession()
@@ -52,21 +55,21 @@ export default async function Page(props: {
     const atw = session?.user.workspaces.find((w) => w.slug === workspace)
 
     if (atw) {
-      activeWorkspace = {
-        unPriceCustomerId: atw.unPriceCustomerId,
-        isInternal: atw.isInternal,
-      }
+      isMain = atw.isMain
+      customerId = atw.unPriceCustomerId
 
-      // prefetch entitlements
-      void trpc.customers.entitlements.prefetch(
-        {
-          customerId: activeWorkspace.unPriceCustomerId,
-          skipCache: true,
-        },
-        {
-          staleTime: 1000 * 60 * 5, // 5 minutes
-        }
-      )
+      // prefetch entitlements only for non-main workspaces
+      if (!atw.isMain) {
+        const { result: featuresResult } = await unprice.projects.getFeatures()
+
+        const features = featuresResult?.features ?? []
+
+        customerEntitlements = await Promise.all(
+          features.map(async (feature) => ({
+            [feature.slug]: await entitlementFlag(feature.slug),
+          }))
+        )
+      }
     }
   }
 
@@ -98,12 +101,11 @@ export default async function Page(props: {
             </Suspense>
           )}
 
-          {activeWorkspace && (
-            <Entitlements
-              unPriceCustomerId={activeWorkspace.unPriceCustomerId}
-              isInternal={activeWorkspace.isInternal}
-            />
-          )}
+          <Flags
+            customerEntitlements={customerEntitlements}
+            isMain={isMain}
+            customerId={customerId}
+          />
 
           {project && (
             <Fragment>

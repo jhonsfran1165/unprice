@@ -11,10 +11,3 @@ jobs:
   build-lint:
     uses: ./.github/workflows/job_build.yaml
     if: "contains(github.head_ref, 'renovate/')"
-    with:
-      pull_secrets: true
-      project_slug: unprice-zq-xm
-      env_slug: preview
-    secrets:
-      MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
-      MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}

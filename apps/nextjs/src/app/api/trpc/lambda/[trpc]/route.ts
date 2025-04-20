@@ -1,8 +1,8 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
 
-import { createTRPCContext } from "@unprice/api"
-import { lambdaRouter } from "@unprice/api/routes"
 import { auth } from "@unprice/auth/server"
+import { createTRPCContext } from "@unprice/trpc"
+import { lambdaRouter } from "@unprice/trpc/routes"
 
 import { CorsOptions, setCorsHeaders } from "~/app/api/_enableCors"
 

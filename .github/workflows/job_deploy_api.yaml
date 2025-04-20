@@ -1,0 +1,122 @@
+name: Deploy API Staging
+on:
+  workflow_call:
+    secrets:
+      PASSWORD_ENCRYPT:
+        required: false
+      DATABASE_URL_ENCRYPTED:
+        required: false
+      MACHINE_IDENTITY_CLIENT_ID:
+        required: true
+      MACHINE_IDENTITY_CLIENT_SECRET:
+        required: true
+    inputs:
+      env:
+        required: true
+        type: string
+
+env:
+  SKIP_ENV_VALIDATION: 1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        uses: ./.github/actions/install
+        with:
+          ts: true
+
+      - name: Check if we need to decrypt the database url
+        if: inputs.env == 'preview'
+        run: |
+          if [ -n "${{ inputs.env }}" ]; then
+            # validate that the database url is encrypted
+            if [ -z "${{ secrets.DATABASE_URL_ENCRYPTED }}" ]; then
+              echo "DATABASE_URL_ENCRYPTED is not set"
+              exit 1
+            fi
+
+            # validate that the password is set
+            if [ -z "${{ secrets.PASSWORD_ENCRYPT }}" ]; then
+              echo "PASSWORD_ENCRYPT is not set"
+              exit 1
+            fi
+          fi
+
+      - uses: cloudposse/github-action-secret-outputs@main
+        if: inputs.env == 'preview'
+        id: db-url
+        with:
+          ## PASSWORD is a gpg passphrase stored in Github Secrets.
+          secret: ${{ secrets.PASSWORD_ENCRYPT }}
+          op: decode
+          in: ${{ secrets.DATABASE_URL_ENCRYPTED }}
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: ${{ inputs.env }}
+          project-slug: "unprice-zq-xm"
+          secret-path: "/"
+          recursive: true
+
+      - name: Build
+        run: pnpm turbo run build --filter='./apps/api'
+
+      - name: Version
+        run: echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Install Wrangler
+        shell: bash
+        run: |
+          npm i -g wrangler@4.12.0
+          wrangler --version
+
+      - name: Deploy with Wrangler
+        uses: cloudflare/wrangler-action@v3.14.1
+        with:
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+          wranglerVersion: "4.12.0"
+          environment: ${{ inputs.env }}
+          packageManager: "pnpm"
+          workingDirectory: "apps/api"
+          # Pass secrets to Worker
+          secrets: |
+            CLOUDFLARE_API_TOKEN
+            TINYBIRD_TOKEN
+            TINYBIRD_URL
+            AUTH_SECRET
+            CLOUDFLARE_ZONE_ID
+            DATABASE_URL
+            DATABASE_READ1_URL
+            DATABASE_READ2_URL
+            ENCRYPTION_KEY
+            BASELIME_APIKEY
+          vars: |
+            VERSION
+            NODE_ENV
+            EMIT_METRICS_LOGS
+            DRIZZLE_LOG
+            VERCEL_ENV
+            EMIT_ANALYTICS
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ env.CLOUDFLARE_ZONE_ID }}
+          TINYBIRD_TOKEN: ${{ env.TINYBIRD_TOKEN }}
+          TINYBIRD_URL: ${{ env.TINYBIRD_URL }}
+          AUTH_SECRET: ${{ env.AUTH_SECRET }}
+          # we are passing the preview database url to the deploy action
+          DATABASE_URL: ${{ steps.db-url.outputs.out || env.DATABASE_URL }}
+          EMIT_METRICS_LOGS: ${{ env.EMIT_METRICS_LOGS }}
+          BASELIME_APIKEY: ${{ env.BASELIME_APIKEY }}
+          EMIT_ANALYTICS: ${{ env.EMIT_ANALYTICS }}
+          VERSION: ${{ env.VERSION }}
+          NODE_ENV: ${{ env.NODE_ENV }}
+          DRIZZLE_LOG: ${{ env.DRIZZLE_LOG }}
+          VERCEL_ENV: ${{ env.VERCEL_ENV }}
+          ENCRYPTION_KEY: ${{ env.ENCRYPTION_KEY }}

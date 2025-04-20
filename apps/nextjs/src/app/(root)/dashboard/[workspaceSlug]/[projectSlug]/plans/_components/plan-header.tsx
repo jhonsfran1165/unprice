@@ -1,6 +1,6 @@
 import { BadgeCheck, Plus } from "lucide-react"
 
-import type { RouterOutputs } from "@unprice/api"
+import type { RouterOutputs } from "@unprice/trpc"
 import { Badge } from "@unprice/ui/badge"
 import { Button } from "@unprice/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"

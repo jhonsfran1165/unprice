@@ -12,7 +12,7 @@ import CopyToClipboard from "./copy-to-clipboard"
 // Sample code examples for different frameworks and methods
 const codeExamples = {
   nextjs: {
-    verifyFeature: `import { Unprice } from "@unprice/unprice"
+    verifyFeature: `import { Unprice } from "@unprice/api"
 
 const unprice = new Unprice({
   token: process.env.UNPRICE_TOKEN,
@@ -29,7 +29,7 @@ if (!verifyFeature.result?.access) {
   console.error("Customer does not have access to feature")
 }
 `,
-    reportUsage: `import { Unprice } from "@unprice/unprice"
+    reportUsage: `import { Unprice } from "@unprice/api"
 
 const unprice = new Unprice({
   token: process.env.UNPRICE_TOKEN,
@@ -47,7 +47,7 @@ if (!reportUsage.result?.success) {
   console.error("Failed to report usage")
 }
 `,
-    signUp: `import { Unprice } from "@unprice/unprice"
+    signUp: `import { Unprice } from "@unprice/api"
 
 const unprice = new Unprice({
   token: process.env.UNPRICE_TOKEN,
@@ -67,7 +67,7 @@ redirect(signUp.result?.url ?? "/")
 `,
   },
   nodejs: {
-    verifyFeature: `import { Unprice } from "@unprice/unprice"
+    verifyFeature: `import { Unprice } from "@unprice/api"
 
 const unprice = new Unprice({
   token: process.env.UNPRICE_TOKEN,
@@ -84,7 +84,7 @@ if (!verifyFeature.result?.access) {
   console.error("Customer does not have access to feature")
 }
 `,
-    reportUsage: `import { Unprice } from "@unprice/unprice"
+    reportUsage: `import { Unprice } from "@unprice/api"
 
 const unprice = new Unprice({
   token: process.env.UNPRICE_TOKEN,
@@ -102,7 +102,7 @@ if (!reportUsage.result?.success) {
   console.error("Failed to report usage")
 }
 `,
-    signUp: `import { Unprice } from "@unprice/unprice"
+    signUp: `import { Unprice } from "@unprice/api"
 
 const unprice = new Unprice({
   token: process.env.UNPRICE_TOKEN,

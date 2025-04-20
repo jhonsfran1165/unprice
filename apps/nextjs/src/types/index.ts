@@ -14,6 +14,7 @@ export interface SidebarRoute {
 
 export interface DashboardRoute {
   name: string
+  slug?: string
   isNew?: boolean
   href: string
   disabled?: boolean

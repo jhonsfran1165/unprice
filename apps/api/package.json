@@ -1,0 +1,40 @@
+{
+  "name": "api",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "sh dev.sh",
+    "dev:wrangler": "wrangler dev -e dev",
+    "start": "wrangler dev -e dev",
+    "generate-types": "wrangler types",
+    "db:generate": "drizzle-kit generate",
+    "type-check": "generate-types && tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.24",
+    "@unprice/tsconfig": "workspace:^",
+    "drizzle-kit": "^0.30.5",
+    "typescript": "^5.3.3",
+    "wrangler": "^4.12.0"
+  },
+  "dependencies": {
+    "@auth/core": "^0.34.1",
+    "@chronark/zod-bird": "^0.3.10",
+    "@hono/zod-openapi": "^0.19.2",
+    "@scalar/hono-api-reference": "^0.7.2",
+    "@t3-oss/env-core": "^0.12.0",
+    "@unkey/cache": "^1.5.0",
+    "@unprice/db": "workspace:^",
+    "@unprice/error": "workspace:^",
+    "@unprice/logging": "workspace:^",
+    "@unprice/logs": "workspace:^",
+    "@unprice/metrics": "workspace:^",
+    "@unprice/services": "workspace:^",
+    "@unprice/tinybird": "workspace:^",
+    "drizzle-orm": "^0.42.0",
+    "hono": "^4.7.4",
+    "hono-party": "^0.0.6",
+    "partyserver": "^0.0.65",
+    "stoker": "^1.4.2",
+    "zod": "^3.24.2"
+  }
+}

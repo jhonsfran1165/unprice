@@ -2,23 +2,6 @@ name: Build
 
 on:
   workflow_call:
-    inputs:
-      pull_secrets:
-        type: boolean
-        default: true
-        description: Whether to pull secrets from Infisical
-      project_slug:
-        type: string
-        description: The slug of the project
-      env_slug:
-        type: string
-        description: The slug of the environment
-    secrets:
-      MACHINE_IDENTITY_CLIENT_ID:
-        required: true
-      MACHINE_IDENTITY_CLIENT_SECRET:
-        required: true
-
 
 jobs:
   build:
@@ -32,6 +15,12 @@ jobs:
         with:
           ts: "true"
           python: "false"
+
+      - name: Build API client
+        run: pnpm build --filter='./packages/api'
+        env:
+          UNPRICE_API_KEY: ""
+          NODE_ENV: test
 
       - name: Type-check
         run: pnpm typecheck

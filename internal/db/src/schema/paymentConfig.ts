@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm"
 import { boolean, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { timestamps } from "../utils/fields.sql"
+import { timestamps } from "../utils/fields"
 import { projectID } from "../utils/sql"
 import { paymentProviderEnum } from "./enums"
 import { projects } from "./projects"

@@ -1,13 +1,16 @@
 "use client"
 
-import type { RouterOutputs } from "@unprice/api"
 import {
   FEATURE_TYPES_MAPS,
   TIER_MODES_MAP,
   USAGE_MODES_MAP,
   currencySymbol,
 } from "@unprice/db/utils"
-import { calculateFreeUnits, calculatePricePerFeature } from "@unprice/db/validators"
+import {
+  type PlanVersionExtended,
+  calculateFreeUnits,
+  calculatePricePerFeature,
+} from "@unprice/db/validators"
 import { CheckIcon, HelpCircle } from "@unprice/ui/icons"
 import { Slider } from "@unprice/ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
@@ -24,7 +27,7 @@ export function PricingItem({
   noCheckIcon = false,
   className,
 }: {
-  feature: RouterOutputs["planVersions"]["getById"]["planVersion"]["planFeatures"][number]
+  feature: PlanVersionExtended["planFeatures"][number]
   withCalculator?: boolean
   onQuantityChange?: (quantity: number) => void
   noCheckIcon?: boolean
@@ -37,7 +40,8 @@ export function PricingItem({
   const { err, val: pricePerFeature } = useMemo(
     () =>
       calculatePricePerFeature({
-        feature: feature,
+        config: feature.config!,
+        featureType: feature.featureType,
         quantity: quantityDebounce,
       }),
     [quantityDebounce, feature.id]
@@ -61,7 +65,10 @@ export function PricingItem({
     },
   }
 
-  const freeUnits = calculateFreeUnits({ feature })
+  const freeUnits = calculateFreeUnits({
+    config: feature.config!,
+    featureType: feature.featureType,
+  })
 
   const freeUnitsText =
     freeUnits === Number.POSITIVE_INFINITY

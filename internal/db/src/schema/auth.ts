@@ -4,7 +4,7 @@ import { boolean, integer, primaryKey, text, timestamp } from "drizzle-orm/pg-co
 
 import { pgTableProject } from "../utils/_table"
 
-import { cuid } from "../utils/fields.sql"
+import { cuid } from "../utils/fields"
 import { members } from "./workspaces"
 
 export const users = pgTableProject("user", {

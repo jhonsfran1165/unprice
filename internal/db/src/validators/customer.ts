@@ -5,10 +5,10 @@ import * as schema from "../schema"
 import {
   aggregationMethodSchema,
   currencySchema,
+  featureVersionType,
   paymentProviderSchema,
   typeFeatureSchema,
 } from "./shared"
-import { subscriptionSelectSchema } from "./subscriptions"
 import { subscriptionItemsConfigSchema } from "./subscriptions/items"
 
 export const reasonCreditSchema = z.enum([
@@ -86,39 +86,40 @@ export const stripePlanVersionSchema = z.object({
   paymentMethodRequired: z.boolean(),
 })
 
+export const customerEntitlementMetadataSchema = z.record(
+  z.string(),
+  z.union([z.string(), z.number(), z.boolean(), z.null()])
+)
+
 export const customerEntitlementSchema = createSelectSchema(schema.customerEntitlements, {
-  aggregationMethod: aggregationMethodSchema,
-  featureType: typeFeatureSchema,
-}).extend({
-  project: z.object({
-    id: z.string(),
-    workspaceId: z.string(),
-  }),
-  subscriptionItem: z
-    .object({
-      id: z.string(),
-      subscriptionPhase: z
-        .object({
-          id: z.string(),
-          subscription: subscriptionSelectSchema
-            .pick({
-              id: true,
-              currentCycleStartAt: true,
-              currentCycleEndAt: true,
-            })
-            .nullable(),
-        })
-        .nullable(),
-    })
-    .nullable(),
+  type: featureVersionType,
+  metadata: customerEntitlementMetadataSchema,
 })
 
-export const customerEntitlementInsertSchema = createInsertSchema(schema.customerEntitlements, {
-  aggregationMethod: aggregationMethodSchema,
-  featureType: typeFeatureSchema,
-}).partial({
+export const customerEntitlementInsertSchema = createInsertSchema(
+  schema.customerEntitlements
+).partial({
   id: true,
   projectId: true,
+})
+
+export const customerEntitlementExtendedSchema = customerEntitlementSchema.extend({
+  featureType: typeFeatureSchema,
+  aggregationMethod: aggregationMethodSchema,
+  featureSlug: z.string(),
+})
+
+export const customerEntitlementsSchema = customerEntitlementExtendedSchema.pick({
+  featureSlug: true,
+  validFrom: true,
+  validTo: true,
+  featureType: true,
+  usage: true,
+  limit: true,
+  featurePlanVersionId: true,
+  aggregationMethod: true,
+  units: true,
+  id: true,
 })
 
 export type StripePlanVersion = z.infer<typeof stripePlanVersionSchema>
@@ -129,3 +130,5 @@ export type CustomerSignUp = z.infer<typeof customerSignUpSchema>
 export type CustomerSetUp = z.infer<typeof customerSetUpSchema>
 export type CustomerEntitlement = z.infer<typeof customerEntitlementSchema>
 export type InsertCustomerEntitlement = z.infer<typeof customerEntitlementInsertSchema>
+export type CustomerEntitlementExtended = z.infer<typeof customerEntitlementExtendedSchema>
+export type CustomerEntitlementsExtended = z.infer<typeof customerEntitlementsSchema>

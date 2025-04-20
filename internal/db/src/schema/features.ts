@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm"
 import { primaryKey, serial, text, uniqueIndex, varchar } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { timestamps } from "../utils/fields.sql"
+import { timestamps } from "../utils/fields"
 import { projectID } from "../utils/sql"
 import { projects } from "./projects"
 

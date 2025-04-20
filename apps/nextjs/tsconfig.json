@@ -2,10 +2,11 @@
   "extends": "@unprice/tsconfig/base.json",
   "compilerOptions": {
     "jsx": "preserve",
+    "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
-      "#*": ["../../internal/api/src/*"]
+      "#*": ["../../internal/trpc/src/*"]
     },
     "plugins": [
       {
@@ -16,6 +17,13 @@
     "moduleResolution": "bundler",
     "module": "esnext"
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "next.config.mjs",
+    "next.config.mjs"
+  ],
   "exclude": ["node_modules"]
 }

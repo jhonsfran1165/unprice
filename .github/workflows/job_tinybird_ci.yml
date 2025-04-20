@@ -17,9 +17,12 @@ jobs:
           - 7181:7181
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Tinybird CLI
-        run: curl -LsSf https://api.tinybird.co/static/install.sh | sh
+        run: curl https://tinybird.co | sh
+
       - name: Build project
         run: tb build
+
       - name: Test project
         run: tb test run

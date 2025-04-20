@@ -2,7 +2,7 @@
 
 import type { UseFormReturn } from "react-hook-form"
 
-import type { Currency, PlanVersionFeature } from "@unprice/db/validators"
+import type { Currency, PlanVersionFeatureInsert } from "@unprice/db/validators"
 import { Separator } from "@unprice/ui/separator"
 
 import {
@@ -18,7 +18,7 @@ export function UsageFormFields({
   currency,
   isDisabled,
 }: {
-  form: UseFormReturn<PlanVersionFeature>
+  form: UseFormReturn<PlanVersionFeatureInsert>
   currency: Currency
   isDisabled?: boolean
 }) {

@@ -24,7 +24,7 @@ interface FormValues extends FieldValues {
   currency: Currency
   paymentProvider: PaymentProvider
   description: string
-  trialDays: number
+  trialDays?: number
 }
 
 export function PaymentMethodRequiredFormField<TFieldValues extends FormValues>({

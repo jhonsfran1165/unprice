@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1742993200332,
+      "tag": "0000_breezy_iron_fist",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1742993478338,
+      "tag": "0001_nasty_baron_zemo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1742993651262,
+      "tag": "0002_loud_robbie_robertson",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1744203145687,
+      "tag": "0003_rare_talon",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1744478757883,
+      "tag": "0004_unknown_black_crow",
+      "breakpoints": true
+    }
+  ]
+}
