@@ -9,7 +9,7 @@
   "compatibility_date": "2025-03-19",
   "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
   "env": {
-    "production": {
+    "prod": {
       "observability": {
         "enabled": true,
         "head_sampling_rate": 1.0 // 100% of requests
@@ -57,7 +57,7 @@
         }
       ]
     },
-    "development": {
+    "dev": {
       "route": {
         "pattern": "localhost:8787",
         "custom_domain": false

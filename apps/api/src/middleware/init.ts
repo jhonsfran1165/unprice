@@ -101,7 +101,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       {
         waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
       },
-      metrics
+      metrics,
+      c.env.EMIT_METRICS_LOGS
     )
 
     await cacheService.init()
@@ -126,7 +127,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
     startTime(c, "initAnalytics")
 
     const analytics = new Analytics({
-      emit: c.env.EMIT_METRICS_LOGS,
+      emit: c.env.EMIT_ANALYTICS,
       tinybirdToken: c.env.TINYBIRD_TOKEN,
       tinybirdUrl: c.env.TINYBIRD_URL,
     })

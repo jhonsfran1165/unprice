@@ -24,7 +24,8 @@ export const createContext = async ({
     {
       waitUntil: () => {},
     },
-    new NoopMetrics()
+    new NoopMetrics(),
+    false
   )
 
   await cache.init()

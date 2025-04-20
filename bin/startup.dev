@@ -64,6 +64,7 @@ if [ "$MODE_ID" = "dev" ]; then
   TB_RESTARTED=$RESTART_TINYBIRD
   UNPRICE_API_URL="http://localhost:8787"
   DRIZZLE_LOG="false"
+  EMIT_METRICS_LOGS="false"
 
   # loging to tb
   cd internal/tinybird
@@ -115,7 +116,7 @@ if [ "$MODE_ID" = "dev" ]; then
   cd ../../
 
   echo "Starting the application"
-  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" AUTH_REDIRECT_PROXY_URL="$AUTH_REDIRECT_PROXY_URL" UNPRICE_API_URL="$UNPRICE_API_URL" DRIZZLE_LOG="$DRIZZLE_LOG" pnpm run dev
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" AUTH_REDIRECT_PROXY_URL="$AUTH_REDIRECT_PROXY_URL" UNPRICE_API_URL="$UNPRICE_API_URL" DRIZZLE_LOG="$DRIZZLE_LOG" EMIT_METRICS_LOGS="$EMIT_METRICS_LOGS" pnpm run dev
 
 elif [ "$MODE_ID" = "preview" ]; then
   # banner to show the user that we are using the preview environment

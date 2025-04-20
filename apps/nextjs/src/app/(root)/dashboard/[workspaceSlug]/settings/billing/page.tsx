@@ -19,8 +19,30 @@ export default async function BillingPage({ params }: { params: { workspaceSlug:
   const { workspaceSlug } = params
   const session = await getSession()
   const atw = session?.user.workspaces.find((w) => w.slug === workspaceSlug)
+  const isMainWorkspace = atw?.isMain
   const customerId = atw?.unPriceCustomerId ?? ""
 
+  if (isMainWorkspace) {
+    return (
+      <DashboardShell
+        header={
+          <HeaderTab
+            title="Billing Settings"
+            description="Manage your payments for this workspace."
+          />
+        }
+      >
+        <Alert variant="info">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Main Workspace</AlertTitle>
+          <AlertDescription>
+            This is the main workspace, there is no need to manage payments or subscriptions for
+            this workspace.
+          </AlertDescription>
+        </Alert>
+      </DashboardShell>
+    )
+  }
   return (
     <DashboardShell
       header={

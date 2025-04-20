@@ -128,7 +128,8 @@ export const createTRPCContext = async (opts: {
     {
       waitUntil,
     },
-    metrics
+    metrics,
+    env.EMIT_METRICS_LOGS
   )
 
   await cacheService.init()

@@ -16,10 +16,12 @@ export class CacheService {
   private cache: Cache | null = null
   private context: Context
   private metrics: Metrics
+  private readonly emitMetrics: boolean
 
-  constructor(context: Context, metrics: Metrics) {
+  constructor(context: Context, metrics: Metrics, emitMetrics: boolean) {
     this.context = context
     this.metrics = metrics
+    this.emitMetrics = emitMetrics
   }
 
   /**
@@ -63,8 +65,9 @@ export class CacheService {
     }
 
     const metricsMiddleware = withMetrics(this.metrics)
-
-    const storesWithMetrics = stores.map((s) => metricsMiddleware.wrap(s))
+    const storesWithMetrics = this.emitMetrics
+      ? stores.map((s) => metricsMiddleware.wrap(s))
+      : stores
 
     const defaultOpts = {
       stores: storesWithMetrics,
