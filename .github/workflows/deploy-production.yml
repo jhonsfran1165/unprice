@@ -56,6 +56,8 @@ jobs:
           VERCEL_ENV: production
           NODE_ENV: production
           DATABASE_URL: ${{ env.DATABASE_URL }}
+          DATABASE_READ1_URL: ${{ env.DATABASE_READ1_URL }}
+          DATABASE_READ2_URL: ${{ env.DATABASE_READ2_URL }}
 
       - name: commit migrations
         working-directory: internal/db
