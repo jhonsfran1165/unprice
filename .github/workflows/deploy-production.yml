@@ -36,7 +36,7 @@ jobs:
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: "preview"
+          env-slug: "prod"
           project-slug: "unprice-zq-xm"
           secret-path: "/ci"
           recursive: true
