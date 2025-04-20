@@ -47,15 +47,10 @@ jobs:
           ts: "true"
           python: "false"
 
-      - name: install drizzle-kit
-        run: |
-          npm install -g drizzle-kit
-
       - name: Run Migrations
-        working-directory: internal/db
         run: |
-          drizzle-kit generate
-          drizzle-kit migrate
+          pnpm --filter db generate
+          pnpm --filter db migrate:custom
         env:
           VERCEL_ENV: production
           NODE_ENV: production
