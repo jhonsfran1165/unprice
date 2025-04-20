@@ -5,7 +5,7 @@ import { migrate } from "drizzle-orm/durable-sqlite/migrator"
 import migrations from "../../drizzle/migrations"
 
 import { Analytics } from "@unprice/tinybird"
-import { eq, inArray, lte, sql } from "drizzle-orm"
+import { count, eq, inArray, lte, sql } from "drizzle-orm"
 import { entitlements, usageRecords, verifications } from "~/db/schema"
 import type { Entitlement, NewEntitlement, schema } from "~/db/types"
 import type { Env } from "~/env"
@@ -57,6 +57,10 @@ export class DurableObjectUsagelimiter extends Server {
       environment: env.NODE_ENV,
     })
 
+    this.initialize()
+  }
+
+  async initialize() {
     // block concurrency while initializing
     this.ctx.blockConcurrencyWhile(async () => {
       // all happen in a try catch to avoid crashing the do
@@ -764,53 +768,53 @@ export class DurableObjectUsagelimiter extends Server {
     }
 
     return this.ctx.blockConcurrencyWhile(async () => {
-      // // send the current usage and verifications to tinybird
-      // await this.sendUsageToTinybird()
-      // await this.sendVerificationsToTinybird()
+      // send the current usage and verifications to tinybird
+      await this.sendUsageToTinybird()
+      await this.sendVerificationsToTinybird()
 
-      // // check if the are events in the db
-      // const events = await this.db
-      //   .select({
-      //     count: count(),
-      //   })
-      //   .from(usageRecords)
-      //   .then((e) => e[0])
+      // check if the are events in the db
+      const events = await this.db
+        .select({
+          count: count(),
+        })
+        .from(usageRecords)
+        .then((e) => e[0])
 
-      // const verification_events = await this.db
-      //   .select({
-      //     count: count(),
-      //   })
-      //   .from(verifications)
-      //   .then((e) => e[0])
+      const verification_events = await this.db
+        .select({
+          count: count(),
+        })
+        .from(verifications)
+        .then((e) => e[0])
 
-      // const slugs = await this.db
-      //   .select({
-      //     featureSlug: entitlements.featureSlug,
-      //   })
-      //   .from(entitlements)
+      const slugs = await this.db
+        .select({
+          featureSlug: entitlements.featureSlug,
+        })
+        .from(entitlements)
 
       // if there are no events, delete the do
-      // if (events?.count === 0 && verification_events?.count === 0) {
-      await this.ctx.storage.deleteAll()
-      // } else {
-      //   return {
-      //     success: false,
-      //     message: `DO has ${events?.count} events and ${verification_events?.count} verification events, can't delete.`,
-      //   }
-      // }
+      if (events?.count === 0 && verification_events?.count === 0) {
+        await this.ctx.storage.deleteAll()
+        this.initialized = false
+      } else {
+        return {
+          success: false,
+          message: `DO has ${events?.count} events and ${verification_events?.count} verification events, can't delete.`,
+        }
+      }
 
       return {
         success: true,
         message: "DO deleted",
-        // slugs: slugs.map((e) => e.featureSlug),
-        slugs: [],
+        slugs: slugs.map((e) => e.featureSlug),
       }
     })
   }
 
   async getEntitlement(featureSlug: string): Promise<Entitlement | null> {
     if (!this.initialized) {
-      return null
+      this.initialize()
     }
 
     // get entitlement from db
@@ -829,7 +833,7 @@ export class DurableObjectUsagelimiter extends Server {
 
   async setEntitlement(entitlement: NewEntitlement) {
     if (!this.initialized) {
-      return
+      this.initialize()
     }
 
     this.ctx.blockConcurrencyWhile(async () => {
@@ -892,7 +896,7 @@ export class DurableObjectUsagelimiter extends Server {
 
   async getEntitlements(): Promise<Entitlement[]> {
     if (!this.initialized) {
-      return []
+      this.initialize()
     }
 
     return this.ctx.blockConcurrencyWhile(async () => {
