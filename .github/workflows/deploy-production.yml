@@ -49,7 +49,6 @@ jobs:
 
       - name: Run Migrations
         run: |
-          pnpm --filter db generate
           pnpm --filter db migrate:custom
         env:
           VERCEL_ENV: production
@@ -57,20 +56,6 @@ jobs:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           DATABASE_READ1_URL: ${{ env.DATABASE_READ1_URL }}
           DATABASE_READ2_URL: ${{ env.DATABASE_READ2_URL }}
-
-      - name: commit migrations
-        working-directory: internal/db
-        run: |
-          if [ -n "$(git status --porcelain ./)" ]; then
-            echo "Changes detected in db folder, committing..."
-            git config --global user.email "unprice-bot@unprice.com"
-            git config --global user.name "Unprice Bot"
-            git add .
-            git commit -m "chore: migrations for production [skip ci]"
-            git push --set-upstream origin ${{ steps.branch-name.outputs.current_branch }}
-          else
-            echo "No changes detected in db folder, skipping commit"
-          fi
 
   deploy-production-tinybird:
     uses: ./.github/workflows/job_tinybird_cd.yml
