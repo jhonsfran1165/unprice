@@ -38,7 +38,7 @@ jobs:
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
           env-slug: "prod"
           project-slug: "unprice-zq-xm"
-          secret-path: "/ci"
+          secret-path: "/app"
           recursive: true
 
       - uses: ./.github/actions/install
