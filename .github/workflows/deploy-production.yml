@@ -38,7 +38,7 @@ jobs:
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
           env-slug: "prod"
           project-slug: "unprice-zq-xm"
-          secret-path: "/app"
+          secret-path: "/"
           recursive: true
 
       - uses: ./.github/actions/install
@@ -55,9 +55,6 @@ jobs:
         env:
           VERCEL_ENV: production
           NODE_ENV: production
-          DATABASE_URL: ${{ env.DATABASE_URL }}
-          DATABASE_READ1_URL: ${{ env.DATABASE_READ1_URL }}
-          DATABASE_READ2_URL: ${{ env.DATABASE_READ2_URL }}
 
       - name: commit migrations
         working-directory: internal/db
