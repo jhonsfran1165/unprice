@@ -35,7 +35,7 @@ async function main() {
       .then((user) => user[0] ?? null)
 
     userExists = user
-  }\
+  }
 
   if (!userExists) throw "Error creating user"
 
