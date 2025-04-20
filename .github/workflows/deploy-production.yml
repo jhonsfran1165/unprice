@@ -38,8 +38,7 @@ jobs:
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
           env-slug: "prod"
           project-slug: "unprice-zq-xm"
-          secret-path: "/"
-          recursive: true
+          secret-path: "/app"
 
       - uses: ./.github/actions/install
         name: Install dependencies
@@ -48,8 +47,10 @@ jobs:
           python: "false"
 
       - name: Run Migrations
+        continue-on-error: true
+        working-directory: internal/db
         run: |
-          pnpm --filter db migrate:custom
+          pnpm migrate:custom
         env:
           VERCEL_ENV: production
           NODE_ENV: production
@@ -69,7 +70,6 @@ jobs:
   deploy-production-api:
     needs:
       - deploy-production-tinybird
-
     uses: ./.github/workflows/job_deploy_api.yaml
     secrets:
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
