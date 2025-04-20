@@ -522,7 +522,7 @@ importers:
         specifier: ^0.1.0
         version: link:../../tooling/typescript
       drizzle-kit:
-        specifier: ^0.30.1
+        specifier: ^0.30.5
         version: 0.30.5
       tsx:
         specifier: ^4.7.2
