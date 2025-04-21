@@ -77,8 +77,11 @@ export const create = protectedProjectProcedure
       reportUsageFeature({
         customerId: unPriceCustomerId,
         featureSlug,
-        usage: 1, // the new customer
+        usage: 1,
         isMain: project.workspace.isMain,
+        metadata: {
+          action: "create",
+        },
       })
     )
 

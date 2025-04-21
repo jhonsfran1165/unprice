@@ -46,7 +46,7 @@ export const update = protectedProjectProcedure
 
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "plan-versions"
+    const featureSlug = "plans"
 
     // check if the customer has access to the feature
     const result = await featureGuard({

@@ -81,6 +81,9 @@ export const create = protectedProjectProcedure
         featureSlug,
         usage: 1,
         isMain: project.workspace.isMain,
+        metadata: {
+          action: "create",
+        },
       })
     )
 

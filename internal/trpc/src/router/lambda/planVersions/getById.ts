@@ -35,7 +35,7 @@ export const getById = protectedProjectProcedure
     // check if the customer has access to the feature
     const result = await featureGuard({
       customerId: workspace.unPriceCustomerId,
-      featureSlug: "plan-versions",
+      featureSlug: "plans",
       isMain: workspace.isMain,
       metadata: {
         action: "getById",

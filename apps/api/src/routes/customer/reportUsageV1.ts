@@ -35,6 +35,16 @@ export const route = createRoute({
           description: "The idempotence key",
           example: "123e4567-e89b-12d3-a456-426614174000",
         }),
+        metadata: z
+          .record(z.string(), z.string())
+          .openapi({
+            description: "The metadata",
+            example: {
+              action: "create",
+              country: "US",
+            },
+          })
+          .optional(),
       }),
       "The usage to report"
     ),
@@ -62,7 +72,7 @@ export type ReportUsageResponse = z.infer<
 
 export const registerReportUsageV1 = (app: App) =>
   app.openapi(route, async (c) => {
-    const { customerId, featureSlug, usage, idempotenceKey } = c.req.valid("json")
+    const { customerId, featureSlug, usage, idempotenceKey, metadata } = c.req.valid("json")
     const { entitlement } = c.get("services")
     const requestId = c.get("requestId")
 
@@ -88,6 +98,7 @@ export const registerReportUsageV1 = (app: App) =>
       idempotenceKey,
       projectId: key.projectId,
       requestId,
+      metadata,
     })
 
     return c.json(result, HttpStatusCodes.OK)

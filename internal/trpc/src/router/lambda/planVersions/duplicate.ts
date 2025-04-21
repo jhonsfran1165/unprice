@@ -7,6 +7,7 @@ import { z } from "zod"
 
 import { protectedProjectProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
+import { reportUsageFeature } from "#utils/shared"
 
 export const duplicate = protectedProjectProcedure
   .input(
@@ -29,7 +30,7 @@ export const duplicate = protectedProjectProcedure
 
     const result = await featureGuard({
       customerId: workspace.unPriceCustomerId,
-      featureSlug: "plan-versions",
+      featureSlug: "plans",
       isMain: workspace.isMain,
       metadata: {
         action: "duplicate",
@@ -156,6 +157,18 @@ export const duplicate = protectedProjectProcedure
         message: "Error duplicating version",
       })
     }
+
+    opts.ctx.waitUntil(
+      reportUsageFeature({
+        customerId: workspace.unPriceCustomerId,
+        featureSlug: "plans",
+        usage: 1,
+        isMain: workspace.isMain,
+        metadata: {
+          action: "duplicate",
+        },
+      })
+    )
 
     return {
       planVersion: duplicatedVersion,

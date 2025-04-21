@@ -378,6 +378,16 @@ export interface operations {
            * @example 123e4567-e89b-12d3-a456-426614174000
            */
           idempotenceKey: string
+          /**
+           * @description The metadata
+           * @example {
+           *       "action": "create",
+           *       "country": "US"
+           *     }
+           */
+          metadata?: {
+            [key: string]: string | undefined
+          }
         }
       }
     }
@@ -614,7 +624,7 @@ export interface operations {
            *       "country": "US"
            *     }
            */
-          metadata: {
+          metadata?: {
             [key: string]: string | undefined
           }
         }
@@ -1155,8 +1165,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1167,8 +1177,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1182,8 +1192,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }
@@ -1201,8 +1211,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }
@@ -1216,8 +1226,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1228,8 +1238,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1248,8 +1258,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }
@@ -1265,8 +1275,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1277,8 +1287,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1296,8 +1306,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1308,8 +1318,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1323,8 +1333,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }
@@ -1534,8 +1544,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1546,8 +1556,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1561,8 +1571,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }
@@ -1580,8 +1590,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }
@@ -1595,8 +1605,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1607,8 +1617,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1627,8 +1637,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }
@@ -1644,8 +1654,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1656,8 +1666,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1675,8 +1685,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1687,8 +1697,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -1702,8 +1712,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }
@@ -2022,8 +2032,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -2034,8 +2044,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -2049,8 +2059,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }
@@ -2068,8 +2078,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }
@@ -2083,8 +2093,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -2095,8 +2105,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -2115,8 +2125,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }
@@ -2132,8 +2142,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -2144,8 +2154,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -2163,8 +2173,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -2175,8 +2185,8 @@ export interface operations {
                             amount: number
                             currency: {
                               code: string
-                              exponent: number
                               base: number | number[]
+                              exponent: number
                             }
                             scale: number
                           }
@@ -2190,8 +2200,8 @@ export interface operations {
                           amount: number
                           currency: {
                             code: string
-                            exponent: number
                             base: number | number[]
+                            exponent: number
                           }
                           scale: number
                         }

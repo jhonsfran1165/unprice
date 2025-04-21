@@ -88,12 +88,14 @@ export const create = protectedWorkspaceProcedure
     }
 
     opts.ctx.waitUntil(
-      // report usage for the new domain in background
       reportUsageFeature({
         customerId,
         featureSlug,
-        usage: 1, // the new domain
+        usage: 1,
         isMain: workspace.isMain,
+        metadata: {
+          action: "create",
+        },
       })
     )
 

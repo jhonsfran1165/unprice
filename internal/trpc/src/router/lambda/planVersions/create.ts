@@ -36,7 +36,7 @@ export const create = protectedProjectProcedure
     const project = opts.ctx.project
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "plan-versions"
+    const featureSlug = "plans"
 
     // only owner and admin can create a plan version
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
@@ -138,12 +138,14 @@ export const create = protectedProjectProcedure
     })
 
     opts.ctx.waitUntil(
-      // report usage for the new project in background
       reportUsageFeature({
         customerId,
         featureSlug,
-        usage: 1, // the new project
+        usage: 1,
         isMain: workspace.isMain,
+        metadata: {
+          action: "create",
+        },
       })
     )
 

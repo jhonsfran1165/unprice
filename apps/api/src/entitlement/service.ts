@@ -532,7 +532,7 @@ export class EntitlementService {
             usage: Number(e.usage),
             units: e.units,
             freeUnits: 0,
-            max: e.limit ?? Number.POSITIVE_INFINITY,
+            max: e.limit || Number.POSITIVE_INFINITY,
             included: 0,
             featureVersion: featureVersion?.featurePlanVersion!,
             price: null,
@@ -558,10 +558,10 @@ export class EntitlementService {
           freeUnits,
           included:
             freeUnits === Number.POSITIVE_INFINITY
-              ? (e.limit ?? Number.POSITIVE_INFINITY)
+              ? e.limit || Number.POSITIVE_INFINITY
               : freeUnits,
           price: price?.totalPrice.displayAmount ?? "0",
-          max: e.limit ?? Number.POSITIVE_INFINITY,
+          max: e.limit || Number.POSITIVE_INFINITY,
           featureVersion: entitlementPhase.featurePlanVersion,
         }
       }),

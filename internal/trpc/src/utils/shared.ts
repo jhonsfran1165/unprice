@@ -14,11 +14,13 @@ export const reportUsageFeature = async ({
   featureSlug,
   usage,
   isMain,
+  metadata,
 }: {
   customerId: string
   featureSlug: string
   usage: number
   isMain?: boolean
+  metadata?: Record<string, string | undefined>
 }) => {
   // if the feature is main, we don't need to report usage
   if (isMain) {
@@ -33,6 +35,7 @@ export const reportUsageFeature = async ({
       featureSlug,
       usage,
       idempotenceKey: uuid(),
+      metadata,
     })
 
     if (error) {

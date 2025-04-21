@@ -71,12 +71,14 @@ export const create = protectedWorkspaceProcedure
     }
 
     opts.ctx.waitUntil(
-      // report usage for the new project in background
       reportUsageFeature({
         customerId,
         featureSlug,
-        usage: 1, // the new project
+        usage: 1,
         isMain: workspace.isMain,
+        metadata: {
+          action: "create",
+        },
       })
     )
 

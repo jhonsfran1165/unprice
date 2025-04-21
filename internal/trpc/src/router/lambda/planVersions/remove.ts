@@ -28,7 +28,7 @@ export const remove = protectedProjectProcedure
     // check if the customer has access to the feature
     const result = await featureGuard({
       customerId: workspace.unPriceCustomerId,
-      featureSlug: "plan-versions",
+      featureSlug: "plans",
       isMain: workspace.isMain,
       metadata: {
         action: "remove",
@@ -77,12 +77,14 @@ export const remove = protectedProjectProcedure
     }
 
     opts.ctx.waitUntil(
-      // report usage for the new project in background
       reportUsageFeature({
         customerId: workspace.unPriceCustomerId,
-        featureSlug: "plan-versions",
-        usage: -1, // the deleted project
+        featureSlug: "plans",
+        usage: -1,
         isMain: workspace.isMain,
+        metadata: {
+          action: "remove",
+        },
       })
     )
 

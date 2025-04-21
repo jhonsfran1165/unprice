@@ -187,7 +187,7 @@ export class DurableObjectUsagelimiter extends Server {
       projectId: string
       featureSlug: string
       requestId: string
-      metadata: string
+      metadata: string | null
       featurePlanVersionId: string
       subscriptionItemId: string | null
       subscriptionPhaseId: string | null
@@ -208,7 +208,7 @@ export class DurableObjectUsagelimiter extends Server {
         timestamp: Date.now(),
         createdAt: Date.now(),
         latency: latency.toString() ?? "0",
-        metadata: JSON.stringify(data.metadata),
+        metadata: data.metadata ? JSON.stringify(data.metadata) : null,
         deniedReason: deniedReason,
         featurePlanVersionId: entitlement.featurePlanVersionId,
         subscriptionItemId: entitlement.subscriptionItemId,
@@ -265,7 +265,7 @@ export class DurableObjectUsagelimiter extends Server {
             projectId: data.projectId,
             featureSlug: data.featureSlug,
             requestId: data.requestId,
-            metadata: JSON.stringify(data.metadata),
+            metadata: data.metadata ? JSON.stringify(data.metadata) : null,
             featurePlanVersionId: entitlement.featurePlanVersionId,
             subscriptionItemId: entitlement.subscriptionItemId,
             subscriptionPhaseId: entitlement.subscriptionPhaseId,
@@ -387,7 +387,7 @@ export class DurableObjectUsagelimiter extends Server {
         subscriptionPhaseId: entitlement.subscriptionPhaseId,
         subscriptionId: entitlement.subscriptionId,
         createdAt: Date.now(),
-        metadata: JSON.stringify(data.metadata),
+        metadata: data.metadata ? JSON.stringify(data.metadata) : null,
       })
       .returning()
       .catch((e) => {

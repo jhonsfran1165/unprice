@@ -29,13 +29,16 @@ export const route = createRoute({
           description: "The feature slug",
           example: "tokens",
         }),
-        metadata: z.record(z.string(), z.string()).openapi({
-          description: "The metadata",
-          example: {
-            action: "create",
-            country: "US",
-          },
-        }),
+        metadata: z
+          .record(z.string(), z.string())
+          .openapi({
+            description: "The metadata",
+            example: {
+              action: "create",
+              country: "US",
+            },
+          })
+          .optional(),
       }),
       "Body of the request"
     ),

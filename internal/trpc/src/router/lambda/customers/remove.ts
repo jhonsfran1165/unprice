@@ -54,12 +54,14 @@ export const remove = protectedProjectProcedure
     }
 
     opts.ctx.waitUntil(
-      // report usage for the new project in background
       reportUsageFeature({
         customerId: unPriceCustomerId,
         featureSlug: "customers",
-        usage: -1, // the deleted project
+        usage: -1,
         isMain: project.workspace.isMain,
+        metadata: {
+          action: "remove",
+        },
       })
     )
 

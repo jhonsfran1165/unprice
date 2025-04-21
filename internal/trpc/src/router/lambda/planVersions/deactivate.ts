@@ -25,7 +25,7 @@ export const deactivate = protectedProjectProcedure
 
     const result = await featureGuard({
       customerId: workspace.unPriceCustomerId,
-      featureSlug: "plan-versions",
+      featureSlug: "plans",
       isMain: workspace.isMain,
       metadata: {
         action: "deactivate",
