@@ -1,7 +1,6 @@
 import { getSession } from "@unprice/auth/server-rsc"
 import { APP_DOMAIN } from "@unprice/config"
 import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
-import { Button } from "@unprice/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import { Typography } from "@unprice/ui/typography"
 import { differenceInCalendarDays } from "date-fns"
@@ -12,7 +11,6 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { formatDate } from "~/lib/dates"
 import { unprice } from "#utils/unprice"
-import { SubscriptionChangePlanDialog } from "../../[projectSlug]/customers/_components/subscriptions/subscription-change-plan-dialog"
 import { BillingCard } from "./_components/billing"
 
 export default async function BillingPage({ params }: { params: { workspaceSlug: string } }) {
@@ -146,7 +144,7 @@ async function SubscriptionCard({
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <SubscriptionChangePlanDialog
                   defaultValues={{
                     id: subscription.result.id,
@@ -161,7 +159,7 @@ async function SubscriptionCard({
                 >
                   <Button size="sm">Change Plan</Button>
                 </SubscriptionChangePlanDialog>
-              </div>
+              </div> */}
             </div>
             <div className="gap-2 rounded-lg bg-background-bg p-4">
               <Typography variant="h6">Current Billing Cycle</Typography>

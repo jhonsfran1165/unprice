@@ -106,7 +106,7 @@ export const getUsageResponseSchema = z.object({
         limit: z.number().nullable(),
         usage: z.number(),
         freeUnits: z.number(),
-        max: z.number(),
+        max: z.number().nullable(),
         units: z.number().nullable(),
         included: z.number(),
         featureVersion: planVersionFeatureSelectBaseSchema.extend({

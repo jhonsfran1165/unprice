@@ -101,7 +101,7 @@ const LineUsageItem: React.FC<{
               Flat feature
             </span>
           </div>
-          <ProgressBar value={used} max={entitlement.max} />
+          <ProgressBar value={used} max={entitlement.max ?? Number.POSITIVE_INFINITY} />
           <div className="flex items-center justify-between">
             <span className="text-content-subtle text-muted-foreground text-xs">N/A usage</span>
           </div>
@@ -124,7 +124,7 @@ const LineUsageItem: React.FC<{
             {nFormatter(entitlement.included ?? 0)} included
           </span>
         </div>
-        <ProgressBar value={used} max={entitlement.max} />
+        <ProgressBar value={used} max={entitlement.max ?? Number.POSITIVE_INFINITY} />
         <div className="flex items-center justify-between">
           <span className="text-content-subtle text-muted-foreground text-xs">
             Used {nFormatter(used)}
