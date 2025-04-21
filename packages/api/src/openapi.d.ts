@@ -1524,7 +1524,7 @@ export interface operations {
               limit: number | null
               usage: number
               freeUnits: number
-              max: number
+              max: number | null
               units: number | null
               included: number
               featureVersion: {
