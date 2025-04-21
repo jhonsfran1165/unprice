@@ -189,6 +189,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       logger,
       metrics,
       db,
+      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
     })
 
     endTime(c, "initApikey")

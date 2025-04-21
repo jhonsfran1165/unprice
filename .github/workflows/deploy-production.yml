@@ -50,6 +50,7 @@ jobs:
         continue-on-error: true
         working-directory: internal/db
         run: |
+          export PATH="node_modules/.bin:$PATH"
           pnpm migrate:custom
         env:
           VERCEL_ENV: production

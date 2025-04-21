@@ -7,6 +7,8 @@ import type { Metrics } from "@unprice/services/metrics"
 import type { Analytics } from "@unprice/tinybird"
 
 import type { Database } from "@unprice/db"
+import { and, eq } from "@unprice/db"
+import { apikeys } from "@unprice/db/schema"
 import type { Context } from "~/hono/app"
 import { retry } from "~/util/retry"
 import { UnPriceApiKeyError } from "./errors"
@@ -17,6 +19,8 @@ export class ApiKeysService {
   private readonly logger: Logger
   private readonly analytics: Analytics
   private readonly hashCache = new Map<string, string>()
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  private readonly waitUntil: (promise: Promise<any>) => void
   private readonly db: Database
 
   constructor(opts: {
@@ -25,12 +29,15 @@ export class ApiKeysService {
     analytics: Analytics
     logger: Logger
     db: Database
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    waitUntil: (promise: Promise<any>) => void
   }) {
     this.cache = opts.cache
     this.metrics = opts.metrics
     this.analytics = opts.analytics
     this.logger = opts.logger
     this.db = opts.db
+    this.waitUntil = opts.waitUntil
   }
 
   private async hash(key: string): Promise<string> {
@@ -92,6 +99,18 @@ export class ApiKeysService {
     if (!data) {
       return null
     }
+
+    // update last used at
+    // this is not awaited to avoid blocking the request
+    // also this is updated only when the apikey is fetched from the db
+    this.waitUntil(
+      this.db
+        .update(apikeys)
+        .set({
+          lastUsed: Date.now(),
+        })
+        .where(and(eq(apikeys.id, data.id), eq(apikeys.projectId, data.projectId)))
+    )
 
     return data
   }
@@ -194,7 +213,6 @@ export class ApiKeysService {
       })
 
       if (result.err) {
-        // TODO: emit error log
         this.logger.error("Error verifying apikey after retrying without cache", {
           error: result.err,
         })
