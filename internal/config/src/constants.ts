@@ -17,7 +17,7 @@ export const BASE_DOMAIN =
 
 export const BASE_URL =
   VERCEL_ENV === "production"
-    ? MAIN_DOMAIN
+    ? `https://${MAIN_DOMAIN}`
     : VERCEL_ENV === "preview"
       ? `https://${env.NEXT_PUBLIC_APP_DOMAIN}`
       : "http://localhost:3000"
