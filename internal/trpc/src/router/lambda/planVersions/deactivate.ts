@@ -29,6 +29,7 @@ export const deactivate = protectedProjectProcedure
       isMain: workspace.isMain,
       metadata: {
         action: "deactivate",
+        module: "planVersion",
       },
     })
 

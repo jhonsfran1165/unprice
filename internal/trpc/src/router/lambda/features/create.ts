@@ -17,7 +17,7 @@ export const create = protectedProjectProcedure
     // check if the customer has access to the feature
     const result = await featureGuard({
       customerId: project.workspace.unPriceCustomerId,
-      featureSlug: "features",
+      featureSlug: "plans",
       isMain: project.workspace.isMain,
       metadata: {
         action: "create",
@@ -54,11 +54,12 @@ export const create = protectedProjectProcedure
     opts.ctx.waitUntil(
       reportUsageFeature({
         customerId: project.workspace.unPriceCustomerId,
-        featureSlug: "features",
+        featureSlug: "plans",
         usage: 1,
         isMain: project.workspace.isMain,
         metadata: {
           action: "create",
+          module: "feature",
         },
       })
     )

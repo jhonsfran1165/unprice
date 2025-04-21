@@ -13,10 +13,11 @@ export const getBySlug = protectedProjectProcedure
 
     const result = await featureGuard({
       customerId: project.workspace.unPriceCustomerId,
-      featureSlug: "features",
+      featureSlug: "plans",
       isMain: project.workspace.isMain,
       metadata: {
         action: "getBySlug",
+        module: "feature",
       },
     })
 

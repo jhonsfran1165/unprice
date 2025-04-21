@@ -16,9 +16,10 @@ export const remove = protectedProjectProcedure
 
     const result = await featureGuard({
       customerId: project.workspace.unPriceCustomerId,
-      featureSlug: "features",
+      featureSlug: "plans",
       metadata: {
         action: "remove",
+        module: "feature",
       },
       isMain: project.workspace.isMain,
     })
@@ -46,11 +47,12 @@ export const remove = protectedProjectProcedure
     opts.ctx.waitUntil(
       reportUsageFeature({
         customerId: project.workspace.unPriceCustomerId,
-        featureSlug: "features",
+        featureSlug: "plans",
         usage: -1,
         isMain: project.workspace.isMain,
         metadata: {
           action: "remove",
+          module: "feature",
         },
       })
     )

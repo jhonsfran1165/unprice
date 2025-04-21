@@ -24,6 +24,7 @@ export const remove = protectedProjectProcedure
       isMain: workspace.isMain,
       metadata: {
         action: "remove",
+        module: "plan",
       },
     })
 
@@ -68,6 +69,7 @@ export const remove = protectedProjectProcedure
         isMain: workspace.isMain,
         metadata: {
           action: "remove",
+          module: "plan",
         },
       })
     )

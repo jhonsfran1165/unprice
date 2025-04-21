@@ -16,10 +16,11 @@ export const searchBy = protectedProjectProcedure
 
     const result = await featureGuard({
       customerId: project.workspace.unPriceCustomerId,
-      featureSlug: "features",
+      featureSlug: "plans",
       isMain: project.workspace.isMain,
       metadata: {
         action: "searchBy",
+        module: "feature",
       },
     })
 

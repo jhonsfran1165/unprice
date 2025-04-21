@@ -39,6 +39,7 @@ export const getById = protectedProjectProcedure
       isMain: workspace.isMain,
       metadata: {
         action: "getById",
+        module: "planVersion",
       },
     })
 

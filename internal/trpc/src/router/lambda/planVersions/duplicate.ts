@@ -34,6 +34,7 @@ export const duplicate = protectedProjectProcedure
       isMain: workspace.isMain,
       metadata: {
         action: "duplicate",
+        module: "planVersion",
       },
     })
 
@@ -166,6 +167,7 @@ export const duplicate = protectedProjectProcedure
         isMain: workspace.isMain,
         metadata: {
           action: "duplicate",
+          module: "planVersion",
         },
       })
     )

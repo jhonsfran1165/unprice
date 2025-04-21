@@ -35,6 +35,7 @@ export const publish = protectedProjectProcedure
       isMain: workspace.isMain,
       metadata: {
         action: "publish",
+        module: "planVersion",
       },
     })
 
