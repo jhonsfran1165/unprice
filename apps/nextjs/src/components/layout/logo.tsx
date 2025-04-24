@@ -3,6 +3,7 @@ import { cn, focusRing } from "@unprice/ui/utils"
 import { siteConfig } from "~/constants/layout"
 import { SuperLink } from "../super-link"
 
+
 export function Logo({ className = "" }) {
   return (
     <SuperLink

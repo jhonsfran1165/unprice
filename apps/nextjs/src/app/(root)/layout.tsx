@@ -10,6 +10,7 @@ import { VercelToolbar } from "@vercel/toolbar/next"
 import { ThemeProvider } from "~/components/layout/theme-provider"
 import { siteConfig } from "~/constants/layout"
 import { fontMapper } from "~/styles/fonts"
+import { TailwindIndicator } from "~/components/layout/tailwind-indicator"
 
 export const metadata = {
   title: {
@@ -69,6 +70,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           {/* <Analytics /> */}
           <Analytics />
           <SpeedInsights />
+          <TailwindIndicator />
         </body>
       </html>
     </ViewTransitions>

@@ -34,7 +34,7 @@ export const Global: FunctionComponent = () => {
         >
           The market is the <br /> world
         </h2>
-        <Globe className="absolute top-[4rem] z-20 aspect-square size-full max-w-fit sm:top-[15rem]" />
+        <Globe className="absolute top-[1rem] z-20 aspect-square size-full max-w-fit sm:top-[12rem] md:top-[15rem]" />
         <div className="-mt-32 md:-mt-36 z-20 h-[36rem] w-full overflow-hidden">
           <div className="absolute bottom-0 h-3/5 w-full bg-gradient-to-b from-transparent via-background-base to-background-base" />
           <div className="absolute inset-x-6 bottom-12 m-auto max-w-4xl md:top-2/3">
