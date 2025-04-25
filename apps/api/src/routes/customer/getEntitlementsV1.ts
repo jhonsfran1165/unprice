@@ -5,7 +5,6 @@ import { jsonContent } from "stoker/openapi/helpers"
 import { z } from "zod"
 import { keyAuth } from "~/auth/key"
 import { getEntitlementsResponseSchema } from "~/entitlement/interface"
-import { UnpriceApiError } from "~/errors/http"
 import { openApiErrorResponses } from "~/errors/openapi-responses"
 import type { App } from "~/hono/app"
 
@@ -46,13 +45,6 @@ export const registerGetEntitlementsV1 = (app: App) =>
 
     // validate the request
     const key = await keyAuth(c)
-
-    if (!key) {
-      throw new UnpriceApiError({
-        code: "UNAUTHORIZED",
-        message: "Invalid API key",
-      })
-    }
 
     // validate usage from db
     const result = await entitlement.getEntitlements({

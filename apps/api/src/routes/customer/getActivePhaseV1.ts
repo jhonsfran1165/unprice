@@ -6,7 +6,6 @@ import { getActivePhaseResponseSchema } from "@unprice/db/validators"
 import { UnPriceCustomerError } from "@unprice/services/customers"
 import { z } from "zod"
 import { keyAuth } from "~/auth/key"
-import { UnpriceApiError } from "~/errors/http"
 import { openApiErrorResponses } from "~/errors/openapi-responses"
 import type { App } from "~/hono/app"
 
@@ -48,13 +47,6 @@ export const registerGetActivePhaseV1 = (app: App) =>
 
     // validate the request
     const key = await keyAuth(c)
-
-    if (!key) {
-      throw new UnpriceApiError({
-        code: "UNAUTHORIZED",
-        message: "Invalid API key",
-      })
-    }
 
     const { val, err } = await customer.getActivePhase({
       customerId,

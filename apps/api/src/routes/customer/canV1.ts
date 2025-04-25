@@ -7,7 +7,6 @@ import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
 import { z } from "zod"
 import { keyAuth } from "~/auth/key"
 import { canResponseSchema } from "~/entitlement/interface"
-import { UnpriceApiError } from "~/errors/http"
 import { openApiErrorResponses } from "~/errors/openapi-responses"
 import type { App } from "~/hono/app"
 const tags = ["customer"]
@@ -69,12 +68,7 @@ export const registerCanV1 = (app: App) =>
     // validate the request
     const key = await keyAuth(c)
 
-    if (!key) {
-      throw new UnpriceApiError({
-        code: "UNAUTHORIZED",
-        message: "Invalid API key",
-      })
-    }
+    // end the timer
     endTime(c, "keyAuth")
 
     // start a new timer

@@ -2,6 +2,7 @@ import { createRoute } from "@hono/zod-openapi"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
 
+import { customerPaymentMethodSchema, paymentProviderSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { keyAuth } from "~/auth/key"
 import { UnpriceApiError } from "~/errors/http"
@@ -11,9 +12,9 @@ import type { App } from "~/hono/app"
 const tags = ["customer"]
 
 export const route = createRoute({
-  path: "/v1/customer/reset-entitlements",
-  operationId: "customer.resetEntitlements",
-  description: "Reset entitlements for a customer",
+  path: "/v1/customer/getPaymentMethods",
+  operationId: "customer.getPaymentMethods",
+  description: "Get payment methods for a customer",
   method: "post",
   tags,
   request: {
@@ -23,46 +24,55 @@ export const route = createRoute({
           description: "The customer ID",
           example: "cus_1H7KQFLr7RepUyQBKdnvY",
         }),
+        provider: paymentProviderSchema.openapi({
+          description: "The payment provider",
+          example: "stripe",
+        }),
       }),
-      "The customer ID"
+      "Body of the request"
     ),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        success: z.boolean(),
-        message: z.string().optional(),
-      }),
-      "The result of the reset entitlements"
+      customerPaymentMethodSchema.array(),
+      "The result of the get payment methods"
     ),
     ...openApiErrorResponses,
   },
 })
 
-export type ResetEntitlementsRequest = z.infer<
+export type GetPaymentMethodsRequest = z.infer<
   (typeof route.request.body)["content"]["application/json"]["schema"]
 >
-export type ResetEntitlementsResponse = z.infer<
+
+export type GetPaymentMethodsResponse = z.infer<
   (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >
 
-export const registerResetEntitlementsV1 = (app: App) =>
+export const registerGetPaymentMethodsV1 = (app: App) =>
   app.openapi(route, async (c) => {
-    const { customerId } = c.req.valid("json")
-    const { entitlement } = c.get("services")
+    const { customerId, provider } = c.req.valid("json")
+    const { customer } = c.get("services")
 
     // validate the request
     const key = await keyAuth(c)
 
-    // delete the customer from the DO
-    const result = await entitlement.resetEntitlements(customerId, key.projectId)
+    // get payment methods from service
+    const result = await customer.getPaymentMethods({
+      customerId,
+      provider,
+      projectId: key.projectId,
+      opts: {
+        skipCache: false,
+      },
+    })
 
-    if (!result.success) {
+    if (result.err) {
       throw new UnpriceApiError({
         code: "INTERNAL_SERVER_ERROR",
-        message: result.message,
+        message: result.err.message,
       })
     }
 
-    return c.json(result, HttpStatusCodes.OK)
+    return c.json(result.val, HttpStatusCodes.OK)
   })

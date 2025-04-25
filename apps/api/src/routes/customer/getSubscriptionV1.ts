@@ -47,13 +47,6 @@ export const registerGetSubscriptionV1 = (app: App) =>
     // validate the request
     const key = await keyAuth(c)
 
-    if (!key) {
-      throw new UnpriceApiError({
-        code: "UNAUTHORIZED",
-        message: "Invalid API key",
-      })
-    }
-
     const { val: subscription, err } = await customer.getActiveSubscription(
       customerId,
       key.projectId

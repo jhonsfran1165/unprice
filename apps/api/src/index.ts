@@ -14,6 +14,7 @@ import { registerReportUsageV1 } from "~/routes/customer/reportUsageV1"
 import { registerCanV1 } from "./routes/customer/canV1"
 import { registerGetActivePhaseV1 } from "./routes/customer/getActivePhaseV1"
 import { registerGetEntitlementsV1 } from "./routes/customer/getEntitlementsV1"
+import { registerGetPaymentMethodsV1 } from "./routes/customer/getPaymentMethodsV1"
 import { registerGetSubscriptionV1 } from "./routes/customer/getSubscriptionV1"
 import { registerGetUsageV1 } from "./routes/customer/getUsageV1"
 import { registerResetEntitlementsV1 } from "./routes/customer/resetEntitlementsV1"
@@ -75,7 +76,7 @@ registerResetEntitlementsV1(app)
 registerGetSubscriptionV1(app)
 registerGetActivePhaseV1(app)
 registerGetUsageV1(app)
-
+registerGetPaymentMethodsV1(app)
 // Project routes
 registerGetFeaturesV1(app)
 

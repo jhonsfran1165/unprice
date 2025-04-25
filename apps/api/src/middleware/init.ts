@@ -82,8 +82,9 @@ export function init(): MiddlewareHandler<HonoEnv> {
 
     // start a new timer
     startTime(c, "initMetrics")
+    const emitMetrics = c.env.EMIT_METRICS_LOGS.toString() === "true"
 
-    const metrics: Metrics = c.env.EMIT_METRICS_LOGS
+    const metrics: Metrics = emitMetrics
       ? new LogdrainMetrics({
           requestId,
           environment: c.env.NODE_ENV,
@@ -102,7 +103,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
         waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
       },
       metrics,
-      c.env.EMIT_METRICS_LOGS
+      emitMetrics
     )
 
     await cacheService.init()
@@ -118,7 +119,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       primaryDatabaseUrl: c.env.DATABASE_URL,
       read1DatabaseUrl: c.env.DATABASE_READ1_URL,
       read2DatabaseUrl: c.env.DATABASE_READ2_URL,
-      logger: c.env.DRIZZLE_LOG,
+      logger: c.env.DRIZZLE_LOG.toString() === "true",
     })
 
     endTime(c, "initDb")
@@ -127,7 +128,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
     startTime(c, "initAnalytics")
 
     const analytics = new Analytics({
-      emit: c.env.EMIT_ANALYTICS,
+      emit: Boolean(c.env.EMIT_ANALYTICS),
       tinybirdToken: c.env.TINYBIRD_TOKEN,
       tinybirdUrl: c.env.TINYBIRD_URL,
     })
