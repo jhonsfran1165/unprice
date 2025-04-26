@@ -3,6 +3,7 @@ import type { Logger } from "@unprice/logging"
 import type { Cache } from "@unprice/services/cache"
 import type { CustomerService } from "@unprice/services/customers"
 import type { Metrics } from "@unprice/services/metrics"
+import type { SubscriptionService } from "@unprice/services/subscriptions"
 import type { Analytics } from "@unprice/tinybird"
 import type { ApiKeysService } from "~/apikey/service"
 import type { EntitlementService } from "~/entitlement"
@@ -19,6 +20,7 @@ export type ServiceContext = {
   apikey: ApiKeysService
   project: ApiProjectService
   customer: CustomerService
+  subscription: SubscriptionService
   db: Database
 }
 

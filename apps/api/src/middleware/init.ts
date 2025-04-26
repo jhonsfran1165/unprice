@@ -12,6 +12,7 @@ import { EntitlementService } from "~/entitlement/service"
 import type { HonoEnv } from "~/hono/env"
 import { ApiProjectService } from "~/project"
 
+import { SubscriptionService } from "@unprice/services/subscriptions"
 import { endTime, startTime } from "hono/timing"
 
 /**
@@ -150,6 +151,19 @@ export function init(): MiddlewareHandler<HonoEnv> {
     endTime(c, "initCustomer")
 
     // start a new timer
+    startTime(c, "initSubscription")
+
+    const subscription = new SubscriptionService({
+      logger,
+      analytics,
+      cache,
+      db,
+      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      metrics,
+    })
+
+    endTime(c, "initSubscription")
+    // start a new timer
     startTime(c, "initEntitlement")
 
     const entitlement = new EntitlementService({
@@ -198,6 +212,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
     c.set("services", {
       version: "1.0.0",
       entitlement,
+      subscription,
       analytics,
       project,
       cache,

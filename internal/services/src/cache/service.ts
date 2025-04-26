@@ -30,6 +30,7 @@ export class CacheService {
   async init(): Promise<void> {
     if (this.cache) return
 
+    // emit the cache size
     this.metrics.emit({
       metric: "metric.cache.size",
       tier: "memory",
@@ -89,6 +90,10 @@ export class CacheService {
         this.context,
         defaultOpts
       ),
+      customerPaymentMethods: new Namespace<CacheNamespaces["customerPaymentMethods"]>(
+        this.context,
+        defaultOpts
+      ),
       projectFeatures: new Namespace<CacheNamespaces["projectFeatures"]>(this.context, defaultOpts),
       idempotentRequestUsageByHash: new Namespace<CacheNamespaces["idempotentRequestUsageByHash"]>(
         this.context,
@@ -103,19 +108,6 @@ export class CacheService {
         defaultOpts
       ),
     })
-  }
-
-  updateContext({
-    waitUntil,
-    metrics,
-  }: {
-    waitUntil: Context["waitUntil"]
-    metrics: Metrics
-  }) {
-    this.context = {
-      waitUntil,
-    }
-    this.metrics = metrics
   }
 
   /**

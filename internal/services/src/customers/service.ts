@@ -9,7 +9,13 @@ import {
   subscriptions,
 } from "@unprice/db/schema"
 import { AesGCM, newId } from "@unprice/db/utils"
-import type { AggregationMethod, CustomerSignUp } from "@unprice/db/validators"
+import type {
+  AggregationMethod,
+  Customer,
+  CustomerPaymentMethod,
+  CustomerSignUp,
+  PaymentProvider,
+} from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
@@ -98,7 +104,10 @@ export class CustomerService {
           ),
       })
       .catch((e) => {
-        console.error("error getting active phase data", e)
+        this.logger.error("error getting active phase data", {
+          error: e.message,
+        })
+
         throw e
       })
 
@@ -718,6 +727,80 @@ export class CustomerService {
     return result
   }
 
+  public async getPaymentProvider({
+    customerId,
+    projectId,
+    provider,
+  }: {
+    customerId?: string
+    projectId: string
+    provider: PaymentProvider
+  }): Promise<Result<PaymentProviderService, FetchError | UnPriceCustomerError>> {
+    let customerData: Customer | undefined
+
+    // validate customer if provided
+    if (customerId) {
+      customerData = await this.db.query.customers.findFirst({
+        where: (customer, { and, eq }) => and(eq(customer.id, customerId)),
+      })
+
+      if (!customerData) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "CUSTOMER_NOT_FOUND",
+            message: "Customer not found",
+          })
+        )
+      }
+    }
+
+    // get config payment provider
+    const config = await this.db.query.paymentProviderConfig
+      .findFirst({
+        where: (config, { and, eq }) =>
+          and(
+            eq(config.projectId, projectId),
+            eq(config.paymentProvider, provider),
+            eq(config.active, true)
+          ),
+      })
+      .catch((e) => {
+        this.logger.error("error getting payment provider config", {
+          error: e.message,
+          customerId,
+          projectId,
+          provider,
+        })
+
+        throw e
+      })
+
+    if (!config) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "PAYMENT_PROVIDER_CONFIG_NOT_FOUND",
+          message: "Payment provider config not found or not active",
+        })
+      )
+    }
+
+    const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+    const decryptedKey = await aesGCM.decrypt({
+      iv: config.keyIv,
+      ciphertext: config.key,
+    })
+
+    const paymentProviderService = new PaymentProviderService({
+      customer: customerData,
+      logger: this.logger,
+      paymentProvider: provider,
+      token: decryptedKey,
+    })
+
+    return Ok(paymentProviderService)
+  }
+
   public async getActiveEntitlement(
     customerId: string,
     featureSlug: string,
@@ -811,6 +894,139 @@ export class CustomerService {
           message: "entitlement is not active",
         })
       )
+    }
+
+    return Ok(val)
+  }
+
+  private async getPaymentMethodsData({
+    customerId,
+    projectId,
+    provider,
+  }: {
+    customerId: string
+    projectId: string
+    provider: PaymentProvider
+  }): Promise<CustomerPaymentMethod[]> {
+    const { val: paymentProviderService, err } = await this.getPaymentProvider({
+      customerId,
+      projectId,
+      provider,
+    })
+
+    if (err) {
+      return []
+    }
+
+    try {
+      const customerId = paymentProviderService.getCustomerId()
+
+      if (!customerId) {
+        this.logger.info("payment provider customer ID not found", {
+          customerId,
+          projectId,
+          provider,
+        })
+        return []
+      }
+
+      const { err, val } = await paymentProviderService.listPaymentMethods({
+        limit: 5,
+      })
+
+      if (err) {
+        this.logger.info("payment provider error", {
+          customerId,
+          projectId,
+          provider,
+          error: err.message,
+        })
+        return []
+      }
+
+      return val
+    } catch (err) {
+      const error = err as Error
+
+      this.logger.error("payment provider error", {
+        customerId,
+        projectId,
+        provider,
+        error: error.message,
+      })
+      return []
+    }
+  }
+
+  public async getPaymentMethods({
+    customerId,
+    provider,
+    projectId,
+    opts,
+  }: {
+    customerId: string
+    provider: PaymentProvider
+    projectId: string
+    opts?: {
+      skipCache?: boolean // skip cache to force revalidation
+    }
+  }): Promise<Result<CustomerPaymentMethod[], FetchError | UnPriceCustomerError>> {
+    // first try to get the payment methods from cache, if not found try to get it from DO,
+    const { val, err } = opts?.skipCache
+      ? await wrapResult(
+          this.getPaymentMethodsData({
+            customerId,
+            provider,
+            projectId,
+          }),
+          (err) =>
+            new FetchError({
+              message: "unable to query payment methods from db",
+              retry: false,
+              context: {
+                error: err.message,
+                url: "",
+                customerId: customerId,
+                provider: provider,
+                method: "getPaymentMethods",
+              },
+            })
+        )
+      : await retry(
+          3,
+          async () =>
+            this.cache.customerPaymentMethods.swr(`${customerId}:${provider}`, () =>
+              this.getPaymentMethodsData({
+                customerId,
+                provider,
+                projectId,
+              })
+            ),
+          (attempt, err) => {
+            this.logger.warn("Failed to fetch payment methods data from cache, retrying...", {
+              customerId: customerId,
+              attempt,
+              error: err.message,
+            })
+          }
+        )
+
+    if (err) {
+      this.logger.error("error getting payment methods", {
+        error: err.message,
+      })
+
+      return Err(
+        new FetchError({
+          message: err.message,
+          retry: true,
+          cause: err,
+        })
+      )
+    }
+
+    if (!val) {
+      return Ok([])
     }
 
     return Ok(val)
@@ -963,11 +1179,20 @@ export class CustomerService {
         },
       })
 
-      if (err ?? !val) {
+      if (err) {
         return Err(
           new UnPriceCustomerError({
             code: "PAYMENT_PROVIDER_ERROR",
             message: err.message,
+          })
+        )
+      }
+
+      if (!val) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "PAYMENT_PROVIDER_ERROR",
+            message: "Error creating payment provider signup",
           })
         )
       }

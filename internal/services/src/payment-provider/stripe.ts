@@ -1,4 +1,7 @@
-import { API_DOMAIN } from "@unprice/config"
+import {
+  STRIPE_SETUP_CALLBACK_PREFIX_URL,
+  STRIPE_SIGNUP_CALLBACK_PREFIX_URL,
+} from "@unprice/config"
 import type { Currency } from "@unprice/db/validators"
 import type { Result } from "@unprice/error"
 import { Err, FetchError, Ok } from "@unprice/error"
@@ -92,7 +95,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
       // do not use `new URL(...).searchParams` here, because it will escape the curly braces and stripe will not replace them with the session id
       // we pass urls as metadata and the call one of our endpoints to handle the session validation and then redirect the user to the success or cancel url
-      const apiCallbackUrl = `${API_DOMAIN}providers/stripe/signup?session_id={CHECKOUT_SESSION_ID}&project_id=${opts.customer.projectId}`
+      const apiCallbackUrl = `${STRIPE_SIGNUP_CALLBACK_PREFIX_URL}/{CHECKOUT_SESSION_ID}/${opts.customer.projectId}`
 
       // create a new session for registering a payment method
       const session = await this.client.checkout.sessions.create({
@@ -153,7 +156,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
       // do not use `new URL(...).searchParams` here, because it will escape the curly braces and stripe will not replace them with the session id
       // we pass urls as metadata and the call one of our endpoints to handle the session validation and then redirect the user to the success or cancel url
-      const apiCallbackUrl = `${API_DOMAIN}providers/stripe/setup?session_id={CHECKOUT_SESSION_ID}&project_id=${opts.projectId}`
+      const apiCallbackUrl = `${STRIPE_SETUP_CALLBACK_PREFIX_URL}{CHECKOUT_SESSION_ID}/${opts.projectId}`
 
       // create a new session for registering a payment method
       const session = await this.client.checkout.sessions.create({

@@ -13,7 +13,8 @@ export const env = createEnv({
       .default("false")
       .transform((v) => {
         return v === "true"
-      }),
+      })
+      .pipe(z.boolean()),
     DATABASE_URL: z.string().min(1).url(),
     DATABASE_READ1_URL: z.string().optional(),
     DATABASE_READ2_URL: z.string().optional(),

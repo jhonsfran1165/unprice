@@ -50,16 +50,16 @@ export const API_HOSTNAMES = new Set([
   `api.${MAIN_DOMAIN}`,
   `api.${env.NEXT_PUBLIC_APP_DOMAIN}`,
   // for preview deployments
-  `api-${env.NEXT_PUBLIC_APP_DOMAIN}`,
-  "api.localhost:3000",
+  `api-preview.${MAIN_DOMAIN}`,
+  "localhost:8787",
 ])
 
 export const API_DOMAIN =
   VERCEL_ENV === "production"
     ? `https://api.${MAIN_DOMAIN}/`
     : VERCEL_ENV === "preview"
-      ? `https://api-${env.NEXT_PUBLIC_APP_DOMAIN}/`
-      : "http://api.localhost:3000/"
+      ? `https://api-preview.${MAIN_DOMAIN}/`
+      : "http://localhost:8787/"
 
 export const AUTH_ROUTES = {
   SIGNIN: "/auth/signin",
@@ -68,6 +68,10 @@ export const AUTH_ROUTES = {
   RESET: "/auth/reset",
   NEW_PASSWORD: "/auth/new-password",
 }
+
+// stripe configuration endpoints
+export const STRIPE_SIGNUP_CALLBACK_PREFIX_URL = `${API_DOMAIN}v1/paymentProvider/stripe/signUp/`
+export const STRIPE_SETUP_CALLBACK_PREFIX_URL = `${API_DOMAIN}v1/paymentProvider/stripe/setup/`
 
 export const RESTRICTED_SUBDOMAINS = new Set(["www", "app", "api", "sites", "builderai", "unprice"])
 

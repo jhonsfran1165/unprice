@@ -8,13 +8,15 @@ export const env = createEnv({
   },
   server: {
     BASELIME_APIKEY: z.string().min(1),
+    // transform the string to a boolean
     EMIT_METRICS_LOGS: z
       .string()
       .optional()
       .default("true")
       .transform((v) => {
         return v === "true"
-      }),
+      })
+      .pipe(z.boolean()),
   },
   runtimeEnv: process.env,
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",

@@ -8,15 +8,13 @@ import type { ReactNode } from "react"
 import Footer from "~/components/layout/footer"
 import { Logo } from "~/components/layout/logo"
 import { MainNav } from "~/components/layout/main-nav"
-import { SearchTool } from "~/components/layout/search"
-import ThemeToggle from "~/components/layout/theme-toggle"
 
 export default function MarketingLayout(props: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <header
         className={cn(
-          "sticky top-0 z-40 flex h-16 items-center border-b bg-background-base px-2 sm:px-12 shadow-sm backdrop-blur-[2px]"
+          "sticky top-0 z-40 flex h-16 items-center border-b bg-background-base px-2 shadow-sm backdrop-blur-[2px] sm:px-12"
         )}
       >
         <div className="flex h-14 w-full items-center space-x-8 sm:justify-between sm:space-x-0">

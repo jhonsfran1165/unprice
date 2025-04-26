@@ -10,7 +10,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "keywords": ["unprice", "client", "api"],
+  "keywords": ["unprice", "pricing", "saas", "subscription", "billing", "payments"],
   "bugs": {
     "url": "https://github.com/jhonsfran1165/unprice/issues"
   },
@@ -21,14 +21,15 @@
     "test": "vitest run",
     "generate": "openapi-typescript http://localhost:8787/openapi.json -o ./src/openapi.d.ts",
     "build:generate": "rm -rf dist && pnpm generate && tsup",
-    "build": "rm -rf dist && tsup"
+    "build": "rm -rf dist && tsup",
+    "dev": "tsup --watch"
   },
   "dependencies": {},
   "devDependencies": {
     "@types/node": "20.11.24",
     "@unprice/tsconfig": "^0.1.0",
     "openapi-typescript": "7.0.0-next.7",
-    "tsup": "^8.2.4",
+    "tsup": "^8.4.0",
     "typescript": "^5.3.3",
     "vitest": "^2.0.5"
   }

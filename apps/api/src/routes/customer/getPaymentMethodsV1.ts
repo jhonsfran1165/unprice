@@ -5,7 +5,6 @@ import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
 import { customerPaymentMethodSchema, paymentProviderSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { keyAuth } from "~/auth/key"
-import { UnpriceApiError } from "~/errors/http"
 import { openApiErrorResponses } from "~/errors/openapi-responses"
 import type { App } from "~/hono/app"
 
@@ -68,10 +67,7 @@ export const registerGetPaymentMethodsV1 = (app: App) =>
     })
 
     if (result.err) {
-      throw new UnpriceApiError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: result.err.message,
-      })
+      throw result.err
     }
 
     return c.json(result.val, HttpStatusCodes.OK)
