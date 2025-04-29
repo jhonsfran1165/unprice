@@ -87,8 +87,8 @@ export function SubscriptionPhaseForm({
 
   // all this querues are deduplicated inside each form field
   const { data: planVersions, isLoading } = api.planVersions.listByActiveProject.useQuery({
-    enterprisePlan: true,
-    published: true,
+    onlyPublished: true,
+    onlyLatest: true,
   })
 
   const selectedPlanVersionId = form.watch("planVersionId")

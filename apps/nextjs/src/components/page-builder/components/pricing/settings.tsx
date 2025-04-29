@@ -16,7 +16,8 @@ export const PricingTableSettings = () => {
   ) => void
 
   const { data: planVersions, isLoading } = api.planVersions.listByActiveProject.useQuery({
-    published: true,
+    onlyPublished: true,
+    onlyLatest: true,
   })
 
   const findPlan = (id: string) => {

@@ -1,5 +1,6 @@
 import * as z from "zod"
 
+import { extendZodWithOpenApi } from "zod-openapi"
 import {
   AGGREGATION_METHODS,
   BILLING_INTERVALS,
@@ -18,6 +19,8 @@ import {
   WHEN_TO_BILLING,
 } from "../utils"
 
+extendZodWithOpenApi(z)
+
 export const paymentProviderSchema = z.enum(PAYMENT_PROVIDERS)
 export const currencySchema = z.enum(CURRENCIES)
 export const typeFeatureSchema = z.enum(FEATURE_TYPES)
@@ -35,7 +38,15 @@ export const dueBehaviourSchema = z.enum(DUE_BEHAVIOUR)
 export const invoiceStatusSchema = z.enum(INVOICE_STATUS)
 export const invoiceTypeSchema = z.enum(INVOICE_TYPE)
 export const billingAnchorSchema = z
-  .union([z.coerce.number().int().min(0).max(31), z.literal("dayOfCreation")])
+  .union([
+    z.number().int().min(1).max(31).openapi({
+      description:
+        "Days of the month. Pick a number between 1 and 31, if the month has less days, it will be the last day of the month",
+    }),
+    z.literal("dayOfCreation").openapi({
+      description: "the day of the creation of the subscription as the billing anchor",
+    }),
+  ])
   .default("dayOfCreation")
 
 export const billingIntervalSchema = z.enum(BILLING_INTERVALS)

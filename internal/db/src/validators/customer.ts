@@ -12,6 +12,7 @@ import {
 import { subscriptionItemsConfigSchema } from "./subscriptions/items"
 
 extendZodWithOpenApi(z)
+
 export const reasonCreditSchema = z.enum([
   "downgrade_in_advance",
   "downgrade_arrear",

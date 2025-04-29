@@ -1,5 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
+import { extendZodWithOpenApi } from "zod-openapi"
 import { versions } from "../schema/planVersions"
 import {
   billingAnchorSchema,
@@ -9,18 +10,22 @@ import {
   planTypeSchema,
 } from "./shared"
 
+extendZodWithOpenApi(z)
+
 export const planVersionMetadataSchema = z.object({
   externalId: z.string().optional(),
 })
 
-export const billingConfigSchema = z
-  .object({
-    name: z.string().min(1),
-    billingInterval: billingIntervalSchema,
-    billingIntervalCount: billingIntervalCountSchema,
-    billingAnchor: billingAnchorSchema.optional(),
-    planType: planTypeSchema,
-  })
+export const billingConfigSchema = z.object({
+  name: z.string().min(1),
+  billingInterval: billingIntervalSchema,
+  billingIntervalCount: billingIntervalCountSchema,
+  billingAnchor: billingAnchorSchema.default("dayOfCreation"),
+  planType: planTypeSchema,
+})
+
+export const insertBillingConfigSchema = billingConfigSchema
+  .partial()
   .required({
     name: true,
     billingInterval: true,
@@ -59,21 +64,24 @@ export const billingConfigSchema = z
 
     return true
   })
+  .openapi({
+    description: "The billing configuration for the plan version",
+  })
 
 export const planVersionSelectBaseSchema = createSelectSchema(versions, {
   tags: z.array(z.string()),
   metadata: planVersionMetadataSchema,
   currency: currencySchema,
-  billingConfig: billingConfigSchema,
-  trialDays: z.coerce.number().int().min(0).default(0),
+  billingConfig: billingConfigSchema.openapi({
+    description: "The billing configuration for the plan version",
+  }),
 })
 
 export const versionInsertBaseSchema = createInsertSchema(versions, {
   tags: z.array(z.string()),
   metadata: planVersionMetadataSchema,
   currency: currencySchema,
-  billingConfig: billingConfigSchema,
-  trialDays: z.coerce.number().int().min(0).default(0),
+  billingConfig: insertBillingConfigSchema,
 })
   .required({
     planId: true,
@@ -97,3 +105,4 @@ export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>
 export type PlanVersionMetadata = z.infer<typeof planVersionMetadataSchema>
 export type PlanVersion = z.infer<typeof planVersionSelectBaseSchema>
 export type BillingConfig = z.infer<typeof billingConfigSchema>
+export type InsertBillingConfig = z.infer<typeof insertBillingConfigSchema>

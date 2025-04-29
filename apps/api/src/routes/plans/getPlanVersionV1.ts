@@ -1,8 +1,5 @@
 import { createRoute } from "@hono/zod-openapi"
-import { planVersionSelectBaseSchema } from "@unprice/db/validators"
-import { planSelectBaseSchema } from "@unprice/db/validators"
-import { planVersionFeatureSelectBaseSchema } from "@unprice/db/validators"
-import { featureSelectBaseSchema } from "@unprice/db/validators"
+import { getPlanVersionListResponseSchema } from "@unprice/db/validators"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent } from "stoker/openapi/helpers"
 
@@ -13,17 +10,6 @@ import { openApiErrorResponses } from "~/errors/openapi-responses"
 import type { App } from "~/hono/app"
 
 const tags = ["plans"]
-
-const responseSchema = z.object({
-  planVersion: planVersionSelectBaseSchema.extend({
-    plan: planSelectBaseSchema,
-    planFeatures: z.array(
-      planVersionFeatureSelectBaseSchema.extend({
-        feature: featureSelectBaseSchema,
-      })
-    ),
-  }),
-})
 
 export const route = createRoute({
   path: "/v1/plans/getPlanVersion/{planVersionId}",
@@ -40,7 +26,12 @@ export const route = createRoute({
     }),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(responseSchema, "The result of the get plan version"),
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({
+        planVersion: getPlanVersionListResponseSchema,
+      }),
+      "The result of the get plan version"
+    ),
     ...openApiErrorResponses,
   },
 })
@@ -56,13 +47,6 @@ export const registerGetPlanVersionV1 = (app: App) =>
 
     // validate the request
     const key = await keyAuth(c)
-
-    if (!key) {
-      throw new UnpriceApiError({
-        code: "UNAUTHORIZED",
-        message: "Invalid API key",
-      })
-    }
 
     const planVersionData = await db.query.versions.findFirst({
       with: {

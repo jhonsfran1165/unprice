@@ -1,7 +1,7 @@
 "use client"
 
 import { BILLING_CONFIG } from "@unprice/db/utils"
-import type { BillingConfig, BillingInterval } from "@unprice/db/validators"
+import type { BillingConfig, BillingInterval, InsertBillingConfig } from "@unprice/db/validators"
 import {
   FormControl,
   FormDescription,
@@ -16,7 +16,7 @@ import type { FieldPath, FieldValues, PathValue, UseFormReturn } from "react-hoo
 import { FilterScroll } from "~/components/filter-scroll"
 
 interface FormValues extends FieldValues {
-  billingConfig: BillingConfig
+  billingConfig: BillingConfig | InsertBillingConfig
 }
 
 export default function BillingConfigFormField<TFieldValues extends FormValues>({

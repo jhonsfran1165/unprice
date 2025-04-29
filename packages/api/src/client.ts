@@ -372,4 +372,34 @@ export class Unprice {
       },
     }
   }
+
+  public get plans() {
+    return {
+      listPlanVersions: async (
+        req: paths["/v1/plans/listPlanVersions"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/v1/plans/listPlanVersions"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "plans", "listPlanVersions"],
+          method: "POST",
+          body: req,
+        })
+      },
+      getPlanVersion: async (
+        planVersionId: string
+      ): Promise<
+        Result<
+          paths["/v1/plans/getPlanVersion/{planVersionId}"]["get"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "plans", "getPlanVersion", planVersionId],
+          method: "GET",
+        })
+      },
+    }
+  }
 }

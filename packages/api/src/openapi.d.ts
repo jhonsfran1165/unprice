@@ -208,6 +208,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/v1/plans/listPlanVersions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** @description List all plan versions */
+    post: operations["plans.listPlanVersions"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/v1/paymentProvider/stripe/signUp/{sessionId}/{projectId}": {
     parameters: {
       query?: never
@@ -229,7 +246,7 @@ export interface paths {
       requestBody?: never
       responses: {
         /** @description Redirect */
-        308: {
+        302: {
           headers: {
             /** @description URL to redirect to */
             Location?: string
@@ -340,7 +357,7 @@ export interface paths {
       requestBody?: never
       responses: {
         /** @description Redirect */
-        308: {
+        302: {
           headers: {
             /** @description URL to redirect to */
             Location?: string
@@ -1370,13 +1387,14 @@ export interface operations {
               dueBehaviour: "cancel" | "downgrade"
               /** @enum {string} */
               currency: "USD" | "EUR"
+              /** @description The billing configuration for the plan version */
               billingConfig: {
                 name: string
                 /** @enum {string} */
                 billingInterval: "month" | "year" | "day" | "minute" | "onetime"
                 billingIntervalCount: number
                 /** @default dayOfCreation */
-                billingAnchor: (number | null) | "dayOfCreation" | unknown
+                billingAnchor: number | "dayOfCreation"
                 /** @enum {string} */
                 planType: "recurring" | "onetime"
               }
@@ -1385,8 +1403,7 @@ export interface operations {
               gracePeriod: number
               /** @enum {string} */
               collectionMethod: "charge_automatically" | "send_invoice"
-              /** @default 0 */
-              trialDays: number | null
+              trialDays: number
               autoRenew: boolean
               metadata: {
                 externalId?: string
@@ -1435,24 +1452,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1462,12 +1489,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1481,12 +1513,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1496,24 +1533,34 @@ export interface operations {
                       tiers: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1528,12 +1575,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1545,24 +1597,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1576,24 +1638,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1603,12 +1675,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1755,7 +1832,7 @@ export interface operations {
                 billingInterval: "month" | "year" | "day" | "minute" | "onetime"
                 billingIntervalCount: number
                 /** @default dayOfCreation */
-                billingAnchor: (number | null) | "dayOfCreation" | unknown
+                billingAnchor: number | "dayOfCreation"
                 /** @enum {string} */
                 planType: "recurring" | "onetime"
               }
@@ -1814,24 +1891,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1841,12 +1928,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1860,12 +1952,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1875,24 +1972,34 @@ export interface operations {
                       tiers: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1907,12 +2014,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1924,24 +2036,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1955,24 +2077,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1982,12 +2114,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -2702,13 +2839,14 @@ export interface operations {
               dueBehaviour: "cancel" | "downgrade"
               /** @enum {string} */
               currency: "USD" | "EUR"
+              /** @description The billing configuration for the plan version */
               billingConfig: {
                 name: string
                 /** @enum {string} */
                 billingInterval: "month" | "year" | "day" | "minute" | "onetime"
                 billingIntervalCount: number
                 /** @default dayOfCreation */
-                billingAnchor: (number | null) | "dayOfCreation" | unknown
+                billingAnchor: number | "dayOfCreation"
                 /** @enum {string} */
                 planType: "recurring" | "onetime"
               }
@@ -2717,14 +2855,14 @@ export interface operations {
               gracePeriod: number
               /** @enum {string} */
               collectionMethod: "charge_automatically" | "send_invoice"
-              /** @default 0 */
-              trialDays: number | null
+              trialDays: number
               autoRenew: boolean
               metadata: {
                 externalId?: string
               } | null
               paymentMethodRequired: boolean
               version: number
+              /** @description The plan information */
               plan: {
                 id: string
                 projectId: string
@@ -2753,24 +2891,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -2780,12 +2928,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -2799,12 +2952,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -2814,24 +2972,34 @@ export interface operations {
                       tiers: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -2846,12 +3014,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -2863,24 +3036,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -2894,24 +3077,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -2921,12 +3114,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -2956,6 +3154,7 @@ export interface operations {
                 defaultQuantity: number | null
                 limit?: number | null
                 hidden: boolean
+                /** @description The feature information */
                 feature: {
                   id: string
                   projectId: string
@@ -2968,6 +3167,473 @@ export interface operations {
                 }
               }[]
             }
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "plans.listPlanVersions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description Whether to include published plan versions
+           * @example true
+           */
+          onlyPublished?: boolean
+          /**
+           * @description Whether to include enterprise plan versions
+           * @example false
+           */
+          onlyEnterprisePlan?: boolean
+          /**
+           * @description Whether to include the latest plan version
+           * @example true
+           */
+          onlyLatest?: boolean
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the list plan versions */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            planVersions: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              planId: string
+              description: string
+              latest: boolean | null
+              title: string
+              tags: string[] | null
+              active: boolean | null
+              flatPrice: string | null
+              /** @enum {string|null} */
+              status: "draft" | "published"
+              publishedAt: number | null
+              publishedBy: string | null
+              archived: boolean | null
+              archivedAt: number | null
+              archivedBy: string | null
+              /** @enum {string} */
+              paymentProvider: "stripe" | "lemonsqueezy"
+              /** @enum {string} */
+              dueBehaviour: "cancel" | "downgrade"
+              /** @enum {string} */
+              currency: "USD" | "EUR"
+              /** @description The billing configuration for the plan version */
+              billingConfig: {
+                name: string
+                /** @enum {string} */
+                billingInterval: "month" | "year" | "day" | "minute" | "onetime"
+                billingIntervalCount: number
+                /** @default dayOfCreation */
+                billingAnchor: number | "dayOfCreation"
+                /** @enum {string} */
+                planType: "recurring" | "onetime"
+              }
+              /** @enum {string} */
+              whenToBill: "pay_in_advance" | "pay_in_arrear"
+              gracePeriod: number
+              /** @enum {string} */
+              collectionMethod: "charge_automatically" | "send_invoice"
+              trialDays: number
+              autoRenew: boolean
+              metadata: {
+                externalId?: string
+              } | null
+              paymentMethodRequired: boolean
+              version: number
+              /** @description The plan information */
+              plan: {
+                id: string
+                projectId: string
+                createdAtM: number
+                updatedAtM: number
+                slug: string
+                active: boolean | null
+                description: string
+                metadata: {
+                  externalId?: string
+                } | null
+                defaultPlan: boolean | null
+                enterprisePlan: boolean | null
+              }
+              planFeatures: {
+                id: string
+                projectId: string
+                createdAtM: number
+                updatedAtM: number
+                planVersionId: string
+                featureId: string
+                /** @enum {string} */
+                featureType: "flat" | "tier" | "package" | "usage"
+                config:
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      tierMode: "volume" | "graduated"
+                      tiers: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      units?: number
+                    }
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      /** @description Units for the package */
+                      units: number
+                    }
+                metadata: {
+                  stripeProductId?: string
+                  realtime?: boolean
+                } | null
+                /** @enum {string} */
+                aggregationMethod:
+                  | "sum"
+                  | "sum_all"
+                  | "last_during_period"
+                  | "count"
+                  | "count_all"
+                  | "max"
+                  | "max_all"
+                order: number
+                /** @default 1 */
+                defaultQuantity: number | null
+                limit?: number | null
+                hidden: boolean
+                /** @description The feature information */
+                feature: {
+                  id: string
+                  projectId: string
+                  createdAtM: number
+                  updatedAtM: number
+                  slug: string
+                  code: number
+                  title: string
+                  description: string | null
+                }
+              }[]
+            }[]
           }
         }
       }

@@ -34,11 +34,10 @@ export default function NewWorkspaceForm({
     },
   })
 
-  const { data, isLoading } = api.planVersions.listByUnpriceProject.useQuery(
+  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
     {
-      enterprisePlan: true,
-      published: true,
-      active: true,
+      onlyPublished: true,
+      onlyLatest: true,
     },
     {
       enabled: true,

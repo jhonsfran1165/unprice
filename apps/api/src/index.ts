@@ -22,7 +22,8 @@ import { registerResetEntitlementsV1 } from "./routes/customer/resetEntitlements
 import { registerSignUpV1 } from "./routes/customer/signUpV1"
 import { registerStripeSetupV1 } from "./routes/paymentProvider/stripeSetupV1"
 import { registerStripeSignUpV1 } from "./routes/paymentProvider/stripeSignUpV1"
-import { registerGetPlanVersionV1 } from "./routes/plans/gePlanVersionV1"
+import { registerGetPlanVersionV1 } from "./routes/plans/getPlanVersionV1"
+import { registerListPlanVersionsV1 } from "./routes/plans/listPlanVersionsV1"
 import { registerGetFeaturesV1 } from "./routes/project/getFeaturesV1"
 
 import { timing } from "hono/timing"
@@ -89,6 +90,7 @@ registerGetFeaturesV1(app)
 
 // Plans routes
 registerGetPlanVersionV1(app)
+registerListPlanVersionsV1(app)
 
 // Payment provider routes
 registerStripeSignUpV1(app)
