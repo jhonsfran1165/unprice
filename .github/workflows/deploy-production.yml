@@ -15,9 +15,8 @@ concurrency:
 jobs:
   build-lint:
     uses: ./.github/workflows/job_build.yaml
-
   ci-production-tinybird:
-    if: "!contains(github.head_ref, 'renovate/')"
+    if: ${{ !contains(github.head_ref, 'renovate/') }}
     uses: ./.github/workflows/job_tinybird_ci.yml
     needs:
       - build-lint
