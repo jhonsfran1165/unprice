@@ -2,6 +2,7 @@ import type {
   ApiKeyExtended,
   CustomerEntitlementExtended,
   CustomerEntitlementsExtended,
+  CustomerPaymentMethod,
   Feature,
   getActivePhaseResponseSchema,
   getSubscriptionResponseSchema,
@@ -38,6 +39,7 @@ export type CacheNamespaces = {
   customerActivePhase: SubscriptionPhaseCache | null
   customerEntitlement: CustomerEntitlementCache | null
   customerEntitlements: CustomerEntitlementsCache[] | null
+  customerPaymentMethods: CustomerPaymentMethod[] | null
   projectFeatures: ProjectFeatureCache | null
   idempotentRequestUsageByHash: UsageEntitlementCache | null
 }

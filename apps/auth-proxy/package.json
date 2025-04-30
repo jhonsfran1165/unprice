@@ -6,7 +6,7 @@
   "scripts": {
     "build": "nitro build",
     "clean": "rm -rf .turbo node_modules .nitro .output .vercel",
-    "dev": "nitro dev --port 3100",
+    "dev": "nitro dev --port 3100 --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

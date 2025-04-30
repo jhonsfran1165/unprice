@@ -5,10 +5,10 @@ import { calculatePricePerFeature } from "@unprice/db/validators"
 import type { RouterOutputs } from "@unprice/trpc"
 import { isZero } from "dinero.js"
 
-type PlanVersionResponse = RouterOutputs["planVersions"]["listByUnpriceProject"]["planVersions"][0]
+type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 
 type PlanVersionFeaturesResponse =
-  RouterOutputs["planVersions"]["listByUnpriceProject"]["planVersions"][0]["planFeatures"][0]
+  RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]["planFeatures"][0]
 
 export function PriceFeature({
   selectedPlanVersion,

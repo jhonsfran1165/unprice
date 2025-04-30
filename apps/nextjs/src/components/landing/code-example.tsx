@@ -1,7 +1,9 @@
 "use client"
-
+import { API_DOMAIN } from "@unprice/config"
+import { Button } from "@unprice/ui/button"
 import { motion, useInView } from "framer-motion"
 import { Check, Code, Lock, Settings } from "lucide-react"
+import Link from "next/link"
 import { useRef } from "react"
 import { SDKDemo } from "./sdk-examples"
 
@@ -72,10 +74,17 @@ export default function CodeExample() {
       >
         Built by developers, <br /> for developers
       </motion.h2>
-      <motion.p variants={itemVariants} className="mt-6 max-w-2xl text-lg">
+      <motion.div variants={itemVariants} className="mt-6 max-w-2xl text-lg">
         I got tired of doing the same thing over and over again, so I decided to build a tool that I
         enjoy using.
-      </motion.p>
+        <div className="mt-4">
+          <Link href={`${API_DOMAIN}reference`} target="_blank" className="text-primary-text">
+            <Button variant="outline" className="text-primary-text">
+              Check API docs
+            </Button>
+          </Link>
+        </div>
+      </motion.div>
       <motion.div variants={itemVariants}>
         <SDKDemo />
       </motion.div>

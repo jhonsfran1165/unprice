@@ -1,9 +1,12 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
+import { extendZodWithOpenApi } from "zod-openapi"
 
 import { subscriptionItems } from "../../schema/subscriptions"
 import { featureSelectBaseSchema } from "../features"
 import { planVersionFeatureSelectBaseSchema } from "../planVersionFeatures"
+
+extendZodWithOpenApi(z)
 
 export const subscriptionItemsSelectSchema = createSelectSchema(subscriptionItems)
 
@@ -27,19 +30,30 @@ export const subscriptionItemsInsertSchema = createInsertSchema(subscriptionItem
   })
 
 export const subscriptionItemConfigSchema = z.object({
-  featurePlanId: z.string(),
-  featureSlug: z.string(),
-  isUsage: z.boolean().optional().describe("if the item is a usage item"),
-  units: z.coerce
-    .number()
-    .min(1)
-    .optional()
-    .describe("units of the feature the user is subscribed to"),
-  min: z.coerce
-    .number()
-    .optional()
-    .describe("minimum units of the feature the user is subscribed to"),
-  limit: z.coerce.number().optional().describe("limit of the feature the user is subscribed to"),
+  featurePlanId: z.string().openapi({
+    description: "The feature plan id of the item",
+    example: "feature_plan_123",
+  }),
+  featureSlug: z.string().openapi({
+    description: "The feature slug of the item",
+    example: "feature_slug_123",
+  }),
+  isUsage: z.boolean().optional().openapi({
+    description: "if the item is a usage item",
+    example: true,
+  }),
+  units: z.coerce.number().min(1).optional().openapi({
+    description: "units of the feature the user is subscribed to",
+    example: 100,
+  }),
+  min: z.coerce.number().optional().openapi({
+    description: "minimum units of the feature the user is subscribed to",
+    example: 100,
+  }),
+  limit: z.coerce.number().optional().openapi({
+    description: "limit of the feature the user is subscribed to",
+    example: 100,
+  }),
 })
 
 // stripe won't allow more than 250 items in a single invoice

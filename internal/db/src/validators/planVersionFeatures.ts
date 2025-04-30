@@ -4,10 +4,12 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 import { ZodError } from "zod"
 
+import { extendZodWithOpenApi } from "zod-openapi"
 import { planVersionFeatures } from "../schema/planVersionFeatures"
 import { FEATURE_TYPES_MAPS, USAGE_MODES_MAP } from "../utils"
 import { featureSelectBaseSchema } from "./features"
 import { planVersionSelectBaseSchema } from "./planVersions"
+import { planSelectBaseSchema } from "./plans"
 import {
   aggregationMethodSchema,
   tierModeSchema,
@@ -16,18 +18,22 @@ import {
   usageModeSchema,
 } from "./shared"
 
+extendZodWithOpenApi(z)
+
 export const priceSchema = z.coerce
   .string()
   .regex(/^\d{1,10}(\.\d{1,10})?$/, "Invalid price format")
 
 export const dineroSnapshotSchema = z.object({
-  amount: z.number(),
+  amount: z.number().describe("The amount of the dinero object"),
   currency: z.object({
-    code: z.string(),
-    base: z.union([z.number(), z.number().array().readonly()]),
-    exponent: z.number(),
+    code: z.string().describe("The currency code of the dinero object"),
+    base: z
+      .union([z.number(), z.number().array().readonly()])
+      .describe("The base of the dinero object"),
+    exponent: z.number().describe("The exponent of the dinero object"),
   }),
-  scale: z.number(),
+  scale: z.number().describe("The scale of the dinero object"),
 })
 
 export type DineroSnapshot = z.infer<typeof dineroSnapshotSchema>
@@ -465,6 +471,34 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
   planFeatures: z.array(
     planVersionFeatureSelectBaseSchema.extend({
       feature: featureSelectBaseSchema,
+    })
+  ),
+})
+
+export const getPlanVersionListSchema = z.object({
+  onlyPublished: z.boolean().optional().openapi({
+    description: "Whether to include published plan versions",
+    example: true,
+  }),
+  onlyEnterprisePlan: z.boolean().optional().openapi({
+    description: "Whether to include enterprise plan versions",
+    example: false,
+  }),
+  onlyLatest: z.boolean().optional().openapi({
+    description: "Whether to include the latest plan version",
+    example: true,
+  }),
+})
+
+export const getPlanVersionListResponseSchema = planVersionSelectBaseSchema.extend({
+  plan: planSelectBaseSchema.openapi({
+    description: "The plan information",
+  }),
+  planFeatures: z.array(
+    planVersionFeatureSelectBaseSchema.extend({
+      feature: featureSelectBaseSchema.openapi({
+        description: "The feature information",
+      }),
     })
   ),
 })

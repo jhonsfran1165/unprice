@@ -74,8 +74,8 @@ async function PaymentMethodCard({
       <CardContent>
         <PaymentMethodForm
           customerId={customerId}
-          successUrl={`${APP_DOMAIN}/${workspaceSlug}/settings/billing`}
-          cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/settings/billing`}
+          successUrl={`${APP_DOMAIN}${workspaceSlug}/settings/billing`}
+          cancelUrl={`${APP_DOMAIN}${workspaceSlug}/settings/billing`}
           readonly={true}
         />
       </CardContent>

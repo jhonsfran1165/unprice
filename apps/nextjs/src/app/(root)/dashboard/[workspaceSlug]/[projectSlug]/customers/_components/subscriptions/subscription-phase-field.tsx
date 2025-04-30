@@ -60,8 +60,8 @@ export default function SubscriptionPhaseFormField({
   // this query is deduplicated from the parent component
   const { data: planVersions, isLoading: isPlanVersionsLoading } =
     api.planVersions.listByActiveProject.useQuery({
-      enterprisePlan: true,
-      published: true,
+      onlyPublished: true,
+      onlyLatest: true,
     })
 
   const removePhase = api.subscriptions.removePhase.useMutation()

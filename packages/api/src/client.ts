@@ -172,6 +172,7 @@ export class Unprice {
       if (res && res.status >= 200 && res.status <= 299) {
         return { result: (await res.json()) as TResult }
       }
+
       // 400-499 -> client error, retries are futile
       if (res && res.status >= 400 && res.status <= 499) {
         return (await res.json()) as ErrorResponse
@@ -312,6 +313,48 @@ export class Unprice {
           method: "GET",
         })
       },
+
+      getPaymentMethods: async (
+        req: paths["/v1/customer/getPaymentMethods"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/v1/customer/getPaymentMethods"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "customer", "getPaymentMethods"],
+          method: "POST",
+          body: req,
+        })
+      },
+
+      createPaymentMethod: async (
+        req: paths["/v1/customer/createPaymentMethod"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/v1/customer/createPaymentMethod"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "customer", "createPaymentMethod"],
+          method: "POST",
+          body: req,
+        })
+      },
+
+      signUp: async (
+        req: paths["/v1/customer/signUp"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/v1/customer/signUp"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "customer", "signUp"],
+          method: "POST",
+          body: req,
+        })
+      },
     }
   }
 
@@ -324,6 +367,36 @@ export class Unprice {
       > => {
         return await this.fetch({
           path: ["v1", "project", "getFeatures"],
+          method: "GET",
+        })
+      },
+    }
+  }
+
+  public get plans() {
+    return {
+      listPlanVersions: async (
+        req: paths["/v1/plans/listPlanVersions"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/v1/plans/listPlanVersions"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "plans", "listPlanVersions"],
+          method: "POST",
+          body: req,
+        })
+      },
+      getPlanVersion: async (
+        planVersionId: string
+      ): Promise<
+        Result<
+          paths["/v1/plans/getPlanVersion/{planVersionId}"]["get"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "plans", "getPlanVersion", planVersionId],
           method: "GET",
         })
       },

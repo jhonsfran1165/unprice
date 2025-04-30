@@ -1,6 +1,5 @@
 import { createTRPCRouter } from "#trpc"
 import { create } from "./create"
-import { createPaymentMethod } from "./createPaymentMethod"
 import { exist } from "./exist"
 import { getByEmail } from "./getByEmail"
 import { getById } from "./getById"
@@ -14,7 +13,6 @@ export const customersRouter = createTRPCRouter({
   create: create,
   remove: remove,
   update: update,
-  createPaymentMethod: createPaymentMethod,
   exist: exist,
   getByEmail: getByEmail,
   getById: getById,

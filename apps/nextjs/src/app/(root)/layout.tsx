@@ -7,6 +7,7 @@ import "~/styles/globals.css"
 import "~/styles/prosemirror.css"
 
 import { VercelToolbar } from "@vercel/toolbar/next"
+import { TailwindIndicator } from "~/components/layout/tailwind-indicator"
 import { ThemeProvider } from "~/components/layout/theme-provider"
 import { siteConfig } from "~/constants/layout"
 import { fontMapper } from "~/styles/fonts"
@@ -69,6 +70,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           {/* <Analytics /> */}
           <Analytics />
           <SpeedInsights />
+          <TailwindIndicator />
         </body>
       </html>
     </ViewTransitions>

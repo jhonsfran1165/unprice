@@ -166,7 +166,7 @@ export const Logos = {
         fill="none"
         stroke="#000"
         strokeWidth="25"
-        stroke-linecap="round"
+        strokeLinecap="round"
         d="M208 128l-80 80M192 40L40 192"
       />
     </svg>

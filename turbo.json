@@ -5,7 +5,8 @@
     "SKIP_ENV_VALIDATION",
     "EMIT_METRICS_LOGS",
     "TRPC_LOGGER",
-    "DRIZZLE_LOG"
+    "DRIZZLE_LOG",
+    "EMIT_ANALYTICS"
   ],
   "tasks": {
     "install": {
@@ -45,7 +46,8 @@
         "COOKIE_ENCRYPTION_KEY",
         "UNPRICE_API_KEY",
         "UNPRICE_API_URL",
-        "FLAGS_SECRET"
+        "FLAGS_SECRET",
+        "EMIT_ANALYTICS"
       ]
     },
     "fmt": {
@@ -87,7 +89,8 @@
         "TINYBIRD_URL",
         "UNPRICE_API_KEY",
         "UNPRICE_API_URL",
-        "FLAGS_SECRET"
+        "FLAGS_SECRET",
+        "EMIT_ANALYTICS"
       ]
     },
     "test": {

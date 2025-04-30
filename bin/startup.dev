@@ -10,8 +10,11 @@ set -o pipefail # don't ignore exit codes when piping output
 set -o posix    # more strict failures in subshells
 # set -x          # enable debugging
 
-
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+export NVM_DIR="$HOME/.nvm"
+# shellcheck disable=SC1090
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
 echo "Starting up"
 
@@ -40,7 +43,7 @@ fi
 docker-compose up -d
 
 # use the correct node version
-bash -ic 'nvm use'
+nvm use
 
 # TODO: add tmux to start the services in different panes
 
@@ -63,8 +66,11 @@ if [ "$MODE_ID" = "dev" ]; then
   # REDIS_TOKEN="example_token"
   TB_RESTARTED=$RESTART_TINYBIRD
   UNPRICE_API_URL="http://localhost:8787"
+  # INFO: Replace with local key
+  UNPRICE_API_KEY="unprice_live_1JANeFH6hfpc2W7979WB2"
   DRIZZLE_LOG="false"
   EMIT_METRICS_LOGS="false"
+  EMIT_ANALYTICS="true"
 
   # loging to tb
   cd internal/tinybird
@@ -116,7 +122,7 @@ if [ "$MODE_ID" = "dev" ]; then
   cd ../../
 
   echo "Starting the application"
-  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" AUTH_REDIRECT_PROXY_URL="$AUTH_REDIRECT_PROXY_URL" UNPRICE_API_URL="$UNPRICE_API_URL" DRIZZLE_LOG="$DRIZZLE_LOG" EMIT_METRICS_LOGS="$EMIT_METRICS_LOGS" pnpm run dev
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" AUTH_REDIRECT_PROXY_URL="$AUTH_REDIRECT_PROXY_URL" UNPRICE_API_URL="$UNPRICE_API_URL" UNPRICE_API_KEY="$UNPRICE_API_KEY" DRIZZLE_LOG="$DRIZZLE_LOG" EMIT_METRICS_LOGS="$EMIT_METRICS_LOGS" EMIT_ANALYTICS="$EMIT_ANALYTICS" pnpm run dev
 
 elif [ "$MODE_ID" = "preview" ]; then
   # banner to show the user that we are using the preview environment

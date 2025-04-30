@@ -1,59 +1,35 @@
-import { eq } from "@unprice/db"
-import * as schema from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
-import { workspaceSignupSchema } from "@unprice/db/validators"
-import { CustomerService } from "@unprice/services/customers"
-import { z } from "zod"
+import { signUpResponseSchema, workspaceSignupSchema } from "@unprice/db/validators"
 
 import { TRPCError } from "@trpc/server"
 import { protectedProcedure } from "#trpc"
+import { unprice } from "#utils/unprice"
 
 export const signUp = protectedProcedure
   .input(workspaceSignupSchema)
-  .output(
-    z.object({
-      url: z.string(),
-    })
-  )
+  .output(signUpResponseSchema)
   .mutation(async (opts) => {
     const { name, planVersionId, config, successUrl, cancelUrl } = opts.input
     const user = opts.ctx.session?.user
     const workspaceId = newId("workspace")
 
-    const mainProject = await opts.ctx.db.query.projects.findFirst({
-      where: eq(schema.projects.isMain, true),
+    // sign up the customer
+    const { error, result } = await unprice.customers.signUp({
+      email: user.email,
+      name: name,
+      planVersionId,
+      config,
+      successUrl,
+      cancelUrl,
+      externalId: workspaceId,
     })
 
-    if (!mainProject) {
+    if (error) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Main project not found",
+        message: error.message,
       })
     }
 
-    const customer = new CustomerService(opts.ctx)
-
-    const { err, val } = await customer.signUp({
-      input: {
-        email: user.email,
-        name: name,
-        planVersionId,
-        config,
-        successUrl,
-        cancelUrl,
-        externalId: workspaceId,
-        timezone: mainProject.timezone,
-        defaultCurrency: mainProject.defaultCurrency,
-      },
-      projectId: mainProject.id,
-    })
-
-    if (err || !val?.success) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: err?.message ?? val?.error ?? "Unknown error, please try again later",
-      })
-    }
-
-    return val
+    return result
   })

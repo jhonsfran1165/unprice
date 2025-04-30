@@ -46,7 +46,7 @@ export class DurableObjectUsagelimiter extends Server {
     this.db = drizzle(ctx.storage, { logger: false })
 
     this.analytics = new Analytics({
-      emit: env.EMIT_ANALYTICS,
+      emit: env.EMIT_ANALYTICS.toString() === "true",
       tinybirdToken: env.TINYBIRD_TOKEN,
       tinybirdUrl: env.TINYBIRD_URL,
     })

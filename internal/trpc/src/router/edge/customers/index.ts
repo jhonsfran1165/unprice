@@ -1,11 +1,11 @@
 import { createTRPCRouter } from "#trpc"
 
+import { createPaymentMethod } from "./createPaymentMethod"
 import { listPaymentMethods } from "./listPaymentMethods"
 import { signOut } from "./signOut"
-import { signUp } from "./signUp"
 
 export const customersRouter = createTRPCRouter({
   listPaymentMethods: listPaymentMethods,
-  signUp: signUp,
   signOut: signOut,
+  createPaymentMethod: createPaymentMethod,
 })

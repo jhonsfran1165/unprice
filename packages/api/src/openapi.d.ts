@@ -123,6 +123,57 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/v1/customer/getPaymentMethods": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** @description Get payment methods for a customer */
+    post: operations["customer.getPaymentMethods"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/customer/signUp": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** @description Sign up a customer for a project */
+    post: operations["customer.signUp"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/customer/createPaymentMethod": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** @description Create a payment method for a customer */
+    post: operations["customer.createPaymentMethod"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/v1/project/getFeatures": {
     parameters: {
       query?: never
@@ -149,6 +200,245 @@ export interface paths {
     }
     /** @description Get a plan version by id */
     get: operations["plans.getPlanVersion"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/plans/listPlanVersions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** @description List all plan versions */
+    post: operations["plans.listPlanVersions"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/paymentProvider/stripe/signUp/{sessionId}/{projectId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description This endpoint is called by stripe after the customer has signed up. No webhook is needed. */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          projectId: string
+          sessionId: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Redirect */
+        302: {
+          headers: {
+            /** @description URL to redirect to */
+            Location?: string
+            [name: string]: unknown
+          }
+          content?: never
+        }
+        /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+        400: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrBadRequest"]
+          }
+        }
+        /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+        401: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrUnauthorized"]
+          }
+        }
+        /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+        403: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrForbidden"]
+          }
+        }
+        /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+        404: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrNotFound"]
+          }
+        }
+        /** @description This response is sent when a request conflicts with the current state of the server. */
+        409: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrConflict"]
+          }
+        }
+        /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+        412: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrPreconditionFailed"]
+          }
+        }
+        /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+        429: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrTooManyRequests"]
+          }
+        }
+        /** @description The server has encountered a situation it does not know how to handle. */
+        500: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrInternalServerError"]
+          }
+        }
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/paymentProvider/stripe/setup/{sessionId}/{projectId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description This endpoint is called by stripe after the customer setup a payment method. No webhook is needed. */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          projectId: string
+          sessionId: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Redirect */
+        302: {
+          headers: {
+            /** @description URL to redirect to */
+            Location?: string
+            [name: string]: unknown
+          }
+          content?: never
+        }
+        /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+        400: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrBadRequest"]
+          }
+        }
+        /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+        401: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrUnauthorized"]
+          }
+        }
+        /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+        403: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrForbidden"]
+          }
+        }
+        /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+        404: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrNotFound"]
+          }
+        }
+        /** @description This response is sent when a request conflicts with the current state of the server. */
+        409: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrConflict"]
+          }
+        }
+        /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+        412: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrPreconditionFailed"]
+          }
+        }
+        /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+        429: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrTooManyRequests"]
+          }
+        }
+        /** @description The server has encountered a situation it does not know how to handle. */
+        500: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrInternalServerError"]
+          }
+        }
+      }
+    }
     put?: never
     post?: never
     delete?: never
@@ -1097,13 +1387,14 @@ export interface operations {
               dueBehaviour: "cancel" | "downgrade"
               /** @enum {string} */
               currency: "USD" | "EUR"
+              /** @description The billing configuration for the plan version */
               billingConfig: {
                 name: string
                 /** @enum {string} */
                 billingInterval: "month" | "year" | "day" | "minute" | "onetime"
                 billingIntervalCount: number
                 /** @default dayOfCreation */
-                billingAnchor: (number | null) | "dayOfCreation" | unknown
+                billingAnchor: number | "dayOfCreation"
                 /** @enum {string} */
                 planType: "recurring" | "onetime"
               }
@@ -1112,8 +1403,7 @@ export interface operations {
               gracePeriod: number
               /** @enum {string} */
               collectionMethod: "charge_automatically" | "send_invoice"
-              /** @default 0 */
-              trialDays: number | null
+              trialDays: number
               autoRenew: boolean
               metadata: {
                 externalId?: string
@@ -1162,24 +1452,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1189,12 +1489,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1208,12 +1513,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1223,24 +1533,34 @@ export interface operations {
                       tiers: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1255,12 +1575,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1272,24 +1597,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1303,24 +1638,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1330,12 +1675,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1482,7 +1832,7 @@ export interface operations {
                 billingInterval: "month" | "year" | "day" | "minute" | "onetime"
                 billingIntervalCount: number
                 /** @default dayOfCreation */
-                billingAnchor: (number | null) | "dayOfCreation" | unknown
+                billingAnchor: number | "dayOfCreation"
                 /** @enum {string} */
                 planType: "recurring" | "onetime"
               }
@@ -1541,24 +1891,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1568,12 +1928,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1587,12 +1952,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1602,24 +1972,34 @@ export interface operations {
                       tiers: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1634,12 +2014,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1651,24 +2036,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1682,24 +2077,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -1709,12 +2114,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -1757,6 +2167,457 @@ export interface operations {
               }
               price: string | null
             }[]
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.getPaymentMethods": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The customer ID
+           * @example cus_1H7KQFLr7RepUyQBKdnvY
+           */
+          customerId: string
+          /**
+           * @description The payment provider
+           * @example stripe
+           * @enum {string}
+           */
+          provider: "stripe" | "lemonsqueezy"
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the get payment methods */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            id: string
+            name: string | null
+            last4?: string
+            expMonth?: number
+            expYear?: number
+            brand?: string
+          }[]
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.signUp": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The name of the customer
+           * @example John Doe
+           */
+          name: string
+          /**
+           * @description The timezone of the customer, if passed null the system will use the project timezone
+           * @example UTC
+           */
+          timezone?: string
+          /**
+           * @description The default currency of the customer, if passed null the system will use the project currency
+           * @example USD
+           * @enum {string}
+           */
+          defaultCurrency?: "USD" | "EUR"
+          /**
+           * Format: email
+           * @description The email of the customer
+           * @example test@example.com
+           */
+          email: string
+          /**
+           * @description The plan version the customer is signing up for
+           * @example pv_1234567890
+           */
+          planVersionId: string
+          /**
+           * @description The configuration of the subscription items. This is required if your features are quantity based when the customer needs to set them. Pass as empty if you want the system to automatically set the units from the plan defaults.
+           * @example [
+           *       {
+           *         "featurePlanId": "feature_plan_123",
+           *         "featureSlug": "feature_slug_123",
+           *         "isUsage": true,
+           *         "units": 100
+           *       }
+           *     ]
+           */
+          config?: {
+            /**
+             * @description The feature plan id of the item
+             * @example feature_plan_123
+             */
+            featurePlanId: string
+            /**
+             * @description The feature slug of the item
+             * @example feature_slug_123
+             */
+            featureSlug: string
+            /**
+             * @description if the item is a usage item
+             * @example true
+             */
+            isUsage?: boolean
+            /**
+             * @description units of the feature the user is subscribed to
+             * @example 100
+             */
+            units?: number
+            /**
+             * @description minimum units of the feature the user is subscribed to
+             * @example 100
+             */
+            min?: number | null
+            /**
+             * @description limit of the feature the user is subscribed to
+             * @example 100
+             */
+            limit?: number | null
+          }[]
+          /**
+           * @description The external id you want to associate with the customer. Could be the id of the user in your database
+           * @example 1234567890
+           */
+          externalId?: string
+          /**
+           * Format: uri
+           * @description The success url if the customer signs up. This is the url after the signup process, normally your dashboard
+           * @example https://example.com/dashboard
+           */
+          successUrl: string
+          /**
+           * Format: uri
+           * @description The cancel url if the customer cancels the signup. This is the url after the signup process, normally your login page
+           * @example https://example.com/login
+           */
+          cancelUrl: string
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the customer sign up */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /**
+             * @description Whether the signup was successful
+             * @example true
+             */
+            success: boolean
+            /**
+             * Format: uri
+             * @description The url to redirect the customer to, either to the success or cancel url
+             * @example https://example.com/dashboard
+             */
+            url: string
+            /**
+             * @description The unprice customer id generated by the system for this customer
+             * @example cus_1234567890
+             */
+            customerId?: string
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.createPaymentMethod": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The payment provider code to use
+           * @example stripe
+           * @enum {string}
+           */
+          paymentProvider: "stripe" | "lemonsqueezy"
+          /**
+           * @description The unprice customer id generated by the system for this customer
+           * @example cus_1234567890
+           */
+          customerId: string
+          /**
+           * Format: uri
+           * @description The success url if the customer signs up
+           * @example https://example.com/dashboard
+           */
+          successUrl: string
+          /**
+           * Format: uri
+           * @description The cancel url if the customer cancels the signup
+           * @example https://example.com/login
+           */
+          cancelUrl: string
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the customer create payment method */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /**
+             * @description Whether the signup was successful
+             * @example true
+             */
+            success: boolean
+            /**
+             * Format: uri
+             * @description The url to redirect the customer to, either to the success or cancel url
+             * @example https://example.com/dashboard
+             */
+            url: string
           }
         }
       }
@@ -1978,13 +2839,14 @@ export interface operations {
               dueBehaviour: "cancel" | "downgrade"
               /** @enum {string} */
               currency: "USD" | "EUR"
+              /** @description The billing configuration for the plan version */
               billingConfig: {
                 name: string
                 /** @enum {string} */
                 billingInterval: "month" | "year" | "day" | "minute" | "onetime"
                 billingIntervalCount: number
                 /** @default dayOfCreation */
-                billingAnchor: (number | null) | "dayOfCreation" | unknown
+                billingAnchor: number | "dayOfCreation"
                 /** @enum {string} */
                 planType: "recurring" | "onetime"
               }
@@ -1993,14 +2855,14 @@ export interface operations {
               gracePeriod: number
               /** @enum {string} */
               collectionMethod: "charge_automatically" | "send_invoice"
-              /** @default 0 */
-              trialDays: number | null
+              trialDays: number
               autoRenew: boolean
               metadata: {
                 externalId?: string
               } | null
               paymentMethodRequired: boolean
               version: number
+              /** @description The plan information */
               plan: {
                 id: string
                 projectId: string
@@ -2029,24 +2891,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -2056,12 +2928,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -2075,12 +2952,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -2090,24 +2972,34 @@ export interface operations {
                       tiers: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -2122,12 +3014,17 @@ export interface operations {
                   | {
                       price?: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -2139,24 +3036,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -2170,24 +3077,34 @@ export interface operations {
                       tiers?: {
                         unitPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
                         }
                         flatPrice: {
                           dinero: {
+                            /** @description The amount of the dinero object */
                             amount: number
                             currency: {
+                              /** @description The currency code of the dinero object */
                               code: string
+                              /** @description The base of the dinero object */
                               base: number | number[]
+                              /** @description The exponent of the dinero object */
                               exponent: number
                             }
+                            /** @description The scale of the dinero object */
                             scale: number
                           }
                           displayAmount: string
@@ -2197,12 +3114,17 @@ export interface operations {
                       }[]
                       price: {
                         dinero: {
+                          /** @description The amount of the dinero object */
                           amount: number
                           currency: {
+                            /** @description The currency code of the dinero object */
                             code: string
+                            /** @description The base of the dinero object */
                             base: number | number[]
+                            /** @description The exponent of the dinero object */
                             exponent: number
                           }
+                          /** @description The scale of the dinero object */
                           scale: number
                         }
                         displayAmount: string
@@ -2232,6 +3154,7 @@ export interface operations {
                 defaultQuantity: number | null
                 limit?: number | null
                 hidden: boolean
+                /** @description The feature information */
                 feature: {
                   id: string
                   projectId: string
@@ -2244,6 +3167,473 @@ export interface operations {
                 }
               }[]
             }
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "plans.listPlanVersions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description Whether to include published plan versions
+           * @example true
+           */
+          onlyPublished?: boolean
+          /**
+           * @description Whether to include enterprise plan versions
+           * @example false
+           */
+          onlyEnterprisePlan?: boolean
+          /**
+           * @description Whether to include the latest plan version
+           * @example true
+           */
+          onlyLatest?: boolean
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the list plan versions */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            planVersions: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              planId: string
+              description: string
+              latest: boolean | null
+              title: string
+              tags: string[] | null
+              active: boolean | null
+              flatPrice: string | null
+              /** @enum {string|null} */
+              status: "draft" | "published"
+              publishedAt: number | null
+              publishedBy: string | null
+              archived: boolean | null
+              archivedAt: number | null
+              archivedBy: string | null
+              /** @enum {string} */
+              paymentProvider: "stripe" | "lemonsqueezy"
+              /** @enum {string} */
+              dueBehaviour: "cancel" | "downgrade"
+              /** @enum {string} */
+              currency: "USD" | "EUR"
+              /** @description The billing configuration for the plan version */
+              billingConfig: {
+                name: string
+                /** @enum {string} */
+                billingInterval: "month" | "year" | "day" | "minute" | "onetime"
+                billingIntervalCount: number
+                /** @default dayOfCreation */
+                billingAnchor: number | "dayOfCreation"
+                /** @enum {string} */
+                planType: "recurring" | "onetime"
+              }
+              /** @enum {string} */
+              whenToBill: "pay_in_advance" | "pay_in_arrear"
+              gracePeriod: number
+              /** @enum {string} */
+              collectionMethod: "charge_automatically" | "send_invoice"
+              trialDays: number
+              autoRenew: boolean
+              metadata: {
+                externalId?: string
+              } | null
+              paymentMethodRequired: boolean
+              version: number
+              /** @description The plan information */
+              plan: {
+                id: string
+                projectId: string
+                createdAtM: number
+                updatedAtM: number
+                slug: string
+                active: boolean | null
+                description: string
+                metadata: {
+                  externalId?: string
+                } | null
+                defaultPlan: boolean | null
+                enterprisePlan: boolean | null
+              }
+              planFeatures: {
+                id: string
+                projectId: string
+                createdAtM: number
+                updatedAtM: number
+                planVersionId: string
+                featureId: string
+                /** @enum {string} */
+                featureType: "flat" | "tier" | "package" | "usage"
+                config:
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      tierMode: "volume" | "graduated"
+                      tiers: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      units?: number
+                    }
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      /** @description Units for the package */
+                      units: number
+                    }
+                metadata: {
+                  stripeProductId?: string
+                  realtime?: boolean
+                } | null
+                /** @enum {string} */
+                aggregationMethod:
+                  | "sum"
+                  | "sum_all"
+                  | "last_during_period"
+                  | "count"
+                  | "count_all"
+                  | "max"
+                  | "max_all"
+                order: number
+                /** @default 1 */
+                defaultQuantity: number | null
+                limit?: number | null
+                hidden: boolean
+                /** @description The feature information */
+                feature: {
+                  id: string
+                  projectId: string
+                  createdAtM: number
+                  updatedAtM: number
+                  slug: string
+                  code: number
+                  title: string
+                  description: string | null
+                }
+              }[]
+            }[]
           }
         }
       }

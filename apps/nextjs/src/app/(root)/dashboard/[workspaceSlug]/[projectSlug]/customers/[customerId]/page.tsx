@@ -134,8 +134,8 @@ export default async function CustomerPage({
           </div>
           <PaymentMethodForm
             customerId={customer.id}
-            successUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
-            cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
+            successUrl={`${APP_DOMAIN}${workspaceSlug}/${projectSlug}/customers/${customerId}`}
+            cancelUrl={`${APP_DOMAIN}${workspaceSlug}/${projectSlug}/customers/${customerId}`}
           />
         </TabsContent>
         <TabsContent value="invoices">s</TabsContent>

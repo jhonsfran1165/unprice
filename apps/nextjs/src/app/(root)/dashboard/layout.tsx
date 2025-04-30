@@ -5,7 +5,6 @@ import { Provider } from "jotai"
 import { cookies } from "next/headers"
 import { Fragment, type ReactNode } from "react"
 import { cloakSSROnlySecret } from "ssr-only-secrets"
-import { TailwindIndicator } from "~/components/layout/tailwind-indicator"
 import { ToasterProvider } from "~/components/layout/theme-provider"
 import { TRPCReactProvider } from "~/trpc/client"
 
@@ -45,7 +44,6 @@ export default async function DashboardLayout({
         </TooltipProvider>
       </TRPCReactProvider>
       <ToasterProvider />
-      <TailwindIndicator />
     </Fragment>
   )
 }

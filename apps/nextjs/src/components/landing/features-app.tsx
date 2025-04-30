@@ -4,16 +4,16 @@ import { motion } from "framer-motion"
 
 const stats = [
   {
-    name: "Conversion rate",
-    value: "+162%",
+    name: "Ease of use",
+    value: "100%",
   },
   {
     name: "Latency",
     value: "<100ms",
   },
   {
-    name: "Invoiced users",
-    value: "Up to 9M",
+    name: "Reliability",
+    value: "99.99%",
   },
 ]
 
