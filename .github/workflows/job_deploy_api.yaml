@@ -120,5 +120,5 @@ jobs:
           DRIZZLE_LOG: ${{ env.DRIZZLE_LOG }}
           VERCEL_ENV: ${{ env.VERCEL_ENV }}
           ENCRYPTION_KEY: ${{ env.ENCRYPTION_KEY }}
-          DATABASE_READ1_URL: ${{ env.DATABASE_READ1_URL || '' }}
-          DATABASE_READ2_URL: ${{ env.DATABASE_READ2_URL || '' }}
+          DATABASE_READ1_URL: ${{ env.DATABASE_READ1_URL }}
+          DATABASE_READ2_URL: ${{ env.DATABASE_READ2_URL }}
