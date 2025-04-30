@@ -12,7 +12,7 @@ pnpm test
 
 echo "Checking tinybird deployment"
 cd internal/tinybird
-tb build
+TB_VERSION_WARNING=0 tb build
 cd ../../
 
 echo "Pre-commit hook completed"

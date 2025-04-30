@@ -13,17 +13,17 @@ concurrency:
 
 jobs:
   build-lint:
-    if: "!contains(github.head_ref, 'renovate/')"
+    if: ${{ !contains(github.head_ref, 'renovate/') }}
     uses: ./.github/workflows/job_build.yaml
 
   ci-preview-tinybird:
-    if: "!contains(github.head_ref, 'renovate/')"
+    if: ${{ !contains(github.head_ref, 'renovate/') }}
     uses: ./.github/workflows/job_tinybird_ci.yml
     needs:
       - build-lint
 
   deploy-preview-neon:
-    if: "!contains(github.head_ref, 'renovate/')"
+    if: ${{ !contains(github.head_ref, 'renovate/') }}
     runs-on: ubuntu-latest
 
     outputs:
@@ -122,7 +122,7 @@ jobs:
           in: ${{ steps.branch-name.outputs.current_branch }}
 
   deploy-preview-tinybird:
-    if: "!contains(github.head_ref, 'renovate/')"
+    if: ${{ !contains(github.head_ref, 'renovate/') }}
     uses: ./.github/workflows/job_tinybird_cd.yml
     needs:
       - deploy-preview-neon
@@ -132,7 +132,7 @@ jobs:
       env: "preview"
 
   deploy-preview-api:
-    if: "!contains(github.head_ref, 'renovate/')"
+    if: ${{ !contains(github.head_ref, 'renovate/') }}
     needs:
       - deploy-preview-neon
       - deploy-preview-tinybird
@@ -147,7 +147,7 @@ jobs:
       env: "preview"
 
   deploy-auth-preview-vercel:
-    if: "!contains(github.head_ref, 'renovate/')"
+    if: ${{ !contains(github.head_ref, 'renovate/') }}
     runs-on: ubuntu-latest
 
     needs:
@@ -215,7 +215,7 @@ jobs:
           working-directory: ./
 
   deploy-app-preview-vercel:
-    if: "!contains(github.head_ref, 'renovate/')"
+    if: ${{ !contains(github.head_ref, 'renovate/') }}
     runs-on: ubuntu-latest
 
     needs:
