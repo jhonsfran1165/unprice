@@ -243,7 +243,49 @@ export class DurableObjectUsagelimiter extends Server {
       }
     }
 
+    await this.ensureAlarmIsSet(data.secondsToLive)
+
+    const performanceStart = data.performanceStart ?? 0
+    const now = Date.now()
+
     if (!valid) {
+      // Only broadcast if enough time has passed since last broadcast
+      // defailt 1 per second
+      // this is used to debug events in real time in unprice dashboard
+      if (now - this.lastBroadcastTime >= this.DEBOUNCE_DELAY) {
+        this.broadcast(
+          JSON.stringify({
+            featureSlug: data.featureSlug,
+            customerId: data.customerId,
+            type: "can",
+            success: valid,
+            deniedReason: deniedReason,
+          })
+        )
+        this.lastBroadcastTime = now
+      }
+
+      // insert async verification
+      this.ctx.waitUntil(
+        this.insertVerification(
+          {
+            entitlementId: entitlement.entitlementId,
+            customerId: data.customerId,
+            projectId: data.projectId,
+            featureSlug: data.featureSlug,
+            requestId: data.requestId,
+            metadata: data.metadata ? JSON.stringify(data.metadata) : null,
+            featurePlanVersionId: entitlement.featurePlanVersionId,
+            subscriptionItemId: entitlement.subscriptionItemId,
+            subscriptionPhaseId: entitlement.subscriptionPhaseId,
+            subscriptionId: entitlement.subscriptionId,
+          },
+          data,
+          performance.now() - performanceStart,
+          deniedReason
+        )
+      )
+
       return {
         success: false,
         message: message,
@@ -251,11 +293,23 @@ export class DurableObjectUsagelimiter extends Server {
       }
     }
 
-    await this.ensureAlarmIsSet(data.secondsToLive)
-
-    const performanceStart = data.performanceStart ?? 0
-
     if (!valid) {
+      // Only broadcast if enough time has passed since last broadcast
+      // defailt 1 per second
+      // this is used to debug events in real time in unprice dashboard
+      if (now - this.lastBroadcastTime >= this.DEBOUNCE_DELAY) {
+        this.broadcast(
+          JSON.stringify({
+            featureSlug: data.featureSlug,
+            customerId: data.customerId,
+            type: "can",
+            success: valid,
+            deniedReason: deniedReason,
+          })
+        )
+        this.lastBroadcastTime = now
+      }
+
       // insert async verification
       this.ctx.waitUntil(
         this.insertVerification(
@@ -286,6 +340,22 @@ export class DurableObjectUsagelimiter extends Server {
 
     // at this point we basically validate the user has access to the feature
     const result = this.checkLimit(entitlement)
+
+    // Only broadcast if enough time has passed since last broadcast
+    // defailt 1 per second
+    // this is used to debug events in real time in unprice dashboard
+    if (now - this.lastBroadcastTime >= this.DEBOUNCE_DELAY) {
+      this.broadcast(
+        JSON.stringify({
+          featureSlug: data.featureSlug,
+          customerId: data.customerId,
+          type: "can",
+          success: result.success,
+          deniedReason: result.deniedReason,
+        })
+      )
+      this.lastBroadcastTime = now
+    }
 
     // insert verification
     this.ctx.waitUntil(
@@ -408,17 +478,27 @@ export class DurableObjectUsagelimiter extends Server {
       }
     }
 
+    const result = await this.setUsage(entitlement, data.usage)
+
     const now = Date.now()
 
     // Only broadcast if enough time has passed since last broadcast
     // defailt 1 per second
     // this is used to debug events in real time in unprice dashboard
     if (now - this.lastBroadcastTime >= this.DEBOUNCE_DELAY) {
-      this.broadcast(JSON.stringify(usageRecord))
+      this.broadcast(
+        JSON.stringify({
+          featureSlug: data.featureSlug,
+          customerId: data.customerId,
+          type: "reportUsage",
+          success: result.success,
+          usage: data.usage,
+          limit: result.limit,
+          notifyUsage: result.notifyUsage,
+        })
+      )
       this.lastBroadcastTime = now
     }
-
-    const result = await this.setUsage(entitlement, data.usage)
 
     // return usage
     return result

@@ -23,13 +23,22 @@ import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export function StripePayment({
+export function StripePaymentConfigForm({
   provider,
   paymentProvider,
-}: { provider?: PaymentProviderConfig; paymentProvider: PaymentProvider }) {
+  setDialogOpen,
+  onSuccess,
+}: {
+  provider?: PaymentProviderConfig
+  paymentProvider: PaymentProvider
+  setDialogOpen?: (open: boolean) => void
+  onSuccess?: (key: string) => void
+}) {
   const saveConfig = api.paymentProvider.saveConfig.useMutation({
     onSuccess: () => {
       toastAction("saved")
+      setDialogOpen?.(false)
+      onSuccess?.("")
     },
   })
 

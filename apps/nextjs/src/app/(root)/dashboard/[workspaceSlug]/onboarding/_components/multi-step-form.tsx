@@ -3,6 +3,7 @@
 import { AnimatePresence } from "framer-motion"
 import dynamic from "next/dynamic"
 import { useSearchParams } from "next/navigation"
+import CreatePaymentConfig from "./create-payment-config"
 
 const Intro = dynamic(() => import("./intro"), {
   ssr: false,
@@ -27,6 +28,7 @@ export function Onboarding(props: { workspaceSlug: string }) {
       <AnimatePresence mode="wait">
         {!step && <Intro key="intro" />}
         {step === "create-project" && <CreateProject />}
+        {step === "create-payment-config" && <CreatePaymentConfig />}
         {step === "create-api-key" && <CreateApiKey />}
         {step === "done" && <Done workspaceSlug={props.workspaceSlug} />}
       </AnimatePresence>

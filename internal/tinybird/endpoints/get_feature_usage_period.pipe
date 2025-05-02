@@ -1,6 +1,6 @@
 TOKEN "web-apps" READ
 
-TAGS "usage"
+TAGS "usage, billing"
 
 NODE feature_usage_period_node
 SQL >
@@ -17,8 +17,8 @@ SQL >
     FROM feature_usage_hourly_mv_data
     WHERE
         1 = 1
-        {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
         {% if defined(customerId) %} AND customerId = {{ String(customerId) }} {% end %}
+        {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
         {% if defined(featureSlug) %} AND featureSlug = {{ String(featureSlug) }} {% end %}
         {% if defined(entitlementId) %} AND entitlementId = {{ String(entitlementId) }} {% end %}
         {% if defined(start) & defined(end) %}

@@ -7,9 +7,9 @@ SCHEMA >
     `customerId` String,
     `featureSlug` LowCardinality(String),
     `entitlementId` String,
+    `max` AggregateFunction(max, Int32),
     `count` AggregateFunction(count),
     `sum` AggregateFunction(sum, Int32),
-    `max` AggregateFunction(max, Int32),
     `last_during_period` AggregateFunction(argMax, Int32, Int64)
 
 ENGINE AggregatingMergeTree

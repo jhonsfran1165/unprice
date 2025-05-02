@@ -50,7 +50,7 @@ export const create = protectedWorkspaceProcedure
         defaultCurrency,
         timezone,
         isMain: false,
-        isInternal: false,
+        isInternal: workspace.isInternal,
       })
       .returning()
       .catch((err) => {
@@ -58,7 +58,7 @@ export const create = protectedWorkspaceProcedure
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create API key",
+          message: "Failed to create project",
         })
       })
       .then((res) => res[0] ?? null)

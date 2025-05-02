@@ -1,5 +1,3 @@
-import { env } from "cloudflare:workers"
-import { getToken } from "@auth/core/jwt"
 import { partyserverMiddleware } from "hono-party"
 import { cors } from "hono/cors"
 import type { Env } from "~/env"
@@ -26,6 +24,8 @@ import { registerGetPlanVersionV1 } from "./routes/plans/getPlanVersionV1"
 import { registerListPlanVersionsV1 } from "./routes/plans/listPlanVersionsV1"
 import { registerGetFeaturesV1 } from "./routes/project/getFeaturesV1"
 
+import { env } from "cloudflare:workers"
+import { getToken } from "@auth/core/jwt"
 import { timing } from "hono/timing"
 
 const app = newApp()
@@ -38,20 +38,27 @@ app.use("*", cors())
 
 // Handle websocket connections for Durable Objects
 app.use(
-  "/broadcast",
+  "*",
   partyserverMiddleware({
     onError: (error) => console.error(error),
     options: {
       prefix: "broadcast",
       onBeforeConnect: async (req) => {
+        const url = new URL(req.url)
+
+        const sessionToken = url.searchParams.get("sessionToken")
+
+        const sessionName =
+          env.NODE_ENV === "production" ? "__Secure-authjs.session-token" : "authjs.session-token"
+
+        // set the req cookie
+        req.headers.set("cookie", `${sessionName}=${sessionToken}`)
+
         const token = await getToken({
           req,
           secret: env.AUTH_SECRET,
           raw: false,
-          salt:
-            env.NODE_ENV === "production"
-              ? "__Secure-authjs.session-token"
-              : "authjs.session-token",
+          salt: sessionName,
           secureCookie: env.NODE_ENV === "production",
         })
 
