@@ -555,8 +555,8 @@ importers:
         specifier: ^0.0.7
         version: 0.0.7(react@18.3.1)
       '@react-email/tailwind':
-        specifier: ^0.0.14
-        version: 0.0.14(react@18.3.1)
+        specifier: ^1.0.5
+        version: 1.0.5(react@18.3.1)
       '@t3-oss/env-nextjs':
         specifier: 0.9.1
         version: 0.9.1(typescript@5.8.2)(zod@3.24.2)
@@ -8176,6 +8176,15 @@ packages:
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: 18.2.0
+    dependencies:
+      react: 18.3.1
+    dev: false
+
+  /@react-email/tailwind@1.0.5(react@18.3.1):
+    resolution: {integrity: sha512-BH00cZSeFfP9HiDASl+sPHi7Hh77W5nzDgdnxtsVr/m3uQD9g180UwxcE3PhOfx0vRdLzQUU8PtmvvDfbztKQg==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^18.0 || ^19.0 || ^19.0.0-rc
     dependencies:
       react: 18.3.1
     dev: false
