@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import { FEATURE_SLUGS } from "@unprice/config"
 import { domains } from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import { domainCreateBaseSchema, domainSelectBaseSchema } from "@unprice/db/validators"
@@ -16,7 +17,7 @@ export const create = protectedWorkspaceProcedure
     const workspace = opts.ctx.workspace
     const domain = opts.input.name
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "domains"
+    const featureSlug = FEATURE_SLUGS.DOMAINS
 
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
 

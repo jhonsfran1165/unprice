@@ -33,7 +33,7 @@ export async function AnalyticsCard<T extends string>({
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-full">
         <Tabs defaultValue={defaultTab}>
           <div className="flex justify-between">
             <TabsList>
@@ -54,15 +54,15 @@ export async function AnalyticsCard<T extends string>({
                   {description}
                 </Typography>
               </div>
-              <ScrollArea className="h-[400px] p-4">
+              <ScrollArea className="h-[430px] p-4">
                 <Suspense
                   fallback={
-                    <div className="flex h-[360px] items-center justify-center">
+                    <div className="flex h-[430px] items-center justify-center">
                       <LoadingAnimation className="size-8" />
                     </div>
                   }
                 >
-                  <div className="h-max-[360px]">{chart({ tab: id })}</div>
+                  <div className="h-min-[430px]">{chart({ tab: id })}</div>
                 </Suspense>
               </ScrollArea>
             </TabsContent>

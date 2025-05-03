@@ -4,6 +4,7 @@ import * as schema from "@unprice/db/schema"
 import { projectSelectBaseSchema, transferToWorkspaceSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { protectedWorkspaceProcedure } from "#trpc"
 import { projectWorkspaceGuard } from "#utils"
 import { featureGuard } from "#utils/feature-guard"
@@ -20,7 +21,7 @@ export const transferToWorkspace = protectedWorkspaceProcedure
     const { targetWorkspaceId, projectSlug } = opts.input
     const workspace = opts.ctx.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "projects"
+    const featureSlug = FEATURE_SLUGS.PROJECTS
 
     // only owner can transfer a project to a workspace
     opts.ctx.verifyRole(["OWNER"])

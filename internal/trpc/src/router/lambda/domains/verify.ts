@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import { FEATURE_SLUGS } from "@unprice/config"
 import { and, eq } from "@unprice/db"
 import { domains } from "@unprice/db/schema"
 import {
@@ -24,7 +25,7 @@ export const verify = protectedWorkspaceProcedure
     let status: DomainVerificationStatusProps = "Valid Configuration"
     const workspace = opts.ctx.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "domains"
+    const featureSlug = FEATURE_SLUGS.DOMAINS
 
     // check if the customer has access to the feature
     const result = await featureGuard({

@@ -4,6 +4,7 @@ import * as schema from "@unprice/db/schema"
 import { pageInsertBaseSchema, pageSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { protectedProjectProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 
@@ -19,7 +20,7 @@ export const update = protectedProjectProcedure
     const project = opts.ctx.project
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "pages"
+    const featureSlug = FEATURE_SLUGS.PAGES
 
     const result = await featureGuard({
       customerId,

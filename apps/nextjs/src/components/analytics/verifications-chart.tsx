@@ -52,7 +52,7 @@ export function VerificationsChart() {
   if (chartData.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
-        <EmptyPlaceholder className="min-h-[300px]">
+        <EmptyPlaceholder className="min-h-[390px]">
           <EmptyPlaceholder.Icon>
             <BarChart4 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
@@ -66,6 +66,45 @@ export function VerificationsChart() {
         </EmptyPlaceholder>
       </div>
     )
+  }
+
+  // Custom formatter for the tooltip
+  function tooltipFormatter(
+    value: number,
+    name: string,
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    _props: any,
+    _index: number,
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    payload: any
+  ) {
+    // Only show the custom content for the verifications bar
+    if (name === "verifications") {
+      return (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Verifications:</span>{" "}
+            {nFormatter(payload.verifications)}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">P95 Latency:</span> {nFormatter(payload.p95_latency)}
+              ms
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Max Latency:</span> {nFormatter(payload.max_latency)}
+              ms
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Latest Latency:</span>{" "}
+              {nFormatter(payload.latest_latency)}ms
+            </div>
+          </div>
+        </div>
+      )
+    }
+    // fallback for other bars (if any)
+    return value
   }
 
   return (
@@ -96,18 +135,18 @@ export function VerificationsChart() {
           tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
         />
         <XAxis dataKey="verifications" type="number" hide />
-        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+        <ChartTooltip
+          cursor={false}
+          content={<ChartTooltipContent />}
+          formatter={tooltipFormatter}
+        />
         <Bar
           dataKey="verifications"
           layout="vertical"
           radius={5}
           fill="hsl(var(--chart-1))"
           maxBarSize={25}
-          activeBar={{
-            opacity: 0.5,
-          }}
-          // TODO: onclick explore details of the feature on different page
-          // onClick={(data) => console.info(data)}
+          activeBar={{ opacity: 0.5 }}
         >
           <LabelList
             dataKey="verifications"

@@ -4,6 +4,7 @@ import * as schema from "@unprice/db/schema"
 import { projectSelectBaseSchema, transferToPersonalProjectSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { protectedWorkspaceProcedure } from "#trpc"
 import { projectWorkspaceGuard } from "#utils"
 import { featureGuard } from "#utils/feature-guard"
@@ -21,7 +22,7 @@ export const transferToPersonal = protectedWorkspaceProcedure
     const userId = opts.ctx.userId
     const workspace = opts.ctx.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "projects"
+    const featureSlug = FEATURE_SLUGS.PROJECTS
 
     // only owner can transfer a project to personal
     opts.ctx.verifyRole(["OWNER"])

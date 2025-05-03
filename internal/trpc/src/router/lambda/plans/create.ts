@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import { planInsertBaseSchema, planSelectBaseSchema } from "@unprice/db/validators"
@@ -20,7 +21,7 @@ export const create = protectedProjectProcedure
     const project = opts.ctx.project
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "plans"
+    const featureSlug = FEATURE_SLUGS.PLANS
 
     // only owner and admin can create a plan
     opts.ctx.verifyRole(["OWNER", "ADMIN"])

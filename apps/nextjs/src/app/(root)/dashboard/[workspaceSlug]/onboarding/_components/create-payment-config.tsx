@@ -1,18 +1,24 @@
-"use client"
-
 import { LazyMotion, domAnimation, m } from "framer-motion"
 import { useParams, useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { Balancer } from "react-wrap-balancer"
-import { ProjectForm } from "../../_components/project-form"
+import { StripePaymentConfigForm } from "../../[projectSlug]/settings/payment/_components/stripe-payment-config-form"
 
-export default function CreateProject() {
+export default function CreatePaymentConfig() {
   const router = useRouter()
-  const workspaceSlug = useParams().workspaceSlug as string
+  const params = useParams()
+  const workspaceSlug = params.workspaceSlug as string
+
+  useEffect(() => {
+    if (!workspaceSlug) {
+      router.push("/onboarding")
+    }
+  }, [workspaceSlug, router])
 
   return (
     <LazyMotion features={domAnimation}>
       <m.div
-        className="my-auto flex h-full w-full flex-col items-center justify-center"
+        className="flex h-full w-full flex-col items-center justify-center"
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.3, type: "spring" }}
       >
@@ -39,7 +45,7 @@ export default function CreateProject() {
               },
             }}
           >
-            <Balancer>{`Let's start off by creating your first app`}</Balancer>
+            <Balancer>{`Next, let's create a payment config for your app`}</Balancer>
           </m.h1>
           <m.div
             variants={{
@@ -51,18 +57,12 @@ export default function CreateProject() {
               },
             }}
           >
-            <ProjectForm
-              onSuccess={({ slug }) => {
+            <StripePaymentConfigForm
+              paymentProvider="stripe"
+              onSuccess={() => {
                 const searchParams = new URLSearchParams(window.location.search)
-                searchParams.set("step", "create-payment-config")
-                searchParams.set("projectSlug", slug)
+                searchParams.set("step", "create-api-key")
                 router.push(`/${workspaceSlug}/onboarding?${searchParams.toString()}`)
-              }}
-              defaultValues={{
-                defaultCurrency: "USD",
-                timezone: "UTC",
-                name: "My SaaS",
-                url: "https://my-saas.com",
               }}
             />
           </m.div>

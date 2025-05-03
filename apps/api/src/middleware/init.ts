@@ -168,6 +168,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
 
     const entitlement = new EntitlementService({
       namespace: c.env.usagelimit,
+      projectNamespace: c.env.projectdo,
       requestId,
       logger,
       metrics,

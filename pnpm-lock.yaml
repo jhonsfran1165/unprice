@@ -65,6 +65,9 @@ importers:
       '@unkey/cache':
         specifier: ^1.5.0
         version: 1.5.0
+      '@unprice/config':
+        specifier: workspace:^
+        version: link:../../internal/config
       '@unprice/db':
         specifier: workspace:^
         version: link:../../internal/db
@@ -328,6 +331,9 @@ importers:
       openapi-types:
         specifier: 12.1.3
         version: 12.1.3
+      partysocket:
+        specifier: ^1.1.3
+        version: 1.1.3
       prism-react-renderer:
         specifier: ^2.4.1
         version: 2.4.1(react@18.3.1)
@@ -13676,6 +13682,10 @@ packages:
     engines: {node: '>= 0.6'}
     dev: true
 
+  /event-target-polyfill@0.0.4:
+    resolution: {integrity: sha512-Gs6RLjzlLRdT8X9ZipJdIZI/Y6/HhRLyq9RdDlCsnpxr/+Nn6bU2EFGuC94GjxqhM+Nmij2Vcq98yoHrU8uNFQ==}
+    dev: false
+
   /event-target-shim@5.0.1:
     resolution: {integrity: sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==}
     engines: {node: '>=6'}
@@ -17832,6 +17842,12 @@ packages:
     resolution: {integrity: sha512-7sSojS4oCRK1Fe1h+Sa0Za5dwOf+M9VksQlynD8yqwGpLvnO4oxx9ppmOSeh6CJTMbF5gbnvUQKMK525QSBdBw==}
     dependencies:
       event-target-shim: 6.0.2
+    dev: false
+
+  /partysocket@1.1.3:
+    resolution: {integrity: sha512-87Jd/nqPoWnVfzHE6Z12WLWTJ+TAgxs0b7i2S163HfQSrVDUK5tW/FC64T5N8L5ss+gqF+EV0BwjZMWggMY3UA==}
+    dependencies:
+      event-target-polyfill: 0.0.4
     dev: false
 
   /pascal-case@2.0.1:

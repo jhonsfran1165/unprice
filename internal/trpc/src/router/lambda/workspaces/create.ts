@@ -4,6 +4,7 @@ import { members } from "@unprice/db/schema"
 import { workspaceInsertBase, workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { protectedProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 import { createWorkspace } from "#utils/shared"
@@ -22,7 +23,7 @@ export const create = protectedProcedure
   )
   .mutation(async (opts) => {
     const userId = opts.ctx.userId
-    const featureSlug = "access-pro"
+    const featureSlug = FEATURE_SLUGS.ACCESS_PRO
 
     let isPersonal = true
 

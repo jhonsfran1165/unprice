@@ -1,9 +1,12 @@
 import type {
   ApiKeyExtended,
+  Customer,
   CustomerEntitlementExtended,
   CustomerEntitlementsExtended,
   CustomerPaymentMethod,
   Feature,
+  Project,
+  Workspace,
   getActivePhaseResponseSchema,
   getSubscriptionResponseSchema,
 } from "@unprice/db/validators"
@@ -33,9 +36,16 @@ export type UsageEntitlementCache = {
   notifyUsage: boolean | undefined
 } | null
 
+export type CustomerCache = Customer & {
+  project: Project & {
+    workspace: Workspace
+  }
+}
+
 export type CacheNamespaces = {
   apiKeyByHash: ApiKeyExtended | null
   customerSubscription: SubcriptionCache | null
+  customer: CustomerCache | null
   customerActivePhase: SubscriptionPhaseCache | null
   customerEntitlement: CustomerEntitlementCache | null
   customerEntitlements: CustomerEntitlementsCache[] | null

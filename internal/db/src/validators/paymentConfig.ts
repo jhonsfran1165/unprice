@@ -13,6 +13,9 @@ export const insertPaymentProviderConfigSchema = createInsertSchema(paymentProvi
     active: true,
     key: true,
   })
+  .extend({
+    projectSlug: z.string().optional(),
+  })
   .partial({
     projectId: true,
     createdAtM: true,

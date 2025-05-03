@@ -21,7 +21,7 @@ export default function Done(props: { workspaceSlug: string }) {
           router.push(`/${props.workspaceSlug}/${projectSlug}`)
           router.refresh()
         })
-      }, 2000)
+      }, 1500)
     }
   }, [projectSlug, props.workspaceSlug, router, step, apiKey])
 

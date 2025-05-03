@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { TRPCError } from "@trpc/server"
+import { FEATURE_SLUGS } from "@unprice/config"
 import { customers } from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import { customerInsertBaseSchema, customerSelectSchema } from "@unprice/db/validators"
@@ -25,7 +26,7 @@ export const create = protectedProjectProcedure
     const { project } = opts.ctx
 
     const unPriceCustomerId = project.workspace.unPriceCustomerId
-    const featureSlug = "customers"
+    const featureSlug = FEATURE_SLUGS.CUSTOMERS
 
     // check if the customer has access to the feature
     const result = await featureGuard({

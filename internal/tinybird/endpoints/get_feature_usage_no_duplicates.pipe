@@ -18,8 +18,8 @@ SQL >
     WHERE
         1 = 1 AND deleted = 0
         {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
-        {% if defined(customerId) %} AND customerId = {{ String(customerId) }} {% end %}
         {% if defined(featureSlug) %} AND featureSlug = {{ String(featureSlug) }} {% end %}
+        {% if defined(customerId) %} AND customerId = {{ String(customerId) }} {% end %}
         {% if defined(subscriptionItemId) %} AND subscriptionItemId = {{ String(subscriptionItemId) }} {% end %}
         {% if defined(start) & defined(end) %}
             AND timestamp BETWEEN {{ Int64(start) }}

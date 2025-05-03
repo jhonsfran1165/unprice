@@ -32,6 +32,7 @@ import { Separator } from "@unprice/ui/separator"
 import { Switch } from "@unprice/ui/switch"
 import { cn } from "@unprice/ui/utils"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { Warning } from "@unprice/ui/icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
@@ -63,7 +64,7 @@ export function FeatureConfigForm({
 
   const editMode = !!defaultValues.id
   const isPublished = planVersion?.status === "published"
-  const isProEnabled = useFlags("access-pro")
+  const isProEnabled = useFlags(FEATURE_SLUGS.ACCESS_PRO)
 
   // we set all possible values for the form so react-hook-form don't complain
   const controlledDefaultValues = {

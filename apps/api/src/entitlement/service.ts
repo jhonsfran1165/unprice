@@ -9,10 +9,11 @@ import {
 import { Err, type FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Cache, CustomerEntitlementCache, SubcriptionCache } from "@unprice/services/cache"
-import type { CustomerService } from "@unprice/services/customers"
+import type { CustomerService, DenyReason } from "@unprice/services/customers"
 import { UnPriceCustomerError } from "@unprice/services/customers"
 import type { Metrics } from "@unprice/services/metrics"
 import type { Analytics } from "@unprice/tinybird"
+import type { DurableObjectProject } from "~/project/do"
 import type { DurableObjectUsagelimiter } from "./do"
 import type {
   CanRequest,
@@ -27,6 +28,7 @@ import type {
 
 export class EntitlementService {
   private readonly namespace: DurableObjectNamespace<DurableObjectUsagelimiter>
+  private readonly projectNamespace: DurableObjectNamespace<DurableObjectProject>
   private readonly logger: Logger
   private readonly metrics: Metrics
   private readonly analytics: Analytics
@@ -41,6 +43,7 @@ export class EntitlementService {
 
   constructor(opts: {
     namespace: DurableObjectNamespace<DurableObjectUsagelimiter>
+    projectNamespace: DurableObjectNamespace<DurableObjectProject>
     requestId: string
     domain?: string
     logger: Logger
@@ -60,6 +63,7 @@ export class EntitlementService {
     this.db = opts.db
     this.waitUntil = opts.waitUntil
     this.customerService = opts.customer
+    this.projectNamespace = opts.projectNamespace
   }
 
   private getStub(
@@ -225,6 +229,26 @@ export class EntitlementService {
     return { success: true, message: "customer object deleted" }
   }
 
+  // broadcast the event to the project
+  private async broadcastEvent(
+    projectId: string,
+    event: {
+      customerId: string
+      featureSlug: string
+      type: "can" | "reportUsage"
+      success: boolean
+      deniedReason?: DenyReason
+      usage?: number
+      limit?: number
+      notifyUsage?: boolean
+    }
+  ) {
+    const projectDurableObject = this.projectNamespace.get(
+      this.projectNamespace.idFromName(projectId)
+    )
+    projectDurableObject.broadcastEvents(event)
+  }
+
   public async can(data: CanRequest): Promise<CanResponse> {
     const { err: subscriptionErr } = await this.validateSubscription(
       data.customerId,
@@ -261,9 +285,31 @@ export class EntitlementService {
         }
       }
 
+      // broadcast the event to the project with waitUntil
+      this.waitUntil(
+        this.broadcastEvent(data.projectId, {
+          customerId: data.customerId,
+          featureSlug: data.featureSlug,
+          type: "can",
+          success: result.success,
+          deniedReason: result.deniedReason,
+        })
+      )
+
       // try again
       return await durableObject.can(data)
     }
+
+    // broadcast the event to the project with waitUntil
+    this.waitUntil(
+      this.broadcastEvent(data.projectId, {
+        customerId: data.customerId,
+        featureSlug: data.featureSlug,
+        type: "can",
+        success: result.success,
+        deniedReason: result.deniedReason,
+      })
+    )
 
     return result
   }
@@ -324,7 +370,18 @@ export class EntitlementService {
           // cache the result for the next time
           // update the cache with the new usage so we can check limit in the next request
           // without calling the DO again
-          Promise.all([this.cache.idempotentRequestUsageByHash.set(idempotentKey, response)])
+          Promise.all([
+            this.cache.idempotentRequestUsageByHash.set(idempotentKey, response),
+            this.broadcastEvent(data.projectId, {
+              customerId: data.customerId,
+              featureSlug: data.featureSlug,
+              type: "reportUsage",
+              success: result.success,
+              usage: Number(data.usage),
+              limit: Number(result.limit),
+              notifyUsage: result.notifyUsage,
+            }),
+          ])
         )
 
         return response
@@ -342,7 +399,18 @@ export class EntitlementService {
         // cache the result for the next time
         // update the cache with the new usage so we can check limit in the next request
         // without calling the DO again
-        Promise.all([this.cache.idempotentRequestUsageByHash.set(idempotentKey, response)])
+        Promise.all([
+          this.cache.idempotentRequestUsageByHash.set(idempotentKey, response),
+          this.broadcastEvent(data.projectId, {
+            customerId: data.customerId,
+            featureSlug: data.featureSlug,
+            type: "reportUsage",
+            success: result.success,
+            usage: Number(result.usage),
+            limit: Number(result.limit),
+            notifyUsage: result.notifyUsage,
+          }),
+        ])
       )
 
       return response

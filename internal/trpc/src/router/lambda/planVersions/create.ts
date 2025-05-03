@@ -5,6 +5,7 @@ import * as utils from "@unprice/db/utils"
 import { planVersionSelectBaseSchema, versionInsertBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { protectedProjectProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 import { reportUsageFeature } from "#utils/shared"
@@ -36,7 +37,7 @@ export const create = protectedProjectProcedure
     const project = opts.ctx.project
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "plans"
+    const featureSlug = FEATURE_SLUGS.PLANS
 
     // only owner and admin can create a plan version
     opts.ctx.verifyRole(["OWNER", "ADMIN"])

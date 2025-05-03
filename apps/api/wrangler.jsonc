@@ -23,6 +23,10 @@
           {
             "name": "usagelimit",
             "class_name": "DurableObjectUsagelimiter"
+          },
+          {
+            "name": "projectdo",
+            "class_name": "DurableObjectProject"
           }
         ]
       },
@@ -30,6 +34,10 @@
         {
           "tag": "v1",
           "new_sqlite_classes": ["DurableObjectUsagelimiter"]
+        },
+        {
+          "tag": "v2",
+          "new_sqlite_classes": ["DurableObjectProject"]
         }
       ]
     },
@@ -47,6 +55,10 @@
           {
             "name": "usagelimit",
             "class_name": "DurableObjectUsagelimiter"
+          },
+          {
+            "name": "projectdo",
+            "class_name": "DurableObjectProject"
           }
         ]
       },
@@ -54,6 +66,10 @@
         {
           "tag": "v1",
           "new_sqlite_classes": ["DurableObjectUsagelimiter"]
+        },
+        {
+          "tag": "v2",
+          "new_sqlite_classes": ["DurableObjectProject"]
         }
       ]
     },
@@ -67,6 +83,10 @@
           {
             "name": "usagelimit",
             "class_name": "DurableObjectUsagelimiter"
+          },
+          {
+            "name": "projectdo",
+            "class_name": "DurableObjectProject"
           }
         ]
       },
@@ -74,6 +94,10 @@
         {
           "tag": "v1",
           "new_sqlite_classes": ["DurableObjectUsagelimiter"]
+        },
+        {
+          "tag": "v2",
+          "new_sqlite_classes": ["DurableObjectProject"]
         }
       ]
     }

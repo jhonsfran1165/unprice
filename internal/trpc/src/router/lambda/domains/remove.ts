@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import { FEATURE_SLUGS } from "@unprice/config"
 import { eq } from "@unprice/db"
 import { domains } from "@unprice/db/schema"
 import { domainSelectBaseSchema } from "@unprice/db/validators"
@@ -19,7 +20,7 @@ export const remove = protectedWorkspaceProcedure
   .mutation(async (opts) => {
     const workspace = opts.ctx.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "domains"
+    const featureSlug = FEATURE_SLUGS.DOMAINS
 
     // only owner can remove a domain
     opts.ctx.verifyRole(["OWNER"])

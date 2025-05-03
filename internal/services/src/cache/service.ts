@@ -94,6 +94,7 @@ export class CacheService {
         this.context,
         defaultOpts
       ),
+      customer: new Namespace<CacheNamespaces["customer"]>(this.context, defaultOpts),
       projectFeatures: new Namespace<CacheNamespaces["projectFeatures"]>(this.context, defaultOpts),
       idempotentRequestUsageByHash: new Namespace<CacheNamespaces["idempotentRequestUsageByHash"]>(
         this.context,

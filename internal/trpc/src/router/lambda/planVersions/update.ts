@@ -11,6 +11,7 @@ import {
   planVersionSelectBaseSchema,
 } from "@unprice/db/validators"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { protectedProjectProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 
@@ -46,7 +47,7 @@ export const update = protectedProjectProcedure
 
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "plans"
+    const featureSlug = FEATURE_SLUGS.PLANS
 
     // check if the customer has access to the feature
     const result = await featureGuard({

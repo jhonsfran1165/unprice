@@ -1,4 +1,5 @@
 import { createRoute } from "@hono/zod-openapi"
+import { FEATURE_SLUGS } from "@unprice/config"
 import { endTime } from "hono/timing"
 import { startTime } from "hono/timing"
 import * as HttpStatusCodes from "stoker/http-status-codes"
@@ -58,7 +59,7 @@ export type CanResponse = z.infer<
 export const registerCanV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { customerId, featureSlug, metadata } = c.req.valid("json")
-    const { entitlement } = c.get("services")
+    const { entitlement, customer, logger } = c.get("services")
     const requestId = c.get("requestId")
     const performanceStart = c.get("performanceStart")
 
@@ -87,6 +88,49 @@ export const registerCanV1 = (app: App) =>
 
     // end the timer
     endTime(c, "can")
+
+    const unPriceCustomerId = c.get("unPriceCustomerId")
+
+    // send analytics event for the unprice customer
+    c.executionCtx.waitUntil(
+      Promise.resolve().then(async () => {
+        if (unPriceCustomerId) {
+          const { val: unPriceCustomer, err: unPriceCustomerErr } =
+            await customer.getCustomer(unPriceCustomerId)
+
+          if (unPriceCustomerErr || !unPriceCustomer) {
+            logger.error("Failed to get unprice customer", {
+              error: unPriceCustomerErr,
+            })
+            return
+          }
+
+          const shouldReportUsage =
+            !unPriceCustomer.project.workspace.isInternal &&
+            !unPriceCustomer.project.workspace.isMain
+
+          // if the unprice customer is internal or main, we don't need to report the usage
+          if (shouldReportUsage) {
+            return
+          }
+
+          await entitlement
+            .reportUsage({
+              customerId: unPriceCustomer.id,
+              featureSlug: FEATURE_SLUGS.EVENTS,
+              projectId: unPriceCustomer.projectId,
+              requestId,
+              now: Date.now(),
+              usage: 1,
+              idempotenceKey: `${requestId}:${unPriceCustomer.id}`,
+              timestamp: Date.now(),
+            })
+            .catch((err) => {
+              logger.error("Failed to report usage", err)
+            })
+        }
+      })
+    )
 
     return c.json(result, HttpStatusCodes.OK)
   })

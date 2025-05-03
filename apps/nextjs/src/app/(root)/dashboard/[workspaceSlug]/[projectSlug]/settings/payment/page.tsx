@@ -1,10 +1,12 @@
 import { api } from "~/trpc/server"
-import { StripePayment } from "./_components/stripe-payment"
+import { StripePaymentConfigForm } from "./_components/stripe-payment-config-form"
 
 export default async function ProjectPaymentSettingsPage() {
   const provider = await api.paymentProvider.getConfig({
     paymentProvider: "stripe",
   })
 
-  return <StripePayment provider={provider.paymentProviderConfig} paymentProvider="stripe" />
+  return (
+    <StripePaymentConfigForm provider={provider.paymentProviderConfig} paymentProvider="stripe" />
+  )
 }

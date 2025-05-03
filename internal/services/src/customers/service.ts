@@ -21,6 +21,7 @@ import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { env } from "../../env"
 import type {
+  CustomerCache,
   CustomerEntitlementCache,
   CustomerEntitlementsCache,
   SubcriptionCache,
@@ -168,6 +169,69 @@ export class CustomerService {
     }
 
     return subscription
+  }
+
+  private async getCustomerData(customerId: string): Promise<CustomerCache | null> {
+    const customer = await this.db.query.customers.findFirst({
+      with: {
+        project: {
+          with: {
+            workspace: true,
+          },
+        },
+      },
+      where: (customer, { eq }) => eq(customer.id, customerId),
+    })
+
+    if (!customer) {
+      return null
+    }
+
+    return customer
+  }
+
+  public async getCustomer(
+    customerId: string,
+    opts?: {
+      skipCache: boolean
+    }
+  ): Promise<Result<CustomerCache | null, FetchError | UnPriceCustomerError>> {
+    const { val, err } = opts?.skipCache
+      ? await wrapResult(
+          this.getCustomerData(customerId),
+          (err) =>
+            new FetchError({
+              message: `unable to query db for customer, ${err.message}`,
+              retry: false,
+            })
+        )
+      : await retry(
+          3,
+          async () => this.cache.customer.swr(customerId, () => this.getCustomerData(customerId)),
+          (attempt, err) => {
+            this.logger.warn("Failed to fetch customer data from cache, retrying...", {
+              customerId: customerId,
+              attempt,
+              error: err.message,
+            })
+          }
+        )
+
+    if (err) {
+      this.logger.error("error getting customer data", {
+        error: err.message,
+      })
+
+      return Err(
+        new FetchError({ message: `unable to query db for customer, ${err.message}`, retry: false })
+      )
+    }
+
+    if (!val) {
+      return Ok(null)
+    }
+
+    return Ok(val)
   }
 
   public async getActiveSubscription(
