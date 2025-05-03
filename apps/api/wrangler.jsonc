@@ -37,7 +37,7 @@
         },
         {
           "tag": "v2",
-          "new_classes": ["DurableObjectProject"]
+          "new_sqlite_classes": ["DurableObjectProject"]
         }
       ]
     },
@@ -69,7 +69,7 @@
         },
         {
           "tag": "v2",
-          "new_classes": ["DurableObjectProject"]
+          "new_sqlite_classes": ["DurableObjectProject"]
         }
       ]
     },
@@ -97,7 +97,7 @@
         },
         {
           "tag": "v2",
-          "new_classes": ["DurableObjectProject"]
+          "new_sqlite_classes": ["DurableObjectProject"]
         }
       ]
     }
