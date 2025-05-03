@@ -4,6 +4,7 @@ import { projectSelectBaseSchema, renameProjectSchema } from "@unprice/db/valida
 import { z } from "zod"
 
 import { TRPCError } from "@trpc/server"
+import { FEATURE_SLUGS } from "@unprice/config"
 import { protectedProjectProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 
@@ -19,7 +20,7 @@ export const rename = protectedProjectProcedure
     const project = opts.ctx.project
     const workspace = project.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "projects"
+    const featureSlug = FEATURE_SLUGS.PROJECTS
 
     // only owner and admin can rename a project
     opts.ctx.verifyRole(["OWNER", "ADMIN"])

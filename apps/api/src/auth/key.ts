@@ -11,6 +11,7 @@ import type { HonoEnv } from "~/hono/env"
  */
 export async function keyAuth(c: Context<HonoEnv>) {
   const authorization = c.req.header("authorization")?.replace("Bearer ", "")
+
   if (!authorization) {
     throw new UnpriceApiError({ code: "UNAUTHORIZED", message: "key required" })
   }
@@ -40,24 +41,6 @@ export async function keyAuth(c: Context<HonoEnv>) {
       message: "key not found",
     })
   }
-
-  // TODO: send analytics event
-  // c.executionCtx.waitUntil(
-  //   analytics.ingestFeaturesVerification({
-  //     projectId: key.projectId,
-  //     customerId: "",
-  //     entitlementId: "",
-  //     featureSlug: "",
-  //     timestamp: Date.now(),
-  //     requestId: c.get("requestId"),
-  //     featurePlanVersionId: "",
-  //     subscriptionItemId: "",
-  //     subscriptionPhaseId: "",
-  //     subscriptionId: "",
-  //     deniedReason: "",
-  //     metadata: {},
-  //   })
-  // )
 
   return key
 }

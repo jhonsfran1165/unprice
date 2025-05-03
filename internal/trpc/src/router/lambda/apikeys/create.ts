@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import { FEATURE_SLUGS } from "@unprice/config"
 import { apikeys } from "@unprice/db/schema"
 import { hashStringSHA256, newId } from "@unprice/db/utils"
 import { createApiKeySchema, selectApiKeySchema } from "@unprice/db/validators"
@@ -18,7 +19,7 @@ export const create = protectedProjectProcedure
     const { name, expiresAt } = opts.input
     const project = opts.ctx.project
     const customerId = project.workspace.unPriceCustomerId
-    const featureSlug = "apikeys"
+    const featureSlug = FEATURE_SLUGS.API_KEYS
 
     // only owner and admin
     opts.ctx.verifyRole(["OWNER", "ADMIN"])

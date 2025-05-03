@@ -5,9 +5,9 @@ import { ScrollArea } from "@unprice/ui/scroll-area"
 import { cn } from "@unprice/ui/utils" // if you have a cn utility
 import { AnimatePresence, motion } from "framer-motion"
 import { BarChart2, CheckCircle, XCircle } from "lucide-react"
+import Link from "next/link"
 import { usePartySocket } from "partysocket/react"
 import { useCallback, useState } from "react"
-import { useCustomerId } from "~/hooks/use-flags"
 
 interface EventMessage {
   id: string
@@ -34,20 +34,18 @@ function getTypeStyles(type: ParsedEventData["data"]["type"], error: boolean) {
   if (type === "can" && error)
     return {
       badge: "bg-destructive/10 text-destructive border-destructive",
-      label: "Denied",
-      icon: <XCircle className="mr-1 h-4 w-4 text-destructive" />,
+      icon: <XCircle className="h-4 w-4 text-destructive" />,
     }
   if (type === "can")
     return {
-      badge: "bg-muted text-muted-foreground border-muted",
-      label: "Verified",
-      icon: <CheckCircle className="mr-1 h-4 w-4 text-muted-foreground" />,
+      badge: "bg-muted text-muted-foreground border-muted text-success border-success",
+      icon: <CheckCircle className="h-4 w-4 text-success" />,
     }
+
   // Usage event
   return {
     badge: "bg-primary/10 text-primary border-primary",
-    label: "Usage",
-    icon: <BarChart2 className="mr-1 h-4 w-4 text-primary" />,
+    icon: <BarChart2 className="h-4 w-4 text-primary" />,
   }
 }
 
@@ -58,9 +56,7 @@ function renderEventContent(event: ParsedEventData) {
     return (
       <div className="flex items-center gap-2 text-xs">
         <span className={cn("font-medium", !success && "text-destructive")}>{featureSlug}</span>
-        {!success && deniedReason && (
-          <span className="ml-1 text-destructive">({deniedReason})</span>
-        )}
+        {!success && deniedReason && <span className="ml-1 text-destructive">{deniedReason}</span>}
       </div>
     )
   }
@@ -74,8 +70,19 @@ function renderEventContent(event: ParsedEventData) {
   )
 }
 
-export function Events({ sessionToken }: { sessionToken: string }) {
-  const customerId = useCustomerId()
+export function Events({
+  sessionToken,
+  projectId,
+  customerId,
+  workspaceSlug,
+  projectSlug,
+}: {
+  sessionToken: string
+  projectId: string
+  customerId?: string
+  workspaceSlug: string
+  projectSlug: string
+}) {
   const [events, setEvents] = useState<ParsedEventData[]>([])
 
   const handleMessage = useCallback((event: EventMessage) => {
@@ -86,45 +93,77 @@ export function Events({ sessionToken }: { sessionToken: string }) {
         data,
         receivedAt: Date.now(),
       },
-      ...prev.slice(0, 19), // up to 20 events
+      ...prev.slice(0, 12), // up to 13 events
     ])
   }, [])
 
   usePartySocket({
     host: API_DOMAIN.replace("https://", "wss://").replace("http://", "ws://"),
-    room: customerId,
+    // customer has precedence over project
+    room: customerId ?? projectId,
     prefix: "broadcast",
-    party: "usagelimit",
+    // customer has precedence over project
+    party: customerId ? "usagelimit" : projectId ? "projectdo" : "projectdo",
     query: { sessionToken },
     onMessage: (event) => handleMessage(event as unknown as EventMessage),
   })
 
   return (
-    <ScrollArea className="h-[500px] w-full rounded-md border bg-background">
+    <ScrollArea className="h-[500px] w-full rounded-md border border-dashed bg-background">
       <div className="divide-y divide-border">
         <AnimatePresence initial={false}>
           {events.map((event) => {
             const error = event.data.type === "can" && !event.data.success
-            const { badge, label, icon } = getTypeStyles(event.data.type, error)
+            const { badge, icon } = getTypeStyles(event.data.type, error)
+            const customerHref = `/${workspaceSlug}/${projectSlug}/customers/${event.data.customerId}`
+
             return (
               <motion.div
                 key={event.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ type: "spring", stiffness: 300, damping: 24 }}
-                className="flex items-center gap-2 px-3 py-2"
+                initial={{
+                  x: -100,
+                  opacity: 0,
+                }}
+                animate={{
+                  x: 0,
+                  opacity: 1,
+                  transition: {
+                    x: { type: "spring", stiffness: 300, damping: 24 },
+                    opacity: { duration: 0.2 },
+                  },
+                }}
+                exit={{
+                  x: -100,
+                  opacity: 0,
+                  scale: 0.8,
+                  transition: {
+                    x: { type: "spring", stiffness: 300, damping: 24 },
+                    opacity: { duration: 0.15 },
+                    scale: { duration: 0.15 },
+                  },
+                }}
+                layout
               >
-                <span
+                <Link
+                  href={customerHref}
                   className={cn(
-                    "inline-flex items-center rounded border px-2 py-0.5 font-medium text-xs",
-                    badge
+                    "flex w-full items-center gap-2 rounded px-3 py-2 transition-colors",
+                    "outline-none hover:bg-muted/50 focus:bg-muted/70"
                   )}
+                  tabIndex={0}
+                  aria-label={`Go to customer ${event.data.customerId}`}
+                  prefetch={false}
                 >
-                  {icon}
-                  {label}
-                </span>
-                <span className="ml-2 flex-1">{renderEventContent(event)}</span>
+                  <span
+                    className={cn(
+                      "inline-flex items-center rounded border px-2 py-0.5 font-medium text-xs",
+                      badge
+                    )}
+                  >
+                    {icon}
+                  </span>
+                  <span className="ml-2 flex-1">{renderEventContent(event)}</span>
+                </Link>
               </motion.div>
             )
           })}

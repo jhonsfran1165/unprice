@@ -19,6 +19,8 @@ import {
   CardTitle,
 } from "@unprice/ui/card"
 import { Switch } from "@unprice/ui/switch"
+import { useParams, useSearchParams } from "next/navigation"
+import { revalidateAppPath } from "~/actions/revalidate"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -34,11 +36,22 @@ export function StripePaymentConfigForm({
   setDialogOpen?: (open: boolean) => void
   onSuccess?: (key: string) => void
 }) {
+  const params = useParams()
+  const searchParams = useSearchParams()
+
+  const workspaceSlug = params.workspaceSlug as string
+  let projectSlug = params.projectSlug as string
+
+  if (!projectSlug) {
+    projectSlug = searchParams.get("projectSlug") as string
+  }
+
   const saveConfig = api.paymentProvider.saveConfig.useMutation({
     onSuccess: () => {
       toastAction("saved")
       setDialogOpen?.(false)
       onSuccess?.("")
+      revalidateAppPath(`/${workspaceSlug}/${projectSlug}/settings/payment`, "page")
     },
   })
 
@@ -49,6 +62,8 @@ export function StripePaymentConfigForm({
       key: "",
       keyIv: "",
       active: false,
+      // from onboarding we can't infer the projectSlug, so we pass it as a search param
+      ...(projectSlug ? { projectSlug } : {}),
     },
   })
 

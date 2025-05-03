@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server"
 import { projectSelectBaseSchema, workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { protectedWorkspaceProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 
@@ -17,7 +18,7 @@ export const getById = protectedWorkspaceProcedure
   .query(async (opts) => {
     const workspace = opts.ctx.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "projects"
+    const featureSlug = FEATURE_SLUGS.PROJECTS
 
     // check if the customer has access to the feature
     const result = await featureGuard({

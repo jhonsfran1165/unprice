@@ -1,4 +1,5 @@
 "use client"
+import { FEATURE_SLUGS } from "@unprice/config"
 import { Avatar, AvatarFallback, AvatarImage } from "@unprice/ui/avatar"
 import { Badge } from "@unprice/ui/badge"
 import { Button } from "@unprice/ui/button"
@@ -32,8 +33,7 @@ export function WorkspaceSwitcher({
   const router = useRouter()
   const [switcherOpen, setSwitcherOpen] = useState(false)
 
-  const isProEnabled = useFlags("access-pro")
-  const isWorkspacesEnabled = useFlags("workspaces")
+  const isProEnabled = useFlags(FEATURE_SLUGS.ACCESS_PRO)
 
   const [data] = api.workspaces.listWorkspacesByActiveUser.useSuspenseQuery(undefined, {
     staleTime: 1000 * 60 * 60, // 1 hour
@@ -174,7 +174,7 @@ export function WorkspaceSwitcher({
           <CommandSeparator />
           <CommandList>
             <CommandGroup>
-              {!isProEnabled && !isWorkspacesEnabled ? (
+              {!isProEnabled ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <SuperLink href="/new" className="cursor-not-allowed">
@@ -187,9 +187,7 @@ export function WorkspaceSwitcher({
                   <TooltipContent align="start" side="bottom" sideOffset={10} alignOffset={-5}>
                     <div className="flex max-w-[200px] flex-col gap-4 py-2">
                       <Typography variant="p" className="text-center">
-                        {isWorkspacesEnabled
-                          ? "You don't have access to this feature"
-                          : "You have reached the limit of workspaces"}
+                        {"You don't have access to this feature"}
                       </Typography>
                       <Button variant="primary" size="sm" className="mx-auto w-2/3">
                         Upgrade

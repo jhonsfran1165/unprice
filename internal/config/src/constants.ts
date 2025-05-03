@@ -87,3 +87,16 @@ export const COOKIES_APP = {
   WORKSPACE: "workspace-slug",
   PROJECT: "project-slug",
 }
+
+// TODO: add this to migrations
+export const FEATURE_SLUGS = {
+  API_KEYS: "apikeys", // core
+  PLANS: "plans", // core
+  PROJECTS: "projects", // core
+  ACCESS_PRO: "access-pro",
+  ACCESS_FREE: "access-free", // core
+  EVENTS: "events", // core
+  CUSTOMERS: "customers", // core
+  DOMAINS: "domains",
+  PAGES: "pages",
+}

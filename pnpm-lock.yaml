@@ -65,6 +65,9 @@ importers:
       '@unkey/cache':
         specifier: ^1.5.0
         version: 1.5.0
+      '@unprice/config':
+        specifier: workspace:^
+        version: link:../../internal/config
       '@unprice/db':
         specifier: workspace:^
         version: link:../../internal/db

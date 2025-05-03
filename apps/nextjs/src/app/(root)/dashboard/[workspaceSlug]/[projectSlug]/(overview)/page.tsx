@@ -11,7 +11,7 @@ import { VerificationsChart } from "~/components/analytics/verifications-chart"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { env } from "~/env"
 import { intervalParserCache } from "~/lib/searchParams"
-import { HydrateClient, trpc } from "~/trpc/server"
+import { HydrateClient, api, trpc } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
 import { Events } from "./_components/events"
 
@@ -133,6 +133,14 @@ async function RecentEvents(props: {
   workspaceSlug: string
   className?: string
 }) {
+  const { project } = await api.projects.getBySlug({
+    slug: props.projectSlug,
+  })
+
+  if (!project) {
+    return null
+  }
+
   const cookie = cookies()
   const sessionToken =
     env.NODE_ENV === "production" ? "__Secure-authjs.session-token" : "authjs.session-token"
@@ -145,7 +153,12 @@ async function RecentEvents(props: {
         <CardDescription>Realtime events from your project.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Events sessionToken={sessionTokenValue ?? ""} />
+        <Events
+          sessionToken={sessionTokenValue ?? ""}
+          projectId={project.id}
+          workspaceSlug={props.workspaceSlug}
+          projectSlug={props.projectSlug}
+        />
       </CardContent>
     </Card>
   )

@@ -4,6 +4,7 @@ import { createSlug, newId } from "@unprice/db/utils"
 import { pageInsertBaseSchema, pageSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { protectedProjectProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 import { reportUsageFeature } from "#utils/shared"
@@ -20,7 +21,7 @@ export const create = protectedProjectProcedure
     const project = opts.ctx.project
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "pages"
+    const featureSlug = FEATURE_SLUGS.PAGES
 
     // only owner and admin can create a page
     opts.ctx.verifyRole(["OWNER", "ADMIN"])

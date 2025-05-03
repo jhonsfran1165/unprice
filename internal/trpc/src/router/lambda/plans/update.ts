@@ -5,6 +5,7 @@ import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { planInsertBaseSchema, planSelectBaseSchema } from "@unprice/db/validators"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { protectedProjectProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 
@@ -20,7 +21,7 @@ export const update = protectedProjectProcedure
     const project = opts.ctx.project
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "plans"
+    const featureSlug = FEATURE_SLUGS.PLANS
 
     // only owner and admin can update a plan
     opts.ctx.verifyRole(["OWNER", "ADMIN"])

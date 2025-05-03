@@ -5,6 +5,7 @@ import { env as envServices } from "@unprice/services/env"
 import { env as envAnalytics } from "@unprice/tinybird/env"
 import { z } from "zod"
 import type { DurableObjectUsagelimiter } from "~/entitlement/do"
+import type { DurableObjectProject } from "./project/do"
 
 export const env = createEnv({
   shared: {
@@ -14,6 +15,9 @@ export const env = createEnv({
     AUTH_SECRET: z.string(),
     VERSION: z.string().default("unknown"),
     usagelimit: z.custom<DurableObjectNamespace<DurableObjectUsagelimiter>>(
+      (ns) => typeof ns === "object"
+    ),
+    projectdo: z.custom<DurableObjectNamespace<DurableObjectProject>>(
       (ns) => typeof ns === "object"
     ),
     // RL_10_60s: cloudflareRatelimiter,

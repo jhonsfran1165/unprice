@@ -10,6 +10,7 @@ import {
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { protectedProjectProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 
@@ -32,7 +33,7 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
     const customerColumns = getTableColumns(schema.customers)
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "plans"
+    const featureSlug = FEATURE_SLUGS.PLANS
 
     const result = await featureGuard({
       customerId,

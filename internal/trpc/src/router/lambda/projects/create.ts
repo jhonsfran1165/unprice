@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import { FEATURE_SLUGS } from "@unprice/config"
 import { projects } from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
 import { projectInsertBaseSchema, projectSelectBaseSchema } from "@unprice/db/validators"
@@ -14,7 +15,7 @@ export const create = protectedWorkspaceProcedure
     const { name, url, defaultCurrency, timezone } = opts.input
     const workspace = opts.ctx.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "projects"
+    const featureSlug = FEATURE_SLUGS.PROJECTS
 
     // only owner and admin can create a project
     opts.ctx.verifyRole(["OWNER", "ADMIN"])

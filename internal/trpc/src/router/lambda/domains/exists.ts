@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import { FEATURE_SLUGS } from "@unprice/config"
 import { z } from "zod"
 import { protectedWorkspaceProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
@@ -9,7 +10,7 @@ export const exists = protectedWorkspaceProcedure
   .mutation(async (opts) => {
     const workspace = opts.ctx.workspace
     const customerId = workspace.unPriceCustomerId
-    const featureSlug = "domains"
+    const featureSlug = FEATURE_SLUGS.DOMAINS
 
     // check if the customer has access to the feature
     const result = await featureGuard({

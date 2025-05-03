@@ -127,6 +127,29 @@ export class DurableObjectUsagelimiter extends Server {
     return { valid: true, message: "DO initialized" }
   }
 
+  async broadcastEvents(data: {
+    customerId: string
+    featureSlug: string
+    deniedReason?: DenyReason
+    usage?: number
+    limit?: number
+    notifyUsage?: boolean
+    type: "can" | "reportUsage"
+    success: boolean
+  }) {
+    const now = Date.now()
+
+    // Only broadcast if enough time has passed since last broadcast
+    // defailt 1 per second
+    // this is used to debug events in real time in unprice dashboard
+    if (now - this.lastBroadcastTime >= this.DEBOUNCE_DELAY) {
+      // under the hood this validates if there are connections
+      // and sends the event to all of them
+      this.broadcast(JSON.stringify(data))
+      this.lastBroadcastTime = now
+    }
+  }
+
   private isValidEntitlement(featureSlug: string): {
     valid: boolean
     message: string
@@ -246,44 +269,38 @@ export class DurableObjectUsagelimiter extends Server {
     await this.ensureAlarmIsSet(data.secondsToLive)
 
     const performanceStart = data.performanceStart ?? 0
-    const now = Date.now()
 
     if (!valid) {
-      // Only broadcast if enough time has passed since last broadcast
-      // defailt 1 per second
-      // this is used to debug events in real time in unprice dashboard
-      if (now - this.lastBroadcastTime >= this.DEBOUNCE_DELAY) {
-        this.broadcast(
-          JSON.stringify({
-            featureSlug: data.featureSlug,
+      // insert async verification
+      this.ctx.waitUntil(
+        Promise.all([
+          // broadcast the event to the project
+          this.broadcastEvents({
             customerId: data.customerId,
+            featureSlug: data.featureSlug,
             type: "can",
             success: valid,
             deniedReason: deniedReason,
-          })
-        )
-        this.lastBroadcastTime = now
-      }
-
-      // insert async verification
-      this.ctx.waitUntil(
-        this.insertVerification(
-          {
-            entitlementId: entitlement.entitlementId,
-            customerId: data.customerId,
-            projectId: data.projectId,
-            featureSlug: data.featureSlug,
-            requestId: data.requestId,
-            metadata: data.metadata ? JSON.stringify(data.metadata) : null,
-            featurePlanVersionId: entitlement.featurePlanVersionId,
-            subscriptionItemId: entitlement.subscriptionItemId,
-            subscriptionPhaseId: entitlement.subscriptionPhaseId,
-            subscriptionId: entitlement.subscriptionId,
-          },
-          data,
-          performance.now() - performanceStart,
-          deniedReason
-        )
+          }),
+          // insert verification
+          this.insertVerification(
+            {
+              entitlementId: entitlement.entitlementId,
+              customerId: data.customerId,
+              projectId: data.projectId,
+              featureSlug: data.featureSlug,
+              requestId: data.requestId,
+              metadata: data.metadata ? JSON.stringify(data.metadata) : null,
+              featurePlanVersionId: entitlement.featurePlanVersionId,
+              subscriptionItemId: entitlement.subscriptionItemId,
+              subscriptionPhaseId: entitlement.subscriptionPhaseId,
+              subscriptionId: entitlement.subscriptionId,
+            },
+            data,
+            performance.now() - performanceStart,
+            deniedReason
+          ),
+        ])
       )
 
       return {
@@ -294,41 +311,36 @@ export class DurableObjectUsagelimiter extends Server {
     }
 
     if (!valid) {
-      // Only broadcast if enough time has passed since last broadcast
-      // defailt 1 per second
-      // this is used to debug events in real time in unprice dashboard
-      if (now - this.lastBroadcastTime >= this.DEBOUNCE_DELAY) {
-        this.broadcast(
-          JSON.stringify({
+      // insert async verification and broadcast the event
+      this.ctx.waitUntil(
+        Promise.all([
+          // broadcast the event
+          this.broadcastEvents({
             featureSlug: data.featureSlug,
             customerId: data.customerId,
             type: "can",
             success: valid,
             deniedReason: deniedReason,
-          })
-        )
-        this.lastBroadcastTime = now
-      }
-
-      // insert async verification
-      this.ctx.waitUntil(
-        this.insertVerification(
-          {
-            entitlementId: entitlement.entitlementId,
-            customerId: data.customerId,
-            projectId: data.projectId,
-            featureSlug: data.featureSlug,
-            requestId: data.requestId,
-            metadata: data.metadata ? JSON.stringify(data.metadata) : null,
-            featurePlanVersionId: entitlement.featurePlanVersionId,
-            subscriptionItemId: entitlement.subscriptionItemId,
-            subscriptionPhaseId: entitlement.subscriptionPhaseId,
-            subscriptionId: entitlement.subscriptionId,
-          },
-          data,
-          performance.now() - performanceStart,
-          deniedReason
-        )
+          }),
+          // insert verification
+          this.insertVerification(
+            {
+              entitlementId: entitlement.entitlementId,
+              customerId: data.customerId,
+              projectId: data.projectId,
+              featureSlug: data.featureSlug,
+              requestId: data.requestId,
+              metadata: data.metadata ? JSON.stringify(data.metadata) : null,
+              featurePlanVersionId: entitlement.featurePlanVersionId,
+              subscriptionItemId: entitlement.subscriptionItemId,
+              subscriptionPhaseId: entitlement.subscriptionPhaseId,
+              subscriptionId: entitlement.subscriptionId,
+            },
+            data,
+            performance.now() - performanceStart,
+            deniedReason
+          ),
+        ])
       )
 
       return {
@@ -341,41 +353,36 @@ export class DurableObjectUsagelimiter extends Server {
     // at this point we basically validate the user has access to the feature
     const result = this.checkLimit(entitlement)
 
-    // Only broadcast if enough time has passed since last broadcast
-    // defailt 1 per second
-    // this is used to debug events in real time in unprice dashboard
-    if (now - this.lastBroadcastTime >= this.DEBOUNCE_DELAY) {
-      this.broadcast(
-        JSON.stringify({
+    // insert verification
+    this.ctx.waitUntil(
+      Promise.all([
+        // broadcast the event
+        this.broadcastEvents({
           featureSlug: data.featureSlug,
           customerId: data.customerId,
           type: "can",
           success: result.success,
           deniedReason: result.deniedReason,
-        })
-      )
-      this.lastBroadcastTime = now
-    }
-
-    // insert verification
-    this.ctx.waitUntil(
-      this.insertVerification(
-        {
-          entitlementId: entitlement.entitlementId,
-          customerId: data.customerId,
-          projectId: data.projectId,
-          featureSlug: data.featureSlug,
-          requestId: data.requestId,
-          metadata: JSON.stringify(data.metadata),
-          featurePlanVersionId: entitlement.featurePlanVersionId,
-          subscriptionItemId: entitlement.subscriptionItemId,
-          subscriptionPhaseId: entitlement.subscriptionPhaseId,
-          subscriptionId: entitlement.subscriptionId,
-        },
-        data,
-        performance.now() - performanceStart,
-        result.deniedReason
-      )
+        }),
+        // insert verification
+        this.insertVerification(
+          {
+            entitlementId: entitlement.entitlementId,
+            customerId: data.customerId,
+            projectId: data.projectId,
+            featureSlug: data.featureSlug,
+            requestId: data.requestId,
+            metadata: JSON.stringify(data.metadata),
+            featurePlanVersionId: entitlement.featurePlanVersionId,
+            subscriptionItemId: entitlement.subscriptionItemId,
+            subscriptionPhaseId: entitlement.subscriptionPhaseId,
+            subscriptionId: entitlement.subscriptionId,
+          },
+          data,
+          performance.now() - performanceStart,
+          result.deniedReason
+        ),
+      ])
     )
 
     return {
@@ -419,6 +426,7 @@ export class DurableObjectUsagelimiter extends Server {
       }
     }
 
+    // TODO: send analytics event??
     if (!valid) {
       return {
         success: false,
@@ -426,6 +434,7 @@ export class DurableObjectUsagelimiter extends Server {
       }
     }
 
+    // TODO: send analytics event??
     // if the use is negative but the entitlement aggregationMethod is not in sum or sum_all
     // we need to return an error
     if (
@@ -471,6 +480,7 @@ export class DurableObjectUsagelimiter extends Server {
         return result?.[0] ?? null
       })
 
+    // TODO: send analytics event??
     if (!usageRecord) {
       return {
         success: false,
@@ -480,25 +490,18 @@ export class DurableObjectUsagelimiter extends Server {
 
     const result = await this.setUsage(entitlement, data.usage)
 
-    const now = Date.now()
-
-    // Only broadcast if enough time has passed since last broadcast
-    // defailt 1 per second
-    // this is used to debug events in real time in unprice dashboard
-    if (now - this.lastBroadcastTime >= this.DEBOUNCE_DELAY) {
-      this.broadcast(
-        JSON.stringify({
-          featureSlug: data.featureSlug,
-          customerId: data.customerId,
-          type: "reportUsage",
-          success: result.success,
-          usage: data.usage,
-          limit: result.limit,
-          notifyUsage: result.notifyUsage,
-        })
-      )
-      this.lastBroadcastTime = now
-    }
+    // broadcast the event
+    this.ctx.waitUntil(
+      this.broadcastEvents({
+        featureSlug: data.featureSlug,
+        customerId: data.customerId,
+        type: "reportUsage",
+        success: result.success,
+        usage: data.usage,
+        limit: result.limit,
+        notifyUsage: result.notifyUsage,
+      })
+    )
 
     // return usage
     return result
