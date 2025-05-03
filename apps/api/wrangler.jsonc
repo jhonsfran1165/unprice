@@ -32,7 +32,7 @@
       },
       "migrations": [
         {
-          "tag": "v1",
+          "tag": "v2",
           "new_sqlite_classes": ["DurableObjectUsagelimiter"],
           "new_classes": ["DurableObjectProject"]
         }
@@ -61,7 +61,7 @@
       },
       "migrations": [
         {
-          "tag": "v1",
+          "tag": "v2",
           "new_sqlite_classes": ["DurableObjectUsagelimiter"],
           "new_classes": ["DurableObjectProject"]
         }
@@ -86,7 +86,7 @@
       },
       "migrations": [
         {
-          "tag": "v1",
+          "tag": "v2",
           "new_sqlite_classes": ["DurableObjectUsagelimiter"],
           "new_classes": ["DurableObjectProject"]
         }
