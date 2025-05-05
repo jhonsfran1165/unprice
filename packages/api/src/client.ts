@@ -402,4 +402,36 @@ export class Unprice {
       },
     }
   }
+
+  public get analytics() {
+    return {
+      getUsage: async (
+        req: paths["/v1/analytics/usage"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/v1/analytics/usage"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "analytics", "usage"],
+          method: "POST",
+          body: req,
+        })
+      },
+
+      getVerifications: async (
+        req: paths["/v1/analytics/verifications"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/v1/analytics/verifications"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "analytics", "verifications"],
+          method: "POST",
+          body: req,
+        })
+      },
+    }
+  }
 }

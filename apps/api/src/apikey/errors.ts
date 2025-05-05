@@ -9,6 +9,7 @@ export const apiKeyErrorSchema = z.enum([
   "PROJECT_DISABLED",
   "WORKSPACE_DISABLED",
   "UNHANDLED_ERROR",
+  "RATE_LIMIT_EXCEEDED",
 ])
 
 export type ApiKeyError = z.infer<typeof apiKeyErrorSchema>

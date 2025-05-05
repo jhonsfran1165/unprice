@@ -49,57 +49,78 @@ export const customerInsertBaseSchema = createInsertSchema(schema.customers, {
     projectId: true,
   })
 
-export const customerSignUpSchema = z.object({
-  name: z.string().min(1, "Name is required").openapi({
-    description: "The name of the customer",
-    example: "John Doe",
-  }),
-  timezone: z.string().optional().openapi({
-    description:
-      "The timezone of the customer, if passed null the system will use the project timezone",
-    example: "UTC",
-  }),
-  defaultCurrency: currencySchema.optional().openapi({
-    description:
-      "The default currency of the customer, if passed null the system will use the project currency",
-    example: "USD",
-  }),
-  email: z.string().email("Invalid email").min(1, "Email is required").openapi({
-    description: "The email of the customer",
-    example: "test@example.com",
-  }),
-  planVersionId: z.string().min(1, "Plan version is required").openapi({
-    description: "The plan version the customer is signing up for",
-    example: "pv_1234567890",
-  }),
-  config: subscriptionItemsConfigSchema.optional().openapi({
-    description:
-      "The configuration of the subscription items. This is required if your features are quantity based when the customer needs to set them. Pass as empty if you want the system to automatically set the units from the plan defaults.",
-    example: [
-      {
-        featurePlanId: "feature_plan_123",
-        featureSlug: "feature_slug_123",
-        isUsage: true,
-        units: 100,
-      },
-    ],
-  }),
-  externalId: z.string().optional().openapi({
-    description:
-      "The external id you want to associate with the customer. Could be the id of the user in your database",
-    example: "1234567890",
-  }),
-  successUrl: z.string().url().openapi({
-    description:
-      "The success url if the customer signs up. This is the url after the signup process, normally your dashboard",
-    example: "https://example.com/dashboard",
-  }),
-  cancelUrl: z.string().url().openapi({
-    description:
-      "The cancel url if the customer cancels the signup. This is the url after the signup process, normally your login page",
-    example: "https://example.com/login",
-  }),
-})
+export const customerSignUpSchema = z
+  .object({
+    name: z.string().min(1, "Name is required").openapi({
+      description: "The name of the customer",
+      example: "John Doe",
+    }),
+    timezone: z.string().optional().openapi({
+      description:
+        "The timezone of the customer, if passed null the system will use the project timezone",
+      example: "UTC",
+    }),
+    defaultCurrency: currencySchema.optional().openapi({
+      description:
+        "The default currency of the customer, if passed null the system will use the project currency",
+      example: "USD",
+    }),
+    email: z.string().email("Invalid email").min(1, "Email is required").openapi({
+      description: "The email of the customer",
+      example: "test@example.com",
+    }),
+    // either plan slug or plan version id is required
+    planSlug: z.string().optional().openapi({
+      description:
+        "If the plan id is not provided, you can pass a plan slug and the system will intelligently pick the lastest plan for that slug and sign up the customer for it",
+      example: "PRO",
+    }),
+    planVersionId: z.string().optional().openapi({
+      description: "The plan version the customer is signing up for",
+      example: "pv_1234567890",
+    }),
+    config: subscriptionItemsConfigSchema.optional().openapi({
+      description:
+        "The configuration of the subscription items. This is required if your features are quantity based when the customer needs to set them. Pass as empty if you want the system to automatically set the units from the plan defaults.",
+      example: [
+        {
+          featurePlanId: "feature_plan_123",
+          featureSlug: "feature_slug_123",
+          isUsage: true,
+          units: 100,
+        },
+      ],
+    }),
+    externalId: z.string().optional().openapi({
+      description:
+        "The external id you want to associate with the customer. Could be the id of the user in your database",
+      example: "1234567890",
+    }),
+    successUrl: z.string().url().openapi({
+      description:
+        "The success url if the customer signs up. This is the url after the signup process, normally your dashboard",
+      example: "https://example.com/dashboard",
+    }),
+    cancelUrl: z.string().url().openapi({
+      description:
+        "The cancel url if the customer cancels the signup. This is the url after the signup process, normally your login page",
+      example: "https://example.com/login",
+    }),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.planSlug && !data.planVersionId)
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Either planSlug or planVersionId is required",
+        path: ["planSlug", "planVersionId"],
+      })
+    if (data.planSlug && data.planVersionId)
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Only one of planSlug or planVersionId should be provided",
+        path: ["planSlug", "planVersionId"],
+      })
+  })
 
 export const signUpResponseSchema = z.object({
   success: z.boolean().openapi({

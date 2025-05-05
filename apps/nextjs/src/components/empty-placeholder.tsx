@@ -36,7 +36,11 @@ EmptyPlaceholder.Icon = function EmptyPlaceHolderIcon({
 }: {
   children: React.ReactNode
 }) {
-  return <div className="flex items-center justify-center rounded-full">{children}</div>
+  return (
+    <div className="flex items-center justify-center rounded-full text-muted-foreground opacity-30">
+      {children}
+    </div>
+  )
 }
 
 type EmptyPlaceholderTitleProps = React.HTMLAttributes<HTMLHeadingElement> & {
@@ -46,11 +50,15 @@ type EmptyPlaceholderTitleProps = React.HTMLAttributes<HTMLHeadingElement> & {
 EmptyPlaceholder.Title = function EmptyPlaceholderTitle({
   className,
   children,
-  variant = "h4",
+  variant = "h6",
   ...props
 }: EmptyPlaceholderTitleProps) {
   return (
-    <Typography variant={variant} className={cn("mt-4", className)} {...props}>
+    <Typography
+      variant={variant}
+      className={cn("mt-4 mb-2 font-medium text-muted-foreground", className)}
+      {...props}
+    >
       {children}
     </Typography>
   )
@@ -72,7 +80,12 @@ EmptyPlaceholder.Description = function EmptyPlaceholderDescription({
   ...props
 }: EmptyPlaceholderDescriptionProps) {
   return (
-    <Typography variant="p" className={cn("my-2", className)} {...props}>
+    <Typography
+      variant="p"
+      affects="removePaddingMargin"
+      className={cn("mb-4 text-muted-foreground text-xs", className)}
+      {...props}
+    >
       {children}
     </Typography>
   )

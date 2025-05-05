@@ -72,6 +72,7 @@ export class ApiKeysService {
                   isPersonal: true,
                   isInternal: true,
                   isMain: true,
+                  createdBy: true,
                 },
               },
             },
@@ -116,6 +117,7 @@ export class ApiKeysService {
   }
 
   private async _getApiKey(
+    c: Context,
     req: {
       key: string
     },
@@ -177,6 +179,17 @@ export class ApiKeysService {
       )
     }
 
+    // rate limit the apikey
+    const result = await this.rateLimit(c, { key: req.key })
+
+    if (!result) {
+      return Err(
+        new UnPriceApiKeyError({
+          code: "RATE_LIMIT_EXCEEDED",
+          message: "apikey rate limit exceeded",
+        })
+      )
+    }
     return Ok(data)
   }
 
@@ -190,6 +203,7 @@ export class ApiKeysService {
       const { key } = req
 
       const result = await this._getApiKey(
+        c,
         {
           key,
         },
@@ -203,6 +217,7 @@ export class ApiKeysService {
 
         await this.cache.apiKeyByHash.remove(await this.hash(req.key))
         return await this._getApiKey(
+          c,
           {
             key,
           },
@@ -276,5 +291,30 @@ export class ApiKeysService {
         })
       )
     }
+  }
+
+  public async rateLimit(c: Context, req: { key: string }) {
+    const keyHash = await this.hash(req.key)
+    // TODO: improve this
+    const limiter = c.env.RL_FREE_100_60s
+    const result = await limiter.limit({ key: keyHash })
+    const start = c.get("performanceStart") as number
+    const workspaceId = c.get("workspaceId") as string
+
+    if (result.success) {
+      // emit metrics
+      this.metrics.emit({
+        metric: "metric.ratelimit",
+        workspaceId,
+        identifier: keyHash,
+        latency: performance.now() - start,
+        mode: "cloudflare",
+        success: result.success,
+        error: !result.success,
+        source: "cloudflare",
+      })
+    }
+
+    return result.success
   }
 }

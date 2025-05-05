@@ -1,7 +1,7 @@
 {
   "name": "@unprice/api",
   "private": false,
-  "version": "0.0.11",
+  "version": "0.0.12",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

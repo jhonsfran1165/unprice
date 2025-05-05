@@ -4,7 +4,7 @@ import { SuperLink } from "../super-link"
 
 export function MainNav({ ...props }: React.HTMLAttributes<HTMLElement>) {
   return (
-    <nav className="items-center space-x-2 lg:flex" {...props}>
+    <nav className="hidden items-center space-x-2 md:flex" {...props}>
       {navItems.map((item, idx) => (
         <SuperLink
           href={item.href}

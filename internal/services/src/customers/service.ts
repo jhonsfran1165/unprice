@@ -15,6 +15,9 @@ import type {
   CustomerPaymentMethod,
   CustomerSignUp,
   PaymentProvider,
+  Plan,
+  PlanVersion,
+  Project,
 } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
@@ -1116,16 +1119,72 @@ export class CustomerService {
       timezone,
       defaultCurrency,
       externalId,
+      planSlug,
     } = input
 
-    const planVersion = await this.db.query.versions.findFirst({
-      with: {
-        project: true,
-        plan: true,
-      },
-      where: (version, { eq, and }) =>
-        and(eq(version.id, planVersionId), eq(version.projectId, projectId)),
-    })
+    // plan version clould be empty, in which case we have to guess the best plan for the customer
+    // given the currency, the plan slug and the version
+    let planVersion: (PlanVersion & { project: Project; plan: Plan }) | null = null
+
+    if (planVersionId) {
+      planVersion = await this.db.query.versions
+        .findFirst({
+          with: {
+            project: true,
+            plan: true,
+          },
+          where: (version, { eq, and }) =>
+            and(
+              eq(version.id, planVersionId),
+              eq(version.projectId, projectId),
+              // filter by currency if provided
+              defaultCurrency ? eq(version.currency, defaultCurrency) : undefined
+            ),
+        })
+        .then((data) => data ?? null)
+    } else if (planSlug) {
+      // find the plan version by the plan slug
+      const plan = await this.db.query.plans
+        .findFirst({
+          with: {
+            versions: {
+              with: {
+                project: true,
+                plan: true,
+              },
+              where: (version, { eq, and }) =>
+                and(
+                  // filter by latest version
+                  eq(version.latest, true),
+                  // filter by project
+                  eq(version.projectId, projectId),
+                  // filter by currency if provided
+                  defaultCurrency ? eq(version.currency, defaultCurrency) : undefined
+                ),
+            },
+          },
+          where: (plan, { eq, and }) => and(eq(plan.projectId, projectId), eq(plan.slug, planSlug)),
+        })
+        .then((data) => data ?? null)
+
+      if (!plan) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "PLAN_VERSION_NOT_FOUND",
+            message: "Plan version not found",
+          })
+        )
+      }
+
+      planVersion = plan.versions[0] ?? null
+    } else {
+      return Err(
+        new UnPriceCustomerError({
+          code: "PLAN_VERSION_NOT_FOUND",
+          message: "Plan version not found, either planVersionId or planSlug is required",
+        })
+      )
+    }
 
     if (!planVersion) {
       return Err(
@@ -1157,6 +1216,18 @@ export class CustomerService {
     const planProject = planVersion.project
     const paymentProvider = planVersion.paymentProvider
     const paymentRequired = planVersion.paymentMethodRequired
+    const currency = defaultCurrency ?? planProject.defaultCurrency
+
+    // validate the currency if provided
+    if (currency !== planVersion.currency) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "CURRENCY_MISMATCH",
+          message:
+            "Currency mismatch, the project default currency does not match the plan version currency",
+        })
+      )
+    }
 
     const customerId = newId("customer")
     const customerSuccessUrl = successUrl.replace("{CUSTOMER_ID}", customerId)
@@ -1207,7 +1278,7 @@ export class CustomerService {
             id: customerId,
             name: name,
             email: email,
-            currency: defaultCurrency || planProject.defaultCurrency,
+            currency: currency,
             timezone: timezone || planProject.timezone,
             projectId: projectId,
             externalId: externalId,
@@ -1238,7 +1309,7 @@ export class CustomerService {
         customer: {
           id: customerId,
           email: email,
-          currency: defaultCurrency || planProject.defaultCurrency,
+          currency: currency,
           projectId: projectId,
         },
       })
@@ -1278,7 +1349,7 @@ export class CustomerService {
             name: name ?? email,
             email: email,
             projectId: projectId,
-            defaultCurrency: defaultCurrency ?? planProject.defaultCurrency,
+            defaultCurrency: currency,
             timezone: timezone ?? planProject.timezone,
             active: true,
           })

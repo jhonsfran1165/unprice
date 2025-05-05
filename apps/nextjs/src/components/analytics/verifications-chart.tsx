@@ -1,9 +1,5 @@
 "use client"
 
-import { BarChart4 } from "lucide-react"
-import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
-
-import { prepareInterval } from "@unprice/tinybird"
 import { Button } from "@unprice/ui/button"
 import {
   type ChartConfig,
@@ -11,9 +7,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@unprice/ui/chart"
+import { BarChart4 } from "lucide-react"
+import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useFilter } from "~/hooks/use-filter"
-import { nFormatter } from "~/lib/nformatter"
+import { nFormatter, nFormatterTime } from "~/lib/nformatter"
 import { api } from "~/trpc/client"
 
 const chartConfig = {
@@ -33,12 +31,10 @@ const chartConfig = {
 
 export function VerificationsChart() {
   const [{ interval }] = useFilter() // read-only
-  const { start, end } = prepareInterval(interval)
 
   // this is prefetched from the server
   const [data] = api.analytics.getVerifications.useSuspenseQuery({
-    start: start - 1000 * 60 * 40,
-    end,
+    range: interval,
   })
 
   const chartData = data.verifications.map((v) => ({
@@ -88,16 +84,16 @@ export function VerificationsChart() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold">P95 Latency:</span> {nFormatter(payload.p95_latency)}
-              ms
+              <span className="font-semibold">P95 Latency:</span>{" "}
+              {nFormatterTime(payload.p95_latency)}
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold">Max Latency:</span> {nFormatter(payload.max_latency)}
-              ms
+              <span className="font-semibold">Max Latency:</span>{" "}
+              {nFormatterTime(payload.max_latency)}
             </div>
             <div className="flex items-center gap-2">
               <span className="font-semibold">Latest Latency:</span>{" "}
-              {nFormatter(payload.latest_latency)}ms
+              {nFormatterTime(payload.latest_latency)}
             </div>
           </div>
         </div>

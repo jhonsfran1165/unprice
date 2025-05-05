@@ -1,9 +1,5 @@
 "use client"
 
-import { BarChart4 } from "lucide-react"
-import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
-
-import { prepareInterval } from "@unprice/tinybird"
 import { Button } from "@unprice/ui/button"
 import {
   type ChartConfig,
@@ -11,6 +7,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@unprice/ui/chart"
+import { BarChart4 } from "lucide-react"
+import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useFilter } from "~/hooks/use-filter"
 import { nFormatter } from "~/lib/nformatter"
@@ -24,12 +22,10 @@ const chartConfig = {
 
 export function UsageChart() {
   const [{ interval }] = useFilter() // read-only
-  const { start, end } = prepareInterval(interval)
 
   // this is prefetched from the server
   const [data] = api.analytics.getUsage.useSuspenseQuery({
-    start,
-    end,
+    range: interval,
   })
 
   const chartData = data.usage.map((v) => ({

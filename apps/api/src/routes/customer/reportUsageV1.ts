@@ -131,6 +131,9 @@ export const registerReportUsageV1 = (app: App) =>
               usage: 1,
               idempotenceKey: `${requestId}:${unPriceCustomer.id}`,
               timestamp: Date.now(),
+              metadata: {
+                action: "reportUsage",
+              },
             })
             .catch((err) => {
               logger.error("Failed to report usage", err)
