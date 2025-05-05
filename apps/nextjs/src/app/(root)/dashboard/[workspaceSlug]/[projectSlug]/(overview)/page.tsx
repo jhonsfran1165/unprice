@@ -1,4 +1,3 @@
-import { prepareInterval } from "@unprice/tinybird"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import { Activity, CreditCard, DollarSign, Users } from "@unprice/ui/icons"
 import { cn } from "@unprice/ui/utils"
@@ -27,16 +26,13 @@ export default async function DashboardPage(props: {
 }) {
   const { projectSlug, workspaceSlug } = props.params
   const filter = intervalParserCache.parse(props.searchParams)
-  const { start, end } = prepareInterval(filter.interval)
 
   void trpc.analytics.getVerifications.prefetch({
-    start,
-    end,
+    range: filter.interval,
   })
 
   void trpc.analytics.getUsage.prefetch({
-    start,
-    end,
+    range: filter.interval,
   })
 
   return (

@@ -58,7 +58,18 @@ export type StripeSetupRequest = z.infer<typeof route.request.params>
 export const registerStripeSetupV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { sessionId, projectId } = c.req.valid("param")
+    const key = c.req.header("cf-connecting-ip") ?? c.req.header("x-forwarded-for") ?? projectId
     const { customer, db } = c.get("services")
+
+    // rate limit the request
+    const result = await c.env.RL_FREE_100_60s.limit({ key })
+
+    if (!result) {
+      throw new UnpriceApiError({
+        code: "RATE_LIMITED",
+        message: "Rate limit exceeded",
+      })
+    }
 
     // get payment provider for the project
     const { err: paymentProviderErr, val: paymentProviderService } =

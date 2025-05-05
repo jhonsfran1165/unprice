@@ -7,6 +7,10 @@ import { z } from "zod"
 import type { DurableObjectUsagelimiter } from "~/entitlement/do"
 import type { DurableObjectProject } from "./project/do"
 
+export const cloudflareRatelimiter = z.custom<{
+  limit: (opts: { key: string }) => Promise<{ success: boolean }>
+}>((r) => !!r && typeof r.limit === "function")
+
 export const env = createEnv({
   shared: {
     NODE_ENV: z.enum(["development", "test", "production", "preview"]).default("development"),
@@ -20,7 +24,7 @@ export const env = createEnv({
     projectdo: z.custom<DurableObjectNamespace<DurableObjectProject>>(
       (ns) => typeof ns === "object"
     ),
-    // RL_10_60s: cloudflareRatelimiter,
+    RL_FREE_100_60s: cloudflareRatelimiter,
   },
   emptyStringAsUndefined: true,
   runtimeEnv: process.env,
@@ -30,9 +34,5 @@ export const env = createEnv({
     throw new Error(`Invalid environment variables in API: ${JSON.stringify(issues, null, 2)}`)
   },
 })
-
-export const cloudflareRatelimiter = z.custom<{
-  limit: (opts: { key: string }) => Promise<{ success: boolean }>
-}>((r) => !!r && typeof r.limit === "function")
 
 export type Env = typeof env

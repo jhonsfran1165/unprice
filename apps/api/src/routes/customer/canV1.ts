@@ -86,9 +86,6 @@ export const registerCanV1 = (app: App) =>
       metadata,
     })
 
-    // end the timer
-    endTime(c, "can")
-
     const unPriceCustomerId = c.get("unPriceCustomerId")
 
     // send analytics event for the unprice customer
@@ -124,6 +121,9 @@ export const registerCanV1 = (app: App) =>
               usage: 1,
               idempotenceKey: `${requestId}:${unPriceCustomer.id}`,
               timestamp: Date.now(),
+              metadata: {
+                action: "can",
+              },
             })
             .catch((err) => {
               logger.error("Failed to report usage", err)
@@ -131,6 +131,9 @@ export const registerCanV1 = (app: App) =>
         }
       })
     )
+
+    // end the timer
+    endTime(c, "can")
 
     return c.json(result, HttpStatusCodes.OK)
   })

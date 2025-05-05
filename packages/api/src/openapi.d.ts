@@ -447,6 +447,40 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/v1/analytics/usage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** @description Get usage for a customer in a given range */
+    post: operations["analytics.getUsage"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/analytics/verifications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** @description Get verifications for a customer in a given range */
+    post: operations["analytics.getVerifications"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -2394,10 +2428,15 @@ export interface operations {
            */
           email: string
           /**
+           * @description If the plan id is not provided, you can pass a plan slug and the system will intelligently pick the lastest plan for that slug and sign up the customer for it
+           * @example PRO
+           */
+          planSlug?: string
+          /**
            * @description The plan version the customer is signing up for
            * @example pv_1234567890
            */
-          planVersionId: string
+          planVersionId?: string
           /**
            * @description The configuration of the subscription items. This is required if your features are quantity based when the customer needs to set them. Pass as empty if you want the system to automatically set the units from the plan defaults.
            * @example [
@@ -3633,6 +3672,254 @@ export interface operations {
                   description: string | null
                 }
               }[]
+            }[]
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "analytics.getUsage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request for the get usage */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The customer ID if you want to get the usage for a specific customer
+           * @example cus_1H7KQFLr7RepUyQBKdnvY
+           */
+          customerId?: string
+          /**
+           * @description The project ID (optional, if not provided, the project ID will be the one of the key)
+           * @example project_1H7KQFLr7RepUyQBKdnvY
+           */
+          projectId: string
+          /**
+           * @description The range of the usage, last hour, day, week or month
+           * @example 24h
+           */
+          range: string
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the get usage */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            usage: {
+              projectId: string
+              customerId?: string
+              entitlementId?: string
+              featureSlug: string
+              count: number
+              sum: number
+              max: number
+              last_during_period: number
+            }[]
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "analytics.getVerifications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request for the get verifications */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The customer ID if you want to get the verifications for a specific customer
+           * @example cus_1H7KQFLr7RepUyQBKdnvY
+           */
+          customerId?: string
+          /**
+           * @description The project ID (optional, if not provided, the project ID will be the one of the key)
+           * @example project_1H7KQFLr7RepUyQBKdnvY
+           */
+          projectId: string
+          /**
+           * @description The range of the verifications, last hour, day, week or month
+           * @example 24h
+           */
+          range: string
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the get verifications */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            verifications: {
+              projectId: string
+              customerId?: string
+              entitlementId?: string
+              featureSlug: string
+              count: number
+              p95_latency: number
+              max_latency: number
+              latest_latency: number
             }[]
           }
         }

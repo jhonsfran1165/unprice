@@ -1,12 +1,13 @@
 import { z } from "zod"
 
+import { TRPCError } from "@trpc/server"
 import { protectedProjectProcedure } from "#trpc"
+import { unprice } from "#utils/unprice"
 
 export const getUsage = protectedProjectProcedure
   .input(
     z.object({
-      start: z.number(),
-      end: z.number(),
+      range: z.enum(["60m", "24h", "7d", "30d", "90d"]),
     })
   )
   .output(
@@ -26,28 +27,21 @@ export const getUsage = protectedProjectProcedure
     })
   )
   .query(async (opts) => {
-    const project = opts.ctx.project
+    const projectId = opts.ctx.project.id
 
-    const data = await opts.ctx.analytics
-      .getFeaturesUsagePeriod({
-        projectId: project.id,
-        start: opts.input.start,
-        end: opts.input.end,
-      })
-      .catch((err) => {
-        opts.ctx.logger.error(
-          JSON.stringify({
-            message: "Error getting usage",
-            error: err.message,
-          })
-        )
+    const data = await unprice.analytics.getUsage({
+      projectId,
+      range: opts.input.range,
+    })
 
-        return {
-          data: [],
-        }
+    if (data.error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: data.error.message,
       })
+    }
 
     return {
-      usage: data.data,
+      usage: data.result?.usage,
     }
   })

@@ -50,6 +50,7 @@ export const projectExtendedSelectSchema = projectSelectBaseSchema
       isPersonal: true,
       isMain: true,
       isInternal: true,
+      createdBy: true,
     }),
   })
 

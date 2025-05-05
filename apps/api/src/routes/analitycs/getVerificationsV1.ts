@@ -1,0 +1,225 @@
+import { createRoute } from "@hono/zod-openapi"
+import { FEATURE_SLUGS } from "@unprice/config"
+import { endTime, startTime } from "hono/timing"
+import * as HttpStatusCodes from "stoker/http-status-codes"
+import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
+
+import { z } from "zod"
+import { keyAuth } from "~/auth/key"
+import { UnpriceApiError } from "~/errors"
+import { openApiErrorResponses } from "~/errors/openapi-responses"
+import type { App } from "~/hono/app"
+
+const tags = ["analytics"]
+
+// TODO: improve this
+const rangeSchema = z
+  .string()
+  .refine(
+    (val) => val === "60m" || val === "24h" || val === "7d" || val === "30d" || val === "90d",
+    {
+      message: "Value must be '60m', '24h', '7d', '30d' or '90d'",
+      path: ["range"],
+    }
+  )
+
+export const route = createRoute({
+  path: "/v1/analytics/verifications",
+  operationId: "analytics.getVerifications",
+  description: "Get verifications for a customer in a given range",
+  method: "post",
+  tags,
+
+  request: {
+    body: jsonContentRequired(
+      z.object({
+        customerId: z.string().optional().openapi({
+          description:
+            "The customer ID if you want to get the verifications for a specific customer",
+          example: "cus_1H7KQFLr7RepUyQBKdnvY",
+        }),
+        projectId: z.string().openapi({
+          description:
+            "The project ID (optional, if not provided, the project ID will be the one of the key)",
+          example: "project_1H7KQFLr7RepUyQBKdnvY",
+        }),
+        range: rangeSchema.openapi({
+          description: "The range of the verifications, last hour, day, week or month",
+          example: "24h",
+        }),
+      }),
+      "Body of the request for the get verifications"
+    ),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({
+        verifications: z
+          .object({
+            projectId: z.string(),
+            customerId: z.string().optional(),
+            entitlementId: z.string().optional(),
+            featureSlug: z.string(),
+            count: z.number(),
+            p95_latency: z.number(),
+            max_latency: z.number(),
+            latest_latency: z.number(),
+          })
+          .array(),
+      }),
+      "The result of the get verifications"
+    ),
+    ...openApiErrorResponses,
+  },
+})
+
+export type GetAnalyticsVerificationsRequest = z.infer<
+  (typeof route.request.body)["content"]["application/json"]["schema"]
+>
+
+export type GetAnalyticsVerificationsResponse = z.infer<
+  (typeof route.responses)[200]["content"]["application/json"]["schema"]
+>
+export const registerGetAnalyticsVerificationsV1 = (app: App) =>
+  app.openapi(route, async (c) => {
+    const { customerId, range, projectId } = c.req.valid("json")
+    const { analytics, logger, customer, entitlement, db } = c.get("services")
+    const requestId = c.get("requestId")
+
+    // start a new timer
+    startTime(c, "keyAuth")
+
+    const now = Date.now()
+
+    // validate the request
+    const key = await keyAuth(c)
+
+    // end the timer
+    endTime(c, "keyAuth")
+
+    // start a new timer
+    startTime(c, "getVerifications")
+
+    // TODO: improve this
+    const start =
+      range === "60m"
+        ? now - 1000 * 60 * 60
+        : range === "24h"
+          ? now - 1000 * 60 * 60 * 24
+          : range === "7d"
+            ? now - 1000 * 60 * 60 * 24 * 7
+            : range === "30d"
+              ? now - 1000 * 60 * 60 * 24 * 30
+              : range === "90d"
+                ? now - 1000 * 60 * 60 * 24 * 90
+                : now - 1000 * 60 * 60 * 24 * 24
+
+    const end = now
+
+    if (projectId) {
+      // validate project from the key and the projectId
+      // are part of the same workspace
+      const project = await db.query.projects.findFirst({
+        with: {
+          workspace: true,
+        },
+        where: (project, { eq }) => eq(project.id, projectId),
+      })
+
+      if (!project) {
+        throw new UnpriceApiError({
+          code: "NOT_FOUND",
+          message: "Project not found",
+        })
+      }
+
+      // for now the only way to check if two workspaces are related is by the createdBy field
+      // TODO: improve this
+      if (project.workspace.createdBy !== key.project.workspace.createdBy) {
+        throw new UnpriceApiError({
+          code: "FORBIDDEN",
+          message: "You are not allowed to access this project analytics.",
+        })
+      }
+    }
+
+    // for now works but we need to get the proper data from the customer service
+    // some features are over the whole dataset.
+    // maybe it's better to query the do.
+    // TODO: cache results
+    const data = await analytics
+      .getFeaturesVerifications({
+        customerId,
+        projectId,
+        start,
+        end,
+      })
+      .catch((err) => {
+        logger.error(
+          JSON.stringify({
+            message: "Error getting verifications for customer",
+            error: err.message,
+          })
+        )
+
+        return {
+          data: [],
+        }
+      })
+
+    const unPriceCustomerId = c.get("unPriceCustomerId")
+
+    // send analytics event for the unprice customer
+    c.executionCtx.waitUntil(
+      Promise.resolve().then(async () => {
+        if (unPriceCustomerId) {
+          const { val: unPriceCustomer, err: unPriceCustomerErr } =
+            await customer.getCustomer(unPriceCustomerId)
+
+          if (unPriceCustomerErr || !unPriceCustomer) {
+            logger.error("Failed to get unprice customer", {
+              error: unPriceCustomerErr,
+            })
+            return
+          }
+
+          const shouldReportUsage =
+            !unPriceCustomer.project.workspace.isInternal &&
+            !unPriceCustomer.project.workspace.isMain
+
+          // if the unprice customer is internal or main, we don't need to report the usage
+          if (shouldReportUsage) {
+            return
+          }
+
+          await entitlement
+            .reportUsage({
+              customerId: unPriceCustomer.id,
+              featureSlug: FEATURE_SLUGS.EVENTS,
+              projectId: unPriceCustomer.projectId,
+              requestId,
+              now: Date.now(),
+              usage: 1,
+              idempotenceKey: `${requestId}:${unPriceCustomer.id}`,
+              timestamp: Date.now(),
+              metadata: {
+                action: "verifications",
+              },
+            })
+            .catch((err) => {
+              logger.error("Failed to report usage", err)
+            })
+        }
+      })
+    )
+
+    // end the timer
+    endTime(c, "getVerifications")
+
+    return c.json(
+      {
+        verifications: data.data,
+      },
+      HttpStatusCodes.OK
+    )
+  })

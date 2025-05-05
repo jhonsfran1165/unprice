@@ -45,6 +45,17 @@ export const metricSchema = z.discriminatedUnion("metric", [
     service: z.string(),
   }),
   z.object({
+    metric: z.literal("metric.ratelimit"),
+    workspaceId: z.string(),
+    namespaceId: z.string().optional(),
+    identifier: z.string(),
+    latency: z.number(),
+    mode: z.enum(["cloudflare"]),
+    success: z.boolean().optional(),
+    error: z.boolean().optional(),
+    source: z.enum(["cloudflare"]),
+  }),
+  z.object({
     metric: z.literal("metric.http.request"),
     path: z.string(),
     method: z.string(),

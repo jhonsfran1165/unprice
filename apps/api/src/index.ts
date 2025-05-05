@@ -28,7 +28,8 @@ import { registerGetFeaturesV1 } from "./routes/project/getFeaturesV1"
 import { env } from "cloudflare:workers"
 import { getToken } from "@auth/core/jwt"
 import { timing } from "hono/timing"
-
+import { registerGetAnalyticsUsageV1 } from "./routes/analitycs/getUsageV1"
+import { registerGetAnalyticsVerificationsV1 } from "./routes/analitycs/getVerificationsV1"
 const app = newApp()
 
 app.use(serveEmojiFavicon("◎"))
@@ -103,6 +104,10 @@ registerListPlanVersionsV1(app)
 // Payment provider routes
 registerStripeSignUpV1(app)
 registerStripeSetupV1(app)
+
+// Analytics routes
+registerGetAnalyticsUsageV1(app)
+registerGetAnalyticsVerificationsV1(app)
 
 // Export handler
 const handler = {

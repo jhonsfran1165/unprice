@@ -53,11 +53,21 @@ const stripeSignUpMetadataSchema = z.object({
 
 export type StripeSignUpRequest = z.infer<typeof route.request.params>
 
-// TODO: implement rate limiting because this endpoint is public
 export const registerStripeSignUpV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { sessionId, projectId } = c.req.valid("param")
+    const key = c.req.header("cf-connecting-ip") ?? c.req.header("x-forwarded-for") ?? projectId
     const { customer, db, subscription } = c.get("services")
+
+    // rate limit the request
+    const result = await c.env.RL_FREE_100_60s.limit({ key })
+
+    if (!result) {
+      throw new UnpriceApiError({
+        code: "RATE_LIMITED",
+        message: "Rate limit exceeded",
+      })
+    }
 
     // get payment provider for the project
     const { err: paymentProviderErr, val: paymentProviderService } =
