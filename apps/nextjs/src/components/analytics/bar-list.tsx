@@ -1,8 +1,8 @@
 "use client"
 
+import { nFormatter } from "@unprice/db/utils"
 import { Search } from "lucide-react"
 import { useMemo, useState } from "react"
-import { nFormatter } from "~/lib/nformatter"
 
 import { Button } from "@unprice/ui/button"
 import { Input } from "@unprice/ui/input"

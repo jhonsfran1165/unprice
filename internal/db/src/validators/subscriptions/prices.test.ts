@@ -1,7 +1,7 @@
 import { toDecimal } from "dinero.js"
 import { describe, expect, it } from "vitest"
 import type { Feature } from "../features"
-import type { PlanVersionExtended } from "../planVersionFeatures"
+import type { PlanVersionExtended } from "../planVersions"
 import { calculateFlatPricePlan } from "./prices"
 
 describe("calculateFlatPricePlan", () => {
@@ -11,7 +11,6 @@ describe("calculateFlatPricePlan", () => {
       currency: "USD",
       projectId: "project_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
       version: 1,
-      flatPrice: "0",
       planId: "plan_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
       active: true,
       status: "published",
@@ -120,7 +119,7 @@ describe("calculateFlatPricePlan", () => {
     expect(result.err).toBe(undefined)
     if (result.val) {
       expect(toDecimal(result.val.dinero)).toBe("50.00")
-      expect(result.val.displayAmount).toBe("$50.00")
+      expect(result.val.displayAmount).toBe("$50")
       expect(result.val.hasUsage).toBe(false)
     }
   })

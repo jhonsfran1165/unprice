@@ -1,13 +1,26 @@
+"use client"
+
 import { cn } from "@unprice/ui/utils"
+import { useTheme } from "next-themes"
 import { Highlight, themes } from "prism-react-renderer"
+import { useMounted } from "~/hooks/use-mounted"
 
 export function CodeEditor({ codeBlock, language }: { codeBlock: string; language: string }) {
+  const { theme } = useTheme()
+  const isMounted = useMounted()
+
+  if (!isMounted) return null
+
   return (
-    <Highlight code={codeBlock} language={language} theme={themes.nightOwlLight}>
+    <Highlight
+      code={codeBlock}
+      language={language}
+      theme={theme === "dark" ? themes.nightOwl : themes.nightOwlLight}
+    >
       {({ className, style, tokens, getLineProps, getTokenProps }) => {
         return (
           <pre
-            className={cn("overflow-x-auto text-sm", className)}
+            className={cn("h-full overflow-x-auto text-sm", className)}
             style={{ ...style, background: "transparent" }}
           >
             {tokens.map((line, i) => {

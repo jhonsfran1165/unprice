@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import { getPlanVersionListResponseSchema, getPlanVersionListSchema } from "@unprice/db/validators"
+import { getPlanVersionApiResponseSchema, getPlanVersionListSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
 import { unprice } from "#utils/unprice"
@@ -8,7 +8,7 @@ export const listByActiveProject = protectedProjectProcedure
   .input(getPlanVersionListSchema)
   .output(
     z.object({
-      planVersions: getPlanVersionListResponseSchema.array(),
+      planVersions: getPlanVersionApiResponseSchema.array(),
     })
   )
   .query(async (opts) => {

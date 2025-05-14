@@ -15,6 +15,7 @@ import {
 } from "react-hook-form"
 
 import { currencySymbol } from "@unprice/db/utils"
+import { nFormatter } from "@unprice/db/utils"
 import type {
   Currency,
   SubscriptionItem,
@@ -56,7 +57,6 @@ import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PriceFeature } from "~/components/forms/price-feature"
 import { PricingItem } from "~/components/forms/pricing-item"
 import { PropagationStopper } from "~/components/prevent-propagation"
-import { nFormatter } from "~/lib/nformatter"
 
 type PlanVersionFeaturesResponse =
   RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]["planFeatures"][0]

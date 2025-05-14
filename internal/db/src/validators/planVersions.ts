@@ -2,6 +2,9 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 import { extendZodWithOpenApi } from "zod-openapi"
 import { versions } from "../schema/planVersions"
+import { featureSelectBaseSchema } from "./features"
+import { planVersionFeatureSelectBaseSchema } from "./planVersionFeatures"
+import { planSelectBaseSchema } from "./plans"
 import {
   billingAnchorSchema,
   billingIntervalCountSchema,
@@ -101,8 +104,60 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
     updatedAtM: true,
   })
 
+export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
+  planFeatures: z.array(
+    planVersionFeatureSelectBaseSchema.extend({
+      feature: featureSelectBaseSchema,
+    })
+  ),
+})
+
+export const getPlanVersionListSchema = z.object({
+  onlyPublished: z.boolean().optional().openapi({
+    description: "Whether to include published plan versions",
+    example: true,
+  }),
+  onlyEnterprisePlan: z.boolean().optional().openapi({
+    description: "Whether to include enterprise plan versions",
+    example: false,
+  }),
+  onlyLatest: z.boolean().optional().openapi({
+    description: "Whether to include the latest plan version",
+    example: true,
+  }),
+  billingInterval: billingIntervalSchema.optional().openapi({
+    description: "The billing interval to filter the plan versions",
+    example: "month",
+  }),
+  currency: currencySchema.optional().openapi({
+    description: "The currency to filter the plan versions",
+    example: "USD",
+  }),
+})
+
+export const getPlanVersionApiResponseSchema = planVersionSelectBaseSchema.extend({
+  plan: planSelectBaseSchema.openapi({
+    description: "The plan information",
+  }),
+  planFeatures: z.array(
+    planVersionFeatureSelectBaseSchema.extend({
+      displayFeatureText: z.string().openapi({
+        description: "The text you can use to show the clients",
+      }),
+      feature: featureSelectBaseSchema.openapi({
+        description: "The feature information",
+      }),
+    })
+  ),
+  flatPrice: z.string().openapi({
+    description: "Flat price of the plan",
+  }),
+})
+
 export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>
 export type PlanVersionMetadata = z.infer<typeof planVersionMetadataSchema>
 export type PlanVersion = z.infer<typeof planVersionSelectBaseSchema>
 export type BillingConfig = z.infer<typeof billingConfigSchema>
 export type InsertBillingConfig = z.infer<typeof insertBillingConfigSchema>
+export type PlanVersionApi = z.infer<typeof getPlanVersionApiResponseSchema>
+export type PlanVersionExtended = z.infer<typeof planVersionExtendedSchema>

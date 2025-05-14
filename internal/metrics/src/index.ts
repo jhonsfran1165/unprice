@@ -71,7 +71,13 @@ export const metricSchema = z.discriminatedUnion("metric", [
   }),
   z.object({
     metric: z.literal("metric.db.read"),
-    query: z.enum(["getActiveEntitlements", "getActiveEntitlement", "getActiveFeatures"]),
+    query: z.enum([
+      "getActiveEntitlements",
+      "getActiveEntitlement",
+      "getActiveFeatures",
+      "listPlanVersionsData",
+      "getPlanVersion",
+    ]),
     duration: z.number(),
     service: z.string(),
     valid: z.boolean().optional(),

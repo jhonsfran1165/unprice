@@ -140,15 +140,27 @@ export const eventSchema = z.object({
   timestamp: z.string().datetime(),
 })
 
-export const usageSchema = z.object({
-  id: z.string(),
-  feature: z.string(),
-  metric: z.string(),
-  value: z.number(),
-  time: z.number().int(),
-  timestamp: z.string().datetime(),
-  workspaceId: z.string(),
+export const getAnalyticsVerificationsResponseSchema = z.object({
   projectId: z.string(),
+  customerId: z.string().optional(),
+  entitlementId: z.string().optional(),
+  featureSlug: z.string(),
+  count: z.number(),
+  p95_latency: z.number(),
+  max_latency: z.number(),
+  latest_latency: z.number(),
 })
 
+export const getUsageResponseSchema = z.object({
+  projectId: z.string(),
+  customerId: z.string().optional(),
+  entitlementId: z.string().optional(),
+  featureSlug: z.string(),
+  count: z.number(),
+  sum: z.number(),
+  max: z.number(),
+  last_during_period: z.number(),
+})
+
+export type GetUsageResponse = z.infer<typeof getUsageResponseSchema>
 export type PayloadEventType = z.infer<typeof payloadEventSchema>

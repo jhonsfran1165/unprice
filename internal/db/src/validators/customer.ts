@@ -4,6 +4,7 @@ import { extendZodWithOpenApi } from "zod-openapi"
 import * as schema from "../schema"
 import {
   aggregationMethodSchema,
+  billingIntervalSchema,
   currencySchema,
   featureVersionType,
   paymentProviderSchema,
@@ -68,6 +69,11 @@ export const customerSignUpSchema = z
     email: z.string().email("Invalid email").min(1, "Email is required").openapi({
       description: "The email of the customer",
       example: "test@example.com",
+    }),
+    billingInterval: billingIntervalSchema.optional().openapi({
+      description:
+        "The billing interval of the customer to be used for the subscription. If plan version is provided, the billing interval will be the same as the plan version. If plan slug is provided, the billing interval will be the default billing interval of the plan.",
+      example: "month",
     }),
     // either plan slug or plan version id is required
     planSlug: z.string().optional().openapi({

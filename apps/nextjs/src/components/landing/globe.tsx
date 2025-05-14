@@ -11,8 +11,8 @@ import useIntersectionObserver from "../../hooks/use-intersection-observer"
 const MOVEMENT_DAMPING = 1400
 
 const GLOBE_CONFIG: COBEOptions = {
-  width: 800,
-  height: 800,
+  width: 900,
+  height: 900,
   onRender: () => {},
   devicePixelRatio: 2,
   phi: 0,
@@ -47,6 +47,7 @@ export function Globe({
 }) {
   let phi = 0
   let width = 0
+  let scale = 1
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pointerInteracting = useRef<number | null>(null)
@@ -88,7 +89,12 @@ export function Globe({
 
     const onResize = () => {
       if (canvasRef.current) {
-        width = canvasRef.current.offsetWidth
+        if (canvasRef.current.offsetWidth > 450) {
+          width = canvasRef.current.offsetWidth
+        } else {
+          width = 450
+          scale = 2.3
+        }
       }
     }
 
@@ -103,6 +109,7 @@ export function Globe({
       ...config,
       width: width * 2,
       height: width * 2,
+      scale: scale,
       baseColor: theme === "dark" ? [0.15, 0.15, 0.15] : [1, 1, 1],
       markerColor:
         theme === "dark" ? [200 / 255, 155 / 255, 48 / 255] : [255 / 255, 197 / 255, 61 / 255],

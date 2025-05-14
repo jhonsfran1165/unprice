@@ -19,10 +19,10 @@ export const Global: FunctionComponent = () => {
   ]
 
   return (
-    <div className="px-3">
+    <div className="mx-auto w-full max-w-6xl px-4 py-10 md:max-w-4xl">
       <section
         aria-labelledby="global-database-title"
-        className="relative mx-auto mt-28 flex w-full max-w-6xl flex-col items-center justify-center overflow-hidden rounded-3xl bg-background pt-24 md:mt-40"
+        className="relative mx-auto flex w-full flex-col items-center justify-center overflow-hidden rounded-3xl pt-24"
       >
         <div className="absolute top-[17rem] size-[40rem] rounded-full bg-primary-bgHover blur-3xl md:top-[20rem]" />
         <div className="z-10 inline-block rounded-lg border border-primary-border bg-primary-bg px-3 py-1.5 font-semibold text-primary-text uppercase leading-4 tracking-tight sm:text-sm">
@@ -34,7 +34,7 @@ export const Global: FunctionComponent = () => {
         >
           The market is the <br /> world
         </h2>
-        <Globe className="absolute top-[1rem] z-20 aspect-square size-full max-w-fit sm:top-[12rem] md:top-[15rem]" />
+        <Globe className="absolute top-[200px] z-20 aspect-square size-full max-w-fit sm:top-[200px] md:top-[250px]" />
         <div className="-mt-32 md:-mt-36 z-20 h-[36rem] w-full overflow-hidden">
           <div className="absolute bottom-0 h-3/5 w-full bg-gradient-to-b from-transparent via-background-base to-background-base" />
           <div className="absolute inset-x-6 bottom-12 m-auto max-w-4xl md:top-2/3">

@@ -1,3 +1,5 @@
+import { z } from "zod"
+
 export const DEFAULT_INTERVALS = {
   "60m": "Last 60 Minutes",
   "24h": "Last 24 Hours",
@@ -5,6 +7,8 @@ export const DEFAULT_INTERVALS = {
   "30d": "Last 30 Days",
   "90d": "Last 3 Months",
 } as const
+
+export const analyticsIntervalSchema = z.enum(["60m", "24h", "7d", "30d", "90d"] as const)
 
 export type Interval = keyof typeof DEFAULT_INTERVALS
 export const INTERVAL_KEYS = Object.keys(DEFAULT_INTERVALS) as Array<keyof typeof DEFAULT_INTERVALS>

@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./metrics": "./src/metrics/index.ts",
+    "./plans": "./src/plans/index.ts",
     "./subscriptions": "./src/subscriptions/index.ts",
     "./customers": "./src/customers/index.ts",
     "./payment-provider": "./src/payment-provider/index.ts",

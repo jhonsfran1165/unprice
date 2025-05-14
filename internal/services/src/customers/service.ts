@@ -542,11 +542,6 @@ export class CustomerService {
                 slug: true,
               },
             },
-            planVersion: {
-              columns: {
-                flatPrice: true,
-              },
-            },
           },
         },
       },
@@ -1120,6 +1115,7 @@ export class CustomerService {
       defaultCurrency,
       externalId,
       planSlug,
+      billingInterval,
     } = input
 
     // plan version clould be empty, in which case we have to guess the best plan for the customer
@@ -1165,7 +1161,21 @@ export class CustomerService {
           },
           where: (plan, { eq, and }) => and(eq(plan.projectId, projectId), eq(plan.slug, planSlug)),
         })
-        .then((data) => data ?? null)
+        .then((data) => {
+          if (!data) {
+            return null
+          }
+
+          // filter by billing interval if provided
+          const versions = data.versions.filter(
+            (version) => version.billingConfig.billingInterval === billingInterval
+          )
+
+          return {
+            ...data,
+            versions: versions ?? [],
+          }
+        })
 
       if (!plan) {
         return Err(
@@ -1212,11 +1222,23 @@ export class CustomerService {
         })
       )
     }
-
     const planProject = planVersion.project
     const paymentProvider = planVersion.paymentProvider
     const paymentRequired = planVersion.paymentMethodRequired
     const currency = defaultCurrency ?? planProject.defaultCurrency
+    const defaultBillingInterval = billingInterval ?? planVersion.billingConfig.billingInterval
+
+    if (
+      defaultBillingInterval &&
+      planVersion.billingConfig.billingInterval !== defaultBillingInterval
+    ) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "BILLING_INTERVAL_MISMATCH",
+          message: "Billing interval mismatch",
+        })
+      )
+    }
 
     // validate the currency if provided
     if (currency !== planVersion.currency) {

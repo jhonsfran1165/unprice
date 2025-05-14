@@ -1,5 +1,6 @@
 import { createRoute } from "@hono/zod-openapi"
 import { FEATURE_SLUGS } from "@unprice/config"
+import { analyticsIntervalSchema, getUsageResponseSchema } from "@unprice/tinybird"
 import { endTime, startTime } from "hono/timing"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
@@ -11,17 +12,6 @@ import { openApiErrorResponses } from "~/errors/openapi-responses"
 import type { App } from "~/hono/app"
 
 const tags = ["analytics"]
-
-// TODO: improve this
-const rangeSchema = z
-  .string()
-  .refine(
-    (val) => val === "60m" || val === "24h" || val === "7d" || val === "30d" || val === "90d",
-    {
-      message: "Value must be '60m', '24h', '7d', '30d' or '90d'",
-      path: ["range"],
-    }
-  )
 
 export const route = createRoute({
   path: "/v1/analytics/usage",
@@ -41,7 +31,7 @@ export const route = createRoute({
             "The project ID (optional, if not provided, the project ID will be the one of the key)",
           example: "project_1H7KQFLr7RepUyQBKdnvY",
         }),
-        range: rangeSchema.openapi({
+        range: analyticsIntervalSchema.openapi({
           description: "The range of the usage, last hour, day, week or month",
           example: "24h",
         }),
@@ -52,18 +42,7 @@ export const route = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
-        usage: z
-          .object({
-            projectId: z.string(),
-            customerId: z.string().optional(),
-            entitlementId: z.string().optional(),
-            featureSlug: z.string(),
-            count: z.number(),
-            sum: z.number(),
-            max: z.number(),
-            last_during_period: z.number(),
-          })
-          .array(),
+        usage: getUsageResponseSchema.array(),
       }),
       "The result of the get usage"
     ),

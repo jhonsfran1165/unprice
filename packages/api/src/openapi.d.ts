@@ -1407,7 +1407,6 @@ export interface operations {
               title: string
               tags: string[] | null
               active: boolean | null
-              flatPrice: string | null
               /** @enum {string|null} */
               status: "draft" | "published"
               publishedAt: number | null
@@ -2428,6 +2427,12 @@ export interface operations {
            */
           email: string
           /**
+           * @description The billing interval of the customer to be used for the subscription. If plan version is provided, the billing interval will be the same as the plan version. If plan slug is provided, the billing interval will be the default billing interval of the plan.
+           * @example month
+           * @enum {string}
+           */
+          billingInterval?: "month" | "year" | "day" | "minute" | "onetime"
+          /**
            * @description If the plan id is not provided, you can pass a plan slug and the system will intelligently pick the lastest plan for that slug and sign up the customer for it
            * @example PRO
            */
@@ -2864,7 +2869,6 @@ export interface operations {
               title: string
               tags: string[] | null
               active: boolean | null
-              flatPrice: string | null
               /** @enum {string|null} */
               status: "draft" | "published"
               publishedAt: number | null
@@ -3193,6 +3197,8 @@ export interface operations {
                 defaultQuantity: number | null
                 limit?: number | null
                 hidden: boolean
+                /** @description The text you can use to show the clients */
+                displayFeatureText: string
                 /** @description The feature information */
                 feature: {
                   id: string
@@ -3205,6 +3211,8 @@ export interface operations {
                   description: string | null
                 }
               }[]
+              /** @description Flat price of the plan */
+              flatPrice: string
             }
           }
         }
@@ -3309,6 +3317,18 @@ export interface operations {
            * @example true
            */
           onlyLatest?: boolean
+          /**
+           * @description The billing interval to filter the plan versions
+           * @example month
+           * @enum {string}
+           */
+          billingInterval?: "month" | "year" | "day" | "minute" | "onetime"
+          /**
+           * @description The currency to filter the plan versions
+           * @example USD
+           * @enum {string}
+           */
+          currency?: "USD" | "EUR"
         }
       }
     }
@@ -3331,7 +3351,6 @@ export interface operations {
               title: string
               tags: string[] | null
               active: boolean | null
-              flatPrice: string | null
               /** @enum {string|null} */
               status: "draft" | "published"
               publishedAt: number | null
@@ -3660,6 +3679,8 @@ export interface operations {
                 defaultQuantity: number | null
                 limit?: number | null
                 hidden: boolean
+                /** @description The text you can use to show the clients */
+                displayFeatureText: string
                 /** @description The feature information */
                 feature: {
                   id: string
@@ -3672,6 +3693,8 @@ export interface operations {
                   description: string | null
                 }
               }[]
+              /** @description Flat price of the plan */
+              flatPrice: string
             }[]
           }
         }
@@ -3774,8 +3797,9 @@ export interface operations {
           /**
            * @description The range of the usage, last hour, day, week or month
            * @example 24h
+           * @enum {string}
            */
-          range: string
+          range: "60m" | "24h" | "7d" | "30d" | "90d"
         }
       }
     }
@@ -3898,8 +3922,9 @@ export interface operations {
           /**
            * @description The range of the verifications, last hour, day, week or month
            * @example 24h
+           * @enum {string}
            */
-          range: string
+          range: "60m" | "24h" | "7d" | "30d" | "90d"
         }
       }
     }

@@ -6,6 +6,7 @@ import {
   USAGE_MODES_MAP,
   currencySymbol,
 } from "@unprice/db/utils"
+import { nFormatter } from "@unprice/db/utils"
 import {
   type PlanVersionExtended,
   calculateFreeUnits,
@@ -18,7 +19,6 @@ import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { useMemo, useState } from "react"
 import { useDebounce } from "~/hooks/use-debounce"
-import { nFormatter } from "~/lib/nformatter"
 
 export function PricingItem({
   feature,

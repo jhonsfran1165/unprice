@@ -27,20 +27,22 @@ export default function Cta() {
                 id="cta-title"
                 className="inline-block bg-clip-text p-2 font-bold text-4xl text-background-textContrast tracking-tighter md:text-6xl"
               >
-                Ready to get started?
+                Unprice, fair prices for everyone.
               </h3>
               <p className="mx-auto mt-4 max-w-2xl text-background-text text-lg">
-                <Balancer>Create your app in minutes and get ready to launch.</Balancer>
+                <Balancer>
+                  Our testimonial section is fake, but our metering system works like a charm.
+                </Balancer>
               </p>
             </motion.div>
             <motion.div
-              className="mt-14 w-full p-1.5"
+              className="mt-10 w-full p-1.5"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.6 }}
             >
               <Link href={`${APP_DOMAIN}`} className={buttonVariants({ variant: "primary" })}>
-                Sign up
+                Start for free
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Link>
             </motion.div>

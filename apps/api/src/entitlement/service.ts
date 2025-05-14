@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers"
 import type { Database } from "@unprice/db"
 import {
+  calculateFlatPricePlan,
   calculateFreeUnits,
   calculatePricePerFeature,
   calculateTotalPricePlan,
@@ -557,14 +558,24 @@ export class EntitlementService {
       currency: phase.planVersion.currency,
     })
 
-    if (totalPricePlanErr) {
-      throw totalPricePlanErr
+    const { err: flatPriceErr, val: flatPrice } = calculateFlatPricePlan({
+      planVersion: {
+        ...phase.planVersion,
+        // TODO: improve this
+        planFeatures: phase.customerEntitlements.map((e) => e.featurePlanVersion),
+      },
+      prorate: 1,
+    })
+
+    if (totalPricePlanErr || flatPriceErr) {
+      throw totalPricePlanErr || flatPriceErr
     }
 
+    // TODO: save this to cache
     const result = {
       planVersion: {
         description: phase.planVersion.description,
-        flatPrice: phase.planVersion.flatPrice ?? "",
+        flatPrice: flatPrice.displayAmount,
         currentTotalPrice: totalPricePlan.displayAmount,
         billingConfig: phase.planVersion.billingConfig,
       },

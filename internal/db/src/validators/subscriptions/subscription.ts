@@ -6,15 +6,14 @@ import type { Result } from "@unprice/error"
 import { subscriptionPhases, subscriptions } from "../../schema/subscriptions"
 import { customerEntitlementSchema, customerSelectSchema } from "../customer"
 import { featureSelectBaseSchema } from "../features"
-import { planVersionSelectBaseSchema } from "../planVersions"
+import {
+  type PlanVersionExtended,
+  planVersionExtendedSchema,
+  planVersionSelectBaseSchema,
+} from "../planVersions"
 import { projectSelectBaseSchema } from "../project"
 import { UnPriceCalculationError } from "./../errors"
-import type { PlanVersionExtended } from "./../planVersionFeatures"
-import {
-  configPackageSchema,
-  planVersionExtendedSchema,
-  planVersionFeatureSelectBaseSchema,
-} from "./../planVersionFeatures"
+import { configPackageSchema, planVersionFeatureSelectBaseSchema } from "./../planVersionFeatures"
 import { subscriptionStatusSchema } from "./../shared"
 import {
   type SubscriptionItem,

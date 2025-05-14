@@ -3,7 +3,6 @@ import {
   Activity,
   AlertTriangle,
   Building,
-  CircleDot,
   ClipboardCheck,
   CreditCard,
   HelpCircle,
@@ -72,7 +71,6 @@ export type { LucideIcon } from "lucide-react"
 
 export type Icon = (props: LucideProps) => JSX.Element
 
-export const Logo = CircleDot
 export const Dashboard = Activity
 export const Spinner = Loader2
 export const Billing = CreditCard
@@ -83,6 +81,36 @@ export const Warning = AlertTriangle
 export const Help = HelpCircle
 export const CopyDone = ClipboardCheck
 export const Sun = SunMedium
+
+export const Logo: Icon = (props) => (
+  <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <defs>
+      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.2" />
+      </filter>
+    </defs>
+
+    <circle
+      cx="100"
+      cy="100"
+      r="90"
+      stroke="currentColor"
+      stroke-width="10"
+      fill="none"
+      filter="url(#shadow)"
+    />
+
+    <polygon
+      points="
+      100,10
+      177.94,145
+      22.06,145"
+      fill="currentColor"
+      filter="url(#shadow)"
+      transform="translate(100,100) scale(0.5) translate(-100,-100)"
+    />
+  </svg>
+)
 
 export const System: Icon = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>

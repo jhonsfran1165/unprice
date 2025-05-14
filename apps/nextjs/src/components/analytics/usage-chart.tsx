@@ -1,5 +1,6 @@
 "use client"
 
+import { nFormatter } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import {
   type ChartConfig,
@@ -11,7 +12,6 @@ import { BarChart4 } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useFilter } from "~/hooks/use-filter"
-import { nFormatter } from "~/lib/nformatter"
 import { api } from "~/trpc/client"
 
 const chartConfig = {

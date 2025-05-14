@@ -6,10 +6,10 @@ import { z } from "zod"
 import type { Result } from "@unprice/error"
 import { Err, Ok, type SchemaError } from "@unprice/error"
 import { calculatePercentage, formatMoney } from "../../utils"
+import type { PlanVersionExtended } from "../planVersions"
 import { type Currency, typeFeatureSchema } from "../shared"
 import { UnPriceCalculationError } from "./../errors"
 import {
-  type PlanVersionExtended,
   type PlanVersionFeature,
   configFeatureSchema,
   type dineroSchema,
@@ -210,7 +210,7 @@ export const calculateFreeUnits = ({
         let total = 0
         for (const tier of tiers) {
           // if limit is infinity, we can't calculate the free units and also means
-          // we are in the last tier so return undefined
+          // we are in the last tier so return POSITIVE_INFINITY
           const limit = tier.lastUnit ?? tier.firstUnit
 
           const { val: totalPrice } = calculateTierPrice({
