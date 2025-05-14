@@ -74,9 +74,9 @@ export function UnpriceManifesto() {
   // Control animation phases
   useEffect(() => {
     if (isInView) {
-      const timer1 = setTimeout(() => setAnimationPhase(1), 500)
-      const timer2 = setTimeout(() => setAnimationPhase(2), 1000)
-      const timer3 = setTimeout(() => setAnimationPhase(3), 1500)
+      const timer1 = setTimeout(() => setAnimationPhase(1), 1000)
+      const timer2 = setTimeout(() => setAnimationPhase(2), 2000)
+      const timer3 = setTimeout(() => setAnimationPhase(3), 3000)
 
       return () => {
         clearTimeout(timer1)
@@ -122,7 +122,7 @@ export function UnpriceManifesto() {
 
   useEffect(() => {
     function handleScroll() {
-      if (window.scrollY > 100) {
+      if (window.scrollY > 500) {
         setShowGoldenRatio(true)
       } else {
         setShowGoldenRatio(false)
@@ -162,7 +162,7 @@ export function UnpriceManifesto() {
               <path
                 d="M 50 50 Q 65 35, 80 50 T 50 80 T 20 50 T 50 20"
                 fill="none"
-                className="stroke-background-solid dark:stroke-background-border"
+                className="stroke-background-line dark:stroke-background-borderHover"
                 strokeWidth="0.5"
                 strokeDasharray="1,2"
               />

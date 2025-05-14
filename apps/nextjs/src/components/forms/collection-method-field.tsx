@@ -44,7 +44,8 @@ export default function CollectionMethodFormField<TFieldValues extends FormValue
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {COLLECTION_METHODS.map((type) => (
+              {/* // TODO: add send_invoice to the collection methods */}
+              {COLLECTION_METHODS.filter((type) => type !== "send_invoice").map((type) => (
                 <SelectItem key={type} value={type}>
                   {type}
                 </SelectItem>

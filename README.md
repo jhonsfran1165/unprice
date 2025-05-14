@@ -1,21 +1,35 @@
 # Unprice
 
 > **Warning**
-> This is a work-in-progress and not the finished product.
+> This is an alpha version of the product, I would really appreciate your feedback.
 >
-> Feel free to leave feature suggestions but please don't open issues for bugs or support requests just yet.
+> Feel free to leave feature suggestions.
 
-## About
+## Your product is smart, but your pricing is dumb.
 
-Unprice pricing platform for modern saas. Manage, iterate and find the right price for your saas.
+The open-source adaptive monetization infrastructure. Built for SaaS founders who refuse to let static plans strangle their growth. Unprice lets you monetize like a billion-dollar company from day one — without the engineering overhead.
+
+Burn your static pricing. Build revenue machines now.
+
+## Description
+
+SaaS pricing was built for a world that no longer exists. Three tiers, feature gating, quarterly pricing reviews. That worked when AI wasn't a thing and buyers behaved predictably.
+
+That world is gone.
+
+Today, your users expect personalized value. Your product ships changes daily. Your market is fragmented, dynamic, and ruthless. But you're still pricing like it's 2010 — Static plans, gut feelings, spreadsheets pretending to be strategy.
+
+In a world where AI can clone your product overnight, pricing is your sharpest weapon.
+
 
 ## Tech Stack & Features
 
-- Nextjs14
+- Nextjs v14
 - Nextauth v5
 - Drizzle ORM
 - Fully Edge support
 - TRPC
+- Hono API
 - ShadcnUI
 - Postgresql
 - Multitenant support with multi projects
@@ -24,7 +38,4 @@ Unprice pricing platform for modern saas. Manage, iterate and find the right pri
 - Stripe (optional)
 - Resend (optional)
 - Tynibird (optional)
-
-## Description
-
-Product market fit is a lie, everything starts with price. Product-market-price fit is the new normal. Unprice is the platform that helps you find the right price for your product.
+- SWR cache

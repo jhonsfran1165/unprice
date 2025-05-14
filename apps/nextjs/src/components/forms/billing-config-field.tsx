@@ -33,7 +33,8 @@ export default function BillingConfigFormField<TFieldValues extends FormValues>(
         return BILLING_CONFIG[key]?.dev !== true
       }
 
-      return true
+      // deactivate yearly for now
+      return key !== "yearly"
     })
     .map(([key, value]) => ({
       label: value.label,

@@ -86,7 +86,7 @@ export const Logo: Icon = (props) => (
   <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" {...props}>
     <defs>
       <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.2" />
+        <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.2" />
       </filter>
     </defs>
 
@@ -95,7 +95,7 @@ export const Logo: Icon = (props) => (
       cy="100"
       r="90"
       stroke="currentColor"
-      stroke-width="10"
+      strokeWidth="10"
       fill="none"
       filter="url(#shadow)"
     />
