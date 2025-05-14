@@ -35,7 +35,7 @@ In a world where AI can clone your product overnight, pricing is your sharpest w
 - Multitenant support with multi projects
 - Monorepo
 - React query
-- Stripe (optional)
+- Stripe
 - Resend (optional)
 - Tynibird (optional)
 - SWR cache
