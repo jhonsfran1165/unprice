@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_plan_versions" DROP COLUMN "flat_price";

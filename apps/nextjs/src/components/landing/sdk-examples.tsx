@@ -207,7 +207,7 @@ export function SDKDemo() {
     ]
 
   return (
-    <div className="relative mx-auto mt-20 flex w-full max-w-6xl flex-col items-center justify-center rounded-2xl bg-background shadow-primary-line shadow-sm ring-1 ring-background-line">
+    <div className="relative mx-auto mt-20 flex w-full max-w-6xl flex-col items-center justify-center rounded-2xl bg-background shadow-primary-line shadow-sm ring-1 ring-background-line [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]">
       {/* Framework tabs */}
       <Tabs value={activeFramework} onValueChange={setActiveFramework} className="w-full">
         <div className="border-background-border border-b pt-4">
@@ -251,9 +251,9 @@ export function SDKDemo() {
               <ScrollArea
                 hideScrollBar={true}
                 className={cn(
-                  "hide-scrollbar",
+                  "hide-scrollbar w-full",
                   // hack for not having to set height on scroll area
-                  "[&>[data-radix-scroll-area-viewport]]:h-[30rem]",
+                  "[&>[data-radix-scroll-area-viewport]]:h-full md:[&>[data-radix-scroll-area-viewport]]:h-[30rem]",
                   "[&>[data-radix-scroll-area-viewport]]:w-full"
                 )}
               >

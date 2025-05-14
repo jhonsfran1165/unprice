@@ -1,29 +1,19 @@
 import { z } from "zod"
 
 import { TRPCError } from "@trpc/server"
+import { analyticsIntervalSchema, getUsageResponseSchema } from "@unprice/tinybird"
 import { protectedProjectProcedure } from "#trpc"
 import { unprice } from "#utils/unprice"
 
 export const getUsage = protectedProjectProcedure
   .input(
     z.object({
-      range: z.enum(["60m", "24h", "7d", "30d", "90d"]),
+      range: analyticsIntervalSchema,
     })
   )
   .output(
     z.object({
-      usage: z
-        .object({
-          projectId: z.string(),
-          customerId: z.string().optional(),
-          entitlementId: z.string().optional(),
-          featureSlug: z.string(),
-          count: z.number(),
-          sum: z.number(),
-          max: z.number(),
-          last_during_period: z.number(),
-        })
-        .array(),
+      usage: getUsageResponseSchema.array(),
     })
   )
   .query(async (opts) => {

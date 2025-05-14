@@ -158,8 +158,14 @@ export const publish = protectedProjectProcedure
         }
 
         // if the flat price is not zero, then the payment method is required
+        if (!isZero(totalPricePlan.dinero) && !planVersionData.paymentMethodRequired) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Payment method required for this plan version",
+          })
+        }
+
         const paymentMethodRequired = !isZero(totalPricePlan.dinero)
-        const flatPrice = totalPricePlan.displayAmount
 
         // set the latest version to false if there is a latest version for this plan
         await tx
@@ -186,7 +192,6 @@ export const publish = protectedProjectProcedure
             publishedBy: opts.ctx.userId,
             latest: true,
             paymentMethodRequired,
-            flatPrice,
           })
           .where(and(eq(schema.versions.id, planVersionData.id)))
           .returning()

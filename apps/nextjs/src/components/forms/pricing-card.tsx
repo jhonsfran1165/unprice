@@ -13,9 +13,14 @@ export function PricingCard({
 }) {
   if (!planVersion) return null
 
-  const { err, val: totalPricePlan } = calculateFlatPricePlan({
+  const { err, val } = calculateFlatPricePlan({
     planVersion,
+    prorate: 1,
   })
+
+  if (err) {
+    return <>Error calculating price</>
+  }
 
   return (
     <Card className="flex w-[300px] flex-col">
@@ -25,22 +30,16 @@ export function PricingCard({
         {/* // only show the price if it's not an enterprise plan */}
         {!planVersion.plan.enterprisePlan && (
           <div className="mt-8 flex items-baseline space-x-2">
-            <span className="font-extrabold text-4xl">
-              {err
-                ? "Error"
-                : totalPricePlan?.hasUsage
-                  ? `+${totalPricePlan.displayAmount}`
-                  : totalPricePlan.displayAmount}
-            </span>
+            <span className="font-extrabold text-4xl">{val.displayAmount}</span>
             <span className="text-sm">{planVersion.billingConfig.billingInterval}</span>
           </div>
         )}
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        <CardDescription>{planVersion.description}</CardDescription>
-        <Typography variant="p" affects="removePaddingMargin" className="text-end italic">
-          {totalPricePlan?.hasUsage ? "+ usage in the period" : ""}
+        <CardDescription className="line-clamp-2">{planVersion.description}</CardDescription>
+        <Typography variant="p" affects="removePaddingMargin" className="text-end text-xs italic">
+          {"* plus usage if applicable"}
         </Typography>
         <Button className="w-full">
           {planVersion.plan.enterprisePlan ? "Contact Us" : "Get Started"}

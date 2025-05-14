@@ -1,12 +1,16 @@
 "use client"
 
 import { APP_DOMAIN } from "@unprice/config"
-import { Button } from "@unprice/ui/button"
-import { GitHub } from "@unprice/ui/icons"
+import { Button, buttonVariants } from "@unprice/ui/button"
+import { ChevronRight, GitHub } from "@unprice/ui/icons"
 import { motion } from "framer-motion"
+import { useTheme } from "next-themes"
 import Link from "next/link"
 import Balancer from "react-wrap-balancer"
+import { useMounted } from "~/hooks/use-mounted"
 import { HeroVideoDialog } from "./hero-video"
+import { WordRotate } from "./text-effects"
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -46,6 +50,9 @@ const heroImageVariants = {
 }
 
 export default function Hero() {
+  const { theme } = useTheme()
+  const isMounted = useMounted()
+
   return (
     <motion.section
       aria-labelledby="hero-title"
@@ -59,20 +66,36 @@ export default function Hero() {
         className="inline-block bg-clip-text p-2 font-bold text-4xl text-background-textContrast tracking-tighter sm:text-6xl md:text-7xl"
         variants={itemVariants}
       >
-        <Balancer>Unprice pricing platform for modern saas.</Balancer>
+        <Balancer>
+          Your product is smart, but your pricing is{" "}
+          {isMounted && (
+            <WordRotate
+              className="italic"
+              words={["dumb", "slow", "static", "rigid"]}
+              shadowColor={theme === "dark" ? "white" : "black"}
+            />
+          )}
+        </Balancer>
       </motion.h1>
-      <motion.p className="mt-6 max-w-xl text-background-text text-lg" variants={itemVariants}>
-        Product market fit is a lie, in the world of saas everything starts with price.
-        Product-market-price fit is the new normal. Unprice helps you manage, iterate and find the
-        right price for your saas.
+      <motion.p
+        className="mt-6 max-w-2xl px-4 text-background-text text-lg md:px-0"
+        variants={itemVariants}
+      >
+        The open-source adaptive monetization infrastructure. Built for SaaS founders who refuse to
+        let static plans strangle their growth. Unprice lets you monetize like a billion-dollar
+        company from day one — without the engineering overhead.
+        <br />
+        <br />
+        Burn your static pricing. Build revenue machines now.
       </motion.p>
       <motion.div
         className="mt-8 flex w-full flex-col justify-center gap-3 px-3 align-middle sm:flex-row"
         variants={itemVariants}
       >
-        <Button className="h-10 font-semibold">
-          <Link href={`${APP_DOMAIN}`}>Start for free</Link>
-        </Button>
+        <Link href={`${APP_DOMAIN}`} className={buttonVariants({ variant: "primary" })}>
+          Start for free
+          <ChevronRight className="ml-1 h-4 w-4" />
+        </Link>
         <Button asChild variant="link">
           <Link
             href="https://github.com/jhonsfran1165/unprice"
@@ -87,7 +110,7 @@ export default function Hero() {
         </Button>
       </motion.div>
       <motion.div
-        className="relative mx-auto mt-20 ml-3 h-fit w-[40rem] max-w-6xl sm:ml-auto sm:w-full sm:px-2"
+        className="relative mx-auto my-20 h-fit w-full max-w-6xl px-4"
         variants={heroImageVariants}
       >
         <div className="relative">
@@ -112,15 +135,6 @@ export default function Hero() {
           aria-hidden="true"
         />
       </motion.div>
-
-      <motion.p
-        className="mt-28 max-w-2xl py-16 text-background-text text-lg"
-        variants={itemVariants}
-      >
-        Unprice is a feature flag engine with superpowers. Track feature usage, bill customer,
-        support subscription, validate access to features, analyze feature performance and optimize
-        your pricing strategy easily.
-      </motion.p>
     </motion.section>
   )
 }

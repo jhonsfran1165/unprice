@@ -1,4 +1,6 @@
 "use client"
+
+import { nFormatter } from "@unprice/db/utils"
 import {
   Card,
   CardContent,
@@ -12,7 +14,6 @@ import { cn } from "@unprice/ui/utils"
 import { ProgressBar } from "~/components/analytics/progress"
 import { PricingItem } from "~/components/forms/pricing-item"
 import { formatDate } from "~/lib/dates"
-import { nFormatter } from "~/lib/nformatter"
 import type { unprice } from "~/lib/unprice"
 
 type Usage = NonNullable<Awaited<ReturnType<typeof unprice.customers.getUsage>>["result"]>

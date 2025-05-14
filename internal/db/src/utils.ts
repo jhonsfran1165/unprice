@@ -6,6 +6,7 @@ export * from "./utils/hash"
 export * from "./utils/constants"
 export * from "./utils/id"
 export * from "./utils/pagination"
+export * from "./utils/nformatter"
 
 export type { Dinero } from "dinero.js"
 
@@ -87,7 +88,7 @@ export function formatMoney(amount: string, currencyCode = "USD") {
   return new Intl.NumberFormat(userLocale, {
     style: "currency",
     currency: currencyCode,
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(Number.parseFloat(amount))
 }

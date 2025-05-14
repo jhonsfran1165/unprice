@@ -2,7 +2,7 @@
 import { API_DOMAIN } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
 import { motion, useInView } from "framer-motion"
-import { Check, Code, Lock, Settings } from "lucide-react"
+import { BarChart, Check, Code, Settings } from "lucide-react"
 import Link from "next/link"
 import { useRef } from "react"
 import { SDKDemo } from "./sdk-examples"
@@ -10,7 +10,8 @@ import { SDKDemo } from "./sdk-examples"
 const features = [
   {
     name: "Use typescript SDK",
-    description: "Install the Unprice SDK in your project and start using it in minutes.",
+    description:
+      "Install the Unprice SDK in your project and start using it in minutes. Start incrementally, then go all in.",
     icon: Code,
   },
   {
@@ -20,14 +21,14 @@ const features = [
   },
   {
     name: "Verify and report",
-    description: "Verify and report on your feature usage, billing, and more.",
+    description: "Verify and report on your feature usage, billing, signals and more.",
     icon: Check,
   },
   {
-    name: "Security & privacy",
+    name: "Data and Insights",
     description:
-      "Unprice is built with security in mind, you own your data. You can see the code, it's all open source.",
-    icon: Lock,
+      "Measure usage, billing, willingness to pay, etc. Get insights into your users and their behavior.",
+    icon: BarChart,
   },
 ]
 
@@ -65,7 +66,7 @@ export default function CodeExample() {
       animate={isInView ? "visible" : "hidden"}
       variants={containerVariants}
       aria-labelledby="code-example-title"
-      className="mx-auto mt-28 w-full max-w-6xl px-3"
+      className="mx-auto w-full max-w-4xl px-4 py-10"
     >
       <motion.h2
         variants={itemVariants}
@@ -74,14 +75,13 @@ export default function CodeExample() {
       >
         Built by developers, <br /> for developers
       </motion.h2>
-      <motion.div variants={itemVariants} className="mt-6 max-w-2xl text-lg">
-        I got tired of doing the same thing over and over again, so I decided to build a tool that I
-        enjoy using.
-        <div className="mt-4">
-          <Link href={`${API_DOMAIN}reference`} target="_blank" className="text-primary-text">
-            <Button variant="outline" className="text-primary-text">
-              Check API docs
-            </Button>
+      <motion.div variants={itemVariants} className="mt-6 text-justify text-lg">
+        The biggest constraint to iterate on pricing is the engineering effort. Unprice give you the
+        developer experience to implement once and forget about it. Pricing logic belongs to
+        business teams, not backlogs.
+        <div className="mt-10 flex justify-end">
+          <Link href={`${API_DOMAIN}reference`} target="_blank">
+            <Button variant="outline">Check API docs</Button>
           </Link>
         </div>
       </motion.div>

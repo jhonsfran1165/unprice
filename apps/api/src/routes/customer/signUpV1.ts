@@ -51,6 +51,7 @@ export const registerSignUpV1 = (app: App) =>
       timezone,
       defaultCurrency,
       planSlug,
+      billingInterval,
     } = c.req.valid("json")
     const { customer } = c.get("services")
 
@@ -70,6 +71,7 @@ export const registerSignUpV1 = (app: App) =>
         cancelUrl,
         config,
         externalId,
+        billingInterval,
       },
       projectId: key.projectId,
     })

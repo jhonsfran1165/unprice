@@ -77,6 +77,7 @@ export const unpriceCustomerErrorSchema = z.enum([
   "SUBSCRIPTION_NOT_CANCELED",
   "CUSTOMER_PHASE_NOT_FOUND",
   "CURRENCY_MISMATCH",
+  "BILLING_INTERVAL_MISMATCH",
 ])
 
 export const unpriceProjectErrorSchema = z.enum([
@@ -84,6 +85,8 @@ export const unpriceProjectErrorSchema = z.enum([
   "PROJECT_NOT_FOUND",
   "PROJECT_NOT_ENABLED",
 ])
+
+export const unpricePlanErrorSchema = z.enum(["PLAN_VERSION_NOT_FOUND"])
 
 export const deniedReasonSchema = z.enum([
   "RATE_LIMITED",

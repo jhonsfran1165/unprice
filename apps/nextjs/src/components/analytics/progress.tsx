@@ -1,7 +1,7 @@
 "use client"
+import { nFormatter } from "@unprice/db/utils"
 import { Progress } from "@unprice/ui/progress"
 import { cn } from "@unprice/ui/utils"
-import { nFormatter } from "~/lib/nformatter"
 
 export function ProgressBar({
   value,

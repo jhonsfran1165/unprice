@@ -31,7 +31,6 @@ export interface Route {
 export interface SiteConfig {
   name: string
   description: string
-  mainNav: Route[]
   links: {
     twitter: string
     github: string

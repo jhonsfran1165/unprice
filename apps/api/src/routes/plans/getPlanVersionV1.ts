@@ -1,5 +1,6 @@
 import { createRoute } from "@hono/zod-openapi"
-import { getPlanVersionListResponseSchema } from "@unprice/db/validators"
+import { getPlanVersionApiResponseSchema } from "@unprice/db/validators"
+import { PlanService } from "@unprice/services/plans"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent } from "stoker/openapi/helpers"
 
@@ -28,7 +29,7 @@ export const route = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
-        planVersion: getPlanVersionListResponseSchema,
+        planVersion: getPlanVersionApiResponseSchema,
       }),
       "The result of the get plan version"
     ),
@@ -42,37 +43,37 @@ export type GetPlanVersionResponse = z.infer<
 
 export const registerGetPlanVersionV1 = (app: App) =>
   app.openapi(route, async (c) => {
-    const { db } = c.get("services")
+    const { db, cache, analytics, logger, metrics } = c.get("services")
     const { planVersionId } = c.req.valid("param")
 
     // validate the request
     const key = await keyAuth(c)
 
-    const planVersionData = await db.query.versions.findFirst({
-      with: {
-        plan: true,
-        planFeatures: {
-          with: {
-            feature: true,
-          },
-          orderBy(fields, operators) {
-            return operators.asc(fields.order)
-          },
-        },
-      },
-      where: (version, { and, eq }) =>
-        and(
-          eq(version.projectId, key.projectId),
-          eq(version.id, planVersionId),
-          eq(version.active, true),
-          eq(version.status, "published")
-        ),
+    const planService = new PlanService({
+      cache,
+      analytics,
+      logger,
+      metrics,
+      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      db,
     })
+
+    const { err, val: planVersionData } = await planService.getPlanVersion({
+      projectId: key.projectId,
+      planVersionId,
+    })
+
+    if (err) {
+      throw new UnpriceApiError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: err.message,
+      })
+    }
 
     if (!planVersionData) {
       throw new UnpriceApiError({
         code: "NOT_FOUND",
-        message: "Plan version not found or not published",
+        message: "Plan version not found",
       })
     }
 

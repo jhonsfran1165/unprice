@@ -58,9 +58,6 @@ export const versions = pgTableProject(
     // active: whether the plan version is active or not, if not active, it won't be available for purchase
     active: boolean("active").default(true),
 
-    // price of the plan version
-    flatPrice: text("flat_price").default("0"),
-
     // status of the plan version - draft, published
     status: statusPlanEnum("plan_version_status").default("draft"),
     // date when the plan version was published

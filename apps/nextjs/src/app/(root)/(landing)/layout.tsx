@@ -21,7 +21,7 @@ export default function MarketingLayout(props: { children: ReactNode }) {
           <div className="flex items-center justify-start">
             <Logo />{" "}
             <Badge variant="secondary" className="ml-2">
-              Beta
+              alpha
             </Badge>
           </div>
 

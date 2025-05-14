@@ -5,6 +5,7 @@ import type {
   CustomerEntitlementsExtended,
   CustomerPaymentMethod,
   Feature,
+  PlanVersionApi,
   Project,
   Workspace,
   getActivePhaseResponseSchema,
@@ -52,6 +53,8 @@ export type CacheNamespaces = {
   customerPaymentMethods: CustomerPaymentMethod[] | null
   projectFeatures: ProjectFeatureCache | null
   idempotentRequestUsageByHash: UsageEntitlementCache | null
+  planVersionList: PlanVersionApi[] | null
+  planVersion: PlanVersionApi | null
 }
 
 export type CacheNamespace = keyof CacheNamespaces

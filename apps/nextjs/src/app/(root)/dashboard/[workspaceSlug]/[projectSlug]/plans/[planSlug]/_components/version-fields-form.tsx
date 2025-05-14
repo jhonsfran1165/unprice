@@ -177,11 +177,14 @@ export function PaymentProviderFormField<TFieldValues extends FormValues>({
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {PAYMENT_PROVIDERS.map((provider) => (
-                <SelectItem key={provider} value={provider}>
-                  {provider}
-                </SelectItem>
-              ))}
+              {PAYMENT_PROVIDERS.map((provider) => {
+                const disabled = provider === "square"
+                return (
+                  <SelectItem key={provider} value={provider} disabled={disabled}>
+                    {disabled ? `${provider} - coming soon` : provider}
+                  </SelectItem>
+                )
+              })}
             </SelectContent>
           </Select>
           <FormMessage />

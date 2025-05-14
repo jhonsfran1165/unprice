@@ -58,7 +58,7 @@ export function FeaturesApp() {
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       aria-labelledby="features-title"
-      className="mx-auto mt-44 w-full max-w-6xl px-3"
+      className="mx-auto w-full max-w-4xl px-4 py-10"
     >
       <motion.h2
         variants={itemVariants}
@@ -70,10 +70,10 @@ export function FeaturesApp() {
 
       <motion.p
         variants={itemVariants}
-        className="mt-6 max-w-3xl text-background-text text-lg leading-7"
+        className="mt-6 max-w-3xl text-justify text-background-text text-lg leading-7"
       >
-        Unprice&rsquo; powered the cloud providers to be the fastest and most reliable in the world.
-        You can measure your own performance and optimize your systems.
+        Unprice&rsquo;s infrastructure is designed to be fast and reliable. It's open source, you
+        can see the code if you don't trust us.
       </motion.p>
 
       <motion.dl

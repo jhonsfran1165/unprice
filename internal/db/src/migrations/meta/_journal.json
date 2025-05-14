@@ -15,6 +15,20 @@
       "when": 1744649718976,
       "tag": "0001_faulty_harpoon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1746978169668,
+      "tag": "0002_loving_hitman",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1747241725042,
+      "tag": "0003_black_bloodaxe",
+      "breakpoints": true
     }
   ]
 }

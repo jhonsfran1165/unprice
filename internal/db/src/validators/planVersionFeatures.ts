@@ -8,8 +8,6 @@ import { extendZodWithOpenApi } from "zod-openapi"
 import { planVersionFeatures } from "../schema/planVersionFeatures"
 import { FEATURE_TYPES_MAPS, USAGE_MODES_MAP } from "../utils"
 import { featureSelectBaseSchema } from "./features"
-import { planVersionSelectBaseSchema } from "./planVersions"
-import { planSelectBaseSchema } from "./plans"
 import {
   aggregationMethodSchema,
   tierModeSchema,
@@ -467,44 +465,6 @@ export const planVersionFeatureDragDropSchema = planVersionFeatureSelectBaseSche
   feature: featureSelectBaseSchema,
 })
 
-export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
-  planFeatures: z.array(
-    planVersionFeatureSelectBaseSchema.extend({
-      feature: featureSelectBaseSchema,
-    })
-  ),
-})
-
-export const getPlanVersionListSchema = z.object({
-  onlyPublished: z.boolean().optional().openapi({
-    description: "Whether to include published plan versions",
-    example: true,
-  }),
-  onlyEnterprisePlan: z.boolean().optional().openapi({
-    description: "Whether to include enterprise plan versions",
-    example: false,
-  }),
-  onlyLatest: z.boolean().optional().openapi({
-    description: "Whether to include the latest plan version",
-    example: true,
-  }),
-})
-
-export const getPlanVersionListResponseSchema = planVersionSelectBaseSchema.extend({
-  plan: planSelectBaseSchema.openapi({
-    description: "The plan information",
-  }),
-  planFeatures: z.array(
-    planVersionFeatureSelectBaseSchema.extend({
-      feature: featureSelectBaseSchema.openapi({
-        description: "The feature information",
-      }),
-    })
-  ),
-})
-
 export type PlanVersionFeature = z.infer<typeof planVersionFeatureSelectBaseSchema>
 export type PlanVersionFeatureInsert = z.infer<typeof planVersionFeatureInsertBaseSchema>
 export type PlanVersionFeatureDragDrop = z.infer<typeof planVersionFeatureDragDropSchema>
-
-export type PlanVersionExtended = z.infer<typeof planVersionExtendedSchema>
