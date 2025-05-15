@@ -8,12 +8,12 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@unprice/ui/chart"
-import { BarChart4 } from "lucide-react"
+import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useFilter } from "~/hooks/use-filter"
 import { api } from "~/trpc/client"
-
+import { CodeApiSheet } from "../forms/code-api-sheet"
 const chartConfig = {
   usage: {
     label: "Usage",
@@ -45,7 +45,12 @@ export function UsageChart() {
             There is no usage available for the selected interval.
           </EmptyPlaceholder.Description>
           <EmptyPlaceholder.Action>
-            <Button size={"sm"}>Start usage</Button>
+            <CodeApiSheet defaultMethod="reportUsage">
+              <Button size={"sm"}>
+                <Code className="mr-2 h-4 w-4" />
+                Start usage
+              </Button>
+            </CodeApiSheet>
           </EmptyPlaceholder.Action>
         </EmptyPlaceholder>
       </div>

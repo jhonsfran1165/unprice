@@ -1,11 +1,12 @@
 import { Button } from "@unprice/ui/button"
 import { TabNavigation, TabNavigationLink } from "@unprice/ui/tabs-navigation"
 import { Typography } from "@unprice/ui/typography"
-import { Plus } from "lucide-react"
+import { Code, Plus } from "lucide-react"
 import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
 import { DataTable } from "~/components/data-table/data-table"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
+import { CodeApiSheet } from "~/components/forms/code-api-sheet"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
@@ -37,12 +38,20 @@ export default async function PlanSubscriptionsPage({
           title="Subscriptions"
           description="Manage your subscriptions, add new subscriptions, update plans and more."
           action={
-            <SuperLink href={`${baseUrl}/subscriptions/new`}>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Subscription
-              </Button>
-            </SuperLink>
+            <div className="flex items-center gap-2">
+              <CodeApiSheet defaultMethod="getSubscription">
+                <Button variant={"ghost"}>
+                  <Code className="mr-2 h-4 w-4" />
+                  API
+                </Button>
+              </CodeApiSheet>
+              <SuperLink href={`${baseUrl}/subscriptions/new`}>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New
+                </Button>
+              </SuperLink>
+            </div>
           }
         />
       }

@@ -43,7 +43,7 @@ export function DataTableToolbar<TData>({ table, filterOptions }: DataTableToolb
   })
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="hidden items-center justify-between md:flex">
       <div className="flex flex-1 items-center space-x-2">
         {table.getColumn(filterBy) && (
           <Input

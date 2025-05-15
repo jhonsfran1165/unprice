@@ -41,7 +41,7 @@ export function PlanActions({
           </DialogTrigger>
         </DropdownMenuContent>
       </DropdownMenu>
-      <DialogContent>
+      <DialogContent className="max-h-screen overflow-y-scroll">
         <DialogHeader>
           <DialogTitle>Plan Form</DialogTitle>
           <DialogDescription>Modify the plan details below.</DialogDescription>

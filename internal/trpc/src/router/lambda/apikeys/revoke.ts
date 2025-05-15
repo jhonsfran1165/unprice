@@ -41,7 +41,7 @@ export const revoke = protectedProjectProcedure
     if (data.length === 0) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "API key not found you don't have access to this project",
+        message: "API key not found you don't have access to this app",
       })
     }
 

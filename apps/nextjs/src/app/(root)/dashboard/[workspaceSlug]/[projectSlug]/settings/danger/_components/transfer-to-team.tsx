@@ -62,7 +62,7 @@ export function TransferProjectToTeam({
   }
 
   const title = "Transfer to Team"
-  const description = "Transfer this project to a team workspace"
+  const description = "Transfer this app to a team workspace"
 
   return (
     <Card className="border-danger">
@@ -126,7 +126,7 @@ export function TransferProjectToTeam({
                     type="submit"
                     disabled={form.formState.isSubmitting}
                   >
-                    {`I'm sure. Transfer this project`}
+                    {`I'm sure. Transfer this app`}
                     {form.formState.isSubmitting && <LoadingAnimation />}
                   </Button>
                 </DialogFooter>

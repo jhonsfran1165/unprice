@@ -1,7 +1,7 @@
 "use client"
 import type { InsertSubscription, Subscription, SubscriptionItem } from "@unprice/db/validators"
 import { subscriptionInsertSchema } from "@unprice/db/validators"
-import { Form, FormDescription, FormLabel } from "@unprice/ui/form"
+import { Form } from "@unprice/ui/form"
 import { Typography } from "@unprice/ui/typography"
 import { AlertCircle } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
@@ -19,6 +19,7 @@ import { SubscriptionCancelButton } from "./subscription-cancel-button"
 import SubscriptionPhaseFormField from "./subscription-phase-field"
 
 import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
+import { Separator } from "@unprice/ui/separator"
 
 export function SubscriptionForm({
   setDialogOpen,
@@ -104,14 +105,16 @@ export function SubscriptionForm({
         {isEdit && (
           <>
             <div className="flex items-start gap-2">
-              <div>
-                <FormLabel>Subscription ID</FormLabel>
-                <FormDescription>{defaultValues.id}</FormDescription>
+              <div className="flex flex-col items-start gap-2">
+                <Typography variant="h6">Subscription ID</Typography>
+                <Typography variant="p" affects="removePaddingMargin">
+                  {defaultValues.id}
+                </Typography>
               </div>
               <CopyButton value={defaultValues.id ?? ""} className="size-4" />
             </div>
             <div className="flex flex-col items-start gap-2">
-              <Typography variant="h5">Current Billing Cycle</Typography>
+              <Typography variant="h6">Current Billing Cycle</Typography>
               <Typography variant="p" affects="removePaddingMargin">
                 {formatDate(
                   defaultValues.currentCycleStartAt!,
@@ -130,6 +133,8 @@ export function SubscriptionForm({
         )}
 
         <div className="space-y-8">
+          <Separator className="my-4" />
+
           <CustomerFormField form={form} isDisabled={isEdit} />
 
           <TimeZoneFormField form={form} isDisabled={isEdit} />

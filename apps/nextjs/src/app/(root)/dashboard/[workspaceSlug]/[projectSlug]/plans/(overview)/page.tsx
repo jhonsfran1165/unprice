@@ -61,7 +61,7 @@ export default async function PlansPage(props: {
             </ul>
             <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 w-full text-center">
               <Balancer>
-                <Typography variant="h2">This project has no plans yet</Typography>
+                <Typography variant="h2">This app has no plans yet</Typography>
                 <Typography variant="large">Create your first plan to get started</Typography>
               </Balancer>
             </div>

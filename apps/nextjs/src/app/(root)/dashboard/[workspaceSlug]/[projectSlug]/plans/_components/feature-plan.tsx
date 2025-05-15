@@ -247,7 +247,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
             </div>
 
             {planFeatureVersion.featureType && (
-              <div className="mt-2 flex w-full flex-row items-center justify-between gap-2">
+              <div className="mt-2 hidden w-full flex-row items-center justify-between gap-2 md:flex">
                 <div className="flex flex-row gap-1">
                   <Badge variant={"secondary"}>{planFeatureVersion.featureType}</Badge>
                   {planFeatureVersion.featureType !== "flat" && (

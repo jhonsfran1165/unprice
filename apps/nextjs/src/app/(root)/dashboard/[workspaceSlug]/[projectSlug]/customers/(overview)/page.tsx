@@ -1,12 +1,13 @@
 import { Button } from "@unprice/ui/button"
 import { TabNavigation, TabNavigationLink } from "@unprice/ui/tabs-navigation"
 import { Typography } from "@unprice/ui/typography"
-import { Plus } from "lucide-react"
+import { Code, Plus } from "lucide-react"
 import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
 import { columns } from "~/app/(root)/dashboard/[workspaceSlug]/[projectSlug]/customers/_components/customers/table/columns"
 import { DataTable } from "~/components/data-table/data-table"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
+import { CodeApiSheet } from "~/components/forms/code-api-sheet"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
@@ -39,12 +40,20 @@ export default async function ProjectUsersPage(props: {
           title="Customers"
           description="Manage your customers, add new customers, update plans and more."
           action={
-            <CustomerDialog>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Customer
-              </Button>
-            </CustomerDialog>
+            <div className="flex items-center gap-2">
+              <CodeApiSheet defaultMethod="signUp">
+                <Button variant={"ghost"}>
+                  <Code className="mr-2 h-4 w-4" />
+                  API
+                </Button>
+              </CodeApiSheet>
+              <CustomerDialog>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Customer
+                </Button>
+              </CustomerDialog>
+            </div>
           }
         />
       }
@@ -62,7 +71,7 @@ export default async function ProjectUsersPage(props: {
       <div className="mt-4">
         <div className="flex flex-col px-1 py-4">
           <Typography variant="p" affects="removePaddingMargin">
-            All customers from this app
+            All customers for this app
           </Typography>
         </div>
 

@@ -59,6 +59,7 @@ export default function CreatePaymentConfig() {
           >
             <StripePaymentConfigForm
               paymentProvider="stripe"
+              skip={true}
               onSuccess={() => {
                 const searchParams = new URLSearchParams(window.location.search)
                 searchParams.set("step", "create-api-key")
