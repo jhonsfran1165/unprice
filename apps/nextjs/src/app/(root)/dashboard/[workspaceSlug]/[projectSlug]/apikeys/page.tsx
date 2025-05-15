@@ -1,3 +1,4 @@
+import { FEATURE_SLUGS } from "@unprice/config"
 import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
 import { DataTable } from "~/components/data-table/data-table"
@@ -17,7 +18,7 @@ export default async function ApiKeysPage(props: {
   params: { projectSlug: string; workspaceSlug: string }
   searchParams: SearchParams
 }) {
-  const isApiKeysEnabled = await entitlementFlag("apikeys")
+  const isApiKeysEnabled = await entitlementFlag(FEATURE_SLUGS.API_KEYS)
 
   if (!isApiKeysEnabled) {
     return <UpgradePlanError />

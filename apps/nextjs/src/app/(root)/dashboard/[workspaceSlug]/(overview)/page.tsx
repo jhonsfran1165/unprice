@@ -1,5 +1,6 @@
 import { Balancer } from "react-wrap-balancer"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
 import { Typography } from "@unprice/ui/typography"
 import { Plus } from "lucide-react"
@@ -11,10 +12,11 @@ import { SuperLink } from "~/components/super-link"
 import { entitlementFlag } from "~/lib/flags"
 import { api } from "~/trpc/server"
 import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
+
 export default async function WorkspaceOverviewPage(props: {
   params: { workspaceSlug: string }
 }) {
-  const isProjectsEnabled = await entitlementFlag("projects")
+  const isProjectsEnabled = await entitlementFlag(FEATURE_SLUGS.PROJECTS)
 
   if (!isProjectsEnabled) {
     return <UpgradePlanError />

@@ -1,5 +1,6 @@
 import Balancer from "react-wrap-balancer"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
 import { Plus } from "@unprice/ui/icons"
 import { Typography } from "@unprice/ui/typography"
@@ -18,7 +19,7 @@ export default async function PageOverviewPage(props: {
 }) {
   const { projectSlug, workspaceSlug } = props.params
 
-  const isPagesEnabled = await entitlementFlag("pages")
+  const isPagesEnabled = await entitlementFlag(FEATURE_SLUGS.PAGES)
 
   if (!isPagesEnabled) {
     return <UpgradePlanError />

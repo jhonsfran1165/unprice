@@ -5,6 +5,7 @@ import type { RouterOutputs } from "@unprice/trpc"
 import { Badge } from "@unprice/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@unprice/ui/card"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -17,7 +18,7 @@ import { DomainDialog } from "./_components/domain-dialog"
 import { VerifyDomainButton } from "./_components/domain-verify-button"
 
 export default async function PageDomains() {
-  const isDomainsEnabled = await entitlementFlag("domains")
+  const isDomainsEnabled = await entitlementFlag(FEATURE_SLUGS.DOMAINS)
 
   if (!isDomainsEnabled) {
     return <UpgradePlanError />

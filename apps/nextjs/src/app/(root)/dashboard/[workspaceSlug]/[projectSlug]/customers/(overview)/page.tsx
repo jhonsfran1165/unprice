@@ -1,3 +1,4 @@
+import { FEATURE_SLUGS } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
 import { TabNavigation, TabNavigationLink } from "@unprice/ui/tabs-navigation"
 import { Typography } from "@unprice/ui/typography"
@@ -25,7 +26,7 @@ export default async function ProjectUsersPage(props: {
   const baseUrl = `/${workspaceSlug}/${projectSlug}/customers`
   const filters = filtersDataTableCache.parse(props.searchParams)
 
-  const isCustomersEnabled = await entitlementFlag("customers")
+  const isCustomersEnabled = await entitlementFlag(FEATURE_SLUGS.CUSTOMERS)
 
   if (!isCustomersEnabled) {
     return <UpgradePlanError />

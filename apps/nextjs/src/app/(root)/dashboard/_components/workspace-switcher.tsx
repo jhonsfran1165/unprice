@@ -177,7 +177,7 @@ export function WorkspaceSwitcher({
               {!isProEnabled ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <SuperLink href="/new" className="cursor-not-allowed">
+                    <SuperLink href="#" className="cursor-not-allowed">
                       <CommandItem className="cursor-not-allowed" disabled>
                         <PlusCircle className="mr-2 size-4" />
                         Create Workspace
