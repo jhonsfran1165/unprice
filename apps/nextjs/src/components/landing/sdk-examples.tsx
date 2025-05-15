@@ -10,7 +10,7 @@ import { CodeEditor } from "./code-editor"
 import CopyToClipboard from "./copy-to-clipboard"
 
 // Sample code examples for different frameworks and methods
-const codeExamples = {
+export const codeExamples = {
   sdk: {
     verifyFeature: `import { Unprice } from "@unprice/api"
 
@@ -148,6 +148,18 @@ const createPaymentMethod = await unprice.customers.createPaymentMethod({
   cancelUrl: "http://your-app.com/failed",
 })
 `,
+    listPlanVersions: `import { Unprice } from "@unprice/api"
+
+const unprice = new Unprice({
+  token: process.env.UNPRICE_TOKEN,
+  baseUrl: "http://api.unprice.dev",
+})
+
+const planVersions = await unprice.plans.listPlanVersions({
+  billingInterval: "month",
+  currency: "USD",
+})
+`,
   },
   fetch: {
     verifyFeature:
@@ -190,12 +202,21 @@ const createPaymentMethod = await unprice.customers.createPaymentMethod({
       'const baseUrl = "http://api.unprice.dev"\nconst token = process.env.UNPRICE_TOKEN\n\nawait fetch("' +
       "${baseUrl}/v1/customer/createPaymentMethod" +
       '", {\n  method: "POST",\n  headers: {\n    Authorization: "Bearer ${token}",\n    "Content-Type": "application/json",\n  },\n  body: JSON.stringify({\n    paymentProvider: "stripe",\n    customerId: "cus_1GTzSGrapiBW1QwCL3Fcn",\n    successUrl: "http://your-app.com/dashboard",\n    cancelUrl: "http://your-app.com/failed",\n  }),\n})',
+    listPlanVersions:
+      'const baseUrl = "http://api.unprice.dev"\nconst token = process.env.UNPRICE_TOKEN\n\nawait fetch("' +
+      "${baseUrl}/v1/plans/listPlanVersions" +
+      '", {\n  method: "POST",\n  headers: {\n    Authorization: "Bearer ${token}",\n    "Content-Type": "application/json",\n  },\n  body: JSON.stringify({\n    billingInterval: "month",\n    currency: "USD",\n  }),\n})',
   },
 }
 
-export function SDKDemo() {
+export type method = keyof typeof codeExamples.sdk
+
+export function SDKDemo({
+  className,
+  defaultMethod,
+}: { className?: string; defaultMethod?: method }) {
   const [activeFramework, setActiveFramework] = useState("sdk")
-  const [activeMethod, setActiveMethod] = useState("verifyFeature")
+  const [activeMethod, setActiveMethod] = useState(defaultMethod ?? "verifyFeature")
 
   // Get the methods for the active framework
   const methods = Object.keys(codeExamples[activeFramework as keyof typeof codeExamples])
@@ -204,10 +225,15 @@ export function SDKDemo() {
   const code =
     codeExamples[activeFramework as keyof typeof codeExamples][
       activeMethod as keyof typeof codeExamples.sdk
-    ]
+    ] ?? codeExamples.sdk.verifyFeature
 
   return (
-    <div className="relative mx-auto mt-20 flex w-full max-w-6xl flex-col items-center justify-center rounded-2xl bg-background shadow-primary-line shadow-sm ring-1 ring-background-line [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]">
+    <div
+      className={cn(
+        "relative mx-auto mt-20 flex w-full max-w-6xl flex-col items-center justify-center rounded-2xl bg-background shadow-primary-line shadow-sm ring-1 ring-background-line [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
+        className
+      )}
+    >
       {/* Framework tabs */}
       <Tabs value={activeFramework} onValueChange={setActiveFramework} className="w-full">
         <div className="border-background-border border-b pt-4">
@@ -229,7 +255,7 @@ export function SDKDemo() {
                   <Button
                     key={method}
                     variant="link"
-                    onClick={() => setActiveMethod(method)}
+                    onClick={() => setActiveMethod(method as method)}
                     className={cn(
                       "flex flex-col items-start whitespace-nowrap text-left transition-colors",
                       activeMethod === method
@@ -245,7 +271,7 @@ export function SDKDemo() {
             </div>
 
             <div className="relative flex h-full w-full overflow-hidden rounded-b-3xl rounded-br-3xl bg-background-base font-mono text-background-text text-sm md:rounded-none md:rounded-br-3xl">
-              <div className="absolute top-3 right-3">
+              <div className="absolute top-3 right-3 z-10">
                 <CopyToClipboard code={code} />
               </div>
               <ScrollArea

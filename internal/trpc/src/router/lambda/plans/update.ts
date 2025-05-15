@@ -76,7 +76,7 @@ export const update = protectedProjectProcedure
       if (defaultPlanData && defaultPlanData.id !== id) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "There is already a default plan for this project",
+          message: "There is already a default plan for this app",
         })
       }
     }
@@ -90,8 +90,7 @@ export const update = protectedProjectProcedure
       if (enterprisePlanData && enterprisePlanData.id !== id) {
         throw new TRPCError({
           code: "CONFLICT",
-          message:
-            "There is already an enterprise plan for this project, create a new version instead",
+          message: "There is already an enterprise plan for this app, create a new version instead",
         })
       }
     }

@@ -1,6 +1,9 @@
 import type React from "react"
 
+import { Button } from "@unprice/ui/button"
+import { Code } from "lucide-react"
 import { notFound } from "next/navigation"
+import { CodeApiSheet } from "~/components/forms/code-api-sheet"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { api } from "~/trpc/server"
@@ -32,11 +35,19 @@ export default async function PlanVersionLayout(props: {
           title="Plan Version Settings"
           description="Configure features and pricing for this plan version."
           action={
-            <StepperButton
-              isPublished={planVersion.status === "published"}
-              planVersionId={props.params.planVersionId}
-              baseUrl={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}/${props.params.planVersionId}`}
-            />
+            <div className="flex items-center gap-2">
+              <CodeApiSheet defaultMethod="listPlanVersions">
+                <Button variant={"ghost"}>
+                  <Code className="mr-2 h-4 w-4" />
+                  API
+                </Button>
+              </CodeApiSheet>
+              <StepperButton
+                isPublished={planVersion.status === "published"}
+                planVersionId={props.params.planVersionId}
+                baseUrl={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}/${props.params.planVersionId}`}
+              />
+            </div>
           }
         />
       }

@@ -3,11 +3,12 @@ import { Button } from "@unprice/ui/button"
 import { Separator } from "@unprice/ui/separator"
 import { TabNavigation, TabNavigationLink } from "@unprice/ui/tabs-navigation"
 import { Typography } from "@unprice/ui/typography"
-import { Plus } from "lucide-react"
+import { Code, Plus } from "lucide-react"
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
 import { DataTable } from "~/components/data-table/data-table"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
+import { CodeApiSheet } from "~/components/forms/code-api-sheet"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
@@ -45,39 +46,47 @@ export default async function PlanPage({
           description={plan.description}
           label={plan.active ? "active" : "inactive"}
           action={
-            <div className="button-primary flex items-center space-x-1 rounded-md">
-              <div className="sm:col-span-full">
-                <PlanVersionDialog
-                  defaultValues={{
-                    planId: plan.id,
-                    description: plan.description,
-                    title: plan.slug,
-                    projectId: plan.projectId,
-                    currency: project.defaultCurrency,
-                    paymentProvider: "stripe",
-                    collectionMethod: "charge_automatically",
-                    whenToBill: "pay_in_arrear",
-                    trialDays: 0,
-                    autoRenew: true,
-                    paymentMethodRequired: false,
-                    billingConfig: {
-                      name: "monthly",
-                      billingInterval: "month",
-                      billingIntervalCount: 1,
-                      billingAnchor: "dayOfCreation",
-                      planType: "recurring",
-                    },
-                  }}
-                >
-                  <Button variant={"custom"}>
-                    <Plus className="mr-2 h-4 w-4" /> Version
-                  </Button>
-                </PlanVersionDialog>
+            <div className="flex items-center space-x-2 rounded-md">
+              <CodeApiSheet defaultMethod="listPlanVersions">
+                <Button variant={"ghost"}>
+                  <Code className="mr-2 h-4 w-4" />
+                  API
+                </Button>
+              </CodeApiSheet>
+              <div className="button-primary flex items-center space-x-1 rounded-md">
+                <div className="sm:col-span-full">
+                  <PlanVersionDialog
+                    defaultValues={{
+                      planId: plan.id,
+                      description: plan.description,
+                      title: plan.slug,
+                      projectId: plan.projectId,
+                      currency: project.defaultCurrency,
+                      paymentProvider: "stripe",
+                      collectionMethod: "charge_automatically",
+                      whenToBill: "pay_in_arrear",
+                      trialDays: 0,
+                      autoRenew: true,
+                      paymentMethodRequired: false,
+                      billingConfig: {
+                        name: "monthly",
+                        billingInterval: "month",
+                        billingIntervalCount: 1,
+                        billingAnchor: "dayOfCreation",
+                        planType: "recurring",
+                      },
+                    }}
+                  >
+                    <Button variant={"custom"}>
+                      <Plus className="mr-2 h-4 w-4" /> Version
+                    </Button>
+                  </PlanVersionDialog>
+                </div>
+
+                <Separator orientation="vertical" className="h-[20px] p-0" />
+
+                <PlanActions plan={plan} />
               </div>
-
-              <Separator orientation="vertical" className="h-[20px] p-0" />
-
-              <PlanActions plan={plan} />
             </div>
           }
         />

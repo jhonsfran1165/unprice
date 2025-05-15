@@ -17,7 +17,7 @@ export const saveConfig = protectedProjectProcedure
     // only owner and admin can cancel a subscription
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
-    const { key, paymentProvider, active } = opts.input
+    const { key, paymentProvider } = opts.input
     const projectId = opts.ctx.project.id
     const id = newId("payment_provider_config")
 
@@ -32,15 +32,14 @@ export const saveConfig = protectedProjectProcedure
         id,
         projectId,
         paymentProvider,
-        active,
+        active: true,
         key: encryptedKey.ciphertext,
         keyIv: encryptedKey.iv,
       })
       .onConflictDoUpdate({
         target: [paymentProviderConfig.paymentProvider, paymentProviderConfig.projectId],
-        // if the invoice is pending, we update the cycle dates
         set: {
-          active,
+          active: true,
           key: encryptedKey.ciphertext,
           keyIv: encryptedKey.iv,
         },

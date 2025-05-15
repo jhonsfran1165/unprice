@@ -103,7 +103,7 @@ export const columns: ColumnDef<Subscription>[] = [
     accessorKey: "currentCycleStartAt",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Start current cycle" />,
     cell: ({ row }) => (
-      <div className="flex items-center space-x-1">
+      <div className="flex items-center space-x-1 whitespace-nowrap">
         <Typography variant="p" affects="removePaddingMargin">
           {formatDate(row.original.currentCycleStartAt, row.original.timezone)}
         </Typography>
@@ -153,7 +153,7 @@ export const columns: ColumnDef<Subscription>[] = [
       }
 
       return (
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 whitespace-nowrap">
           <Typography variant="p" affects="removePaddingMargin">
             {formatDate(endDate, row.original.timezone)}
           </Typography>
@@ -201,7 +201,7 @@ export const columns: ColumnDef<Subscription>[] = [
       }
 
       return (
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 whitespace-nowrap">
           <Typography variant="p" affects="removePaddingMargin">
             {formatDate(invoiceDate, row.original.timezone)}
           </Typography>

@@ -1,19 +1,29 @@
+import { FEATURE_SLUGS } from "@unprice/config"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import { UserIcon } from "lucide-react"
 import { Suspense } from "react"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
+import UpgradePlanError from "~/components/layout/error"
 import LayoutLoader from "~/components/layout/layout-loader"
+import { entitlementFlag } from "~/lib/flags"
 import { api } from "~/trpc/server"
 import NewWorkspaceForm from "../_components/new-workspace-form"
 import Redirect from "./_components/redirect"
 
-export default function PageSuccess(props: {
+export default async function NewPage(props: {
   searchParams: {
     customer_id: string
   }
 }) {
   const { customer_id } = props.searchParams
+  // isProEnabled
+
+  const isProEnabled = await entitlementFlag(FEATURE_SLUGS.ACCESS_PRO)
+
+  if (!isProEnabled) {
+    return <UpgradePlanError />
+  }
 
   return (
     <Suspense fallback={<LayoutLoader />}>

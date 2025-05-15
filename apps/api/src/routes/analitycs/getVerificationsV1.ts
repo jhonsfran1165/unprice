@@ -117,7 +117,7 @@ export const registerGetAnalyticsVerificationsV1 = (app: App) =>
       if (project.workspace.createdBy !== key.project.workspace.createdBy) {
         throw new UnpriceApiError({
           code: "FORBIDDEN",
-          message: "You are not allowed to access this project analytics.",
+          message: "You are not allowed to access this app analytics.",
         })
       }
     }

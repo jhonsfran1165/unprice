@@ -1,5 +1,6 @@
 import Balancer from "react-wrap-balancer"
 
+import { FEATURE_SLUGS } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
 import { Plus } from "@unprice/ui/icons"
 import { Typography } from "@unprice/ui/typography"
@@ -11,14 +12,13 @@ import { entitlementFlag } from "~/lib/flags"
 import { api } from "~/trpc/server"
 import { PlanDialog } from "../_components/plan-dialog"
 import { PlanCard, PlanCardSkeleton } from "./_components/plan-card"
-
 export default async function PlansPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
   searchParams: Record<string, string | string[] | undefined>
 }) {
   const { projectSlug, workspaceSlug } = props.params
 
-  const isPlansEnabled = await entitlementFlag("plans")
+  const isPlansEnabled = await entitlementFlag(FEATURE_SLUGS.PLANS)
 
   if (!isPlansEnabled) {
     return <UpgradePlanError />
@@ -61,7 +61,7 @@ export default async function PlansPage(props: {
             </ul>
             <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 w-full text-center">
               <Balancer>
-                <Typography variant="h2">This project has no plans yet</Typography>
+                <Typography variant="h2">This app has no plans yet</Typography>
                 <Typography variant="large">Create your first plan to get started</Typography>
               </Balancer>
             </div>

@@ -6,10 +6,11 @@ import { Button } from "@unprice/ui/button"
 import { Separator } from "@unprice/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
 import { Typography } from "@unprice/ui/typography"
-import { Plus } from "lucide-react"
+import { Code, Plus } from "lucide-react"
 import { Suspense } from "react"
 import { DataTable } from "~/components/data-table/data-table"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
+import { CodeApiSheet } from "~/components/forms/code-api-sheet"
 import { PaymentMethodForm } from "~/components/forms/payment-method-form"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
@@ -46,26 +47,34 @@ export default async function CustomerPage({
           label={customer.active ? "active" : "inactive"}
           id={customer.id}
           action={
-            <div className="button-primary flex items-center space-x-1 rounded-md">
-              <div className="sm:col-span-full">
-                <SubscriptionSheet
-                  defaultValues={{
-                    customerId: customer.id,
-                    projectId: customer.projectId,
-                    timezone: customer.timezone,
-                    phases: [],
-                  }}
-                >
-                  <Button variant={"custom"}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Subscription
-                  </Button>
-                </SubscriptionSheet>
+            <div className="flex items-center gap-2">
+              <CodeApiSheet defaultMethod="getEntitlements">
+                <Button variant={"ghost"}>
+                  <Code className="mr-2 h-4 w-4" />
+                  API
+                </Button>
+              </CodeApiSheet>
+              <div className="button-primary flex items-center space-x-1 rounded-md">
+                <div className="sm:col-span-full">
+                  <SubscriptionSheet
+                    defaultValues={{
+                      customerId: customer.id,
+                      projectId: customer.projectId,
+                      timezone: customer.timezone,
+                      phases: [],
+                    }}
+                  >
+                    <Button variant={"custom"}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Subscription
+                    </Button>
+                  </SubscriptionSheet>
+                </div>
+
+                <Separator orientation="vertical" className="h-[20px] p-0" />
+
+                <CustomerActions customer={customer} />
               </div>
-
-              <Separator orientation="vertical" className="h-[20px] p-0" />
-
-              <CustomerActions customer={customer} />
             </div>
           }
         />

@@ -25,7 +25,7 @@ export default function HeaderTab({
           <Typography variant="h3">{title}</Typography>
           {label && (
             <Badge
-              className={cn("ml-2", {
+              className={cn("ml-2 hidden md:flex", {
                 info: label === "active",
                 danger: label === "inactive",
               })}
@@ -41,7 +41,11 @@ export default function HeaderTab({
           )}
           {id && <CopyButton value={id} />}
         </div>
-        {description && <Typography variant="normal">{description}</Typography>}
+        {description && (
+          <Typography variant="normal" className="hidden md:flex">
+            {description}
+          </Typography>
+        )}
       </div>
       <div>{action}</div>
     </div>

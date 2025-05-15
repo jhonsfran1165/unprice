@@ -69,7 +69,7 @@ const PlanVersionPublish = forwardRef<ElementRef<"button">, PlanVersionPublishPr
           disabled={publishVersion.isPending}
           className={classNames}
         >
-          Publish version
+          Publish
           {publishVersion.isPending && <LoadingAnimation className={"ml-2"} />}
         </Button>
       </ConfirmAction>
