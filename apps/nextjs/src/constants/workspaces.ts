@@ -42,9 +42,9 @@ export const WORKSPACE_SHORTCUTS: Shortcut[] = [
     href: "settings/billing",
     icon: Link,
   },
-  {
-    name: "Add domain",
-    href: "domains",
-    icon: Link,
-  },
+  // {
+  //   name: "Add domain",
+  //   href: "domains",
+  //   icon: Link,
+  // },
 ]

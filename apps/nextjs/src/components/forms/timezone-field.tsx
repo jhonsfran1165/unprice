@@ -48,7 +48,7 @@ export default function TimeZoneFormField<TFieldValues extends FormValues>({
         <FormItem className="flex flex-col">
           <FormLabel>Timezone</FormLabel>
           <FormDescription>
-            This subscription will use this timezone for all its invoices.
+            Subscriptions will use this timezone for all its invoices.
           </FormDescription>
           <Popover
             modal={true}

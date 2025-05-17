@@ -85,7 +85,7 @@ export default async function CustomerPage({
           <TabsList variant="line">
             <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
             <TabsTrigger value="paymentMethods">Payment Methods</TabsTrigger>
-            <TabsTrigger value="Invoices">Invoices</TabsTrigger>
+            <TabsTrigger value="invoices">Invoices</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="subscriptions" className="mt-4">
@@ -147,7 +147,13 @@ export default async function CustomerPage({
             cancelUrl={`${APP_DOMAIN}${workspaceSlug}/${projectSlug}/customers/${customerId}`}
           />
         </TabsContent>
-        <TabsContent value="invoices">s</TabsContent>
+        <TabsContent value="invoices">
+          <div className="flex flex-col px-1 py-4">
+            <Typography variant="p" affects="removePaddingMargin">
+              Invoices of this customer {customer.invoices.length}
+            </Typography>
+          </div>
+        </TabsContent>
       </Tabs>
     </DashboardShell>
   )

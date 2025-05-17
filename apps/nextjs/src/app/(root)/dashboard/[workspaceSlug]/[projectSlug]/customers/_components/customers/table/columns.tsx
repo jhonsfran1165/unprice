@@ -6,6 +6,7 @@ import type { Customer } from "@unprice/db/validators"
 import { Checkbox } from "@unprice/ui/checkbox"
 
 import { Badge } from "@unprice/ui/badge"
+import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { SuperLink } from "~/components/super-link"
@@ -100,8 +101,10 @@ export const columns: ColumnDef<Customer>[] = [
     accessorKey: "createdAtM",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Creation Date" />,
     cell: ({ row }) => (
-      <div className="whitespace-nowrap text-sm">
-        {formatDate(row.original.createdAtM, row.original.timezone)}
+      <div className="flex items-center space-x-1 whitespace-nowrap">
+        <Typography variant="p" affects="removePaddingMargin">
+          {formatDate(row.original.createdAtM, row.original.timezone)}
+        </Typography>
       </div>
     ),
     enableSorting: true,

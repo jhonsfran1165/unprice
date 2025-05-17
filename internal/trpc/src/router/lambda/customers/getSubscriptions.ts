@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import {
   customerSelectSchema,
+  subscriptionInvoiceSelectSchema,
   subscriptionPhaseSelectSchema,
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
@@ -8,14 +9,6 @@ import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
 
 export const getSubscriptions = protectedProjectProcedure
-  .meta({
-    span: "customers.getSubscriptions",
-    openapi: {
-      method: "GET",
-      path: "/lambda/customers.getSubscriptions",
-      protect: true,
-    },
-  })
   .input(
     z.object({
       customerId: z.string(),
@@ -23,14 +16,18 @@ export const getSubscriptions = protectedProjectProcedure
   )
   .output(
     z.object({
-      customer: customerSelectSchema.extend({
-        subscriptions: subscriptionSelectSchema
-          .extend({
-            customer: customerSelectSchema,
-            phases: subscriptionPhaseSelectSchema.array(),
-          })
-          .array(),
-      }),
+      customer: customerSelectSchema
+        .extend({
+          subscriptions: subscriptionSelectSchema
+            .extend({
+              customer: customerSelectSchema,
+              phases: subscriptionPhaseSelectSchema.array(),
+            })
+            .array(),
+        })
+        .extend({
+          invoices: subscriptionInvoiceSelectSchema.array(),
+        }),
     })
   )
   .query(async (opts) => {
@@ -54,6 +51,7 @@ export const getSubscriptions = protectedProjectProcedure
             },
           },
         },
+        invoices: true,
       },
       where: (table, { eq, and }) => and(eq(table.id, customerId), eq(table.projectId, project.id)),
       orderBy: (table, { desc }) => [desc(table.createdAtM)],

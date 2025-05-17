@@ -25,6 +25,27 @@ export class PlanService {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   private readonly waitUntil: (promise: Promise<any>) => void
 
+  private createCacheKey(prefix: string, params: Record<string, unknown>): string {
+    // Sort keys to ensure consistent order
+    const sortedParams = Object.keys(params)
+      .sort()
+      .reduce(
+        (acc, key) => {
+          acc[key] = params[key]
+          return acc
+        },
+        {} as Record<string, unknown>
+      )
+
+    // Create a stable string representation
+    const paramsString = JSON.stringify(sortedParams)
+      .replace(/["'{}]/g, "")
+      .replace(",", "-")
+
+    // Use a separator that's unlikely to appear in the data
+    return `${prefix}:${paramsString}`
+  }
+
   constructor({
     db,
     logger,
@@ -272,8 +293,7 @@ export class PlanService {
       skipCache?: boolean // skip cache to force revalidation
     }
   }): Promise<Result<PlanVersionApi[] | null, FetchError>> {
-    // TODO: improve this cache key
-    const cachekey = `${projectId}:${JSON.stringify(query)}`
+    const cachekey = this.createCacheKey(projectId, query)
 
     // first try to get the entitlement from cache
     const { val, err } = opts?.skipCache

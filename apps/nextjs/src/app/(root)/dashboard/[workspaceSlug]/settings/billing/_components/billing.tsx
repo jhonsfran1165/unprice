@@ -88,6 +88,18 @@ const LineUsageItem: React.FC<{
   const isFlat = entitlement.featureType === "flat"
   const used = entitlement.usage ?? 0
 
+  // TODO: improve this
+  // if included is 0 and max is null then don't show the line item
+  // don't show free features
+  if (
+    entitlement.featureVersion.hidden ||
+    (entitlement.included === null &&
+      entitlement.max === null &&
+      entitlement.featureVersion.config?.price?.dinero.amount === 0)
+  ) {
+    return null
+  }
+
   if (isFlat) {
     return (
       <div className="flex items-center justify-between">

@@ -6,7 +6,7 @@ import { getSession } from "@unprice/auth/server-rsc"
 
 import { Typography } from "@unprice/ui/typography"
 import { SignInGithub } from "./github-signin"
-
+import { SignInGoogle } from "./google-signin"
 export default async function AuthenticationPage() {
   const session = await getSession()
 
@@ -19,8 +19,9 @@ export default async function AuthenticationPage() {
       <div className="flex flex-col space-y-2 text-center">
         <Typography variant="h2">Create an account</Typography>
       </div>
-      <div className="grid gap-6">
-        <SignInGithub />
+      <div className="flex w-full items-center justify-between gap-2">
+        <SignInGithub className="flex-1" />
+        <SignInGoogle className="flex-1" />
       </div>
 
       <Typography variant="p" className="px-8 text-center">

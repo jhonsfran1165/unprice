@@ -1,11 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@unprice/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import { api } from "~/trpc/server"
 import { StripePaymentConfigForm } from "./_components/stripe-payment-config-form"
 
@@ -32,8 +25,6 @@ export default async function ProjectPaymentSettingsPage() {
           paymentProvider="stripe"
         />
       </CardContent>
-
-      <CardFooter className="border-t px-6 py-4">sadsad</CardFooter>
     </Card>
   )
 }

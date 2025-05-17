@@ -29,6 +29,13 @@
       "when": 1747241725042,
       "tag": "0003_black_bloodaxe",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1747499878863,
+      "tag": "0004_redundant_scalphunter",
+      "breakpoints": true
     }
   ]
 }
