@@ -1,3 +1,4 @@
+import { env } from "cloudflare:workers"
 import { OpenAPIHono } from "@hono/zod-openapi"
 import { apiReference } from "@scalar/hono-api-reference"
 import type { Context as GenericContext } from "hono"
@@ -25,26 +26,36 @@ export function newApp() {
     return next()
   })
 
+  const servers = [
+    {
+      url: "https://api.unprice.dev",
+      description: "Production",
+    },
+    {
+      url: "http://localhost:8787",
+      description: "Development",
+    },
+    {
+      url: "https://preview-api.unprice.dev",
+      description: "Preview",
+    },
+  ]
+
   app.doc("/openapi.json", {
-    openapi: "3.0.0",
+    openapi: "3.1.0",
     info: {
       title: "Unprice API",
       version: "1.0.0",
     },
-    servers: [
-      {
-        url: "https://api.unprice.dev",
-        description: "Production",
-      },
-      {
-        url: "http://localhost:8787",
-        description: "Development",
-      },
-      {
-        url: "https://preview-api.unprice.dev",
-        description: "Preview",
-      },
-    ],
+    servers:
+      env.NODE_ENV === "production"
+        ? [
+            {
+              url: "https://api.unprice.dev",
+              description: "Production",
+            },
+          ]
+        : servers,
     "x-speakeasy-retries": {
       strategy: "backoff",
       backoff: {
@@ -56,6 +67,11 @@ export function newApp() {
       statusCodes: ["5XX"],
       retryConnectionErrors: true,
     },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   })
 
   app.get(
@@ -71,11 +87,9 @@ export function newApp() {
       theme: "deepSpace",
       url: "/openapi.json",
       authentication: {
-        name: "root key",
         type: "http",
         scheme: "bearer",
         bearerFormat: "root key",
-        in: "header",
       },
     })
   )
@@ -84,10 +98,7 @@ export function newApp() {
     bearerFormat: "root key",
     type: "http",
     scheme: "bearer",
-    "x-speakeasy-example": "UNPRICE_ROOT_KEY",
-    description: "The root key for the Unprice API",
-    name: "root key",
-    in: "header",
+    "x-speakeasy-example": "UNPRICE_API_KEY",
   })
 
   return app
