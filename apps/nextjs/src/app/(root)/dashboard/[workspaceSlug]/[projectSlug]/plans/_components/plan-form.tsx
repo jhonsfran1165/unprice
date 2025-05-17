@@ -64,6 +64,7 @@ export function PlanForm({
       toastAction("saved")
       setDialogOpen?.(false)
       router.refresh()
+      router.push(`plans/${plan.slug}`)
     },
   })
 
@@ -143,7 +144,7 @@ export function PlanForm({
                   The slug is a unique identifier for the plan and will be used for api calls.
                 </FormDescription>
                 <FormControl>
-                  <Input {...field} placeholder="free" disabled={editMode} />
+                  <Input {...field} placeholder="FREE" disabled={editMode} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -192,7 +193,7 @@ export function PlanForm({
                 <div className="space-y-0.5">
                   <FormLabel className="text-base">Enterprise plan</FormLabel>
                   <FormDescription>
-                    Enterprises plans are rendered differently in the frontend.
+                    Enterprises plans don't show prices information in the frontend.
                   </FormDescription>
                 </div>
                 <FormControl>

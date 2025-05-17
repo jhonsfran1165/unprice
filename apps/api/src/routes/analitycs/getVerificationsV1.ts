@@ -94,8 +94,11 @@ export const registerGetAnalyticsVerificationsV1 = (app: App) =>
                 : now - 1000 * 60 * 60 * 24 * 24
 
     const end = now
+    // main workspace can see all verifications
+    // TODO: abstract this to analytics service
+    const isMain = key.project.workspace.isMain
 
-    if (projectId) {
+    if (projectId && !isMain) {
       // validate project from the key and the projectId
       // are part of the same workspace
       const project = await db.query.projects.findFirst({

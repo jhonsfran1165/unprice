@@ -58,7 +58,8 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
         <FormItem className="flex flex-col">
           <FormLabel>Plan Version</FormLabel>
           <FormDescription>
-            Select the plan version to create the subscription phase.
+            Select the plan version to create the subscription phase. Only plan versions that are
+            published and active are shown.
           </FormDescription>
 
           <Popover
@@ -121,7 +122,7 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
                         ))}
                         {noData && !isLoading && (
                           <CommandItem disabled className="w-full justify-center">
-                            No data provided
+                            No plan versions found
                           </CommandItem>
                         )}
                       </div>

@@ -58,7 +58,7 @@ export default function Intro() {
                 },
               }}
             >
-              Manage, iterate, maximize and find the right price for your SaaS.
+              Manage, iterate, and find the best price for your SaaS.
             </m.p>
             <m.div
               variants={{
@@ -77,7 +77,7 @@ export default function Intro() {
                 `)
                 }
               >
-                Get Started
+                Create your first app
               </Button>
             </m.div>
           </m.div>

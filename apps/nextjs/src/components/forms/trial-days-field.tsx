@@ -31,9 +31,7 @@ export default function TrialDaysFormField<TFieldValues extends FormValues>({
       render={({ field }) => (
         <FormItem className={cn("flex w-full flex-col", className)}>
           <FormLabel>Trial Days</FormLabel>
-          <FormDescription>
-            The number of days trial for the subscription in the phase.
-          </FormDescription>
+          <FormDescription>The number of days trial for the phase.</FormDescription>
           <FormControl className="w-full">
             <InputWithAddons
               {...field}

@@ -6,7 +6,6 @@ import { FileStack, Search } from "lucide-react"
 import { useState } from "react"
 
 import type { RouterOutputs } from "@unprice/trpc"
-import { Button } from "@unprice/ui/button"
 import { Input } from "@unprice/ui/input"
 import { Separator } from "@unprice/ui/separator"
 
@@ -19,7 +18,6 @@ import {
   usePlanFeaturesList,
 } from "~/hooks/use-features"
 import { DroppableContainer } from "../../_components/droppable"
-import { FeatureDialog } from "../../_components/feature-dialog"
 import { SortableFeature } from "../../_components/sortable-feature"
 
 interface PlanFeatureListProps {
@@ -76,19 +74,9 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
                 </EmptyPlaceholder.Icon>
                 <EmptyPlaceholder.Title>No features</EmptyPlaceholder.Title>
                 <EmptyPlaceholder.Description>
-                  Create feature and drag it here
+                  Once you create a feature, you can add it to the plan version. Drag and drop it
+                  here.
                 </EmptyPlaceholder.Description>
-                <EmptyPlaceholder.Action>
-                  <FeatureDialog
-                    defaultValues={{
-                      title: filter,
-                      slug: filter,
-                      description: "",
-                    }}
-                  >
-                    <Button size={"sm"}>Create feature</Button>
-                  </FeatureDialog>
-                </EmptyPlaceholder.Action>
               </EmptyPlaceholder>
             ) : (
               <div className="space-y-2">

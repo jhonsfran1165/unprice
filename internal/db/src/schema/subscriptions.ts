@@ -198,6 +198,7 @@ export const invoices = pgTableProject(
     // Is it necessary to have the subscription id?
     subscriptionId: cuid("subscription_id").notNull(),
     subscriptionPhaseId: cuid("subscription_phase_id").notNull(),
+    customerId: cuid("customer_id").notNull(),
     requiredPaymentMethod: boolean("required_payment_method").notNull().default(false),
     paymentMethodId: text("payment_method_id"),
     status: invoiceStatusEnum("status").notNull().default("draft"),
@@ -257,6 +258,11 @@ export const invoices = pgTableProject(
       foreignColumns: [subscriptions.id, subscriptions.projectId],
       name: "invoices_subscription_id_fkey",
     }).onDelete("cascade"),
+    customerfk: foreignKey({
+      columns: [table.customerId, table.projectId],
+      foreignColumns: [customers.id, customers.projectId],
+      name: "invoices_customer_id_fkey",
+    }).onDelete("cascade"),
     subscriptionPhasefk: foreignKey({
       columns: [table.subscriptionPhaseId, table.projectId],
       foreignColumns: [subscriptionPhases.id, subscriptionPhases.projectId],
@@ -307,6 +313,10 @@ export const invoiceRelations = relations(invoices, ({ one }) => ({
   customerCredit: one(customerCredits, {
     fields: [invoices.customerCreditId, invoices.projectId],
     references: [customerCredits.id, customerCredits.projectId],
+  }),
+  customer: one(customers, {
+    fields: [invoices.customerId, invoices.projectId],
+    references: [customers.id, customers.projectId],
   }),
 }))
 

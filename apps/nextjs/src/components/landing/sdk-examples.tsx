@@ -219,7 +219,12 @@ export function SDKDemo({
   const [activeMethod, setActiveMethod] = useState(defaultMethod ?? "verifyFeature")
 
   // Get the methods for the active framework
-  const methods = Object.keys(codeExamples[activeFramework as keyof typeof codeExamples])
+  let methods = Object.keys(codeExamples[activeFramework as keyof typeof codeExamples])
+
+  // if defaultMethod is passed only show that method
+  if (defaultMethod) {
+    methods = [defaultMethod]
+  }
 
   // Get the code for the active framework and method
   const code =
@@ -230,7 +235,7 @@ export function SDKDemo({
   return (
     <div
       className={cn(
-        "relative mx-auto mt-20 flex w-full max-w-6xl flex-col items-center justify-center rounded-2xl bg-background shadow-primary-line shadow-sm ring-1 ring-background-line [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
+        "relative mx-auto mt-20 flex w-full max-w-6xl flex-col items-center justify-center rounded-2xl border bg-background shadow-primary-line shadow-sm ring-1 ring-background-line [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
         className
       )}
     >
@@ -250,7 +255,7 @@ export function SDKDemo({
           <div className="flex flex-col md:flex-row">
             {/* Method selection */}
             <div className="w-full border-b md:w-52 md:border-r md:border-b-0">
-              <div className="flex flex-row flex-wrap gap-2 px-2 py-4 md:flex-col">
+              <div className="hide-scrollbar flex gap-2 overflow-y-auto px-2 py-0 md:flex-col md:py-4">
                 {methods.map((method) => (
                   <Button
                     key={method}
@@ -279,7 +284,7 @@ export function SDKDemo({
                 className={cn(
                   "hide-scrollbar w-full",
                   // hack for not having to set height on scroll area
-                  "[&>[data-radix-scroll-area-viewport]]:h-full md:[&>[data-radix-scroll-area-viewport]]:h-[30rem]",
+                  "[&>[data-radix-scroll-area-viewport]]:h-full md:[&>[data-radix-scroll-area-viewport]]:h-[35rem]",
                   "[&>[data-radix-scroll-area-viewport]]:w-full"
                 )}
               >

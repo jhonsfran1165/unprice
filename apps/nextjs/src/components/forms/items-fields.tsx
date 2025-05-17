@@ -112,8 +112,11 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
 
       if (err) {
         console.error(err)
+        form.setError("config" as FieldPath<TFieldValues>, { message: err.message })
         return
       }
+
+      form.clearErrors("config" as FieldPath<TFieldValues>)
 
       items.replace(itemsConfig as FieldArray<TFieldValues, ArrayPath<TFieldValues>>[])
     }

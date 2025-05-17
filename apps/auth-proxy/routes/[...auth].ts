@@ -2,6 +2,7 @@ import { Auth } from "@auth/core"
 import Github from "@auth/core/providers/github"
 import { eventHandler, toWebRequest } from "h3"
 
+import Google from "@auth/core/providers/google"
 import { env } from "../env"
 
 export default eventHandler((event) =>
@@ -19,6 +20,16 @@ export default eventHandler((event) =>
           email: p.email,
           name: p.login,
           image: p.avatar_url,
+        }),
+      }),
+      Google({
+        clientId: env.AUTH_GOOGLE_CLIENT_ID,
+        clientSecret: env.AUTH_GOOGLE_CLIENT_SECRET,
+        profile: (p) => ({
+          id: p.id.toString(),
+          email: p.email,
+          name: p.name,
+          image: p.image,
         }),
       }),
     ],

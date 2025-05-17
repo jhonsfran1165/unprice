@@ -77,7 +77,7 @@ export default function DurationFormField<TFieldValues extends FormValues>({
         Duration
       </FormLabel>
 
-      <FormDescription>The start date and the end date of the subscription.</FormDescription>
+      <FormDescription>The duration of the phase.</FormDescription>
 
       <div className="flex flex-row rounded-md border bg-background-bg">
         <FormField

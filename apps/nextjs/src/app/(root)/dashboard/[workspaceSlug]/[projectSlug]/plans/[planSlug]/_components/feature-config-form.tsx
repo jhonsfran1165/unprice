@@ -31,14 +31,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@unprice/ui/separator"
 import { Switch } from "@unprice/ui/switch"
 import { cn } from "@unprice/ui/utils"
-
-import { FEATURE_SLUGS } from "@unprice/config"
-import { Warning } from "@unprice/ui/icons"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
-import { Typography } from "@unprice/ui/typography"
 import { SubmitButton } from "~/components/submit-button"
 import { usePlanFeaturesList } from "~/hooks/use-features"
-import { useFlags } from "~/hooks/use-flags"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -64,7 +58,7 @@ export function FeatureConfigForm({
 
   const editMode = !!defaultValues.id
   const isPublished = planVersion?.status === "published"
-  const isProEnabled = useFlags(FEATURE_SLUGS.ACCESS_PRO)
+  // const isProEnabled = useFlags(FEATURE_SLUGS.ACCESS_PRO)
 
   // we set all possible values for the form so react-hook-form don't complain
   const controlledDefaultValues = {
@@ -189,7 +183,7 @@ export function FeatureConfigForm({
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name="metadata.realtime"
           render={({ field }) => (
@@ -230,7 +224,7 @@ export function FeatureConfigForm({
               </FormControl>
             </FormItem>
           )}
-        />
+        /> */}
 
         <Separator />
 

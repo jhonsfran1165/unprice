@@ -1,0 +1,2 @@
+ALTER TABLE "unprice_invoices" ADD COLUMN "customer_id" varchar(36) NOT NULL;--> statement-breakpoint
+ALTER TABLE "unprice_invoices" ADD CONSTRAINT "invoices_customer_id_fkey" FOREIGN KEY ("customer_id","project_id") REFERENCES "public"."unprice_customers"("id","project_id") ON DELETE cascade ON UPDATE no action;

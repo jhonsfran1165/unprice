@@ -26,7 +26,7 @@ export default async function ProjectSettingsLayout(props: {
           description="Manage your project settings"
           action={
             <ProjectDialog defaultValues={project}>
-              <Button>
+              <Button variant={"outline"}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit Project
               </Button>

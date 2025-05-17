@@ -4,7 +4,7 @@ import { deactivate } from "./deactivate"
 import { duplicate } from "./duplicate"
 import { getById } from "./getById"
 import { listByActiveProject } from "./listByActiveProject"
-import { listByProjectId } from "./listByProjectId"
+import { listByProjectUnprice } from "./listByProjectUnprice"
 import { publish } from "./publish"
 import { remove } from "./remove"
 import { update } from "./update"
@@ -17,6 +17,6 @@ export const planVersionRouter = createTRPCRouter({
   duplicate: duplicate,
   publish: publish,
   getById: getById,
-  listByProjectId: listByProjectId,
+  listByProjectUnprice: listByProjectUnprice,
   listByActiveProject: listByActiveProject,
 })

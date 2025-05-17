@@ -10,6 +10,8 @@ export const env = createEnv({
     AUTH_REDIRECT_PROXY_URL: z.string().min(1),
     AUTH_GITHUB_CLIENT_ID: z.string().min(1),
     AUTH_GITHUB_CLIENT_SECRET: z.string().min(1),
+    AUTH_GOOGLE_CLIENT_ID: z.string().min(1),
+    AUTH_GOOGLE_CLIENT_SECRET: z.string().min(1),
     AUTH_SECRET:
       process.env.NODE_ENV === "production" ? z.string().min(1) : z.string().min(1).optional(),
   },

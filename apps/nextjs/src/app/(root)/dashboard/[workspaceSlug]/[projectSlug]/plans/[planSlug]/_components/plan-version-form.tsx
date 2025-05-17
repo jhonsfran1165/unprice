@@ -60,6 +60,7 @@ export function PlanVersionForm({
       toastAction("saved")
       setDialogOpen?.(false)
       router.refresh()
+      router.push(`${params.planSlug}/${planVersion.id}`)
     },
   })
 

@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server"
 import { getPlanVersionApiResponseSchema, getPlanVersionListSchema } from "@unprice/db/validators"
+import { PlanService } from "@unprice/services/plans"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
-import { unprice } from "#utils/unprice"
 
 export const listByActiveProject = protectedProjectProcedure
   .input(getPlanVersionListSchema)
@@ -12,16 +12,37 @@ export const listByActiveProject = protectedProjectProcedure
     })
   )
   .query(async (opts) => {
-    const planVersions = await unprice.plans.listPlanVersions(opts.input)
+    const planService = new PlanService({
+      cache: opts.ctx.cache,
+      analytics: opts.ctx.analytics,
+      logger: opts.ctx.logger,
+      metrics: opts.ctx.metrics,
+      waitUntil: opts.ctx.waitUntil,
+      db: opts.ctx.db,
+    })
 
-    if (planVersions.error) {
+    const { err, val: planVersionData } = await planService.listPlanVersions({
+      projectId: opts.ctx.project.id,
+      query: {
+        published: opts.input.onlyPublished,
+        enterprise: opts.input.onlyEnterprisePlan,
+        latest: opts.input.onlyLatest,
+        currency: opts.input.currency,
+        billingInterval: opts.input.billingInterval,
+      },
+      opts: {
+        skipCache: true,
+      },
+    })
+
+    if (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: planVersions.error.message,
+        message: err.message,
       })
     }
 
     return {
-      planVersions: planVersions.result.planVersions,
+      planVersions: planVersionData ?? [],
     }
   })
