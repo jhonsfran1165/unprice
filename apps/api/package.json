@@ -10,18 +10,18 @@
     "type-check": "gentypes && tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "20.11.24",
+    "@types/node": "20.17.47",
     "@unprice/tsconfig": "workspace:^",
-    "drizzle-kit": "^0.30.5",
-    "typescript": "^5.3.3",
-    "wrangler": "^4.12.0"
+    "drizzle-kit": "^0.31.1",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.15.2"
   },
   "dependencies": {
-    "@auth/core": "^0.34.1",
+    "@auth/core": "^0.39.1",
     "@chronark/zod-bird": "^0.3.10",
-    "@hono/zod-openapi": "^0.19.2",
-    "@scalar/hono-api-reference": "^0.7.2",
-    "@t3-oss/env-core": "^0.12.0",
+    "@hono/zod-openapi": "^0.19.6",
+    "@scalar/hono-api-reference": "^0.8.10",
+    "@t3-oss/env-core": "^0.13.4",
     "@unkey/cache": "^1.5.0",
     "@unprice/config": "workspace:^",
     "@unprice/db": "workspace:^",
@@ -31,11 +31,11 @@
     "@unprice/metrics": "workspace:^",
     "@unprice/services": "workspace:^",
     "@unprice/tinybird": "workspace:^",
-    "drizzle-orm": "^0.42.0",
-    "hono": "^4.7.4",
-    "hono-party": "^0.0.6",
-    "partyserver": "^0.0.65",
+    "drizzle-orm": "^0.43.1",
+    "hono": "^4.7.10",
+    "hono-party": "^0.0.12",
+    "partyserver": "^0.0.71",
     "stoker": "^1.4.2",
-    "zod": "^3.24.2"
+    "zod": "^3.24.4"
   }
 }

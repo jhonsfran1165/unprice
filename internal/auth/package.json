@@ -20,21 +20,21 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@auth/core": "^0.34.1",
-    "@auth/drizzle-adapter": "1.8.0",
-    "@t3-oss/env-core": "^0.12.0",
+    "@auth/core": "^0.39.1",
+    "@auth/drizzle-adapter": "1.9.1",
+    "@t3-oss/env-core": "^0.13.4",
     "@unprice/db": "^0.1.0",
     "encoding": "^0.1.13",
-    "next": "14.3.0-canary.44",
-    "next-auth": "5.0.0-beta.20",
-    "zod": "^3.24.2"
+    "next": "14.3.0-canary.87",
+    "next-auth": "5.0.0-beta.28",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "@unprice/tsconfig": "^0.1.0",
-    "typescript": "^5.3.3",
-    "@types/react": "^18.3.1",
-    "@types/react-dom": "^18.3.1"
+    "typescript": "^5.8.3",
+    "@types/react": "^18.3.21",
+    "@types/react-dom": "^18.3.7"
   }
 }
