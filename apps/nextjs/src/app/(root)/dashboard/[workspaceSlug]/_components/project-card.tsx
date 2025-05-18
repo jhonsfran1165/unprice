@@ -53,7 +53,7 @@ export function ProjectCardSkeleton(props: { pulse?: boolean }) {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span className={cn("flex-1 bg-muted", pulse && "animate-pulse")}>&nbsp;</span>
-          <ProjectTierIndicator tier="FREE" />
+          <ProjectTierIndicator tier="" />
         </CardTitle>
         <CardDescription className={cn("bg-muted", pulse && "animate-pulse")}>
           &nbsp;

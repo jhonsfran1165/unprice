@@ -200,6 +200,7 @@ export async function invoiceSubscription({
           amountCreditUsed: 0,
           invoicePaymentProviderUrl: "",
           invoicePaymentProviderId: "",
+          customerId: subscription.customerId,
           paymentProvider: currentPhase.planVersion.paymentProvider,
           requiredPaymentMethod: currentPhase.planVersion.paymentMethodRequired,
           projectId: subscription.projectId,

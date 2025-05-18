@@ -1,5 +1,6 @@
 "use client"
 
+import { Typography } from "@unprice/ui/typography"
 import { LazyMotion, domAnimation, m } from "framer-motion"
 import { useParams, useRouter } from "next/navigation"
 import { Balancer } from "react-wrap-balancer"
@@ -39,8 +40,24 @@ export default function CreateProject() {
               },
             }}
           >
-            <Balancer>{`Let's start off by creating your first app`}</Balancer>
+            <Balancer>Let's start off by creating your first app</Balancer>
           </m.h1>
+          <m.div
+            className="mb-8"
+            variants={{
+              hidden: { opacity: 0, x: 100 },
+              show: {
+                opacity: 1,
+                x: 0,
+                transition: { duration: 0.4, type: "spring" },
+              },
+            }}
+          >
+            <Typography variant="p">
+              An app is a representation of your product. It can be a website, a mobile app, or a
+              desktop app, where you can offer your plans and features to your customers.
+            </Typography>
+          </m.div>
           <m.div
             variants={{
               hidden: { opacity: 0, x: 100 },
@@ -61,8 +78,8 @@ export default function CreateProject() {
               defaultValues={{
                 defaultCurrency: "USD",
                 timezone: "UTC",
-                name: "My SaaS",
-                url: "https://my-saas.com",
+                name: "Acme App",
+                url: "https://acme.com",
               }}
             />
           </m.div>

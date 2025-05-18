@@ -28,7 +28,7 @@ import type {
 import { currencyEnum, typeFeatureVersionEnum } from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
 import { projects } from "./projects"
-import { subscriptionItems, subscriptionPhases, subscriptions } from "./subscriptions"
+import { invoices, subscriptionItems, subscriptionPhases, subscriptions } from "./subscriptions"
 
 export const customers = pgTableProject(
   "customers",
@@ -253,6 +253,7 @@ export const customersRelations = relations(customers, ({ one, many }) => ({
   }),
   subscriptions: many(subscriptions),
   entitlements: many(customerEntitlements),
+  invoices: many(invoices),
   // paymentMethods: many(customerPaymentMethods),
 }))
 

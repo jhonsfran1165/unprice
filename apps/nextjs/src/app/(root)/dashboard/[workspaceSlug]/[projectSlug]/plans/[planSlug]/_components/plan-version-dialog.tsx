@@ -44,7 +44,7 @@ export function PlanVersionDialog({
               paymentProvider: "stripe",
               description: "",
               collectionMethod: "charge_automatically",
-              whenToBill: "pay_in_arrear",
+              whenToBill: "pay_in_advance",
               autoRenew: true,
               paymentMethodRequired: false,
               trialDays: 0,

@@ -125,7 +125,8 @@ export function ProjectForm(props: {
                 <FormLabel>Currency</FormLabel>
 
                 <FormDescription>
-                  This customer will use this currency for all its invoices.
+                  Default currency for all plans and features. You can override this for each plan
+                  and feature.
                 </FormDescription>
                 <Select onValueChange={field.onChange} value={field.value ?? ""}>
                   <FormControl>
@@ -154,7 +155,7 @@ export function ProjectForm(props: {
             onClick={() => form.handleSubmit(onSubmit)()}
             isDisabled={form.formState.isSubmitting}
             isSubmitting={form.formState.isSubmitting}
-            label={editMode ? "Update Project" : "Create Project"}
+            label={editMode ? "Update" : "Create"}
           />
         </div>
       </form>

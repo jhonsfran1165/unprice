@@ -13,7 +13,7 @@ export default function Loading() {
       header={
         <HeaderTab
           title="Apps"
-          description="All your for this Workspace"
+          description="All your appsfor this Workspace"
           action={
             <SuperLink href={"/onboarding"}>
               <Button>

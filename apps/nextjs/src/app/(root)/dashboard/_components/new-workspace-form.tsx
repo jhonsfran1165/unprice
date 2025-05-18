@@ -15,6 +15,7 @@ import { Input } from "@unprice/ui/input"
 import ConfigItemsFormField from "~/components/forms/items-fields"
 import SelectPlanFormField from "~/components/forms/select-plan-field"
 import { SubmitButton } from "~/components/submit-button"
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -34,10 +35,10 @@ export default function NewWorkspaceForm({
     },
   })
 
-  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
+  const { data, isLoading, error } = api.planVersions.listByProjectUnprice.useQuery(
     {
-      onlyPublished: true,
-      onlyLatest: true,
+      published: true,
+      enterprisePlan: true,
     },
     {
       enabled: true,
@@ -55,6 +56,10 @@ export default function NewWorkspaceForm({
 
   const onSubmitForm = async (data: WorkspaceSignup) => {
     await signUpWorkspace.mutateAsync(data)
+  }
+
+  if (error) {
+    toastAction("error", error.message)
   }
 
   return (

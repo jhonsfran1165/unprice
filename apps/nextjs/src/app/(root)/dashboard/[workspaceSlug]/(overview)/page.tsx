@@ -31,7 +31,7 @@ export default async function WorkspaceOverviewPage(props: {
       header={
         <HeaderTab
           title="Apps"
-          description="All your for this Workspace"
+          description="All your apps for this Workspace"
           action={
             <SuperLink href={`/${props.params.workspaceSlug}/onboarding`}>
               <Button>
@@ -61,8 +61,8 @@ export default async function WorkspaceOverviewPage(props: {
             </ul>
             <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 w-full text-center">
               <Balancer>
-                <Typography variant="h2">This workspace has no projects yet</Typography>
-                <Typography variant="large">Create your first project to get started</Typography>
+                <Typography variant="h2">This workspace has no apps yet</Typography>
+                <Typography variant="large">Create your first app to get started</Typography>
               </Balancer>
             </div>
           </div>

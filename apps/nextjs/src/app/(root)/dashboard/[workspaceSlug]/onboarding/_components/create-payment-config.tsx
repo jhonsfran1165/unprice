@@ -1,3 +1,4 @@
+import { Typography } from "@unprice/ui/typography"
 import { LazyMotion, domAnimation, m } from "framer-motion"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect } from "react"
@@ -35,7 +36,7 @@ export default function CreatePaymentConfig() {
           className="flex flex-col rounded-xl bg-background/60 p-8"
         >
           <m.h1
-            className="mb-4 font-bold text-2xl transition-colors sm:text-3xl"
+            className="mb-4 font-bold text-2xl transition-colors sm:text-4xl"
             variants={{
               hidden: { opacity: 0, x: 250 },
               show: {
@@ -45,8 +46,24 @@ export default function CreatePaymentConfig() {
               },
             }}
           >
-            <Balancer>{`Next, let's create a payment config for your app`}</Balancer>
+            <Balancer>Next, let's create a payment config for your app</Balancer>
           </m.h1>
+          <m.div
+            className="mb-8"
+            variants={{
+              hidden: { opacity: 0, x: 100 },
+              show: {
+                opacity: 1,
+                x: 0,
+                transition: { duration: 0.4, type: "spring" },
+              },
+            }}
+          >
+            <Typography variant="p">
+              Unprice uses different payment providers to configure your plans and features. This
+              API key is used to create the configurations for the payment provider.
+            </Typography>
+          </m.div>
           <m.div
             variants={{
               hidden: { opacity: 0, x: 100 },

@@ -9,6 +9,7 @@ import { Checkbox } from "@unprice/ui/checkbox"
 import { Eye, EyeOff } from "@unprice/ui/icons"
 import { cn } from "@unprice/ui/utils"
 
+import { Typography } from "@unprice/ui/typography"
 import { CopyButton } from "~/components/copy-button"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { formatDate } from "~/lib/dates"
@@ -94,7 +95,13 @@ export const columns: ColumnDef<ApiKey>[] = [
   {
     accessorKey: "createdAtM",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
-    cell: ({ row }) => <div>{formatDate(row.getValue("createdAtM"))}</div>,
+    cell: ({ row }) => (
+      <div className="flex items-center space-x-1 whitespace-nowrap">
+        <Typography variant="p" affects="removePaddingMargin">
+          {formatDate(row.getValue("createdAtM"))}
+        </Typography>
+      </div>
+    ),
     enableSorting: true,
     enableHiding: true,
   },
@@ -138,7 +145,13 @@ export const columns: ColumnDef<ApiKey>[] = [
       if (lastUsed === null) {
         return "Never used"
       }
-      return <div>{formatDate(lastUsed)}</div>
+      return (
+        <div className="flex items-center space-x-1 whitespace-nowrap">
+          <Typography variant="p" affects="removePaddingMargin">
+            {formatDate(lastUsed)}
+          </Typography>
+        </div>
+      )
     },
     enableSorting: true,
     enableHiding: true,

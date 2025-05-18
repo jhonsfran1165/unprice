@@ -181,7 +181,11 @@ export const columns: ColumnDef<PlanVersion>[] = [
     accessorKey: "createdAtM",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
     cell: ({ row }) => (
-      <div className="whitespace-nowrap text-sm">{formatDate(row.original.createdAtM)}</div>
+      <div className="flex items-center space-x-1 whitespace-nowrap">
+        <Typography variant="p" affects="removePaddingMargin">
+          {formatDate(row.original.createdAtM)}
+        </Typography>
+      </div>
     ),
     enableSorting: true,
     enableHiding: true,
@@ -191,7 +195,11 @@ export const columns: ColumnDef<PlanVersion>[] = [
     accessorKey: "updatedAtM",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Updated At" />,
     cell: ({ row }) => (
-      <div className="whitespace-nowrap text-sm">{formatDate(row.original.updatedAtM)}</div>
+      <div className="flex items-center space-x-1 whitespace-nowrap">
+        <Typography variant="p" affects="removePaddingMargin">
+          {formatDate(row.original.updatedAtM)}
+        </Typography>
+      </div>
     ),
     enableSorting: true,
     enableHiding: true,

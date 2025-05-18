@@ -64,7 +64,7 @@ export default function AMI() {
         <br />
         In a world where AI can clone your product overnight, pricing is your sharpest weapon.
         <div className="mt-10 flex justify-end">
-          <Link href={`${BASE_URL}/manifesto`} target="_blank">
+          <Link href={`${BASE_URL}/manifesto`}>
             <Button variant="outline">See AMI manifesto</Button>
           </Link>
         </div>

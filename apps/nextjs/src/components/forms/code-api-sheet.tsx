@@ -34,7 +34,7 @@ export function CodeApiSheet({
       }}
     >
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="flex max-h-screen w-full flex-col justify-start overflow-y-scroll md:w-1/2 lg:w-[800px]">
+      <SheetContent className="hide-scrollbar flex max-h-screen w-full flex-col justify-start overflow-y-auto overflow-x-hidden md:w-1/2 lg:w-[800px]">
         <SheetHeader>
           <SheetTitle className="text-2xl">Code API</SheetTitle>
           <SheetDescription>Use the code API to get the price of a product</SheetDescription>
