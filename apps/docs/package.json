@@ -1,0 +1,13 @@
+{
+  "name": "@unprice/docs",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "mint dev --port 3333"
+  },
+  "keywords": [],
+  "author": "Sebastian Franco",
+  "devDependencies": {
+    "mint": "^4.1.17"
+  }
+}
