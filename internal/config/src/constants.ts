@@ -61,6 +61,13 @@ export const API_DOMAIN =
       ? `https://api-preview.${MAIN_DOMAIN}/`
       : "http://localhost:8787/"
 
+export const DOCS_DOMAIN =
+  VERCEL_ENV === "production"
+    ? `https://docs.${MAIN_DOMAIN}/`
+    : VERCEL_ENV === "preview"
+      ? `https://docs.${MAIN_DOMAIN}/`
+      : "http://localhost:3333/"
+
 export const AUTH_ROUTES = {
   SIGNIN: "/auth/signin",
   SIGNOUT: "/auth/signout",

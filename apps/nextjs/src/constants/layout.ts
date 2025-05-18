@@ -1,4 +1,4 @@
-import { BASE_URL } from "@unprice/config"
+import { BASE_URL, DOCS_DOMAIN } from "@unprice/config"
 import type { SiteConfig } from "../types"
 
 export const navItems = [
@@ -7,8 +7,8 @@ export const navItems = [
     title: "Manifesto",
   },
   {
-    href: `${BASE_URL}/docs`,
-    title: "Docs",
+    href: `${DOCS_DOMAIN}`,
+    title: "Documentation",
   },
 ] satisfies { href: string; title: string }[]
 

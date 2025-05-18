@@ -154,9 +154,9 @@ importers:
 
   apps/docs:
     devDependencies:
-      mintlify:
-        specifier: ^4.0.531
-        version: 4.0.536(@types/node@20.11.24)(@types/react@18.3.18)(react-dom@18.3.1)(react@18.3.1)(typescript@5.8.2)
+      mint:
+        specifier: ^4.1.17
+        version: 4.1.17(@types/node@20.11.24)(@types/react@18.3.18)(react-dom@18.3.1)(react@18.3.1)(typescript@5.8.2)
 
   apps/nextjs:
     dependencies:
@@ -18565,8 +18565,8 @@ packages:
       rimraf: 5.0.10
     dev: true
 
-  /mintlify@4.0.536(@types/node@20.11.24)(@types/react@18.3.18)(react-dom@18.3.1)(react@18.3.1)(typescript@5.8.2):
-    resolution: {integrity: sha512-peGiDm5G8+k0VKzRCF1S6V0S0HduYJCNy31nIwBHS1IOaWIVlnG7+V0cbyTtSxT454xf8DZdps7PJBVgUkFDYw==}
+  /mint@4.1.17(@types/node@20.11.24)(@types/react@18.3.18)(react-dom@18.3.1)(react@18.3.1)(typescript@5.8.2):
+    resolution: {integrity: sha512-/PvsQRUhsnmbzM7iEoB0GwRfH6NJ9Diq2cjjm579yrDGiLxXPnDitP73MYO9IZj/Z1eoaiYyWhx1+DaLPGSJWw==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     dependencies:
