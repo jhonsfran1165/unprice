@@ -1,0 +1,13 @@
+{
+  "name": "@unprice/docs",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "mintlify dev --port 3333"
+  },
+  "keywords": [],
+  "author": "Sebastian Franco",
+  "devDependencies": {
+    "mintlify": "^4.1.17"
+  }
+}
