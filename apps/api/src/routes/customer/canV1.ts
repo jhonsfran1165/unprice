@@ -15,6 +15,7 @@ const tags = ["customer"]
 export const route = createRoute({
   path: "/v1/customer/can",
   operationId: "customer.can",
+  summary: "can feature",
   description: "Check if a customer can use a feature",
   method: "post",
   tags,

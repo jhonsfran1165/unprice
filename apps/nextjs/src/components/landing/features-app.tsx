@@ -72,8 +72,8 @@ export function FeaturesApp() {
         variants={itemVariants}
         className="mt-6 max-w-3xl text-justify text-background-text text-lg leading-7"
       >
-        Unprice&rsquo;s infrastructure is designed to be fast and reliable. It's open source, you
-        can see the code if you don't trust us.
+        Unprice&rsquo;s infrastructure is designed to be fast and reliable. Built on top of
+        cloudflare and durable objects. Go check the code.
       </motion.p>
 
       <motion.dl

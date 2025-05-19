@@ -1,5 +1,5 @@
 "use client"
-import { API_DOMAIN } from "@unprice/config"
+import { DOCS_DOMAIN } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
 import { motion, useInView } from "framer-motion"
 import { BarChart, Check, Code, Settings } from "lucide-react"
@@ -9,15 +9,15 @@ import { SDKDemo } from "./sdk-examples"
 
 const features = [
   {
-    name: "Use typescript SDK",
+    name: "Configure",
+    description: "Create and manage your plans, features, and tiers in the Unprice Dashboard.",
+    icon: Settings,
+  },
+  {
+    name: "Use SDK",
     description:
       "Install the Unprice SDK in your project and start using it in minutes. Start incrementally, then go all in.",
     icon: Code,
-  },
-  {
-    name: "Configure your plans",
-    description: "Create and manage your plans, features, and tiers in the Unprice Dashboard.",
-    icon: Settings,
   },
   {
     name: "Verify and report",
@@ -80,7 +80,7 @@ export default function CodeExample() {
         developer experience to implement once and forget about it. Pricing logic belongs to
         business teams, not backlogs.
         <div className="mt-10 flex justify-end">
-          <Link href={`${API_DOMAIN}reference`} target="_blank">
+          <Link href={`${DOCS_DOMAIN}/api-reference/introduction`} target="_blank">
             <Button variant="outline">Check API docs</Button>
           </Link>
         </div>
@@ -95,11 +95,11 @@ export default function CodeExample() {
             variants={itemVariants}
             className="col-span-full sm:col-span-2 lg:col-span-1"
           >
-            <div className="w-fit rounded-lg p-2 shadow-md shadow-primary-line ring-1 ring-black/5 dark:shadow-primary-line/30 dark:ring-white/5">
-              <item.icon aria-hidden="true" className="size-6 text-primary-text" />
+            <div className="flex items-center gap-2 align-middle text-primary-text">
+              <item.icon aria-hidden="true" className="size-6" />
+              <dt className="font-semibold">{item.name}</dt>
             </div>
-            <dt className="mt-6 font-semibold text-background-textContrast">{item.name}</dt>
-            <dd className="mt-2 text-background-text text-lg leading-7">{item.description}</dd>
+            <dd className="mt-2 text-background-text leading-7">{item.description}</dd>
           </motion.div>
         ))}
       </motion.dl>

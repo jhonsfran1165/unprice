@@ -3,7 +3,6 @@ import { Link } from "next-view-transitions"
 import { Logo } from "@unprice/ui/icons"
 
 import { Fragment } from "react"
-import Footer from "~/components/layout/footer"
 import { siteConfig } from "~/constants/layout"
 
 export default function AuthLayout(props: { children: React.ReactNode }) {
@@ -33,7 +32,6 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
           {props.children}
         </div>
       </div>
-      <Footer className="border-none" />
     </Fragment>
   )
 }

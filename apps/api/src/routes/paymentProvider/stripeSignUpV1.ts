@@ -12,6 +12,7 @@ export const route = createRoute({
   path: "/v1/paymentProvider/stripe/signUp/{sessionId}/{projectId}",
   // this endpoint is not public, so we hide it
   hide: env.NODE_ENV === "production",
+  summary: "stripe sign up",
   description:
     "This endpoint is called by stripe after the customer has signed up. No webhook is needed.",
   method: "get",

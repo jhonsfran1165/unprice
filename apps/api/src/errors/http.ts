@@ -33,7 +33,7 @@ export function errorSchemaFactory(code: z.ZodEnum<any>) {
       }),
       docs: z.string().openapi({
         description: "A link to our documentation with more details about this error code",
-        example: `https://unprice.dev/docs/api-reference/errors/code/${code._def.values.at(0)}`,
+        example: `https://docs.unprice.dev/api-reference/errors/code/${code._def.values.at(0)}`,
       }),
       message: z
         .string()
@@ -54,7 +54,7 @@ export const ErrorSchema = z.object({
     }),
     docs: z.string().openapi({
       description: "A link to our documentation with more details about this error code",
-      example: "https://unprice.dev/docs/api-reference/errors/code/BAD_REQUEST",
+      example: "https://docs.unprice.dev/api-reference/errors/code/BAD_REQUEST",
     }),
     message: z.string().openapi({ description: "A human readable explanation of what went wrong" }),
     requestId: z.string().openapi({
@@ -141,7 +141,7 @@ export function handleZodError(
       {
         error: {
           code: "BAD_REQUEST",
-          docs: "https://unprice.dev/docs/api-reference/errors/code/BAD_REQUEST",
+          docs: "https://docs.unprice.dev/api-reference/errors/code/BAD_REQUEST",
           message: parseZodErrorMessage(result.error),
           requestId: c.get("requestId"),
         },
@@ -168,7 +168,7 @@ export function handleError(err: Error, c: Context<HonoEnv>): Response {
       {
         error: {
           code: err.code,
-          docs: `https://unprice.dev/docs/api-reference/errors/code/${err.code}`,
+          docs: `https://docs.unprice.dev/api-reference/errors/code/${err.code}`,
           message: err.message,
           requestId: c.get("requestId"),
         },
@@ -194,7 +194,7 @@ export function handleError(err: Error, c: Context<HonoEnv>): Response {
       {
         error: {
           code,
-          docs: `https://unprice.dev/docs/api-reference/errors/code/${code}`,
+          docs: `https://docs.unprice.dev/api-reference/errors/code/${code}`,
           message: err.message,
           requestId: c.get("requestId"),
         },
@@ -217,7 +217,7 @@ export function handleError(err: Error, c: Context<HonoEnv>): Response {
     {
       error: {
         code: "INTERNAL_SERVER_ERROR",
-        docs: "https://unprice.dev/docs/api-reference/errors/code/INTERNAL_SERVER_ERROR",
+        docs: "https://docs.unprice.dev/api-reference/errors/code/INTERNAL_SERVER_ERROR",
         message: err.message ?? "something unexpected happened",
         requestId: c.get("requestId"),
       },

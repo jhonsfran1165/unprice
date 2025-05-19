@@ -15,6 +15,7 @@ const tags = ["plans"]
 export const route = createRoute({
   path: "/v1/plans/getPlanVersion/{planVersionId}",
   operationId: "plans.getPlanVersion",
+  summary: "get plan version",
   description: "Get a plan version by id",
   method: "get",
   tags,

@@ -17,6 +17,7 @@ const tags = ["customer"]
 export const route = createRoute({
   path: "/v1/customer/createPaymentMethod",
   operationId: "customer.createPaymentMethod",
+  summary: "create payment method",
   description: "Create a payment method for a customer",
   method: "post",
   tags,

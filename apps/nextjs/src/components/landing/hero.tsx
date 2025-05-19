@@ -81,9 +81,11 @@ export default function Hero() {
         className="mt-6 max-w-2xl px-4 text-background-text text-lg md:px-0"
         variants={itemVariants}
       >
+        <br />
+        <br />
         The open-source adaptive monetization infrastructure. Built for SaaS founders who refuse to
-        let static plans strangle their growth. Unprice lets you monetize like a billion-dollar
-        company from day one — without the engineering overhead.
+        let static plans strangle their growth. From flat rates to smart revenue — unlock adaptive
+        pricing without the headaches.
         <br />
         <br />
         Burn your static pricing. Build revenue machines now.
