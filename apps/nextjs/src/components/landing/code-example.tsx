@@ -1,22 +1,18 @@
 "use client"
-import { DOCS_DOMAIN } from "@unprice/config"
-import { Button } from "@unprice/ui/button"
 import { motion, useInView } from "framer-motion"
 import { BarChart, Check, Code, Settings } from "lucide-react"
-import Link from "next/link"
 import { useRef } from "react"
 import { SDKDemo } from "./sdk-examples"
 
 const features = [
   {
     name: "Configure",
-    description: "Create and manage your plans, features, and tiers in the Unprice Dashboard.",
+    description: "Create and manage your plans, features, and tiers from the Dashboard.",
     icon: Settings,
   },
   {
     name: "Use SDK",
-    description:
-      "Install the Unprice SDK in your project and start using it in minutes. Start incrementally, then go all in.",
+    description: "Use our SDK in your project. Start incrementally.",
     icon: Code,
   },
   {
@@ -26,8 +22,7 @@ const features = [
   },
   {
     name: "Data and Insights",
-    description:
-      "Measure usage, billing, willingness to pay, etc. Get insights into your users and their behavior.",
+    description: "Get insights into your users and their behavior from data.",
     icon: BarChart,
   },
 ]
@@ -66,7 +61,7 @@ export default function CodeExample() {
       animate={isInView ? "visible" : "hidden"}
       variants={containerVariants}
       aria-labelledby="code-example-title"
-      className="mx-auto w-full max-w-4xl px-4 py-10"
+      className="mx-auto w-full max-w-4xl px-4 py-20"
     >
       <motion.h2
         variants={itemVariants}
@@ -76,14 +71,9 @@ export default function CodeExample() {
         Built by developers, <br /> for developers
       </motion.h2>
       <motion.div variants={itemVariants} className="mt-6 text-justify text-lg">
-        The biggest constraint to iterate on pricing is the engineering effort. Unprice give you the
-        developer experience to implement once and forget about it. Pricing logic belongs to
-        business teams, not backlogs.
-        <div className="mt-10 flex justify-end">
-          <Link href={`${DOCS_DOMAIN}/api-reference/introduction`} target="_blank">
-            <Button variant="outline">Check API docs</Button>
-          </Link>
-        </div>
+        The biggest constraint to iterate on pricing is the engineering effort and the risk of
+        losing customers. Unprice solves those two issues and gives you the developer experience to
+        implement once and forget about it. Pricing logic belongs to business teams, not backlogs.
       </motion.div>
       <motion.div variants={itemVariants}>
         <SDKDemo />

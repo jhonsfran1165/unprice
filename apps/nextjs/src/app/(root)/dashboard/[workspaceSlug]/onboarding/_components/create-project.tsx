@@ -40,7 +40,7 @@ export default function CreateProject() {
               },
             }}
           >
-            <Balancer>Let's start off by creating your first app</Balancer>
+            <Balancer>Let's start off by creating your first project</Balancer>
           </m.h1>
           <m.div
             className="mb-8"
@@ -54,8 +54,8 @@ export default function CreateProject() {
             }}
           >
             <Typography variant="p">
-              An app is a representation of your product. It can be a website, a mobile app, or a
-              desktop app, where you can offer your plans and features to your customers.
+              An project is a representation of your product. It can be a website, a mobile project,
+              or a desktop project, where you can offer your plans and features to your customers.
             </Typography>
           </m.div>
           <m.div
@@ -78,7 +78,7 @@ export default function CreateProject() {
               defaultValues={{
                 defaultCurrency: "USD",
                 timezone: "UTC",
-                name: "Acme App",
+                name: "Acme project",
                 url: "https://acme.com",
               }}
             />

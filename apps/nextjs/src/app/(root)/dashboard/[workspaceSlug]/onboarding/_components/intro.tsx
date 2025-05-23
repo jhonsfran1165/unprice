@@ -77,7 +77,7 @@ export default function Intro() {
                 `)
                 }
               >
-                Create your first app
+                Create your first project
               </Button>
             </m.div>
           </m.div>

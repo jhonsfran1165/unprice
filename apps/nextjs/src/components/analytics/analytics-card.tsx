@@ -54,7 +54,7 @@ export async function AnalyticsCard<T extends string>({
                   {description}
                 </Typography>
               </div>
-              <ScrollArea className="h-[430px] p-4">
+              <ScrollArea className="h-[420px]">
                 <Suspense
                   fallback={
                     <div className="flex h-[430px] items-center justify-center">

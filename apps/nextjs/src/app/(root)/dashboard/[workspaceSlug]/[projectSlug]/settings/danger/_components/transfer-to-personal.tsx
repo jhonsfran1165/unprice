@@ -38,7 +38,7 @@ export function TransferProjectToPersonal({
   })
 
   const title = "Transfer to Personal"
-  const description = "Transfer this app to your personal workspace"
+  const description = "Transfer this project to your personal workspace"
 
   return (
     <Card className="border-danger">
@@ -79,7 +79,7 @@ export function TransferProjectToPersonal({
                   })
                 }}
               >
-                {`I'm sure. Transfer this app`}
+                {`I'm sure. Transfer this project`}
                 {transferProjectToPersonal.isPending && <LoadingAnimation className="ml-2" />}
               </Button>
             </DialogFooter>

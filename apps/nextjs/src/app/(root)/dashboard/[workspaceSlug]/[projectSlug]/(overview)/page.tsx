@@ -82,7 +82,7 @@ export default async function DashboardPage(props: {
       <div className="mt-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
         <HydrateClient>
           <AnalyticsCard
-            className="w-full"
+            className="w-full md:w-2/3"
             title="Feature Verifications & Usage"
             description="Feature verifications and usage recorded for this month."
             defaultTab="verifications"
@@ -143,7 +143,7 @@ async function RecentEvents(props: {
   const sessionTokenValue = cookie.get(sessionToken)?.value
 
   return (
-    <Card className={cn("flex flex-col", props.className)}>
+    <Card className={cn("flex flex-col justify-between", props.className)}>
       <CardHeader>
         <CardTitle>Recent Events</CardTitle>
         <CardDescription>Realtime events from your project.</CardDescription>

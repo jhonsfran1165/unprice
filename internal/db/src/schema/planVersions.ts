@@ -105,7 +105,7 @@ export const versions = pgTableProject(
       columns: [table.planId, table.projectId],
       foreignColumns: [plans.id, plans.projectId],
       name: "plan_versions_plan_id_pkey",
-    }),
+    }).onDelete("cascade"),
     pk: primaryKey({
       columns: [table.id, table.projectId],
       name: "plan_versions_plan_id_fkey",

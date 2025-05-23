@@ -45,7 +45,7 @@ export default function CreateApiKey() {
               },
             }}
           >
-            <Balancer>{`Next, let's create an API key for your app`}</Balancer>
+            <Balancer>{`Next, let's create an API key for your project`}</Balancer>
           </m.h1>
           <m.div
             variants={{

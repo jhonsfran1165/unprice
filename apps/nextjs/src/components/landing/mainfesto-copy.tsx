@@ -47,21 +47,38 @@ export default function MainfestoCopy() {
         The Market Shift
       </motion.h2>
       <motion.div variants={itemVariants} className="mt-6 text-justify text-lg">
-        Static pricing is dead. Everything is moving toward customer-perceived value, yet you still
-        price your product with one-size-fits-all pricing.
+        Static price is dead.
+        <br />
+        <br />3 plans and once a year pricing review is not enough.
         <br />
         <br />
-        You don't need to be a genius to see that this is a problem, and it is accelerating thanks
-        to AI.
+        Everything is moving toward customer-perceived value pricing, a fancy way to say; customers
+        want to pay for the value your product creates. Yet you still price your product with
+        one-size-fits-all pricing.
         <br />
         <br />
-        This shift is a common phenomenon; the market specializes, the customer specializes too,
-        becoming more demanding and hard to please.
+        This shift is a common phenomenon; think about the first smartphone.
         <br />
         <br />
-        In the old days, you could get away with a static pricing page, and think about pricing
-        strategy once your product is mature, but not anymore, today, customers expect pricing based
-        on their usage and outcomes.
+        When smartphones first became popular, there were only a few models, and most people were
+        satisfied with basic features like calling, texting, and a simple camera. As the market
+        offered more specialized products, customers expectations increased. People started to
+        demand more. Now, customers are much more demanding. A generic smartphone is rarely
+        enough—buyers want a device that fits their specific needs perfectly.
+        <br />
+        <br />
+        Same thing is happening in the SaaS market.
+        <br />
+        <br />
+        In the past, SaaS companies could rely on a simple, static pricing page — think flat monthly
+        fees or seat-based subscriptions. Customers would pay a fixed amount regardless of how much
+        value they actually received. This approach worked well when SaaS markets were less
+        competitive and customers had fewer alternatives.
+        <br />
+        <br />
+        Today, however, customers expect pricing that reflects their actual usage or the outcomes
+        they achieve. This shift is driven by a desire for fairer value exchange and flexibility as
+        business needs change.
         <br />
         <br />
         Think about it, why are you moving off from certain SaaS?
@@ -70,25 +87,30 @@ export default function MainfestoCopy() {
         Why do you want other alternatives?
         <br />
         <br />
-        It's probably because a mix of value-price mismatch and changes in the market.
+        Chances are, it comes down to a mismatch between value and price—or simply that the market
+        has changed. Maybe you’re paying for features you never use, or you’ve found a solution that
+        delivers more for less.
         <br />
         <br />
-        Price is innovation. Price is a mirror that reflects value.
-        <br />
-        <br />
-        And value is always changing. It's not static.
+        Price is more than just a number. It’s a reflection of innovation — a direct mirror of the
+        value your product delivers. And value isn’t static. It evolves with your customers’ needs,
+        your product roadmap, and the market itself.
         <br />
         <br />
         So why are you still using static pricing?
         <br />
         <br />
-        Some undeniable truths:
+        Consider this:
         <br />
         <br />
         <ul className="list-disc pl-10">
           <li>
-            Companies using hybrid models (subscription + usage) report the highest median growth
-            rate (21%), outperforming pure subscription and usage-based models.
+            <span className="font-semibold">
+              Hybrid pricing models (subscription + usage) drive results.
+            </span>
+            <br />
+            Companies using these models see the highest median growth rate—21%—outperforming both
+            pure subscription and pure usage-based models.
             <a
               href="https://www.maxio.com/resources/2025-saas-pricing-trends-report"
               target="_blank"
@@ -97,10 +119,14 @@ export default function MainfestoCopy() {
             >
               (Source: Maxio)
             </a>
+            <br />
+            <br />
           </li>
           <li>
-            There is a clear movement toward pricing models that directly tie cost to customer
-            outcomes or value received.
+            <span className="font-semibold">Pricing is moving closer to customer value.</span>
+            <br />
+            There’s a clear shift toward models that directly link what customers pay to the
+            outcomes they achieve.
             <a
               href="https://metronome.com/blog/saas-pricing-predictions-for-2025-whats-coming-and-how-to-prepare"
               target="_blank"
@@ -109,23 +135,37 @@ export default function MainfestoCopy() {
             >
               (Source: Metronome)
             </a>
+            <br />
+            <br />
           </li>
-          <li>Pricing is now a strategic growth lever, not just an operational detail.</li>
+          <li>
+            <span className="font-semibold"> Pricing is no longer just a backend detail.</span>
+            <br />
+            It’s a strategic lever for growth — a fundamental part of your product experience.
+            <br />
+            <br />
+          </li>
         </ul>
       </motion.div>
       <motion.div variants={itemVariants} className="mt-6 text-justify text-lg">
-        But let's be honest, you are not ready for this shift:
+        Are you ready for the shift?
+        <br />
+        <br />
+        Let’s be honest—most SaaS companies aren’t:
         <br />
         <br />
         <ul className="list-disc pl-10">
-          <li>You don’t know what your users are truly willing to pay.</li>
-          <li>You lack the tools to adapt pricing at the speed of your product.</li>
-          <li>You treat pricing like a backend config, not a growth engine.</li>
-          <li>You are not sure how to price your product for different segments of your market.</li>
+          <li>You’re unsure what your users are truly willing to pay.</li>
+          <li>You lack the tools to adapt pricing as quickly as your product evolves.</li>
+          <li>You treat pricing as a backend config, not a growth engine.</li>
+          <li>You don’t know how to price for different customer segments.</li>
         </ul>
       </motion.div>
       <motion.div variants={itemVariants} className="mt-6 text-justify text-lg">
-        And if you can’t evolve your monetization in real-time, you will lose to someone who can.
+        The companies winning today are those who treat pricing as a product, not an afterthought.
+        <br />
+        <br />
+        Are you ready to join them?
       </motion.div>
     </motion.section>
   )

@@ -38,13 +38,20 @@ export const remove = protectedProjectProcedure
     const countVersionsPlan = await opts.ctx.db
       .select({ count: sql<number>`count(*)` })
       .from(schema.versions)
-      .where(and(eq(schema.versions.projectId, project.id), eq(schema.versions.planId, id)))
+      .where(
+        and(
+          eq(schema.versions.projectId, project.id),
+          eq(schema.versions.planId, id),
+          eq(schema.versions.status, "published")
+        )
+      )
       .then((res) => res[0]?.count ?? 0)
 
     if (countVersionsPlan > 0) {
       throw new TRPCError({
         code: "CONFLICT",
-        message: "You cannot delete a plan that has versions. Please deactivate it instead",
+        message:
+          "You cannot delete a plan that has published versions. Please deactivate it instead",
       })
     }
 

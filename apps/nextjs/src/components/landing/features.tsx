@@ -29,7 +29,7 @@ const features = [
     Icon: FileTextIcon,
     name: "Plan iteration",
     description: "Version plans, migrate customers, packaging features and more.",
-    href: `${DOCS_DOMAIN}`,
+    href: `${DOCS_DOMAIN}/features/plans`,
     cta: "Learn more",
     className: "col-span-3 lg:col-span-1",
     background: (
@@ -61,7 +61,7 @@ const features = [
     Icon: BellIcon,
     name: "Any pricing model",
     description: "Report usage, metering, usage-based pricing, etc.",
-    href: `${DOCS_DOMAIN}`,
+    href: `${DOCS_DOMAIN}/features/pricing`,
     cta: "Learn more",
     className: "col-span-3 lg:col-span-2",
     background: (
@@ -70,10 +70,9 @@ const features = [
   },
   {
     Icon: Share2Icon,
-    name: "Billing integrations",
-    description:
-      "Use plug and play integrations to automate your billing with different payment providers.",
-    href: `${DOCS_DOMAIN}`,
+    name: "Analytics",
+    description: "Track events, see how your customers are using your product. Get insights.",
+    href: `${DOCS_DOMAIN}/features/analytics`,
     cta: "Learn more",
     className: "col-span-3 lg:col-span-2",
     background: (
@@ -85,7 +84,7 @@ const features = [
     name: "Subscription",
     description: "Manage subscriptions, cancel, pause, resume, with a simple API.",
     className: "col-span-3 lg:col-span-1",
-    href: `${DOCS_DOMAIN}`,
+    href: `${DOCS_DOMAIN}/features/subscriptions`,
     cta: "Learn more",
     background: (
       <Calendar

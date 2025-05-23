@@ -24,7 +24,7 @@ export const listByProjectUnprice = protectedProcedure
     // find unprice project
     const mainProject = await opts.ctx.db.query.projects.findFirst({
       where: (project, { eq, and }) =>
-        and(eq(project.isMain, true), eq(project.slug, "unprice-main")),
+        and(eq(project.isMain, true), eq(project.slug, "unprice-admin")),
     })
 
     if (!mainProject) {

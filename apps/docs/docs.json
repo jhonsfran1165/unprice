@@ -19,19 +19,35 @@
         "tab": "Guides",
         "groups": [
           {
-            "group": "Unprice",
-            "pages": ["index", "quickstart", "development"]
+            "group": "Introduction",
+            "icon": "home",
+            "pages": [
+              "index",
+              {
+                "group": "Quickstart",
+                "pages": ["quickstart/onboarding-plan"]
+              }
+            ]
           },
           {
-            "group": "Essentials",
+            "group": "Features",
+            "icon": "fingerprint",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets",
-              "essentials/update"
+              "features/plans",
+              "features/subscriptions",
+              "features/customers",
+              "features/analytics",
+              "features/billing"
+            ]
+          },
+          {
+            "group": "Concepts",
+            "pages": [
+              {
+                "group": "Identities",
+                "icon": "fingerprint",
+                "pages": ["concepts/identities/overview", "concepts/identities/ratelimits"]
+              }
             ]
           }
         ]
@@ -74,13 +90,18 @@
     "global": {
       "anchors": [
         {
+          "anchor": "Home",
+          "href": "https://unprice.dev",
+          "icon": "globe"
+        },
+        {
           "anchor": "Community",
-          "href": "https://mintlify.com/community",
+          "href": "https://discord.gg/unprice",
           "icon": "discord"
         },
         {
           "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
+          "href": "https://unprice.dev",
           "icon": "newspaper"
         }
       ]

@@ -79,25 +79,67 @@ export default function PillarsAMI() {
       >
         The Solution: AMI
       </motion.h2>
-      <motion.p variants={itemVariants} className="mt-6 text-justify text-lg">
-        Unprice is not a pricing tool. It’s the foundation of a new category: Adaptive Monetization
-        Infrastructure. A framework designed to make pricing easy and scalable as your product
-        grows. We believe pricing is the most neglected growth lever in SaaS.
+      <motion.div variants={itemVariants} className="mt-6 text-justify text-lg">
+        Unprice is not a pricing tool. It’s the foundation of a new category:{" "}
+        <b>Adaptive Monetization Infrastructure</b> — a framework built to make pricing effortless
+        and scalable as your product evolves. We believe pricing is the most overlooked growth lever
+        in SaaS. It’s time to change that — with systems, not guesswork.
         <br />
         <br />
-        It’s time to change that — with systems, not guesswork.
+        <b>What is AMI?</b>
+        <br />
+        AMI is foundational infrastructure designed to give you the tools and processes to handle
+        pricing like a billion-dollar business, right from day one. It’s the abstraction layer that
+        transforms pricing from a backend configuration into a core growth engine.
         <br />
         <br />
-        AMI is foundational infrastructure that gives you the right tools and processes to handle
-        pricing like a billion dollar business since day one.
+        <b>Why AMI Matters?</b>
+        <br />
+        <ul className="my-4 list-disc pl-10">
+          <li>
+            <span className="font-semibold">Dynamic, Not Static:</span> Kill static pricing. AMI
+            enables you to build a monetization system that learns and adapts as quickly as your
+            product and your market.
+          </li>
+          <li>
+            <span className="font-semibold">Continuous Learning:</span> AMI doesn't just set prices
+            — it continuously collects data, tests, and optimizes. Your pricing evolves in real
+            time, keeping you ahead of the competition.
+          </li>
+          <li>
+            <span className="font-semibold">Segment-Aware:</span> Easily tailor pricing for
+            different customer segments, geographies, or use cases—without engineering bottlenecks
+            or risky manual changes.
+          </li>
+          <li>
+            <span className="font-semibold">Seamless Integration:</span> AMI fits into your existing
+            stack, letting you experiment, iterate, and deploy new pricing models without disrupting
+            your product or your customers.
+          </li>
+        </ul>
+        <br />
+        <b>The AMI Advantage</b>
+        <br />
+        <ul className="my-4 list-disc pl-10">
+          <li>
+            <span className="font-semibold">Move Fast, Stay Flexible:</span> Launch new pricing
+            experiments in hours, not months.
+          </li>
+          <li>
+            <span className="font-semibold">Unlock Growth:</span> Capture more value from every
+            customer, every segment, every feature.
+          </li>
+          <li>
+            <span className="font-semibold">Future-Proof Your Monetization:</span> As your product
+            and market change, your pricing keeps pace.
+          </li>
+        </ul>
+        <br />
+        Stop treating pricing as an afterthought
         <br />
         <br />
-        AMI is the abstraction that allows to treat pricing as a growth lever, not just a backend
-        config.
-        <br />
-        <br />
-        Kill static pricing. Build a monetization system that learns as fast as your product.
-      </motion.p>
+        <b>The future of pricing is here.</b>
+      </motion.div>
 
       <motion.div variants={itemVariants} className="my-28 flex justify-center">
         <AnimatedBeamDemo />

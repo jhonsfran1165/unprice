@@ -9,6 +9,7 @@ export function SignInGoogle({ className }: { className?: string }) {
     <form className={cn("w-full", className)}>
       <Button
         className="w-full"
+        variant="outline"
         formAction={async () => {
           "use server"
           await signIn("google", {

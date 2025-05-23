@@ -51,44 +51,45 @@ export default function Belief() {
       </motion.h2>
       <motion.div variants={itemVariants} className="mt-6 max-w-prose space-y-4">
         <p className="text-justify text-lg leading-8">
-          SaaS, AI apps and consumers, deserve full control over how they capture and receive value.
-          Static plans, vendor lock-in, and engineering bottlenecks are the enemy. Adaptive
-          Monetization is the weapon. Open source is the armor.
+          We believe SaaS founders, AI app builders, and their customers deserve full control over
+          how value is captured and delivered.
           <br />
           <br />
-          We're not here to tweak pricing.
+          Static plans, vendor lock-in, and engineering bottlenecks? Those are relics of the past.
+          Adaptive Monetization is your weapon. Open source is your armor.
           <br />
           <br />
-          We're here to reinvent the monetization stack.
+          We’re not here to tweak pricing around the edges.
+          <br />
+          We’re here to reinvent the entire monetization stack — from the ground up.
           <br />
           <br />
-          You don't need Stripe's permission.
+          You don’t need Stripe’s permission to innovate.
           <br />
-          You don't need another pricing consultant.
+          You don’t need another pricing consultant to tell you what you already know.
           <br />
-          You don't need guesswork and gut feelings.
+          You don’t need to rely on guesswork or gut feelings.
+          <br />
+          <br />
+          You need Adaptive Monetization — built on your terms, at your pace and at any scale.
           <br />
           <br />
           <span className="font-bold italic">
-            We believe pricing is the most neglected growth lever in SaaS.
+            We believe pricing is the most neglected growth lever in SaaS. It’s time to change that.
           </span>
           <br />
           <br />
-          You need Adaptive Monetization — built on your terms, at your pace and at scale. If you're
-          building the future, your pricing should be part of it.
-          <br />
-          <br />
-          <span className="font-bold italic">Unprice, fair prices for everyone.</span>
+          <span className="font-bold italic">Unprice, better pricing for SaaS.</span>
         </p>
       </motion.div>
       <motion.div
-        className="mx-auto mt-10 flex w-fit justify-center p-1.5"
+        className="mx-auto mt-20 flex w-fit justify-center p-1.5"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.6 }}
       >
         <Link href={`${APP_DOMAIN}`} className={buttonVariants({ variant: "primary" })}>
-          Start for free
+          Start pricing
           <ChevronRight className="ml-1 h-4 w-4" />
         </Link>
       </motion.div>

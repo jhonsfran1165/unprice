@@ -88,14 +88,14 @@ export default function Hero() {
         pricing without the headaches.
         <br />
         <br />
-        Burn your static pricing. Build revenue machines now.
+        Implement and iterate any pricing model you want, without the fear of losing customers.
       </motion.p>
       <motion.div
         className="mt-8 flex w-full flex-col justify-center gap-3 px-3 align-middle sm:flex-row"
         variants={itemVariants}
       >
         <Link href={`${APP_DOMAIN}`} className={buttonVariants({ variant: "primary" })}>
-          Start for free
+          Start pricing
           <ChevronRight className="ml-1 h-4 w-4" />
         </Link>
         <Button asChild variant="link">
