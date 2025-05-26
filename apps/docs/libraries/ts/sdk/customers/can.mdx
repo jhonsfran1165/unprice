@@ -1,0 +1,77 @@
+---
+title: "Can"
+description: "Check if a customer can use a feature"
+---
+
+<RequestExample>
+
+```ts
+const { result, error } = await unprice.customers.can({
+  customerId: "cus_1234567890",
+  featureSlug: "feature_1",
+  metadata: {
+    action: "create",
+    country: "US"
+  }
+});
+
+if (error) {
+  // handle potential network or bad request error
+  // a link to our docs will be in the `error.docs` field
+  console.error(error.message);
+  return;
+}
+
+console.log(result);
+```
+
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "can": true,
+  "reason": "Feature is included in the current plan",
+  "usage": {
+    "used": 100,
+    "limit": 1000
+  }
+}
+```
+</ResponseExample>
+
+## Request
+
+<ParamField body="customerId" type="string" required>
+    The ID of the customer to check feature access for
+</ParamField>
+
+<ParamField body="featureSlug" type="string" required>
+    The slug of the feature to check access for
+</ParamField>
+
+<ParamField body="metadata" type="object">
+    Additional metadata to consider when checking access
+</ParamField>
+
+## Response
+
+<ResponseField name="can" type="boolean" required>
+    Whether the customer can use the feature
+</ResponseField>
+
+<ResponseField name="reason" type="string" required>
+    The reason for the access decision
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+    Usage information for the feature
+</ResponseField>
+
+<ResponseField name="usage.used" type="number">
+    The amount of usage consumed
+</ResponseField>
+
+<ResponseField name="usage.limit" type="number">
+    The usage limit for the feature
+</ResponseField>

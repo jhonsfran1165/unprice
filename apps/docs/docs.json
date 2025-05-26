@@ -25,7 +25,11 @@
               "index",
               {
                 "group": "Quickstart",
-                "pages": ["quickstart/onboarding-plan"]
+                "pages": [
+                  "quickstart/onboarding-plan",
+                  "quickstart/onboarding-customer",
+                  "quickstart/onboarding-entitlements"
+                ]
               }
             ]
           },
@@ -57,7 +61,7 @@
         "groups": [
           {
             "group": "API Documentation",
-            "pages": ["api-reference/introduction"]
+            "pages": ["api-reference/overview", "api-reference/authentication"]
           },
           {
             "group": "Errors",
@@ -83,6 +87,56 @@
               "source": "/api-reference/openapi.json",
               "directory": "api-reference"
             }
+          }
+        ]
+      },
+      {
+        "tab": "SDKs",
+        "groups": [
+          {
+            "group": "Official Libraries",
+            "icon": "code",
+            "pages": [
+              {
+                "group": "@unprice/api",
+                "pages": [
+                  "libraries/ts/sdk/overview",
+                  {
+                    "group": "Customers",
+                    "pages": [
+                      "libraries/ts/sdk/customers/create",
+                      "libraries/ts/sdk/customers/get-active-phase",
+                      "libraries/ts/sdk/customers/get-subscription",
+                      "libraries/ts/sdk/customers/get-entitlements",
+                      "libraries/ts/sdk/customers/reset-entitlements",
+                      "libraries/ts/sdk/customers/get-payment-methods",
+                      "libraries/ts/sdk/customers/create-payment-method",
+                      "libraries/ts/sdk/customers/can",
+                      "libraries/ts/sdk/customers/get-usage",
+                      "libraries/ts/sdk/customers/report-usage"
+                    ]
+                  },
+                  {
+                    "group": "Projects",
+                    "pages": ["libraries/ts/sdk/projects/get-features"]
+                  },
+                  {
+                    "group": "Analytics",
+                    "pages": [
+                      "libraries/ts/sdk/analytics/get-usage",
+                      "libraries/ts/sdk/analytics/get-verifications"
+                    ]
+                  },
+                  {
+                    "group": "Plans",
+                    "pages": [
+                      "libraries/ts/sdk/plans/get-plan-version",
+                      "libraries/ts/sdk/plans/list-plan-versions"
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
       }

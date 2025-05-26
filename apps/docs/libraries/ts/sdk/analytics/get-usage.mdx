@@ -1,0 +1,96 @@
+---
+title: "Get Usage"
+description: "Get usage analytics for a project or customer"
+---
+
+<RequestExample>
+
+```ts
+const { result, error } = await unprice.analytics.getUsage({
+  projectId: "project_1234567890",
+  range: "24h",
+  customerId: "cus_1234567890" // optional
+});
+
+if (error) {
+  // handle potential network or bad request error
+  // a link to our docs will be in the `error.docs` field
+  console.error(error.message);
+  return;
+}
+
+console.log(result);
+```
+
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "usage": [
+    {
+      "projectId": "project_1234567890",
+      "customerId": "cus_1234567890",
+      "entitlementId": "ent_1234567890",
+      "featureSlug": "feature_1",
+      "count": 100,
+      "sum": 1000,
+      "max": 50,
+      "last_during_period": 30
+    }
+  ]
+}
+```
+</ResponseExample>
+
+## Request
+
+<ParamField body="projectId" type="string" required>
+    The ID of the project to get usage for
+</ParamField>
+
+<ParamField body="range" type="string" enum="60m,24h,7d,30d,90d" required>
+    The time range to get usage for (last hour, day, week, month, or 3 months)
+</ParamField>
+
+<ParamField body="customerId" type="string">
+    The ID of the customer to get usage for (optional)
+</ParamField>
+
+## Response
+
+<ResponseField name="usage" type="array" required>
+    Array of usage data points
+</ResponseField>
+
+<ResponseField name="usage[].projectId" type="string" required>
+    The ID of the project
+</ResponseField>
+
+<ResponseField name="usage[].customerId" type="string">
+    The ID of the customer
+</ResponseField>
+
+<ResponseField name="usage[].entitlementId" type="string">
+    The ID of the entitlement
+</ResponseField>
+
+<ResponseField name="usage[].featureSlug" type="string" required>
+    The slug of the feature
+</ResponseField>
+
+<ResponseField name="usage[].count" type="number" required>
+    The number of usage events
+</ResponseField>
+
+<ResponseField name="usage[].sum" type="number" required>
+    The sum of all usage values
+</ResponseField>
+
+<ResponseField name="usage[].max" type="number" required>
+    The maximum usage value
+</ResponseField>
+
+<ResponseField name="usage[].last_during_period" type="number" required>
+    The last usage value during the period
+</ResponseField>
