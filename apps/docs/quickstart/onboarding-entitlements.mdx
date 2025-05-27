@@ -1,29 +1,133 @@
 ---
-title: 'First Customer'
-description: 'How to subscribe your first customer'
+title: 'Use entitlements'
+description: 'Use entitlements, report usage and verify access'
 ---
 
 ## Overview
 
-A plan is a representation of a package in the SaaS world. Creating your first plan in Unprice, involves creating an account and setting your first project. The following video shows how to set up your project and publish your first plan.
+This is why Unprice is really adaptive. Instead of thinking about plans inside your code, with Unprice you think about features.
+You map your application to validate specific features, this gives you the flexibility to change the packaging without affecting other customers.
+
+Think about it as a feature flag, with super powers.
+
+```ts
+// without Unprice
+if (customer.plan === "PRO") {
+  continue
+} else {
+  return "don't have access"
+}
+
+// ----------------------------------------------------
+
+// with Unprice
+const { result, error } = await unprice.customers.can({
+  customerId: "cus_1234567890",
+  featureSlug: "tokens", // map your feature code
+  metadata: {
+    action: "create",
+    country: "US"
+  }
+});
+
+if (error) {
+  // handle potential network or bad request error
+  // a link to our docs will be in the `error.docs` field
+  console.error(error.message);
+  return;
+}
+
+if (result.access) {
+  continue
+} else {
+  return {
+    message: "don't have access",
+    deniedReason: result.deniedReason
+  }
+}
+
+console.log(result);
+```
+
+
 
 <AccordionGroup>
-  <Accordion title="Create account & project">
-    Sign up into [Unprice](https://app.unprice.dev)
+  <Accordion title="Create API key">
+    Create API key for your project in [Unprice](https://app.unprice.dev)
   </Accordion>
-  <Accordion title="Set up your plan">
-    A plan represent the package of features that you are offering. Every plan can have multiple versions, which comes handy when you want iterate on it.
+  <Accordion title="Install SDK">
+    A plan represent the package of features that you are offering. Every plan can have multiple versions, which comes handy when you want iterate on it. More info [here](/libraries/ts/sdk/overview)
+
+    <CodeGroup>
+      ```bash npm
+      npm install @unprice/api
+      ```
+
+      ```bash pnpm
+      pnpm add @unprice/api
+      ```
+
+      ```bash yarn
+      yarn add @unprice/api
+      ```
+
+      ```bash bun
+      bun install @unprice/api
+      ```
+    </CodeGroup>
   </Accordion>
-  <Accordion title="Create a new plan version">
-    A plan version represent a version of the plan with different configurations, like billing frequency, payment provider, currency, etc. Once a plan version is published, customer can subscribe to it. Plan versions are append only, meaning after they are published you can't change them. See why [here](/a)
+  <Accordion title="Verify features">
+    Can method verify if the customer has access to the feature, whether is a flat feature or a usage based one.
+    See more [here](/libraries/ts/sdk/overview)
+
+    ```ts
+    const { result, error } = await unprice.customers.can({
+      customerId: "cus_1234567890",
+      featureSlug: "tokens",
+      metadata: {
+        action: "create",
+        country: "US"
+      }
+    });
+
+    if (error) {
+      // handle potential network or bad request error
+      // a link to our docs will be in the `error.docs` field
+      console.error(error.message);
+      return;
+    }
+
+    console.log(result);
+    ```
   </Accordion>
-  <Accordion title="Add Features">
-    Every plan version contains a set of features that you can configure according to your needs. Flat features, usage based features or quatity based features.
-  </Accordion>
-  <Accordion title="Review & publish">
-    Review the pricing card and publish the new plan version.
+  <Accordion title="Report Usage">
+    Depending on the feature, you can report usage.
+
+    ```ts
+    const { result, error } = await unprice.customers.reportUsage({
+      customerId: "cus_1234567890",
+      featureSlug: "tokens",
+      usage: 30,
+      idempotenceKey: "123e4567-e89b-12d3-a456-426614174000",
+      metadata: {
+        action: "create",
+        country: "US"
+      }
+    });
+
+    if (error) {
+      // handle potential network or bad request error
+      // a link to our docs will be in the `error.docs` field
+      console.error(error.message);
+      return;
+    }
+
+    console.log(result);
+    ```
+
   </Accordion>
 </AccordionGroup>
+
 
 
 <Frame>
@@ -34,7 +138,7 @@ A plan is a representation of a package in the SaaS world. Creating your first p
     title="YouTube video player"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen
+    allowFullScreen
   ></iframe>
 </Frame>
 

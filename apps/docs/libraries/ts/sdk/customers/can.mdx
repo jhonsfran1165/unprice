@@ -8,7 +8,7 @@ description: "Check if a customer can use a feature"
 ```ts
 const { result, error } = await unprice.customers.can({
   customerId: "cus_1234567890",
-  featureSlug: "feature_1",
+  featureSlug: "tokens",
   metadata: {
     action: "create",
     country: "US"
@@ -30,12 +30,11 @@ console.log(result);
 <ResponseExample>
 ```json
 {
-  "can": true,
-  "reason": "Feature is included in the current plan",
-  "usage": {
-    "used": 100,
-    "limit": 1000
-  }
+  "success": true,
+  "message": "Feature is available",
+  "deniedReason": null,
+  "cacheHit": false,
+  "remaining": 900
 }
 ```
 </ResponseExample>
@@ -51,27 +50,33 @@ console.log(result);
 </ParamField>
 
 <ParamField body="metadata" type="object">
-    Additional metadata to consider when checking access
+    Additional metadata to consider when checking access. This can include information like the action being performed or the user's location
 </ParamField>
 
 ## Response
 
-<ResponseField name="can" type="boolean" required>
+<ResponseField name="success" type="boolean" required>
     Whether the customer can use the feature
 </ResponseField>
 
-<ResponseField name="reason" type="string" required>
-    The reason for the access decision
+<ResponseField name="message" type="string">
+    A human-readable message explaining the result
 </ResponseField>
 
-<ResponseField name="usage" type="object">
-    Usage information for the feature
+<ResponseField name="deniedReason" type="string">
+    The reason why access was denied. Possible values:
+    - "RATE_LIMITED"
+    - "CUSTOMER_SUBSCRIPTION_NOT_FOUND"
+    - "ENTITLEMENT_NOT_FOUND"
+    - "LIMIT_EXCEEDED"
+    - "ENTITLEMENT_EXPIRED"
+    - "ENTITLEMENT_NOT_ACTIVE"
 </ResponseField>
 
-<ResponseField name="usage.used" type="number">
-    The amount of usage consumed
+<ResponseField name="cacheHit" type="boolean">
+    Whether the result was served from cache
 </ResponseField>
 
-<ResponseField name="usage.limit" type="number">
-    The usage limit for the feature
+<ResponseField name="remaining" type="number">
+    The remaining usage quota for the feature
 </ResponseField>

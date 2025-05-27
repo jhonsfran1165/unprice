@@ -1,30 +1,79 @@
 ---
-title: 'Use entitlements'
-description: 'Use entitlements, report usage and verify access'
+title: 'First Customer'
+description: 'How to subscribe your first customer'
 ---
 
 ## Overview
 
-A plan is a representation of a package in the SaaS world. Creating your first plan in Unprice, involves creating an account and setting your first project. The following video shows how to set up your project and publish your first plan.
+Once you create and published your first plan, you are ready to subscribe customers to it. Here is when the beauty of Unprice comes in. Because plans are inmutable, every customer you subscribe  never will have some side effect when there are new versions of the same plan.
+
+Customer subscribes to a specific plan versions, which is way you can iterate on the prices without affecting current customers.
+
+You could migrate customer from one version to another, or change the plan entirely as well.
+
+There are 2 main ways to create customer in Unprice. The recommended way is through our API or SDK. You can also use the [Dashboard](https://app.unprice.dev).
 
 <AccordionGroup>
-  <Accordion title="Create account & project">
-    Sign up into [Unprice](https://app.unprice.dev)
+  <Accordion title="Create API key">
+    Create API key for your project in [Unprice](https://app.unprice.dev)
   </Accordion>
-  <Accordion title="Set up your plan">
-    A plan represent the package of features that you are offering. Every plan can have multiple versions, which comes handy when you want iterate on it.
+  <Accordion title="Install SDK">
+    A plan represent the package of features that you are offering. Every plan can have multiple versions, which comes handy when you want iterate on it. More info [here](/libraries/ts/sdk/overview)
+
+    <CodeGroup>
+      ```bash npm
+      npm install @unprice/api
+      ```
+
+      ```bash pnpm
+      pnpm add @unprice/api
+      ```
+
+      ```bash yarn
+      yarn add @unprice/api
+      ```
+
+      ```bash bun
+      bun install @unprice/api
+      ```
+    </CodeGroup>
   </Accordion>
-  <Accordion title="Create a new plan version">
-    A plan version represent a version of the plan with different configurations, like billing frequency, payment provider, currency, etc. Once a plan version is published, customer can subscribe to it. Plan versions are append only, meaning after they are published you can't change them. See why [here](/a)
+  <Accordion title="Use sign up method">
+    SignUp method can be use to get the latest version of a plan and subscribe to it, or you can pass a specific plan version ID. More info [here](/libraries/ts/sdk/overview)
+
+    ```ts
+    // subscribe to the lastest version of the plan PRO
+    const { result, error } = await unprice.customers.signUp({
+      name: "John Doe",
+      email: "customer@example.com",
+      planSlug: "PRO",
+      externalId: "your_database_id",
+      successUrl: "https://example.com/dashboard",
+      cancelUrl: "https://example.com/login"
+    });
+
+    if (error) {
+      // handle potential network or bad request error
+      // a link to our docs will be in the `error.docs` field
+      console.error(error.message);
+      return;
+    }
+
+    console.log(result);
+    ```
+
+    This is the flow of how it works.
+
+    <Frame>
+      <img src="/images/signup-flow.png"/>
+    </Frame>
   </Accordion>
-  <Accordion title="Add Features">
-    Every plan version contains a set of features that you can configure according to your needs. Flat features, usage based features or quatity based features.
-  </Accordion>
-  <Accordion title="Review & publish">
-    Review the pricing card and publish the new plan version.
+  <Accordion title="Handle redirect">
+    The signUp flow if sucessful will response with the redirect URL and the customer ID.
   </Accordion>
 </AccordionGroup>
 
+### How to create customers - Tutorial
 
 <Frame>
   <iframe
@@ -34,7 +83,7 @@ A plan is a representation of a package in the SaaS world. Creating your first p
     title="YouTube video player"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen
+    allowFullScreen
   ></iframe>
 </Frame>
 

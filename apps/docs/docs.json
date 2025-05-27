@@ -104,7 +104,7 @@
                   {
                     "group": "Customers",
                     "pages": [
-                      "libraries/ts/sdk/customers/create",
+                      "libraries/ts/sdk/customers/signup",
                       "libraries/ts/sdk/customers/get-active-phase",
                       "libraries/ts/sdk/customers/get-subscription",
                       "libraries/ts/sdk/customers/get-entitlements",
@@ -170,6 +170,10 @@
       {
         "label": "Support",
         "href": "mailto:jhonsfran@gmail.com"
+      },
+      {
+        "label": "Manifesto",
+        "href": "https://unprice.dev/manifesto"
       }
     ],
     "primary": {
