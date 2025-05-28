@@ -48,9 +48,13 @@
             "group": "Concepts",
             "pages": [
               {
-                "group": "Identities",
-                "icon": "fingerprint",
-                "pages": ["concepts/identities/overview", "concepts/identities/ratelimits"]
+                "group": "Pricing",
+                "icon": "money-check-dollar",
+                "pages": [
+                  "concepts/pricing/overview",
+                  "concepts/pricing/plans",
+                  "concepts/pricing/entitlements"
+                ]
               }
             ]
           }

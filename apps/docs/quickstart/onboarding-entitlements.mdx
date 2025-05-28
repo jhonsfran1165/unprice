@@ -8,12 +8,18 @@ description: 'Use entitlements, report usage and verify access'
 This is why Unprice is really adaptive. Instead of thinking about plans inside your code, with Unprice you think about features.
 You map your application to validate specific features, this gives you the flexibility to change the packaging without affecting other customers.
 
-Think about it as a feature flag, with super powers.
+Think about it as a feature flag with super powers.
+
+### What is an entitlement?
+
+Entitlements are the features a customer has access to. They can be billed or not, for instance if a customer
+is subscribe to a plan PRO with fetures "tokens" with a limit of 10000 tokens per month, that is an entitlement that is billed.
+
 
 ```ts
 // without Unprice
-if (customer.plan === "PRO") {
-  continue
+if (customer.plan === "PRO") { // <-- mapping to PRO plan means when the plan changes you have to change this
+  // let custor use tokens
 } else {
   return "don't have access"
 }
@@ -21,8 +27,9 @@ if (customer.plan === "PRO") {
 // ----------------------------------------------------
 
 // with Unprice
+// Verify if the customer has access to the feature
 const { result, error } = await unprice.customers.can({
-  customerId: "cus_1234567890",
+  customerId: customer.unpriceCustomerId,
   featureSlug: "tokens", // map your feature code
   metadata: {
     action: "create",
@@ -38,6 +45,9 @@ if (error) {
 }
 
 if (result.access) {
+  // let custor use tokens
+  // because now the feature is tied to the customer itself and not the plan
+  // you can change the features of your customer without touching your code
   continue
 } else {
   return {
@@ -48,8 +58,6 @@ if (result.access) {
 
 console.log(result);
 ```
-
-
 
 <AccordionGroup>
   <Accordion title="Create API key">
@@ -129,6 +137,7 @@ console.log(result);
 </AccordionGroup>
 
 
+### How to use entitlement - Tutorial
 
 <Frame>
   <iframe
@@ -136,7 +145,7 @@ console.log(result);
     height="500"
     src="https://www.youtube.com/embed/4KzFe50RQkQ"
     title="YouTube video player"
-    frameborder="0"
+    frameBorder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowFullScreen
   ></iframe>
