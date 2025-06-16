@@ -28,6 +28,13 @@ export const customerMetadataSchema = z.object({
   externalId: z.string().optional(),
   stripeSubscriptionId: z.string().optional(),
   stripeDefaultPaymentMethodId: z.string().optional(),
+  // analytics
+  continent: z.string().optional(),
+  country: z.string().optional(),
+  region: z.string().optional(),
+  colo: z.string().optional(),
+  city: z.string().optional(),
+  isEUCountry: z.boolean().optional(),
 })
 
 export const customerSelectSchema = createSelectSchema(schema.customers, {

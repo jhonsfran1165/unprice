@@ -45,7 +45,6 @@ export const customers = pgTableProject(
     // all customers will have a default currency - normally the currency of the project
     defaultCurrency: currencyEnum("default_currency").notNull().default("USD"),
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
-    // beta features
   },
   (table) => ({
     email: index("email").on(table.email),

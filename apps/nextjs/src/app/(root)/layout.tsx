@@ -22,15 +22,13 @@ export const metadata = {
     icon: "/favicon.ico",
   },
   openGraph: {
-    // TODO: add a proper opengraph image
-    images: [{ url: "/opengraph-image.png" }],
+    images: [{ url: "/og" }],
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
-    // TODO: add a proper twitter image
-    images: [{ url: "https://acme-corp-lib.vercel.app/opengraph-image.png" }],
+    images: [{ url: "/og" }],
     creator: "@jhonsfran",
   },
   metadataBase: new URL("https://unprice.dev"),

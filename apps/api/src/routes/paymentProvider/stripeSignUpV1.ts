@@ -145,6 +145,13 @@ export const registerStripeSignUpV1 = (app: App) =>
           stripeSubscriptionId: stripeSession.subscriptionId ?? "",
           stripeDefaultPaymentMethodId: defaultPaymentMethodId ?? "",
           externalId: customerSession.customer.externalId,
+          // analytics
+          colo: c.get("analytics").colo,
+          country: c.get("analytics").country,
+          city: c.get("analytics").city,
+          isEUCountry: c.get("analytics").isEUCountry,
+          region: c.get("analytics").region,
+          continent: c.get("analytics").continent,
         },
       })
       .onConflictDoUpdate({
@@ -160,6 +167,13 @@ export const registerStripeSignUpV1 = (app: App) =>
             stripeSubscriptionId: stripeSession.subscriptionId ?? "",
             stripeDefaultPaymentMethodId: defaultPaymentMethodId ?? "",
             externalId: customerSession.customer.externalId,
+            // analytics
+            colo: c.get("analytics").colo,
+            country: c.get("analytics").country,
+            city: c.get("analytics").city,
+            isEUCountry: c.get("analytics").isEUCountry,
+            region: c.get("analytics").region,
+            continent: c.get("analytics").continent,
           },
         },
       })

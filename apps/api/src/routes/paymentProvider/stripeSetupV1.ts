@@ -139,6 +139,13 @@ export const registerStripeSetupV1 = (app: App) =>
           ...customerData?.metadata,
           stripeSubscriptionId: stripeSession.subscriptionId ?? "",
           stripeDefaultPaymentMethodId: defaultPaymentMethodId ?? "",
+          // analytics
+          colo: c.get("analytics").colo,
+          country: c.get("analytics").country,
+          city: c.get("analytics").city,
+          isEUCountry: c.get("analytics").isEUCountry,
+          region: c.get("analytics").region,
+          continent: c.get("analytics").continent,
         },
       })
       .where(and(eq(customers.id, customerData.id), eq(customers.projectId, projectId)))

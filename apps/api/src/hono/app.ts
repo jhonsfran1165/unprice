@@ -13,18 +13,6 @@ export function newApp() {
 
   app.use(prettyJSON())
   app.onError(handleError)
-  app.use("*", (c, next) => {
-    c.set(
-      "location",
-      (c.req.header("True-Client-IP") as string) ??
-        (c.req.header("CF-Connecting-IP") as string) ??
-        (c.req.raw?.cf?.colo as string) ??
-        ""
-    )
-    c.set("userAgent", c.req.header("User-Agent"))
-
-    return next()
-  })
 
   const servers = [
     {

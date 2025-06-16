@@ -61,6 +61,7 @@ export const registerCanV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { customerId, featureSlug, metadata } = c.req.valid("json")
     const { entitlement, customer, logger } = c.get("services")
+    const analytics = c.get("analytics")
     const requestId = c.get("requestId")
     const performanceStart = c.get("performanceStart")
 
@@ -84,7 +85,10 @@ export const registerCanV1 = (app: App) =>
       requestId,
       performanceStart: performanceStart,
       now: Date.now(),
-      metadata,
+      metadata: {
+        ...metadata,
+        ...analytics,
+      },
     })
 
     const unPriceCustomerId = c.get("unPriceCustomerId")
@@ -124,6 +128,7 @@ export const registerCanV1 = (app: App) =>
               timestamp: Date.now(),
               metadata: {
                 action: "can",
+                ...analytics,
               },
             })
             .catch((err) => {
