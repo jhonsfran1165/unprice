@@ -15,6 +15,7 @@ concurrency:
 jobs:
   build-lint:
     uses: ./.github/workflows/job_build.yaml
+
   ci-production-tinybird:
     if: ${{ !contains(github.head_ref, 'renovate/') }}
     uses: ./.github/workflows/job_tinybird_ci.yml
@@ -46,8 +47,9 @@ jobs:
           python: "false"
 
       - name: Run Migrations
+        working-directory: internal/db
         run: |
-          pnpm --filter db migrate:custom
+          pnpm migrate:custom
         env:
           VERCEL_ENV: production
           NODE_ENV: production
