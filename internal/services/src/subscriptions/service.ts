@@ -253,6 +253,21 @@ export class SubscriptionService {
       )
     }
 
+    // validate if the phase is already in the subscription
+    // the same plan version and start and end date
+    // this makes this function idempotent
+    const phaseAlreadyInSubscription = subscriptionWithPhases.phases.find((p) => {
+      return (
+        p.planVersionId === planVersionId &&
+        p.startAt <= startAtToUse &&
+        (p.endAt === endAtToUse || p.endAt === null)
+      )
+    })
+
+    if (phaseAlreadyInSubscription) {
+      return Ok(phaseAlreadyInSubscription)
+    }
+
     // order phases by startAt
     const orderedPhases = subscriptionWithPhases.phases.sort((a, b) => a.startAt - b.startAt)
 
@@ -815,19 +830,14 @@ export class SubscriptionService {
     return result
   }
 
-  // creating a subscription is a 4 step process:
-  // 1. validate the input
-  // 2. validate the customer exists
-  // 3. create the subscription
-  // 4. create the phases
   public async createSubscription({
     input,
     projectId,
   }: {
-    input: InsertSubscription
+    input: Omit<InsertSubscription, "phases">
     projectId: string
   }): Promise<Result<Subscription, UnPriceSubscriptionError | SchemaError>> {
-    const { customerId, phases, metadata, timezone } = input
+    const { customerId, metadata, timezone } = input
 
     const customerData = await this.db.query.customers.findFirst({
       with: {
@@ -856,19 +866,14 @@ export class SubscriptionService {
     if (!customerData.active) {
       return Err(
         new UnPriceSubscriptionError({
-          message: "Customer is not active, please contact support",
+          message: "Customer is not active",
         })
       )
     }
 
     // IMPORTANT: for now we only allow one subscription per customer
     if (customerData.subscriptions.length > 0) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message:
-            "Customer already has a subscription, add a new phase to the existing subscription if you want to apply a change",
-        })
-      )
+      return Ok(customerData.subscriptions[0]!)
     }
 
     // project defaults
@@ -912,33 +917,6 @@ export class SubscriptionService {
           )
         }
 
-        // create the phases
-        const phasesResult = await Promise.all(
-          phases.map((phase) =>
-            this.createPhase({
-              input: {
-                ...phase,
-                subscriptionId: newSubscription.id,
-                customerId: customerData.id,
-                paymentMethodRequired: phase.paymentMethodRequired ?? false,
-              },
-              projectId,
-              db: trx,
-              now: Date.now(),
-            })
-          )
-        )
-
-        const phaseErr = phasesResult.find((r) => r.err)
-
-        // if there is an error, rollback the transaction and throw the error
-        if (phaseErr?.err) {
-          this.logger.error(`Error creating subscription phase ${phaseErr?.err?.message}`)
-
-          trx.rollback()
-          return Err(phaseErr.err)
-        }
-
         return Ok(newSubscription)
       } catch (e) {
         this.logger.error("Error creating subscription", {
@@ -946,7 +924,7 @@ export class SubscriptionService {
         })
 
         trx.rollback()
-        throw e
+        throw e // this is never reach because rollback will throw an error
       }
     })
 

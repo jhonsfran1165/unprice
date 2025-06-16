@@ -1,5 +1,3 @@
-import { Link } from "next-view-transitions"
-
 import type { Session } from "@unprice/auth/server"
 import {
   DropdownMenu,
@@ -18,7 +16,7 @@ import { ExternalLink } from "lucide-react"
 import { SuperLink } from "../super-link"
 import { ThemeToggleItems } from "./theme-toggle"
 
-export default async function UserProfile({
+export default function UserProfile({
   children,
   align = "end",
   session,
@@ -39,7 +37,7 @@ export default async function UserProfile({
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className="max-h-[--radix-dropdown-menu-content-available-height] w-[--radix-dropdown-menu-content-width]"
+        className="max-h-[--radix-dropdown-menu-content-available-height] w-[--radix-dropdown-menu-content-width] min-w-60 max-w-60"
         align={align}
       >
         <DropdownMenuLabel className="font-normal">
@@ -55,7 +53,6 @@ export default async function UserProfile({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            {/* // TODO: this should redirect to the user's profile */}
             <SuperLink href={`/${personalWorkspace?.slug}/settings`}>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
@@ -94,11 +91,11 @@ export default async function UserProfile({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`${AUTH_ROUTES.SIGNOUT}`}>
+          <SuperLink href={`${AUTH_ROUTES.SIGNOUT}`}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
             <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-          </Link>
+          </SuperLink>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

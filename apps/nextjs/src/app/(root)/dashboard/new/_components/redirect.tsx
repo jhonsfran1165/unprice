@@ -18,12 +18,15 @@ export default function Redirect({ url }: { url: string }) {
       // // trigger the session update
       await updateSession()
 
+      // wait 1 second to make sure the session is updated
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
       // redirect to the url
       router.push(url)
     }
 
     validate()
-  }, [url])
+  }, [])
 
   return <LayoutLoader />
 }

@@ -8,9 +8,9 @@ import { insertPaymentProviderConfigSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
-import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { useParams, useSearchParams } from "next/navigation"
 import { revalidateAppPath } from "~/actions/revalidate"
+import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -113,10 +113,13 @@ export function StripePaymentConfigForm({
               Skip
             </Button>
           )}
-          <Button type="submit" disabled={!form.getValues("active") || saveConfig.isPending}>
-            Save
-            {form.formState.isSubmitting && <LoadingAnimation className="ml-2" />}
-          </Button>
+
+          <SubmitButton
+            type="submit"
+            isSubmitting={form.formState.isSubmitting}
+            isDisabled={form.formState.isSubmitting || !form.getValues("active")}
+            label={"Save"}
+          />
         </div>
       </form>
     </Form>

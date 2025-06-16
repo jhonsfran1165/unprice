@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_user" ADD COLUMN "password" varchar(255);

@@ -21,10 +21,31 @@ export async function Sidebar({
   const activeRoutes = await Promise.all(
     routes.map(async (route) => {
       if (!route.slug || isMain) {
-        return route // Return the route if no slug
+        if (route.sidebar && route.sidebar.length > 0) {
+          // check if the sidebar is active
+          const sidebar = await Promise.all(
+            route.sidebar.map(async (subItem) => {
+              if (!subItem.slug) {
+                return subItem
+              }
+
+              const isActive = await entitlementFlag(subItem.slug)
+              return isActive ? subItem : null
+            })
+          )
+
+          return {
+            ...route,
+            sidebar: sidebar.filter((subItem) => subItem !== null),
+          }
+        }
+
+        // if no sidebar, return the route
+        return route
       }
 
       const isActive = await entitlementFlag(route.slug)
+
       return isActive ? route : null // Return the route if active, otherwise null
     })
   )

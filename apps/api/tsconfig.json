@@ -6,7 +6,7 @@
     /* Specify how TypeScript looks up a file from a given module specifier. */
     "moduleResolution": "bundler",
     /* Specify type package names to be included without being referenced in a source file. */
-    "types": ["worker-configuration.d.ts", "node"],
+    "types": ["node"],
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "baseUrl": ".",
     "paths": {

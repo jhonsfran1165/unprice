@@ -434,9 +434,21 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
+      '@unprice/api':
+        specifier: workspace:^
+        version: link:../../packages/api
+      '@unprice/config':
+        specifier: workspace:^
+        version: link:../config
       '@unprice/db':
         specifier: ^0.1.0
         version: link:../db
+      '@unprice/error':
+        specifier: workspace:^
+        version: link:../error
+      bcryptjs:
+        specifier: ^3.0.2
+        version: 3.0.2
       encoding:
         specifier: ^0.1.13
         version: 0.1.13
@@ -12267,6 +12279,11 @@ packages:
   /basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
+
+  /bcryptjs@3.0.2:
+    resolution: {integrity: sha512-k38b3XOZKv60C4E2hVsXTolJWfkGRMbILBIe2IBITXciy5bOsTKot5kDrf3ZfufQtQOUN5mXceUEpU1rTl9Uog==}
+    hasBin: true
+    dev: false
 
   /better-opn@3.0.2:
     resolution: {integrity: sha512-aVNobHnJqLiUelTaHat9DZ1qM2w0C0Eym4LPI/3JxOnSokGVdsl1T1kN7TFvsEAD8G47A6VKQ0TVHqbBnYMJlQ==}

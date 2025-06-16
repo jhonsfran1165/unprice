@@ -1,6 +1,6 @@
 import type { AdapterAccount } from "@auth/core/adapters"
 import { relations } from "drizzle-orm"
-import { boolean, integer, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
+import { boolean, integer, primaryKey, text, timestamp, varchar } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 
@@ -10,11 +10,12 @@ import { members } from "./workspaces"
 export const users = pgTableProject("user", {
   id: cuid("id").notNull().primaryKey(),
   name: text("name"),
-  email: text("email").notNull(),
+  email: text("email").notNull().unique(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
   theme: text("theme").default("dark").notNull(),
   defaultWorkspaceSlug: text("default_wk_slug"),
+  password: varchar("password", { length: 255 }), // nullable for Oauth users
 })
 
 export const accounts = pgTableProject(

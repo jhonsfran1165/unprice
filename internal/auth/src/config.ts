@@ -1,16 +1,16 @@
+import Credentials from "@auth/core/providers/credentials"
 import GitHub from "@auth/core/providers/github"
 import Google from "@auth/core/providers/google"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
-import type { NextAuthConfig } from "next-auth"
-
-import { and, eq, sql } from "@unprice/db"
 import { db } from "@unprice/db"
 import { createWorkspacesByUserQuery } from "@unprice/db/queries"
 import * as schema from "@unprice/db/schema"
-import * as utils from "@unprice/db/utils"
 import type { WorkspacesJWTPayload } from "@unprice/db/validators"
+import bcrypt from "bcryptjs"
+import type { NextAuthConfig } from "next-auth"
 
 import { env } from "./env"
+import { createUser } from "./utils"
 
 const useSecureCookies = env.VERCEL_ENV === "production"
 const log = console // TODO: create a logger for this
@@ -59,53 +59,18 @@ export const authConfig: NextAuthConfig = {
 
     // override the default create user
     async createUser(data) {
-      const user = await db
-        .insert(schema.users)
-        .values({
-          ...data,
-          // use our own id generator
-          id: utils.newId("user"),
-          // only true if we use auth providers like github, google, etc
-          emailVerified: new Date(),
-        })
-        .returning()
-        .then((user) => user[0] ?? null)
-
-      if (!user) {
-        throw `Error creating user for ${data.email}`
-      }
-
-      const inviteUser = await db.query.invites.findFirst({
-        where: (invite, { eq, and }) =>
-          and(eq(invite.email, user.email), eq(invite.acceptedAt, sql`NULL`)),
+      const { val, err } = await createUser({
+        email: data.email,
+        name: data.name ?? "",
+        emailVerified: data.emailVerified,
+        image: data.image ?? undefined,
       })
 
-      if (inviteUser) {
-        // add the user as a member of the workspace
-        await db
-          .insert(schema.members)
-          .values({
-            userId: user.id,
-            workspaceId: inviteUser.workspaceId,
-            role: inviteUser.role,
-          })
-          .onConflictDoNothing()
-
-        // update the invite as accepted
-        await db
-          .update(schema.invites)
-          .set({
-            acceptedAt: Date.now(),
-          })
-          .where(
-            and(
-              eq(schema.invites.email, inviteUser.email),
-              eq(schema.invites.workspaceId, inviteUser.workspaceId)
-            )
-          )
+      if (err) {
+        throw err
       }
 
-      return user
+      return val
     },
   },
   providers: [
@@ -118,6 +83,34 @@ export const authConfig: NextAuthConfig = {
       clientId: process.env.AUTH_GOOGLE_CLIENT_ID,
       clientSecret: process.env.AUTH_GOOGLE_CLIENT_SECRET,
       allowDangerousEmailAccountLinking: true,
+    }),
+    Credentials({
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      authorize: async (credentials) => {
+        if (!credentials?.email || !credentials.password) {
+          throw new Error("Invalid credentials")
+        }
+
+        // check if the user exists
+        const user = await db.query.users.findFirst({
+          where: (users, { eq }) => eq(users.email, credentials.email as string),
+        })
+
+        if (!user || !user.password) {
+          throw new Error("Invalid credentials")
+        }
+
+        const validPassword = await bcrypt.compare(credentials.password as string, user.password)
+
+        if (!validPassword) {
+          throw new Error("Invalid credentials")
+        }
+
+        return user
+      },
     }),
   ],
   callbacks: {

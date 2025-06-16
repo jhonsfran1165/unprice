@@ -6,7 +6,7 @@ import { cn } from "@unprice/ui/utils"
 import { env } from "~/env"
 import { SignInGithub } from "../_components/github-signin"
 import { SignInGoogle } from "../_components/google-signin"
-import { SignInCredentials } from "./credentials-signin"
+import { SignUpCredentials } from "./credentials-signin"
 
 export default async function AuthenticationPage() {
   const session = await getSession()
@@ -19,10 +19,10 @@ export default async function AuthenticationPage() {
     <div className={cn("flex flex-col gap-6")}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>Login with your Github or Google account</CardDescription>
+          <CardTitle className="text-xl">Create an account</CardTitle>
+          <CardDescription>Sign up with your Github or Google account</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-6">
+        <CardContent className="flex flex-col gap-8">
           <div className="flex w-full flex-col items-center justify-between gap-4">
             <SignInGithub />
             <SignInGoogle />
@@ -34,12 +34,12 @@ export default async function AuthenticationPage() {
                   Or continue with
                 </span>
               </div>
-              <SignInCredentials />
+              <SignUpCredentials />
 
               <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <a href="/auth/signup" className="underline underline-offset-4">
-                  Sign up
+                Already have an account?{" "}
+                <a href="/auth/signin" className="underline underline-offset-4">
+                  Sign in
                 </a>
               </div>
             </>

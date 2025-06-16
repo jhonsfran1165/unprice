@@ -55,20 +55,19 @@ const stripeSetupMetadataSchema = z.object({
 
 export type StripeSetupRequest = z.infer<typeof route.request.params>
 
-// TODO: implement rate limiting because this endpoint is public
 export const registerStripeSetupV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { sessionId, projectId } = c.req.valid("param")
     const key = c.req.header("cf-connecting-ip") ?? c.req.header("x-forwarded-for") ?? projectId
-    const { customer, db } = c.get("services")
+    const { customer, db, logger } = c.get("services")
 
     // rate limit the request
-    const result = await c.env.RL_FREE_100_60s.limit({ key })
+    const result = await c.env.RL_FREE_600_60s.limit({ key })
 
     if (!result) {
       throw new UnpriceApiError({
         code: "RATE_LIMITED",
-        message: "Rate limit exceeded",
+        message: "Rate limit exceeded, please don't DDos me :(",
       })
     }
 
@@ -144,6 +143,28 @@ export const registerStripeSetupV1 = (app: App) =>
       })
       .where(and(eq(customers.id, customerData.id), eq(customers.projectId, projectId)))
       .execute()
+      .catch((err) => {
+        logger.error(`Error updating customer: ${err.message}`)
+
+        throw new UnpriceApiError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error updating customer",
+        })
+      })
+
+    // in development wrangler do weird things with the url
+    if (c.env.NODE_ENV === "development") {
+      return c.html(`
+        <html>
+          <head>
+            <meta http-equiv="refresh" content="0;url=${metadata.data.successUrl}" />
+          </head>
+          <body>
+            Redirecting from client side (only in development)...
+          </body>
+        </html>
+      `)
+    }
 
     // redirect to the success URL
     return c.redirect(metadata.data.successUrl, HttpStatusCodes.SEE_OTHER)

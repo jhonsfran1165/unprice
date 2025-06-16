@@ -70,6 +70,7 @@ export const DOCS_DOMAIN =
 
 export const AUTH_ROUTES = {
   SIGNIN: "/auth/signin",
+  SIGNUP: "/auth/signup",
   SIGNOUT: "/auth/signout",
   ERROR: "/auth/error",
   RESET: "/auth/reset",
@@ -77,8 +78,8 @@ export const AUTH_ROUTES = {
 }
 
 // stripe configuration endpoints
-export const STRIPE_SIGNUP_CALLBACK_PREFIX_URL = `${API_DOMAIN}v1/paymentProvider/stripe/signUp/`
-export const STRIPE_SETUP_CALLBACK_PREFIX_URL = `${API_DOMAIN}v1/paymentProvider/stripe/setup/`
+export const STRIPE_SIGNUP_CALLBACK_PREFIX_URL = `${API_DOMAIN}v1/paymentProvider/stripe/signUp`
+export const STRIPE_SETUP_CALLBACK_PREFIX_URL = `${API_DOMAIN}v1/paymentProvider/stripe/setup`
 
 export const RESTRICTED_SUBDOMAINS = new Set(["www", "app", "api", "sites", "builderai", "unprice"])
 

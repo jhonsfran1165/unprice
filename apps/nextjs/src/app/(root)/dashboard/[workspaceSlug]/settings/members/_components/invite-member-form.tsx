@@ -22,7 +22,11 @@ import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export const InviteMemberForm = () => {
+export const InviteMemberForm = ({
+  onSuccess,
+}: {
+  onSuccess: () => void
+}) => {
   const router = useRouter()
 
   const form = useZodForm({
@@ -39,6 +43,8 @@ export const InviteMemberForm = () => {
     },
     onSuccess: () => {
       toastAction("success")
+      form.reset()
+      onSuccess()
     },
   })
 
@@ -94,9 +100,8 @@ export const InviteMemberForm = () => {
           />
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end space-x-4 pt-8">
           <SubmitButton
-            className="mt-8"
             isDisabled={form.formState.isSubmitting}
             isSubmitting={form.formState.isSubmitting}
             label="Invite"

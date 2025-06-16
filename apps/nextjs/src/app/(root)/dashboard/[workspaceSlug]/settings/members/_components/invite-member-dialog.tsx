@@ -9,12 +9,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@unprice/ui/dialog"
+import { useState } from "react"
 
 import { InviteMemberForm } from "./invite-member-form"
 
 export const InviteMemberDialog = () => {
+  const [open, setOpen] = useState(false)
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>Invite member</Button>
       </DialogTrigger>
@@ -23,7 +26,7 @@ export const InviteMemberDialog = () => {
           <DialogTitle>Invite to workspace</DialogTitle>
           <DialogDescription>Invite a member to this workspace</DialogDescription>
         </DialogHeader>
-        <InviteMemberForm />
+        <InviteMemberForm onSuccess={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   )

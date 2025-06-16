@@ -74,8 +74,9 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
                 </EmptyPlaceholder.Icon>
                 <EmptyPlaceholder.Title>No features</EmptyPlaceholder.Title>
                 <EmptyPlaceholder.Description>
-                  Once you create a feature, you can add it to the plan version. Drag and drop it
-                  here.
+                  Once you create a feature, you can add it to the plan version.
+                  <br />
+                  Drag and drop it here.
                 </EmptyPlaceholder.Description>
               </EmptyPlaceholder>
             ) : (

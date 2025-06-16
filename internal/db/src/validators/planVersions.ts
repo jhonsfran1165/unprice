@@ -104,6 +104,9 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
     createdAtM: true,
     updatedAtM: true,
   })
+  .extend({
+    isDefault: z.boolean().optional(),
+  })
 
 export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
   planFeatures: z.array(

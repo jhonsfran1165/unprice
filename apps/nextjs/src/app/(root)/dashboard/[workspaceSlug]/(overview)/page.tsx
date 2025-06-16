@@ -36,7 +36,7 @@ export default async function WorkspaceOverviewPage(props: {
             <SuperLink href={`/${props.params.workspaceSlug}/onboarding`}>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Create Project
+                Project
               </Button>
             </SuperLink>
           }

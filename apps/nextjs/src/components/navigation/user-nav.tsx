@@ -16,13 +16,14 @@ export const UserProfileDesktop = async () => {
   const user = session.user
 
   return (
-    <UserProfile session={session} align="center">
+    <UserProfile session={session} align="start">
       <Button variant="ghost" className="flex w-full justify-between">
         <span className="flex items-center space-x-1">
           <Avatar className="h-6 w-6">
             <AvatarImage
               src={user.image || "/placeholder-avatar.svg"}
               alt={user.name || "user-img"}
+              key={user.image || "placeholder-avatar"}
             />
             <AvatarFallback>{user.name?.substring(0, 2)}</AvatarFallback>
           </Avatar>
@@ -49,6 +50,7 @@ export const UserProfileMobile = async () => {
           <AvatarImage
             src={user.image || "/placeholder-avatar.svg"}
             alt={user.name || "user-img"}
+            key={user.image || "placeholder-avatar"}
           />
           <AvatarFallback>{user.name?.substring(0, 2)}</AvatarFallback>
         </Avatar>

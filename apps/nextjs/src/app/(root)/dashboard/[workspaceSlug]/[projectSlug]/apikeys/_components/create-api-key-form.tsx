@@ -31,6 +31,7 @@ export default function CreateApiKeyForm(props: {
   setDialogOpen?: (open: boolean) => void
   onSuccess?: (key: string) => void
   defaultValues?: CreateApiKey
+  skip?: boolean
 }) {
   const params = useParams()
   const searchParams = useSearchParams()
@@ -139,6 +140,18 @@ export default function CreateApiKeyForm(props: {
         </div>
 
         <div className="flex justify-end space-x-4 pt-8">
+          {props.skip && (
+            <Button
+              variant="ghost"
+              onClick={(e) => {
+                e.preventDefault()
+                props.setDialogOpen?.(false)
+                props.onSuccess?.("")
+              }}
+            >
+              Skip
+            </Button>
+          )}
           <SubmitButton
             type="submit"
             isSubmitting={form.formState.isSubmitting}

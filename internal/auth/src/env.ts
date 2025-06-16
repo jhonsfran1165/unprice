@@ -8,6 +8,8 @@ export const env = createEnv({
     VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
   },
   server: {
+    UNPRICE_API_KEY: z.string(),
+    UNPRICE_API_URL: z.string().url(),
     AUTH_GITHUB_CLIENT_ID: z.string().min(1),
     AUTH_GITHUB_CLIENT_SECRET: z.string().min(1),
     AUTH_GOOGLE_CLIENT_ID: z.string().min(1),

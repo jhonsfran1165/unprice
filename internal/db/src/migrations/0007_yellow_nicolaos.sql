@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_user" ADD CONSTRAINT "unprice_user_email_unique" UNIQUE("email");

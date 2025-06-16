@@ -61,12 +61,12 @@ export const registerStripeSignUpV1 = (app: App) =>
     const { customer, db, subscription } = c.get("services")
 
     // rate limit the request
-    const result = await c.env.RL_FREE_100_60s.limit({ key })
+    const result = await c.env.RL_FREE_600_60s.limit({ key })
 
     if (!result) {
       throw new UnpriceApiError({
         code: "RATE_LIMITED",
-        message: "Rate limit exceeded",
+        message: "Rate limit exceeded, please don't DDos me :(",
       })
     }
 
@@ -148,7 +148,7 @@ export const registerStripeSignUpV1 = (app: App) =>
         },
       })
       .onConflictDoUpdate({
-        target: [customers.id],
+        target: [customers.id, customers.projectId],
         set: {
           stripeCustomerId: stripeSession.customerId,
           name: customerSession.customer.name ?? "",
@@ -174,20 +174,51 @@ export const registerStripeSignUpV1 = (app: App) =>
     }
 
     // create the subscription
-    await subscription.createSubscription({
-      projectId: customerSession.customer.projectId,
+    const { err: createSubscriptionErr, val: subscriptionData } =
+      await subscription.createSubscription({
+        projectId: customerSession.customer.projectId,
+        input: {
+          customerId: customerUnprice.id,
+        },
+      })
+
+    if (createSubscriptionErr) {
+      throw createSubscriptionErr
+    }
+
+    // create the phases
+    const { err: createPhaseErr } = await subscription.createPhase({
       input: {
+        startAt: Date.now(),
+        planVersionId: customerSession.planVersion.id,
+        config: customerSession.planVersion.config,
+        paymentMethodId: defaultPaymentMethodId,
+        subscriptionId: subscriptionData.id,
         customerId: customerUnprice.id,
-        phases: [
-          {
-            startAt: Date.now(),
-            planVersionId: customerSession.planVersion.id,
-            config: customerSession.planVersion.config,
-            paymentMethodId: defaultPaymentMethodId,
-          },
-        ],
+        paymentMethodRequired: customerSession.planVersion.paymentMethodRequired,
       },
+      projectId,
+      db,
+      now: Date.now(),
     })
+
+    if (createPhaseErr) {
+      throw createPhaseErr
+    }
+
+    // in development wrangler do weird things with the url
+    if (c.env.NODE_ENV === "development") {
+      return c.html(`
+        <html>
+          <head>
+            <meta http-equiv="refresh" content="0;url=${metadata.data.successUrl}" />
+          </head>
+          <body>
+            Redirecting from client side (only in development)...
+          </body>
+        </html>
+      `)
+    }
 
     // redirect to the success URL
     return c.redirect(metadata.data.successUrl, HttpStatusCodes.MOVED_TEMPORARILY)

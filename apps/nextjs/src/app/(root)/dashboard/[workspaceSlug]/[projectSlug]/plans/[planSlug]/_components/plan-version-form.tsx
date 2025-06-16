@@ -5,7 +5,7 @@ import { Button } from "@unprice/ui/button"
 import { Form, FormDescription, FormLabel } from "@unprice/ui/form"
 import { useParams, usePathname, useRouter } from "next/navigation"
 import { startTransition } from "react"
-import type { z } from "zod"
+import { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
 import { CopyButton } from "~/components/copy-button"
 import AutoRenewFormField from "~/components/forms/autorenew-field"
@@ -26,12 +26,17 @@ import {
   TitleFormField,
 } from "./version-fields-form"
 
-const isPublishedSchema = planVersionSelectBaseSchema.partial().required({
-  id: true,
-  projectId: true,
-  billingConfig: true,
-  trialDays: true,
-})
+const isPublishedSchema = planVersionSelectBaseSchema
+  .partial()
+  .required({
+    id: true,
+    projectId: true,
+    billingConfig: true,
+    trialDays: true,
+  })
+  .extend({
+    isDefault: z.boolean().optional(),
+  })
 
 export type PublishedPlanVersion = z.infer<typeof isPublishedSchema>
 
@@ -136,7 +141,9 @@ export function PlanVersionForm({
 
         {isPublished && <BannerPublishedVersion />}
 
-        <PaymentMethodRequiredFormField form={form} isDisabled={isPublished} />
+        {!defaultValues.isDefault && (
+          <PaymentMethodRequiredFormField form={form} isDisabled={isPublished} />
+        )}
 
         <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:space-y-4">
           <TitleFormField form={form} isDisabled={isPublished} />

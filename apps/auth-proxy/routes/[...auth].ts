@@ -1,8 +1,9 @@
 import { Auth } from "@auth/core"
+import Credentials from "@auth/core/providers/credentials"
 import Github from "@auth/core/providers/github"
+import Google from "@auth/core/providers/google"
 import { eventHandler, toWebRequest } from "h3"
 
-import Google from "@auth/core/providers/google"
 import { env } from "../env"
 
 export default eventHandler((event) =>
@@ -12,6 +13,12 @@ export default eventHandler((event) =>
     redirectProxyUrl: env.AUTH_REDIRECT_PROXY_URL,
     basePath: "/auth",
     providers: [
+      Credentials({
+        credentials: {
+          email: { label: "Email", type: "email" },
+          password: { label: "Password", type: "password" },
+        },
+      }),
       Github({
         clientId: env.AUTH_GITHUB_CLIENT_ID,
         clientSecret: env.AUTH_GITHUB_CLIENT_SECRET,

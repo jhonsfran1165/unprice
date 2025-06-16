@@ -22,12 +22,14 @@ export const metadata = {
     icon: "/favicon.ico",
   },
   openGraph: {
+    // TODO: add a proper opengraph image
     images: [{ url: "/opengraph-image.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
+    // TODO: add a proper twitter image
     images: [{ url: "https://acme-corp-lib.vercel.app/opengraph-image.png" }],
     creator: "@jhonsfran",
   },
