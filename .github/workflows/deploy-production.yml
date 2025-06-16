@@ -49,7 +49,6 @@ jobs:
       - name: Run Migrations
         working-directory: internal/db
         run: |
-          pnpm install
           pnpm migrate:custom
         env:
           VERCEL_ENV: production
