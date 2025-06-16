@@ -33,7 +33,7 @@ export const primary = drizzleNeon(
   }),
   {
     schema: schema,
-    logger: env.DRIZZLE_LOG,
+    logger: env.DRIZZLE_LOG ? true : undefined,
   }
 )
 
@@ -43,7 +43,7 @@ export const read1 = drizzleNeon(
   }),
   {
     schema: schema,
-    logger: env.DRIZZLE_LOG,
+    logger: env.DRIZZLE_LOG ? true : undefined,
   }
 )
 
@@ -53,7 +53,7 @@ export const read2 = drizzleNeon(
   }),
   {
     schema: schema,
-    logger: env.DRIZZLE_LOG,
+    logger: env.DRIZZLE_LOG ? true : undefined,
   }
 )
 

@@ -56,6 +56,7 @@ jobs:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           DATABASE_READ1_URL: ${{ env.DATABASE_READ1_URL }}
           DATABASE_READ2_URL: ${{ env.DATABASE_READ2_URL }}
+          DRIZZLE_LOG: "false"
 
   deploy-production-tinybird:
     uses: ./.github/workflows/job_tinybird_cd.yml
