@@ -14,6 +14,7 @@ import { ApiProjectService } from "~/project"
 
 import { SubscriptionService } from "@unprice/services/subscriptions"
 import { endTime, startTime } from "hono/timing"
+import { getAnalytics } from "~/util/analytics"
 
 /**
  * These maps persist between worker executions and are used for caching
@@ -58,6 +59,9 @@ export function init(): MiddlewareHandler<HonoEnv> {
     // Set request ID header
     c.res.headers.set("unprice-request-id", requestId)
 
+    // Set analytics
+    c.set("analytics", getAnalytics(c))
+
     // start a new timer
     startTime(c, "initLogger")
 
@@ -71,10 +75,10 @@ export function init(): MiddlewareHandler<HonoEnv> {
         requestId: c.get("requestId"),
         requestStartedAt: c.get("requestStartedAt"),
         performanceStart: c.get("performanceStart"),
-        location: c.get("location"),
+        location: c.get("analytics").colo,
         workspaceId: c.get("workspaceId"),
         projectId: c.get("projectId"),
-        userAgent: c.get("userAgent"),
+        userAgent: c.get("analytics").ua,
         path: c.req.path,
       },
     })

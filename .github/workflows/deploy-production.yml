@@ -46,11 +46,8 @@ jobs:
           python: "false"
 
       - name: Run Migrations
-        continue-on-error: true
-        working-directory: internal/db
         run: |
-          export PATH="node_modules/.bin:$PATH"
-          pnpm migrate:custom
+          pnpm --filter db migrate:custom
         env:
           VERCEL_ENV: production
           NODE_ENV: production

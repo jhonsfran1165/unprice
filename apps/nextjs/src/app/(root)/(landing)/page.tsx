@@ -6,7 +6,6 @@ import { FeaturesApp } from "~/components/landing/features-app"
 import { Global } from "~/components/landing/global"
 import Hero from "~/components/landing/hero"
 import LogoCloud from "~/components/landing/logo-cloud"
-import { Testimonials } from "~/components/landing/testimonials"
 
 export default function Home() {
   return (
@@ -15,7 +14,7 @@ export default function Home() {
       <AMI />
       <Features />
       <CodeExample />
-      <Testimonials />
+      {/* <Testimonials /> */}
       <FeaturesApp />
       <Global />
       <LogoCloud />

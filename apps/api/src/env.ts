@@ -24,7 +24,7 @@ export const env = createEnv({
     projectdo: z.custom<DurableObjectNamespace<DurableObjectProject>>(
       (ns) => typeof ns === "object"
     ),
-    RL_FREE_100_60s: cloudflareRatelimiter,
+    RL_FREE_600_60s: cloudflareRatelimiter,
   },
   emptyStringAsUndefined: true,
   runtimeEnv: process.env,

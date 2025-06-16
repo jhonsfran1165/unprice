@@ -12,6 +12,7 @@ export const route = createRoute({
   path: "/v1/paymentProvider/stripe/signUp/{sessionId}/{projectId}",
   // this endpoint is not public, so we hide it
   hide: env.NODE_ENV === "production",
+  summary: "stripe sign up",
   description:
     "This endpoint is called by stripe after the customer has signed up. No webhook is needed.",
   method: "get",
@@ -60,12 +61,12 @@ export const registerStripeSignUpV1 = (app: App) =>
     const { customer, db, subscription } = c.get("services")
 
     // rate limit the request
-    const result = await c.env.RL_FREE_100_60s.limit({ key })
+    const result = await c.env.RL_FREE_600_60s.limit({ key })
 
     if (!result) {
       throw new UnpriceApiError({
         code: "RATE_LIMITED",
-        message: "Rate limit exceeded",
+        message: "Rate limit exceeded, please don't DDos me :(",
       })
     }
 
@@ -144,10 +145,17 @@ export const registerStripeSignUpV1 = (app: App) =>
           stripeSubscriptionId: stripeSession.subscriptionId ?? "",
           stripeDefaultPaymentMethodId: defaultPaymentMethodId ?? "",
           externalId: customerSession.customer.externalId,
+          // analytics
+          colo: c.get("analytics").colo,
+          country: c.get("analytics").country,
+          city: c.get("analytics").city,
+          isEUCountry: c.get("analytics").isEUCountry,
+          region: c.get("analytics").region,
+          continent: c.get("analytics").continent,
         },
       })
       .onConflictDoUpdate({
-        target: [customers.id],
+        target: [customers.id, customers.projectId],
         set: {
           stripeCustomerId: stripeSession.customerId,
           name: customerSession.customer.name ?? "",
@@ -159,6 +167,13 @@ export const registerStripeSignUpV1 = (app: App) =>
             stripeSubscriptionId: stripeSession.subscriptionId ?? "",
             stripeDefaultPaymentMethodId: defaultPaymentMethodId ?? "",
             externalId: customerSession.customer.externalId,
+            // analytics
+            colo: c.get("analytics").colo,
+            country: c.get("analytics").country,
+            city: c.get("analytics").city,
+            isEUCountry: c.get("analytics").isEUCountry,
+            region: c.get("analytics").region,
+            continent: c.get("analytics").continent,
           },
         },
       })
@@ -173,20 +188,51 @@ export const registerStripeSignUpV1 = (app: App) =>
     }
 
     // create the subscription
-    await subscription.createSubscription({
-      projectId: customerSession.customer.projectId,
+    const { err: createSubscriptionErr, val: subscriptionData } =
+      await subscription.createSubscription({
+        projectId: customerSession.customer.projectId,
+        input: {
+          customerId: customerUnprice.id,
+        },
+      })
+
+    if (createSubscriptionErr) {
+      throw createSubscriptionErr
+    }
+
+    // create the phases
+    const { err: createPhaseErr } = await subscription.createPhase({
       input: {
+        startAt: Date.now(),
+        planVersionId: customerSession.planVersion.id,
+        config: customerSession.planVersion.config,
+        paymentMethodId: defaultPaymentMethodId,
+        subscriptionId: subscriptionData.id,
         customerId: customerUnprice.id,
-        phases: [
-          {
-            startAt: Date.now(),
-            planVersionId: customerSession.planVersion.id,
-            config: customerSession.planVersion.config,
-            paymentMethodId: defaultPaymentMethodId,
-          },
-        ],
+        paymentMethodRequired: customerSession.planVersion.paymentMethodRequired,
       },
+      projectId,
+      db,
+      now: Date.now(),
     })
+
+    if (createPhaseErr) {
+      throw createPhaseErr
+    }
+
+    // in development wrangler do weird things with the url
+    if (c.env.NODE_ENV === "development") {
+      return c.html(`
+        <html>
+          <head>
+            <meta http-equiv="refresh" content="0;url=${metadata.data.successUrl}" />
+          </head>
+          <body>
+            Redirecting from client side (only in development)...
+          </body>
+        </html>
+      `)
+    }
 
     // redirect to the success URL
     return c.redirect(metadata.data.successUrl, HttpStatusCodes.MOVED_TEMPORARILY)

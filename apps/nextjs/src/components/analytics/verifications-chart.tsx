@@ -49,7 +49,7 @@ export function VerificationsChart() {
   if (chartData.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
-        <EmptyPlaceholder className="min-h-[390px]">
+        <EmptyPlaceholder className="min-h-[420px]">
           <EmptyPlaceholder.Icon>
             <BarChart4 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>

@@ -30,6 +30,7 @@ import { getToken } from "@auth/core/jwt"
 import { timing } from "hono/timing"
 import { registerGetAnalyticsUsageV1 } from "./routes/analitycs/getUsageV1"
 import { registerGetAnalyticsVerificationsV1 } from "./routes/analitycs/getVerificationsV1"
+
 const app = newApp()
 
 app.use(serveEmojiFavicon("◎"))

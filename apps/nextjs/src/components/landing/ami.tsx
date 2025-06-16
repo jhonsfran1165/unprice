@@ -50,22 +50,21 @@ export default function AMI() {
       </motion.h2>
       <motion.div variants={itemVariants} className="mt-6 text-justify text-lg">
         SaaS pricing was built for a world that no longer exists. Three tiers, feature gating,
-        quarterly pricing reviews. That worked when AI wasn't a thing and buyers behaved
-        predictably.
+        quarterly pricing reviews.
         <br />
         <br />
         That world is gone.
         <br />
         <br />
-        Today, your users expect personalized value. Your product ships changes daily. Your market
-        is fragmented, dynamic, and ruthless. But you're still pricing like it's 2010 — Static
-        plans, gut feelings, spreadsheets pretending to be strategy.
+        Today, your users expect personalized value. Your product ships changes daily. But you're
+        still pricing like it's 2010 — Static plans, gut feelings, spreadsheets pretending to be
+        strategy.
         <br />
         <br />
-        In a world where AI can clone your product overnight, pricing is your sharpest weapon.
+        We believe pricing is the most neglected growth lever in SaaS.
         <div className="mt-10 flex justify-end">
           <Link href={`${BASE_URL}/manifesto`}>
-            <Button variant="outline">See AMI manifesto</Button>
+            <Button variant="outline">Read more</Button>
           </Link>
         </div>
       </motion.div>

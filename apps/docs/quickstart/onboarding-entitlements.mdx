@@ -1,0 +1,159 @@
+---
+title: 'Use entitlements'
+description: 'Use entitlements, report usage and verify access'
+---
+
+## Overview
+
+This is why Unprice is really adaptive. Instead of thinking about plans inside your code, with Unprice you think about features.
+You map your application to validate specific features, this gives you the flexibility to change the packaging without affecting other customers.
+
+Think about it as a feature flag with super powers.
+
+### What is an entitlement?
+
+Entitlements are the features a customer has access to. They can be billed or not, for instance if a customer
+is subscribe to a plan PRO with fetures "tokens" with a limit of 10K tokens per month, that is an entitlement that is billed.
+
+
+```ts
+// without Unprice
+if (customer.plan === "PRO") { // <-- mapping to PRO plan means when the plan changes you have to change this
+  // let custor use tokens
+} else {
+  return "don't have access"
+}
+
+// ----------------------------------------------------
+
+// with Unprice
+// Verify if the customer has access to the feature
+const { result, error } = await unprice.customers.can({
+  customerId: customer.unpriceCustomerId,
+  featureSlug: "tokens", // map your feature code
+  metadata: {
+    action: "create",
+    country: "US"
+  }
+});
+
+if (error) {
+  // handle potential network or bad request error
+  // a link to our docs will be in the `error.docs` field
+  console.error(error.message);
+  return;
+}
+
+if (result.access) {
+  // let custor use tokens
+  // because now the feature is tied to the customer itself and not the plan
+  // you can change the features of your customer without touching your code
+  continue
+} else {
+  return {
+    message: "don't have access",
+    deniedReason: result.deniedReason
+  }
+}
+
+console.log(result);
+```
+
+<AccordionGroup>
+  <Accordion title="Create API key">
+    Create API key for your project in [Unprice](https://app.unprice.dev)
+  </Accordion>
+  <Accordion title="Install SDK">
+    A plan represent the package of features that you are offering. Every plan can have multiple versions, which comes handy when you want iterate on it. More info [here](/libraries/ts/sdk/overview)
+
+    <CodeGroup>
+      ```bash npm
+      npm install @unprice/api
+      ```
+
+      ```bash pnpm
+      pnpm add @unprice/api
+      ```
+
+      ```bash yarn
+      yarn add @unprice/api
+      ```
+
+      ```bash bun
+      bun install @unprice/api
+      ```
+    </CodeGroup>
+  </Accordion>
+  <Accordion title="Verify features">
+    Can method verify if the customer has access to the feature, whether is a flat feature or a usage based one.
+    See more [here](/libraries/ts/sdk/overview)
+
+    ```ts
+    const { result, error } = await unprice.customers.can({
+      customerId: "cus_1234567890",
+      featureSlug: "tokens",
+      metadata: {
+        action: "create",
+        country: "US"
+      }
+    });
+
+    if (error) {
+      // handle potential network or bad request error
+      // a link to our docs will be in the `error.docs` field
+      console.error(error.message);
+      return;
+    }
+
+    console.log(result);
+    ```
+  </Accordion>
+  <Accordion title="Report Usage">
+    Depending on the feature, you can report usage.
+
+    ```ts
+    const { result, error } = await unprice.customers.reportUsage({
+      customerId: "cus_1234567890",
+      featureSlug: "tokens",
+      usage: 30,
+      idempotenceKey: "123e4567-e89b-12d3-a456-426614174000",
+      metadata: {
+        action: "create",
+        country: "US"
+      }
+    });
+
+    if (error) {
+      // handle potential network or bad request error
+      // a link to our docs will be in the `error.docs` field
+      console.error(error.message);
+      return;
+    }
+
+    console.log(result);
+    ```
+
+  </Accordion>
+</AccordionGroup>
+
+
+### How to use entitlement - Tutorial
+
+<Frame>
+  <iframe
+    width="900"
+    height="500"
+    src="https://www.youtube.com/embed/4KzFe50RQkQ"
+    title="YouTube video player"
+    frameBorder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowFullScreen
+  ></iframe>
+</Frame>
+
+
+## Next Steps
+
+You should get to know our [API reference](/api-reference/authentication) or the [Typescript SDK](/libraries/ts/sdk/overview) to start integrate with your product.
+
+You can also check out the [Features](/apis/features/ratelimiting) section for more information on how to use Unkey.

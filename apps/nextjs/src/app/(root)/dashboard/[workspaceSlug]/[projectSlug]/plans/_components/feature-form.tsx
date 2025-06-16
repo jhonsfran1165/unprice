@@ -53,7 +53,7 @@ export function FeatureForm({
             })
 
             return !exist
-          }, "Feature slug already exists in this app. Change the title of your feature."),
+          }, "Feature slug already exists in this project. Change the title of your feature."),
       })
 
   const form = useZodForm({

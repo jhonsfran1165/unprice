@@ -10,6 +10,7 @@ export interface SidebarRoute {
   name: string
   icon?: LucideIcon
   href: string
+  slug?: string
 }
 
 export interface DashboardRoute {

@@ -71,6 +71,23 @@ export function UnpriceManifesto() {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, amount: 0.3 })
 
+  // Add click outside handler
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement
+      // Check if click is outside of any tooltip trigger or content
+      if (
+        !target.closest("[data-radix-tooltip-trigger]") &&
+        !target.closest("[data-radix-tooltip-content]")
+      ) {
+        setActiveSection(null)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
   // Control animation phases
   useEffect(() => {
     if (isInView) {
@@ -253,7 +270,7 @@ export function UnpriceManifesto() {
               transition={{ duration: 0.5, delay: 0.6 }}
               className="text-background-text text-sm"
             >
-              fair prices for everyone
+              better pricing for SaaS
             </motion.div>
           </motion.div>
 
@@ -322,7 +339,7 @@ export function UnpriceManifesto() {
             return (
               <div key={key} className="absolute h-full w-full">
                 {/* Icon with circle background and tooltip */}
-                <Tooltip>
+                <Tooltip open={isActive || isHovered}>
                   <TooltipTrigger asChild>
                     <Button
                       style={{
@@ -339,17 +356,35 @@ export function UnpriceManifesto() {
                       className={
                         "flex size-6 items-center justify-center rounded-full border p-0 shadow-sm transition-all"
                       }
-                      onClick={() =>
+                      onClick={(e) => {
+                        e.stopPropagation()
                         setActiveSection(sectionKey === activeSection ? null : sectionKey)
-                      }
+                      }}
                       onMouseEnter={() => setHoveredSection(sectionKey)}
-                      onMouseLeave={() => setHoveredSection(null)}
+                      onMouseLeave={() => {
+                        setHoveredSection(null)
+                        // Only clear active section if we're not clicking the tooltip content
+                        if (!document.querySelector("[data-radix-tooltip-content]:hover")) {
+                          setActiveSection(null)
+                        }
+                      }}
                       variant="primary"
                     >
                       {section.icon}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="top" align="center" className="w-64 bg-background-bg p-4">
+                  <TooltipContent
+                    side="top"
+                    align="center"
+                    className="w-64 bg-background-bg p-4"
+                    onPointerEnter={() => setHoveredSection(sectionKey)}
+                    onPointerLeave={() => {
+                      setHoveredSection(null)
+                      if (!isActive) {
+                        setActiveSection(null)
+                      }
+                    }}
+                  >
                     <div className="flex items-start gap-3">
                       <div>
                         <h4 className="font-bold text-background-textContrast">{section.title}</h4>
@@ -416,7 +451,7 @@ export function UnpriceManifesto() {
             animate={{ opacity: animationPhase >= 3 ? 1 : 0 }}
             transition={{ duration: 0.5, delay: 0.8 }}
           >
-            <Tooltip>
+            <Tooltip open={activeSection === "opensource" || hoveredSection === "opensource"}>
               <TooltipTrigger asChild>
                 <div
                   className={`flex w-full items-center gap-1 ${
@@ -424,16 +459,23 @@ export function UnpriceManifesto() {
                       ? "text-background-textContrast"
                       : "text-background-text"
                   }`}
-                  onClick={() =>
+                  onClick={(e) => {
+                    e.stopPropagation()
                     setActiveSection("opensource" === activeSection ? null : "opensource")
-                  }
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
+                      e.stopPropagation()
                       setActiveSection("opensource" === activeSection ? null : "opensource")
                     }
                   }}
                   onMouseEnter={() => setHoveredSection("opensource")}
-                  onMouseLeave={() => setHoveredSection(null)}
+                  onMouseLeave={() => {
+                    setHoveredSection(null)
+                    if (!document.querySelector("[data-radix-tooltip-content]:hover")) {
+                      setActiveSection(null)
+                    }
+                  }}
                 >
                   <Code className="h-5 w-5" />
                   <span className="font-medium text-sm md:text-lg">
@@ -441,7 +483,18 @@ export function UnpriceManifesto() {
                   </span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="top" align="center" className="w-64 bg-background-bg p-4">
+              <TooltipContent
+                side="top"
+                align="center"
+                className="w-64 bg-background-bg p-4"
+                onPointerEnter={() => setHoveredSection("opensource")}
+                onPointerLeave={() => {
+                  setHoveredSection(null)
+                  if (activeSection !== "opensource") {
+                    setActiveSection(null)
+                  }
+                }}
+              >
                 <div className="flex items-start gap-3">
                   <div>
                     <h4 className="font-bold text-background-textContrast">

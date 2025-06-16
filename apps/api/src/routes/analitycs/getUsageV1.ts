@@ -16,6 +16,7 @@ const tags = ["analytics"]
 export const route = createRoute({
   path: "/v1/analytics/usage",
   operationId: "analytics.getUsage",
+  summary: "get usage",
   description: "Get usage for a customer in a given range",
   method: "post",
   tags,

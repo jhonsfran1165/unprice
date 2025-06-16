@@ -9,7 +9,7 @@ export default function WorkSpaceSettingsDangerLoading() {
         <CardHeader>
           <CardTitle>Transfer to Personal</CardTitle>
           <CardDescription className="flex items-center">
-            Transfer this app to your personal workspace
+            Transfer this project to your personal workspace
           </CardDescription>
         </CardHeader>
         <CardFooter className="border-t px-6 py-4">
@@ -18,20 +18,20 @@ export default function WorkSpaceSettingsDangerLoading() {
       </Card>
       <Card className="border-danger">
         <CardHeader>
-          <CardTitle>Delete app</CardTitle>
+          <CardTitle>Delete project</CardTitle>
           <CardDescription className="flex items-center">
-            Transfer this app to a team
+            Transfer this project to a team
           </CardDescription>
         </CardHeader>
         <CardFooter className="border-t px-6 py-4">
-          <Button variant="destructive">Delete app</Button>
+          <Button variant="destructive">Delete project</Button>
         </CardFooter>
       </Card>
       <Card className="border-danger">
         <CardHeader>
           <CardTitle>Transfer to Team</CardTitle>
           <CardDescription className="flex items-center">
-            Transfer this app to a team workspace
+            Transfer this project to a team workspace
           </CardDescription>
         </CardHeader>
         <CardFooter className="border-t px-6 py-4">

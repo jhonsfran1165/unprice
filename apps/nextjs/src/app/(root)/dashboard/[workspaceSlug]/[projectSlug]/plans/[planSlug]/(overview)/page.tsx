@@ -75,6 +75,7 @@ export default async function PlanPage({
                         billingAnchor: "dayOfCreation",
                         planType: "recurring",
                       },
+                      isDefault: plan.defaultPlan ?? false,
                     }}
                   >
                     <Button variant={"custom"}>

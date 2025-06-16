@@ -49,6 +49,7 @@ export const duplicate = protectedProjectProcedure
       where: (version, { and, eq }) => and(eq(version.id, id), eq(version.projectId, project.id)),
       with: {
         planFeatures: true,
+        plan: true,
       },
     })
 
@@ -56,6 +57,14 @@ export const duplicate = protectedProjectProcedure
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "Plan version not found",
+      })
+    }
+
+    // default plan shouldn't have a required payment method
+    if (planVersionData.plan.defaultPlan && planVersionData.paymentMethodRequired) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "default plan can't have a required payment method",
       })
     }
 

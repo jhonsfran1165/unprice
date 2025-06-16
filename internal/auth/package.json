@@ -7,7 +7,8 @@
     "./server": "./src/server.ts",
     "./server-rsc": "./src/server-rsc.ts",
     "./config": "./src/config.ts",
-    "./env": "./src/env.ts"
+    "./env": "./src/env.ts",
+    "./utils": "./src/utils.ts"
   },
   "typesVersions": {
     "*": {
@@ -23,18 +24,22 @@
     "@auth/core": "^0.34.1",
     "@auth/drizzle-adapter": "1.8.0",
     "@t3-oss/env-core": "^0.12.0",
+    "@unprice/api": "workspace:^",
+    "@unprice/config": "workspace:^",
     "@unprice/db": "^0.1.0",
+    "@unprice/error": "workspace:^",
+    "bcryptjs": "^3.0.2",
     "encoding": "^0.1.13",
     "next": "14.3.0-canary.44",
     "next-auth": "5.0.0-beta.20",
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@unprice/tsconfig": "^0.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "@unprice/tsconfig": "^0.1.0",
-    "typescript": "^5.3.3",
-    "@types/react": "^18.3.1",
-    "@types/react-dom": "^18.3.1"
+    "typescript": "^5.3.3"
   }
 }

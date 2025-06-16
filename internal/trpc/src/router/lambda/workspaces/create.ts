@@ -75,7 +75,8 @@ export const create = protectedProcedure
         ...opts.input,
         isPersonal,
       },
-      ctx: opts.ctx,
+      db: opts.ctx.db,
+      userId: userId,
     })
 
     if (!newWorkspace) {

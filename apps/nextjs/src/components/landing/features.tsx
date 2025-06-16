@@ -1,6 +1,7 @@
 import { CalendarIcon, FileTextIcon } from "lucide-react"
 import { BellIcon, Share2Icon } from "lucide-react"
 
+import { DOCS_DOMAIN } from "@unprice/config"
 import { Calendar } from "@unprice/ui/calendar"
 import { cn } from "@unprice/ui/utils"
 import { AnimatedBeamDemo } from "./animated-beam-demo"
@@ -26,9 +27,9 @@ const files = [
 const features = [
   {
     Icon: FileTextIcon,
-    name: "Manage plans & pricing",
-    description: "Version plans, migrate customers, implement any pricing model you want.",
-    href: "#",
+    name: "Plan iteration",
+    description: "Version plans, migrate customers, packaging features and more.",
+    href: `${DOCS_DOMAIN}/features/plans`,
     cta: "Learn more",
     className: "col-span-3 lg:col-span-1",
     background: (
@@ -58,9 +59,9 @@ const features = [
   },
   {
     Icon: BellIcon,
-    name: "Metering & usage-based pricing",
-    description: "Report usage and get real-time insights to optimize your pricing.",
-    href: "#",
+    name: "Any pricing model",
+    description: "Report usage, metering, usage-based pricing, etc.",
+    href: `${DOCS_DOMAIN}/features/pricing`,
     cta: "Learn more",
     className: "col-span-3 lg:col-span-2",
     background: (
@@ -69,10 +70,9 @@ const features = [
   },
   {
     Icon: Share2Icon,
-    name: "Automated billing",
-    description:
-      "Use plug and play integrations to automate your billing with different payment providers.",
-    href: "#",
+    name: "Analytics",
+    description: "Track events, see how your customers are using your product. Get insights.",
+    href: `${DOCS_DOMAIN}/features/analytics`,
     cta: "Learn more",
     className: "col-span-3 lg:col-span-2",
     background: (
@@ -81,10 +81,10 @@ const features = [
   },
   {
     Icon: CalendarIcon,
-    name: "Subscription & Customer",
-    description: "Manage subscriptions, cancel, pause, resume, and more.",
+    name: "Subscription",
+    description: "Manage subscriptions, cancel, pause, resume, with a simple API.",
     className: "col-span-3 lg:col-span-1",
-    href: "#",
+    href: `${DOCS_DOMAIN}/features/subscriptions`,
     cta: "Learn more",
     background: (
       <Calendar

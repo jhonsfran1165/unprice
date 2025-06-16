@@ -49,7 +49,7 @@ export function PlanForm({
             })
 
             return !exist
-          }, "Plan slug already exists in this app."),
+          }, "Plan slug already exists in this project."),
       })
 
   const form = useZodForm({

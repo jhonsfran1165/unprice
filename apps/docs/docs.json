@@ -19,19 +19,43 @@
         "tab": "Guides",
         "groups": [
           {
-            "group": "Unprice",
-            "pages": ["index", "quickstart", "development"]
+            "group": "Introduction",
+            "icon": "home",
+            "pages": [
+              "index",
+              {
+                "group": "Quickstart",
+                "pages": [
+                  "quickstart/onboarding-plan",
+                  "quickstart/onboarding-customer",
+                  "quickstart/onboarding-entitlements"
+                ]
+              }
+            ]
           },
           {
-            "group": "Essentials",
+            "group": "Features",
+            "icon": "fingerprint",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets",
-              "essentials/update"
+              "features/plans",
+              "features/subscriptions",
+              "features/customers",
+              "features/analytics",
+              "features/billing"
+            ]
+          },
+          {
+            "group": "Concepts",
+            "pages": [
+              {
+                "group": "Pricing",
+                "icon": "money-check-dollar",
+                "pages": [
+                  "concepts/pricing/overview",
+                  "concepts/pricing/plans",
+                  "concepts/pricing/entitlements"
+                ]
+              }
             ]
           }
         ]
@@ -41,7 +65,25 @@
         "groups": [
           {
             "group": "API Documentation",
-            "pages": ["api-reference/introduction"]
+            "pages": ["api-reference/overview", "api-reference/authentication"]
+          },
+          {
+            "group": "Errors",
+            "pages": [
+              "api-reference/errors/introduction",
+              {
+                "group": "Errors",
+                "pages": [
+                  "api-reference/errors/code/BAD_REQUEST",
+                  "api-reference/errors/code/UNAUTHORIZED",
+                  "api-reference/errors/code/FORBIDDEN",
+                  "api-reference/errors/code/NOT_FOUND",
+                  "api-reference/errors/code/CONFLICT",
+                  "api-reference/errors/code/TOO_MANY_REQUESTS",
+                  "api-reference/errors/code/INTERNAL_SERVER_ERROR"
+                ]
+              }
+            ]
           },
           {
             "group": "Endpoints",
@@ -51,18 +93,73 @@
             }
           }
         ]
+      },
+      {
+        "tab": "SDKs",
+        "groups": [
+          {
+            "group": "Official Libraries",
+            "icon": "code",
+            "pages": [
+              {
+                "group": "@unprice/api",
+                "pages": [
+                  "libraries/ts/sdk/overview",
+                  {
+                    "group": "Customers",
+                    "pages": [
+                      "libraries/ts/sdk/customers/signup",
+                      "libraries/ts/sdk/customers/get-active-phase",
+                      "libraries/ts/sdk/customers/get-subscription",
+                      "libraries/ts/sdk/customers/get-entitlements",
+                      "libraries/ts/sdk/customers/reset-entitlements",
+                      "libraries/ts/sdk/customers/get-payment-methods",
+                      "libraries/ts/sdk/customers/create-payment-method",
+                      "libraries/ts/sdk/customers/can",
+                      "libraries/ts/sdk/customers/get-usage",
+                      "libraries/ts/sdk/customers/report-usage"
+                    ]
+                  },
+                  {
+                    "group": "Projects",
+                    "pages": ["libraries/ts/sdk/projects/get-features"]
+                  },
+                  {
+                    "group": "Analytics",
+                    "pages": [
+                      "libraries/ts/sdk/analytics/get-usage",
+                      "libraries/ts/sdk/analytics/get-verifications"
+                    ]
+                  },
+                  {
+                    "group": "Plans",
+                    "pages": [
+                      "libraries/ts/sdk/plans/get-plan-version",
+                      "libraries/ts/sdk/plans/list-plan-versions"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     ],
     "global": {
       "anchors": [
         {
+          "anchor": "Home",
+          "href": "https://unprice.dev",
+          "icon": "globe"
+        },
+        {
           "anchor": "Community",
-          "href": "https://mintlify.com/community",
+          "href": "https://discord.gg/unprice",
           "icon": "discord"
         },
         {
           "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
+          "href": "https://unprice.dev",
           "icon": "newspaper"
         }
       ]
@@ -77,6 +174,10 @@
       {
         "label": "Support",
         "href": "mailto:jhonsfran@gmail.com"
+      },
+      {
+        "label": "Manifesto",
+        "href": "https://unprice.dev/manifesto"
       }
     ],
     "primary": {

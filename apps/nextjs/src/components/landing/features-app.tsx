@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 
 const stats = [
   {
-    name: "Ease of use",
+    name: "Scalability",
     value: "100%",
   },
   {
@@ -13,7 +13,7 @@ const stats = [
   },
   {
     name: "Reliability",
-    value: "99.99%",
+    value: "99.9999%",
   },
 ]
 
@@ -72,8 +72,8 @@ export function FeaturesApp() {
         variants={itemVariants}
         className="mt-6 max-w-3xl text-justify text-background-text text-lg leading-7"
       >
-        Unprice&rsquo;s infrastructure is designed to be fast and reliable. It's open source, you
-        can see the code if you don't trust us.
+        Unprice&rsquo;s infrastructure is designed to be fast and reliable. Built for scale and low
+        latency.
       </motion.p>
 
       <motion.dl

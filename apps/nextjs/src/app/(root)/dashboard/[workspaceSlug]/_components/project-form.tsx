@@ -96,7 +96,7 @@ export function ProjectForm(props: {
                 <FormControl>
                   <Input {...field} placeholder="unprice" />
                 </FormControl>
-                <FormDescription>A name to identify your app in the dashboard.</FormDescription>
+                <FormDescription>A name to identify your project in the dashboard.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -111,7 +111,7 @@ export function ProjectForm(props: {
                 <FormControl>
                   <Input {...field} placeholder="https://unprice.dev" />
                 </FormControl>
-                <FormDescription>The URL of your app</FormDescription>
+                <FormDescription>The URL of your project</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

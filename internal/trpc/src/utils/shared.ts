@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import type { Database, TransactionDatabase } from "@unprice/db"
 import { members, workspaces } from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
 import type { WorkspaceInsert } from "@unprice/db/validators"
@@ -56,16 +57,18 @@ export const reportUsageFeature = async ({
 
 export const createWorkspace = async ({
   input,
-  ctx,
+  db,
+  userId,
 }: {
-  input: WorkspaceInsert & {
-    unPriceCustomerId: string
-    name: string
-  }
-  ctx: Context
+  input: WorkspaceInsert
+  db: Database | TransactionDatabase
+  userId: string
 }) => {
   const { name, unPriceCustomerId, isInternal, id, isPersonal } = input
-  const user = ctx.session?.user
+
+  const user = await db.query.users.findFirst({
+    where: (user, { eq }) => eq(user.id, userId),
+  })
 
   if (!user) {
     throw new TRPCError({
@@ -74,20 +77,20 @@ export const createWorkspace = async ({
     })
   }
 
-  // verify if the customer exists
-  const customer = await ctx.db.query.customers.findFirst({
+  // TODO: use sdk to verify if the customer exists
+  const customer = await db.query.customers.findFirst({
     where: (customer, { eq }) => eq(customer.id, unPriceCustomerId),
   })
 
   if (!customer) {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: "Customer unrpice not found",
+      message: "Customer unprice not found",
     })
   }
 
   // get the subscription of the customer
-  const subscription = await ctx.db.query.subscriptions.findFirst({
+  const subscription = await db.query.subscriptions.findFirst({
     where: (subscription, { eq }) => eq(subscription.customerId, unPriceCustomerId),
   })
 
@@ -98,11 +101,11 @@ export const createWorkspace = async ({
     })
   }
 
-  const newWorkspace = await ctx.db.transaction(async (tx) => {
+  const newWorkspace = await db.transaction(async (tx) => {
     const slug = createSlug()
 
     // look if the workspace already has a customer
-    const workspaceExists = await ctx.db.query.workspaces.findFirst({
+    const workspaceExists = await db.query.workspaces.findFirst({
       where: (workspace, { eq }) => eq(workspace.unPriceCustomerId, unPriceCustomerId),
     })
 

@@ -16,7 +16,7 @@ export default function Loading() {
       header={
         <HeaderTab
           title="FREE"
-          description="free plan for the app"
+          description="free plan for the project"
           label="active"
           id="1"
           action={
@@ -51,7 +51,7 @@ export default function Loading() {
       <div className="mt-4">
         <div className="flex flex-col px-1 py-4">
           <Typography variant="p" affects="removePaddingMargin">
-            All customers for this app
+            All customers for this project
           </Typography>
         </div>
         <DataTableSkeleton

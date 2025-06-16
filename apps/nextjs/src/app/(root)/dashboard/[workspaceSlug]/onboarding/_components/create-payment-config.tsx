@@ -46,7 +46,7 @@ export default function CreatePaymentConfig() {
               },
             }}
           >
-            <Balancer>Next, let's create a payment config for your app</Balancer>
+            <Balancer>Next, let's create a payment config for your project</Balancer>
           </m.h1>
           <m.div
             className="mb-8"

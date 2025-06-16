@@ -14,6 +14,7 @@ const tags = ["customer"]
 export const route = createRoute({
   path: "/v1/customer/{customerId}/getActivePhase",
   operationId: "customer.getActivePhase",
+  summary: "get active phase",
   description: "Get active phase for a customer",
   method: "get",
   tags,

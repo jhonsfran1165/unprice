@@ -17,9 +17,9 @@ SaaS pricing was built for a world that no longer exists. Three tiers, feature g
 
 That world is gone.
 
-Today, your users expect personalized value. Your product ships changes daily. Your market is fragmented, dynamic, and ruthless. But you're still pricing like it's 2010 — Static plans, gut feelings, spreadsheets pretending to be strategy.
+Today, your users expect personalized value. Your product ships changes daily. But you're still pricing like it's 2010 — Static plans, gut feelings, spreadsheets pretending to be strategy.
 
-In a world where AI can clone your product overnight, pricing is your sharpest weapon.
+We believe pricing is the most neglected growth lever in SaaS.
 
 
 ## Tech Stack & Features

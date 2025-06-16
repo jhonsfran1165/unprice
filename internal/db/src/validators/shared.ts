@@ -56,6 +56,7 @@ export const planTypeSchema = z.enum(PLAN_TYPES)
 export const unpriceCustomerErrorSchema = z.enum([
   "SUBSCRIPTION_EXPIRED",
   "SUBSCRIPTION_NOT_ACTIVE",
+  "PHASE_NOT_CREATED",
   "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
   "CUSTOMER_SUBSCRIPTION_NOT_FOUND",
   "CUSTOMER_NOT_FOUND",

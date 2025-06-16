@@ -241,7 +241,8 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                   versionFeatures.get(itemConfig.featurePlanId) ??
                   versionAddons.get(itemConfig.featurePlanId)
 
-                if (!feature) return null
+                // if the feature is hidden, don't show it
+                if (!feature || feature.hidden) return null
 
                 // if the units are not set, use the minimum units
                 const units =

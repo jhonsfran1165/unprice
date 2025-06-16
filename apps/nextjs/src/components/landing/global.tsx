@@ -32,7 +32,7 @@ export const Global: FunctionComponent = () => {
           id="global-database-title"
           className="z-10 mt-6 inline-block px-2 text-center font-bold text-5xl text-background-textContrast tracking-tighter md:text-8xl"
         >
-          The market is the <br /> world
+          Works <br /> anywhere
         </h2>
         <Globe className="absolute top-[200px] z-20 aspect-square size-full max-w-fit sm:top-[200px] md:top-[250px]" />
         <div className="-mt-32 md:-mt-36 z-20 h-[36rem] w-full overflow-hidden">

@@ -14,8 +14,7 @@ export function LoadingAnimation({ className, variant = "default", ...props }: P
       {variant === "default" ? (
         <Loader
           className={cn("size-4 animate-spin", className)}
-          // 1s feels a bit fast
-          style={{ animationDuration: "2s" }}
+          style={{ animationDuration: "1s" }}
         />
       ) : (
         <LoadingDots className={cn("size-4", className)} />

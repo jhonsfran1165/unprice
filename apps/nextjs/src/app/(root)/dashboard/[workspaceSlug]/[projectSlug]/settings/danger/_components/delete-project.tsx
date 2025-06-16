@@ -85,7 +85,7 @@ export function DeleteProject({
                   })
                 }}
               >
-                {`I'm sure. Delete this app`}
+                {`I'm sure. Delete this project`}
 
                 {deleteProject.isPending && <LoadingAnimation className="ml-2" />}
               </Button>

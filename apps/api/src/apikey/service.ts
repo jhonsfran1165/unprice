@@ -296,7 +296,7 @@ export class ApiKeysService {
   public async rateLimit(c: Context, req: { key: string }) {
     const keyHash = await this.hash(req.key)
     // TODO: improve this
-    const limiter = c.env.RL_FREE_100_60s
+    const limiter = c.env.RL_FREE_600_60s
     const result = await limiter.limit({ key: keyHash })
     const start = c.get("performanceStart") as number
     const workspaceId = c.get("workspaceId") as string

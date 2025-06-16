@@ -1,12 +1,13 @@
-import type { Route } from "next"
-import { Link } from "next-view-transitions"
 import { redirect } from "next/navigation"
 
 import { getSession } from "@unprice/auth/server-rsc"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
+import { cn } from "@unprice/ui/utils"
+import { env } from "~/env"
+import { SignInGithub } from "../_components/github-signin"
+import { SignInGoogle } from "../_components/google-signin"
+import { SignInCredentials } from "./credentials-signin"
 
-import { Typography } from "@unprice/ui/typography"
-import { SignInGithub } from "./github-signin"
-import { SignInGoogle } from "./google-signin"
 export default async function AuthenticationPage() {
   const session = await getSession()
 
@@ -15,29 +16,47 @@ export default async function AuthenticationPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-      <div className="flex flex-col space-y-2 text-center">
-        <Typography variant="h2">Create an account</Typography>
-      </div>
-      <div className="flex w-full items-center justify-between gap-2">
-        <SignInGithub className="flex-1" />
-        <SignInGoogle className="flex-1" />
-      </div>
+    <div className={cn("flex flex-col gap-6")}>
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">Welcome back</CardTitle>
+          <CardDescription>Login with your Github or Google account</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <div className="flex w-full flex-col items-center justify-between gap-4">
+            <SignInGithub />
+            <SignInGoogle />
+          </div>
+          {env.NODE_ENV === "development" && (
+            <>
+              <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-border after:border-t">
+                <span className="relative z-10 bg-card px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+              <SignInCredentials />
 
-      <Typography variant="p" className="px-8 text-center">
+              <div className="text-center text-sm">
+                Don&apos;t have an account?{" "}
+                <a href="/auth/signup" className="underline underline-offset-4">
+                  Sign up
+                </a>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+      <div className="text-balance text-center text-muted-foreground text-xs [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary ">
         By clicking continue, you agree to our{" "}
-        <Link href={"/terms" as Route} className="underline underline-offset-4 hover:text-primary">
+        <a href="/terms" className="underline underline-offset-4 hover:text-primary">
           Terms of Service
-        </Link>{" "}
+        </a>{" "}
         and{" "}
-        <Link
-          href={"/privacy" as Route}
-          className="underline underline-offset-4 hover:text-primary"
-        >
+        <a href="/privacy" className="underline underline-offset-4 hover:text-primary">
           Privacy Policy
-        </Link>
+        </a>
         .
-      </Typography>
+      </div>
     </div>
   )
 }

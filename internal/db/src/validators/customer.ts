@@ -28,6 +28,13 @@ export const customerMetadataSchema = z.object({
   externalId: z.string().optional(),
   stripeSubscriptionId: z.string().optional(),
   stripeDefaultPaymentMethodId: z.string().optional(),
+  // analytics
+  continent: z.string().optional(),
+  country: z.string().optional(),
+  region: z.string().optional(),
+  colo: z.string().optional(),
+  city: z.string().optional(),
+  isEUCountry: z.coerce.boolean().optional(),
 })
 
 export const customerSelectSchema = createSelectSchema(schema.customers, {
@@ -112,6 +119,12 @@ export const customerSignUpSchema = z
         "The cancel url if the customer cancels the signup. This is the url after the signup process, normally your login page",
       example: "https://example.com/login",
     }),
+    metadata: customerMetadataSchema.optional().openapi({
+      description: "The metadata of the customer",
+      example: {
+        externalId: "1234567890",
+      },
+    }),
   })
   .superRefine((data, ctx) => {
     if (!data.planSlug && !data.planVersionId)
@@ -181,6 +194,7 @@ export const stripeSetupSchema = z.object({
   timezone: z.string().min(1, "Timezone is required"),
   projectId: z.string().min(1, "Project id is required"),
   externalId: z.string().optional(),
+  metadata: customerMetadataSchema.optional(),
 })
 
 export const customerSetUpSchema = z.object({

@@ -111,7 +111,7 @@ export function CurrencyFormField<TFieldValues extends FormValues>({
               href={`/${workspaceSlug}/${projectSlug}/settings`}
               className="ml-auto inline-block text-info text-xs underline opacity-70"
             >
-              Set default currency for this app
+              Set default currency for this project
             </SuperLink>
           </div>
 

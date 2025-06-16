@@ -13,7 +13,10 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** @description Report usage for a customer */
+    /**
+     * report usage
+     * @description Report usage for a customer
+     */
     post: operations["customer.reportUsage"]
     delete?: never
     options?: never
@@ -28,7 +31,10 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** @description Get entitlements for a customer */
+    /**
+     * get entitlements
+     * @description Get entitlements for a customer
+     */
     get: operations["customer.getEntitlements"]
     put?: never
     post?: never
@@ -47,7 +53,10 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** @description Check if a customer can use a feature */
+    /**
+     * can feature
+     * @description Check if a customer can use a feature
+     */
     post: operations["customer.can"]
     delete?: never
     options?: never
@@ -64,7 +73,10 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** @description Reset entitlements for a customer */
+    /**
+     * reset entitlements
+     * @description Reset entitlements for a customer
+     */
     post: operations["customer.resetEntitlements"]
     delete?: never
     options?: never
@@ -79,7 +91,10 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** @description Get subscription with the active phase for a customer */
+    /**
+     * get subscription
+     * @description Get subscription with the active phase for a customer
+     */
     get: operations["customer.getSubscription"]
     put?: never
     post?: never
@@ -96,7 +111,10 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** @description Get active phase for a customer */
+    /**
+     * get active phase
+     * @description Get active phase for a customer
+     */
     get: operations["customer.getActivePhase"]
     put?: never
     post?: never
@@ -113,7 +131,10 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** @description Get usage for a customer */
+    /**
+     * get usage
+     * @description Get usage for a customer
+     */
     get: operations["customer.getUsage"]
     put?: never
     post?: never
@@ -132,7 +153,10 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** @description Get payment methods for a customer */
+    /**
+     * get payment methods
+     * @description Get payment methods for a customer
+     */
     post: operations["customer.getPaymentMethods"]
     delete?: never
     options?: never
@@ -149,7 +173,10 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** @description Sign up a customer for a project */
+    /**
+     * sign up
+     * @description Sign up a customer for a project
+     */
     post: operations["customer.signUp"]
     delete?: never
     options?: never
@@ -166,7 +193,10 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** @description Create a payment method for a customer */
+    /**
+     * create payment method
+     * @description Create a payment method for a customer
+     */
     post: operations["customer.createPaymentMethod"]
     delete?: never
     options?: never
@@ -181,7 +211,10 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** @description Get features for a project */
+    /**
+     * get features
+     * @description Get features for a project
+     */
     get: operations["project.getFeatures"]
     put?: never
     post?: never
@@ -198,7 +231,10 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** @description Get a plan version by id */
+    /**
+     * get plan version
+     * @description Get a plan version by id
+     */
     get: operations["plans.getPlanVersion"]
     put?: never
     post?: never
@@ -217,7 +253,10 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** @description List all plan versions */
+    /**
+     * list all plan versions
+     * @description List all plan versions for a project
+     */
     post: operations["plans.listPlanVersions"]
     delete?: never
     options?: never
@@ -232,7 +271,10 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** @description This endpoint is called by stripe after the customer has signed up. No webhook is needed. */
+    /**
+     * stripe sign up
+     * @description This endpoint is called by stripe after the customer has signed up. No webhook is needed.
+     */
     get: {
       parameters: {
         query?: never
@@ -343,7 +385,10 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** @description This endpoint is called by stripe after the customer setup a payment method. No webhook is needed. */
+    /**
+     * stripe setup
+     * @description This endpoint is called by stripe after the customer setup a payment method. No webhook is needed.
+     */
     get: {
       parameters: {
         query?: never
@@ -456,7 +501,10 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** @description Get usage for a customer in a given range */
+    /**
+     * get usage
+     * @description Get usage for a customer in a given range
+     */
     post: operations["analytics.getUsage"]
     delete?: never
     options?: never
@@ -473,7 +521,10 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** @description Get verifications for a customer in a given range */
+    /**
+     * get verifications
+     * @description Get verifications for a customer in a given range
+     */
     post: operations["analytics.getVerifications"]
     delete?: never
     options?: never
@@ -495,7 +546,7 @@ export interface components {
         code: "BAD_REQUEST"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unprice.dev/docs/api-reference/errors/code/BAD_REQUEST
+         * @example https://docs.unprice.dev/api-reference/errors/code/BAD_REQUEST
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -517,7 +568,7 @@ export interface components {
         code: "UNAUTHORIZED"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unprice.dev/docs/api-reference/errors/code/UNAUTHORIZED
+         * @example https://docs.unprice.dev/api-reference/errors/code/UNAUTHORIZED
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -539,7 +590,7 @@ export interface components {
         code: "FORBIDDEN"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unprice.dev/docs/api-reference/errors/code/FORBIDDEN
+         * @example https://docs.unprice.dev/api-reference/errors/code/FORBIDDEN
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -561,7 +612,7 @@ export interface components {
         code: "NOT_FOUND"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unprice.dev/docs/api-reference/errors/code/NOT_FOUND
+         * @example https://docs.unprice.dev/api-reference/errors/code/NOT_FOUND
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -583,7 +634,7 @@ export interface components {
         code: "CONFLICT"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unprice.dev/docs/api-reference/errors/code/CONFLICT
+         * @example https://docs.unprice.dev/api-reference/errors/code/CONFLICT
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -605,7 +656,7 @@ export interface components {
         code: "PRECONDITION_FAILED"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unprice.dev/docs/api-reference/errors/code/PRECONDITION_FAILED
+         * @example https://docs.unprice.dev/api-reference/errors/code/PRECONDITION_FAILED
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -627,7 +678,7 @@ export interface components {
         code: "TOO_MANY_REQUESTS"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unprice.dev/docs/api-reference/errors/code/TOO_MANY_REQUESTS
+         * @example https://docs.unprice.dev/api-reference/errors/code/TOO_MANY_REQUESTS
          */
         docs: string
         /** @description A human readable explanation of what went wrong */
@@ -649,7 +700,7 @@ export interface components {
         code: "INTERNAL_SERVER_ERROR"
         /**
          * @description A link to our documentation with more details about this error code
-         * @example https://unprice.dev/docs/api-reference/errors/code/INTERNAL_SERVER_ERROR
+         * @example https://docs.unprice.dev/api-reference/errors/code/INTERNAL_SERVER_ERROR
          */
         docs: string
         /** @description A human readable explanation of what went wrong */

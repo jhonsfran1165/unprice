@@ -94,7 +94,7 @@ export const publish = protectedProjectProcedure
       throw new TRPCError({
         code: "BAD_REQUEST",
         message:
-          "Payment provider config not found or not active. Please check the payment provider config in the project settings. You can create a new one in the project settings.",
+          "Payment provider config not found or not active. Please check the payment provider config in the project > settings > payment provider.",
       })
     }
 

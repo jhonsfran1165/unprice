@@ -16,6 +16,7 @@ const tags = ["analytics"]
 export const route = createRoute({
   path: "/v1/analytics/verifications",
   operationId: "analytics.getVerifications",
+  summary: "get verifications",
   description: "Get verifications for a customer in a given range",
   method: "post",
   tags,

@@ -1116,6 +1116,7 @@ export class CustomerService {
       externalId,
       planSlug,
       billingInterval,
+      metadata,
     } = input
 
     // plan version clould be empty, in which case we have to guess the best plan for the customer
@@ -1167,14 +1168,18 @@ export class CustomerService {
           }
 
           // filter by billing interval if provided
-          const versions = data.versions.filter(
-            (version) => version.billingConfig.billingInterval === billingInterval
-          )
+          if (billingInterval) {
+            const versions = data.versions.filter(
+              (version) => version.billingConfig.billingInterval === billingInterval
+            )
 
-          return {
-            ...data,
-            versions: versions ?? [],
+            return {
+              ...data,
+              versions: versions ?? [],
+            }
           }
+
+          return data
         })
 
       if (!plan) {
@@ -1304,6 +1309,7 @@ export class CustomerService {
             timezone: timezone || planProject.timezone,
             projectId: projectId,
             externalId: externalId,
+            metadata: metadata,
           },
           planVersion: {
             id: planVersion.id,
@@ -1374,6 +1380,7 @@ export class CustomerService {
             defaultCurrency: currency,
             timezone: timezone ?? planProject.timezone,
             active: true,
+            metadata: metadata,
           })
           .returning()
           .then((data) => data[0])
@@ -1403,15 +1410,6 @@ export class CustomerService {
             customerId: newCustomer.id,
             projectId: projectId,
             timezone: timezone ?? planProject.timezone,
-            phases: [
-              {
-                planVersionId: planVersion.id,
-                startAt: Date.now(),
-                config: config,
-                paymentMethodRequired: planVersion.paymentMethodRequired,
-                customerId: newCustomer.id,
-              },
-            ],
           },
           projectId: projectId,
         })
@@ -1425,11 +1423,28 @@ export class CustomerService {
           throw err
         }
 
-        if (!newSubscription?.id) {
+        // create the phase
+        const { err: createPhaseErr } = await subscriptionService.createPhase({
+          input: {
+            planVersionId: planVersion.id,
+            startAt: Date.now(),
+            config: config,
+            paymentMethodRequired: planVersion.paymentMethodRequired,
+            customerId: newCustomer.id,
+            subscriptionId: newSubscription.id,
+          },
+          projectId: projectId,
+          db: trx,
+          now: Date.now(),
+        })
+
+        if (createPhaseErr) {
+          trx.rollback()
+
           return Err(
             new UnPriceCustomerError({
-              code: "SUBSCRIPTION_NOT_CREATED",
-              message: "Error creating subscription",
+              code: "PHASE_NOT_CREATED",
+              message: "Error creating phase",
             })
           )
         }

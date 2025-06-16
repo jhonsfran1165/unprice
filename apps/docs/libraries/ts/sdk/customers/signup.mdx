@@ -1,0 +1,130 @@
+---
+title: "Sign Up"
+description: "Create a new customer account"
+---
+
+SignUp is the most important method of the SDK because that is how you can seemssly onboard new users into your product.
+If you are used to used Stripe, the flow is pretty much the same.
+
+<Frame>
+    <img src="/images/signup-flow.png"/>
+</Frame>
+
+<RequestExample>
+
+```ts
+// subscribe to the lastest version of the plan PRO
+const { result, error } = await unprice.customers.signUp({
+  name: "John Doe",
+  email: "customer@example.com",
+  planSlug: "PRO",
+  externalId: "your_database_id",
+  successUrl: "https://example.com/dashboard",
+  cancelUrl: "https://example.com/login"
+});
+
+if (error) {
+  // handle potential network or bad request error
+  // a link to our docs will be in the `error.docs` field
+  console.error(error.message);
+  return;
+}
+
+console.log(result);
+```
+
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "success": true,
+  "url": "https://example.com/dashboard",
+  "customerId": "cus_1234567890"
+}
+```
+</ResponseExample>
+
+## Request
+
+<ParamField body="name" type="string" required>
+    The name of the customer
+</ParamField>
+
+<ParamField body="email" type="string" required>
+    The email of the customer
+</ParamField>
+
+<ParamField body="timezone" type="string">
+    The timezone of the customer. If not provided, the system will use the project timezone
+</ParamField>
+
+<ParamField body="defaultCurrency" type="string">
+    The default currency of the customer. If not provided, the system will use the project currency. Must be one of: "USD" or "EUR"
+</ParamField>
+
+<ParamField body="billingInterval" type="string">
+    The billing interval for the customer's subscription. If plan version is provided, this will match the plan version. If plan slug is provided, this will be the default billing interval of the plan. Must be one of: "month", "year", "day", "minute", or "onetime"
+</ParamField>
+
+<ParamField body="planSlug" type="string">
+    The plan slug to sign up for. If provided, the system will intelligently pick the latest plan for that slug. Required if planVersionId is not provided
+</ParamField>
+
+<ParamField body="planVersionId" type="string">
+    The specific plan version ID to sign up for. Required if planSlug is not provided
+</ParamField>
+
+<ParamField body="config" type="array">
+    Configuration for subscription items. Required for quantity-based features when customer needs to set them. Leave empty to use plan defaults
+</ParamField>
+
+<ParamField body="config[].featurePlanId" type="string" required>
+    The feature plan ID of the item
+</ParamField>
+
+<ParamField body="config[].featureSlug" type="string" required>
+    The feature slug of the item
+</ParamField>
+
+<ParamField body="config[].isUsage" type="boolean">
+    Whether the item is a usage-based feature
+</ParamField>
+
+<ParamField body="config[].units" type="number">
+    The number of units the customer is subscribed to
+</ParamField>
+
+<ParamField body="config[].min" type="number">
+    The minimum number of units for the feature
+</ParamField>
+
+<ParamField body="config[].limit" type="number">
+    The maximum number of units for the feature
+</ParamField>
+
+<ParamField body="externalId" type="string">
+    An external ID to associate with the customer (e.g., user ID from your database)
+</ParamField>
+
+<ParamField body="successUrl" type="string" required>
+    The URL to redirect to after successful signup (typically your dashboard)
+</ParamField>
+
+<ParamField body="cancelUrl" type="string" required>
+    The URL to redirect to if the customer cancels signup (typically your login page)
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean" required>
+    Whether the signup was successful
+</ResponseField>
+
+<ResponseField name="url" type="string" required>
+    The URL to redirect the customer to (either success or cancel URL)
+</ResponseField>
+
+<ResponseField name="customerId" type="string" required>
+    The Unprice customer ID generated for this customer
+</ResponseField>
