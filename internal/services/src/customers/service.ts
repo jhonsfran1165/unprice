@@ -1116,6 +1116,7 @@ export class CustomerService {
       externalId,
       planSlug,
       billingInterval,
+      metadata,
     } = input
 
     // plan version clould be empty, in which case we have to guess the best plan for the customer
@@ -1308,6 +1309,7 @@ export class CustomerService {
             timezone: timezone || planProject.timezone,
             projectId: projectId,
             externalId: externalId,
+            metadata: metadata,
           },
           planVersion: {
             id: planVersion.id,
@@ -1378,6 +1380,7 @@ export class CustomerService {
             defaultCurrency: currency,
             timezone: timezone ?? planProject.timezone,
             active: true,
+            metadata: metadata,
           })
           .returning()
           .then((data) => data[0])

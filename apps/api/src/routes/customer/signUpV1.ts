@@ -53,8 +53,10 @@ export const registerSignUpV1 = (app: App) =>
       defaultCurrency,
       planSlug,
       billingInterval,
+      metadata,
     } = c.req.valid("json")
     const { customer } = c.get("services")
+    const analytics = c.get("analytics")
 
     // validate the request
     const key = await keyAuth(c)
@@ -73,6 +75,10 @@ export const registerSignUpV1 = (app: App) =>
         config,
         externalId,
         billingInterval,
+        metadata: {
+          ...metadata,
+          ...analytics,
+        },
       },
       projectId: key.projectId,
     })

@@ -38,13 +38,14 @@ export const getAnalytics = (c: Context): Analytics => {
   const colo = c.req.raw?.cf?.colo as string
   const latitude = c.req.raw?.cf?.latitude as string
   const longitude = c.req.raw?.cf?.longitude as string
+  const isEUCountry = c.req.raw?.cf?.isEUCountry as boolean
+
   const ip =
     c.req.header("X-Forwarded-For") ??
     c.req.header("True-Client-IP") ??
     c.req.header("CF-Connecting-IP")
   const userAgent = c.req.header("User-Agent")
   const ua = new UAParser(userAgent).getResult()
-  const isEUCountry = c.req.raw?.cf?.isEUCountry as boolean
 
   return {
     ip:
