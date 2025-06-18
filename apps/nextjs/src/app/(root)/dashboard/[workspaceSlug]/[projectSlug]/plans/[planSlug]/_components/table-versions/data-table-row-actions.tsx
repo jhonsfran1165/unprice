@@ -2,7 +2,7 @@
 
 import type { Row } from "@tanstack/react-table"
 
-import { planVersionSelectBaseSchema } from "@unprice/db/validators"
+import { planSelectBaseSchema, planVersionSelectBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 
 import {
@@ -38,7 +38,12 @@ interface DataTableRowActionsProps<TData> {
 
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
   const pathname = usePathname()
-  const version = planVersionSelectBaseSchema.parse(row.original)
+  // parse to get the types
+  const version = planVersionSelectBaseSchema
+    .extend({
+      plan: planSelectBaseSchema.pick({ defaultPlan: true }),
+    })
+    .parse(row.original)
   const [isOpen, setIsOpen] = useState(false)
   const [isOpenDialog, setIsOpenDialog] = useState(false)
 
@@ -91,7 +96,13 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
           <DialogTitle>Plan Version Form</DialogTitle>
           <DialogDescription>Modify the plan version details below.</DialogDescription>
         </DialogHeader>
-        <PlanVersionForm defaultValues={version} setDialogOpen={setIsOpenDialog} />
+        <PlanVersionForm
+          defaultValues={{
+            ...version,
+            isDefault: version.plan.defaultPlan ?? false,
+          }}
+          setDialogOpen={setIsOpenDialog}
+        />
       </DialogContent>
     </Dialog>
   )

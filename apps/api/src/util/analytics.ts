@@ -24,6 +24,7 @@ export interface Analytics {
   ua: string
   bot: boolean
   isEUCountry: boolean
+  source: string
 }
 
 function capitalize(type: string): string {
@@ -46,11 +47,12 @@ export const getAnalytics = (c: Context): Analytics => {
     c.req.header("CF-Connecting-IP")
   const userAgent = c.req.header("User-Agent")
   const ua = new UAParser(userAgent).getResult()
+  const unpriceRequestSource = c.req.header("Unprice-Request-Source")
 
   return {
     ip:
       // only record IP if it's a valid IP and not from a EU country
-      typeof ip === "string" && ip.trim().length > 0 && !isEUCountry ? ip : "",
+      typeof ip === "string" && ip.trim().length > 0 && !isEUCountry ? ip : "Unknown",
     continent: continent || "Unknown",
     country: country || "Unknown",
     region: region || "Unknown",
@@ -71,5 +73,6 @@ export const getAnalytics = (c: Context): Analytics => {
     ua: ua.ua || "Unknown",
     bot: isBot(ua.ua),
     isEUCountry,
+    source: unpriceRequestSource || "Unknown",
   }
 }

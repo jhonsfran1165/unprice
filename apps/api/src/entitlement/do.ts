@@ -675,7 +675,7 @@ export class DurableObjectUsagelimiter extends Server {
             subscriptionItemId: event.subscriptionItemId,
             timestamp: event.timestamp,
             status: event.deniedReason,
-            metadata: event.metadata,
+            metadata: event.metadata ? JSON.parse(event.metadata) : {},
             latency: event.latency ? Number(event.latency) : 0,
             requestId: event.requestId,
             featurePlanVersionId: event.featurePlanVersionId,
@@ -696,6 +696,12 @@ export class DurableObjectUsagelimiter extends Server {
               const quarantined = data?.quarantined_rows ?? 0
 
               const total = rows + quarantined
+
+              if (quarantined > 0) {
+                this.logger.warn("quarantined verifications", {
+                  quarantined,
+                })
+              }
 
               if (total >= ids.length) {
                 // Only delete events that were successfully sent
@@ -768,7 +774,10 @@ export class DurableObjectUsagelimiter extends Server {
             : `${event.idempotenceKey}-${event.timestamp}`
 
         if (!uniqueEvents.has(key)) {
-          uniqueEvents.set(key, event)
+          uniqueEvents.set(key, {
+            ...event,
+            metadata: event.metadata ? JSON.parse(event.metadata) : {},
+          })
         }
       }
 

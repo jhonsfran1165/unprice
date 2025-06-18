@@ -43,6 +43,19 @@ export const nullableJsonToString = anyObject.nullable().transform((s) => {
 export const stringToUInt32 = z.union([z.string(), z.number()]).transform((s) => Number(s))
 export const booleanToUInt8 = z.boolean().transform((b) => (b ? 1 : 0))
 
+export const metadataSchema = z
+  .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()]))
+  .nullable()
+  .transform((m) => {
+    // tinybird receives a Map<string, string>
+    // transform boolean to string
+    const transformed = m
+      ? Object.fromEntries(Object.entries(m).map(([key, value]) => [key, value?.toString() ?? ""]))
+      : null
+
+    return transformed
+  })
+
 export const featureVerificationSchemaV1 = z.object({
   projectId: z.string(),
   featurePlanVersionId: z.string(),
@@ -63,7 +76,7 @@ export const featureVerificationSchemaV1 = z.object({
   featureSlug: z.string(),
   customerId: z.string(),
   requestId: z.string(),
-  metadata: z.string().nullable(),
+  metadata: metadataSchema,
 })
 
 export const featureUsageSchemaV1 = z.object({
@@ -87,7 +100,7 @@ export const featureUsageSchemaV1 = z.object({
     .describe("timestamp of when this usage record was created"),
   requestId: z.string(),
   deleted: z.number().int().min(0).max(1).default(0),
-  metadata: z.string().nullable(),
+  metadata: metadataSchema,
 })
 
 export const auditLogSchemaV1 = z.object({

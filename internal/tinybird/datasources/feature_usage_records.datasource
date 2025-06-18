@@ -19,7 +19,7 @@ SCHEMA >
     `subscriptionItemId` Nullable(String) `json:$.subscriptionItemId`,
     `subscriptionPhaseId` Nullable(String) `json:$.subscriptionPhaseId`,
     `createdAt` Int64 `json:$.createdAt`,
-    `metadata` Nullable(String) `json:$.metadata`,
+    `metadata` Map(String, String) `json:$.metadata`,
     `deleted` UInt8 `json:$.deleted` DEFAULT 0
 
 ENGINE ReplacingMergeTree

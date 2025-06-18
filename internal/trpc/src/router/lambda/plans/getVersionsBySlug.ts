@@ -18,6 +18,7 @@ export const getVersionsBySlug = protectedProjectProcedure
         versions: z.array(
           planVersionSelectBaseSchema.extend({
             subscriptions: z.number(),
+            plan: planSelectBaseSchema.pick({ defaultPlan: true }),
           })
         ),
       }),
@@ -59,6 +60,11 @@ export const getVersionsBySlug = protectedProjectProcedure
                 columns: {
                   id: true,
                   subscriptionId: true,
+                },
+              },
+              plan: {
+                columns: {
+                  defaultPlan: true,
                 },
               },
             },
