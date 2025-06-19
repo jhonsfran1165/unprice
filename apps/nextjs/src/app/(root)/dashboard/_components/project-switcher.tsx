@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { cn } from "@unprice/ui/utils"
 import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
+import { revalidateAppPath } from "~/actions/revalidate"
 import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/client"
 
@@ -81,6 +82,7 @@ export function ProjectSwitcher() {
                   value={project.slug}
                   onSelect={() => {
                     setSwitcherOpen(false)
+                    revalidateAppPath(`/${project.workspace.slug}/${project.slug}`, "page")
                     router.push(`/${project.workspace.slug}/${project.slug}`)
                   }}
                   className={cn(

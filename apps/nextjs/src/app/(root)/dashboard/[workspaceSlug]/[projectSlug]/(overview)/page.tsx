@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
-import { Activity, BarChart2, CreditCard, DollarSign, Users } from "@unprice/ui/icons"
+import { BarChart2 } from "@unprice/ui/icons"
 import { cn } from "@unprice/ui/utils"
 import { cookies } from "next/headers"
 import type { SearchParams } from "nuqs/server"
@@ -10,12 +10,9 @@ import { VerificationsChart } from "~/components/analytics/verifications-chart"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { env } from "~/env"
 import { intervalParserCache } from "~/lib/searchParams"
-import { HydrateClient, api, trpc } from "~/trpc/server"
+import { api } from "~/trpc/server"
 import { Events } from "./_components/events"
-
-// Run this on edge analytics don't query the database
-// This is hitting the limits of the free tier in vercel :/
-// export const runtime = "edge"
+import Stats from "./_components/stats"
 
 export const dynamic = "force-dynamic"
 
@@ -26,81 +23,41 @@ export default async function DashboardPage(props: {
   const { projectSlug, workspaceSlug } = props.params
   const filter = intervalParserCache.parse(props.searchParams)
 
-  void trpc.analytics.getVerifications.prefetch({
-    range: filter.interval,
-  })
-
-  void trpc.analytics.getUsage.prefetch({
-    range: filter.interval,
-  })
+  // TODO: this prefetch doesn't work here, investigate why
+  const [stats, verifications, usage] = await Promise.all([
+    await api.analytics.getStats(),
+    await api.analytics.getVerifications({
+      range: filter.interval,
+    }),
+    await api.analytics.getUsage({
+      range: filter.interval,
+    }),
+  ])
 
   return (
     <DashboardShell>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl">$0</div>
-            <p className="text-muted-foreground text-xs">+0% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">Subscriptions</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl">+0</div>
-            <p className="text-muted-foreground text-xs">+0% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">SignUps</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl">+0</div>
-            <p className="text-muted-foreground text-xs">+0% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">Customers</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl">+0</div>
-            <p className="text-muted-foreground text-xs">+0</p>
-          </CardContent>
-        </Card>
-      </div>
+      <Stats stats={stats.stats} />
       <div className="mt-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-        <HydrateClient>
-          <AnalyticsCard
-            className="w-full md:w-2/3"
-            title="Feature Verifications & Usage"
-            description="Feature verifications and usage recorded for this month."
-            defaultTab="verifications"
-            tabs={[
-              {
-                id: "verifications",
-                label: "Verifications",
-                description: "Feature verifications recorded for the selected interval.",
-                chart: () => <VerificationsChart />,
-              },
-              {
-                id: "usage",
-                label: "Usage",
-                description: "Feature usage recorded for the selected interval.",
-                chart: () => <UsageChart />,
-              },
-            ]}
-          />
-        </HydrateClient>
+        <AnalyticsCard
+          className="w-full md:w-2/3"
+          title="Feature Verifications & Usage"
+          description="Feature verifications and usage recorded for this month."
+          defaultTab="verifications"
+          tabs={[
+            {
+              id: "verifications",
+              label: "Verifications",
+              description: "Feature verifications recorded for the selected interval.",
+              chart: () => <VerificationsChart verifications={verifications.verifications} />,
+            },
+            {
+              id: "usage",
+              label: "Usage",
+              description: "Feature usage recorded for the selected interval.",
+              chart: () => <UsageChart usage={usage.usage} />,
+            },
+          ]}
+        />
 
         <Suspense
           fallback={

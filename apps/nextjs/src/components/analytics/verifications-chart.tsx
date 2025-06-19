@@ -11,8 +11,7 @@ import {
 import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import { useFilter } from "~/hooks/use-filter"
-import { api } from "~/trpc/client"
+import type { RouterOutputs } from "#index"
 import { CodeApiSheet } from "../forms/code-api-sheet"
 
 const chartConfig = {
@@ -30,15 +29,12 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function VerificationsChart() {
-  const [{ interval }] = useFilter() // read-only
-
-  // this is prefetched from the server
-  const [data] = api.analytics.getVerifications.useSuspenseQuery({
-    range: interval,
-  })
-
-  const chartData = data.verifications.map((v) => ({
+export function VerificationsChart({
+  verifications,
+}: {
+  verifications: RouterOutputs["analytics"]["getVerifications"]["verifications"]
+}) {
+  const chartData = verifications.map((v) => ({
     feature: v.featureSlug,
     verifications: v.count,
     p95_latency: v.p95_latency,

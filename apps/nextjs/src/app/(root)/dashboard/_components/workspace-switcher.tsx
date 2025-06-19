@@ -19,6 +19,7 @@ import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { revalidateAppPath } from "~/actions/revalidate"
 import { FilterScroll } from "~/components/filter-scroll"
 import { SuperLink } from "~/components/super-link"
 import { useFlags } from "~/hooks/use-flags"
@@ -99,6 +100,7 @@ export function WorkspaceSwitcher({
                     value={personalWorkspace.id}
                     onSelect={() => {
                       setSwitcherOpen(false)
+                      revalidateAppPath(`/${personalWorkspace.slug}`, "page")
                       router.push(`/${personalWorkspace.slug}`)
                     }}
                     className={cn(
