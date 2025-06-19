@@ -48,7 +48,6 @@ export const metadataSchema = z
   .nullable()
   .transform((m) => {
     // tinybird receives a Map<string, string>
-    // transform boolean to string
     const transformed = m
       ? Object.fromEntries(Object.entries(m).map(([key, value]) => [key, value?.toString() ?? ""]))
       : null

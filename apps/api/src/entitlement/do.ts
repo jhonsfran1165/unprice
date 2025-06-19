@@ -29,7 +29,7 @@ export class DurableObjectUsagelimiter extends Server {
   // logger
   private logger: Logger
   // Default ttl for the usage records
-  private readonly MS_TTL = 1000 * 5 // 5 secs
+  private readonly MS_TTL = 1000 * 30 // 30 secs
   // Debounce delay for the broadcast
   private lastBroadcastTime = 0
   // debounce delay for the broadcast

@@ -27,5 +27,4 @@ SQL >
         {% end %}
     GROUP BY projectId, customerId, featureSlug, subscriptionItemId
 
-
 TYPE endpoint

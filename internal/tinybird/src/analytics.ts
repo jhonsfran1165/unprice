@@ -77,6 +77,7 @@ export class Analytics {
       wait: true,
     })
   }
+
   public get getFeaturesVerifications() {
     return this.readClient.buildPipe({
       pipe: "get_feature_verifications",
