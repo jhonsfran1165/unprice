@@ -101,12 +101,12 @@ export async function createUser({
     }
 
     const workspaceId = newId("workspace")
-    // Don't create workspace if the user is invited to another workspace ?
+
     // 1. create customer in unprice with the latest version of the free plan
     const { error: errCustomer, result: customer } = await unprice.customers.signUp({
       email: user.email,
       name: user.name ?? user.email.split("@")[0]!,
-      planSlug: "FREE",
+      planSlug: "FREE", // TODO: should be default plan
       successUrl: `${APP_DOMAIN}`,
       cancelUrl: `${APP_DOMAIN}`,
       externalId: workspaceId,
@@ -159,6 +159,7 @@ export const createWorkspace = async ({
     return Err(new UnPriceAuthError({ message: "User not found" }))
   }
 
+  // TODO: use unprice api to get the customer
   const customer = await db.query.customers.findFirst({
     where: (customer, { eq }) => eq(customer.id, unPriceCustomerId),
   })
@@ -167,7 +168,7 @@ export const createWorkspace = async ({
     return Err(new UnPriceAuthError({ message: "Customer unprice not found" }))
   }
 
-  // get the subscription of the customer
+  // TODO: use unprice api to get the subscription
   const subscription = await db.query.subscriptions.findFirst({
     where: (subscription, { eq }) => eq(subscription.customerId, unPriceCustomerId),
   })

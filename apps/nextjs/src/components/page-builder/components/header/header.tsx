@@ -1,7 +1,7 @@
 "use client"
 
 import { type UserComponent, useNode } from "@craftjs/core"
-import { Logo } from "@unprice/ui/icons"
+import { Logo } from "~/components/layout/logo"
 import ThemeToggle from "~/components/layout/theme-toggle"
 import { HeaderSettings } from "./settings"
 import type { HeaderComponentProps } from "./types"
@@ -21,7 +21,7 @@ export const HeaderComponent: UserComponent<HeaderComponentProps> = (props) => {
       className="top-0 z-30 flex h-16 w-full items-center border-b bg-background-base px-2 shadow-sm backdrop-blur-[2px]"
     >
       <div className="flex items-center gap-4 text-primary-text md:flex-row md:gap-2 md:px-0">
-        <Logo />
+        <Logo className={"size-6 text-primary-text"} />
       </div>
 
       <div className="flex h-14 w-full items-center space-x-2 sm:justify-between sm:space-x-0">

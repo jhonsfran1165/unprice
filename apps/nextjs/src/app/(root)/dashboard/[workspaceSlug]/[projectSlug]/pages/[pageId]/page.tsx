@@ -1,18 +1,15 @@
-import lz from "lzutf8"
+import { Button } from "@unprice/ui/button"
 import { notFound } from "next/navigation"
-import BreadcrumbsApp from "~/components/layout/breadcrumbs"
-import { UserProfileMobile } from "~/components/navigation/user-nav"
-import { EditorPageComponent } from "~/components/page-builder/editor"
-import { ElementsSidebar } from "~/components/page-builder/viewport/elements-sidebar"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
+import PageBuilderConfig from "~/components/pager/builder"
 import { api } from "~/trpc/server"
 
 export default async function PageEditor({
-  params: { workspaceSlug, projectSlug, pageId },
+  params: { pageId },
 }: {
   params: { workspaceSlug: string; projectSlug: string; pageId: string }
 }) {
-  const baseUrl = `/${workspaceSlug}`
-
   const { page } = await api.pages.getById({
     id: pageId,
   })
@@ -21,27 +18,39 @@ export default async function PageEditor({
     notFound()
   }
 
-  const { content, ...rest } = page
-
-  // convert to json string
-  const data = lz.decompress(lz.decodeBase64(content ?? ""))
-
   return (
-    <EditorPageComponent
-      page={rest}
-      data={data}
-      breadcrumbs={
-        <div className="px-4 md:px-6">
-          <BreadcrumbsApp breadcrumbs={[projectSlug, "pages", pageId]} baseUrl={baseUrl} />
-        </div>
+    <DashboardShell
+      header={
+        <HeaderTab
+          title={page.title}
+          description={page.description}
+          label={page.published ? "published" : "draft"}
+          id={pageId}
+          action={
+            <div className="flex items-center gap-2">
+              <Button variant={"ghost"}>API</Button>
+            </div>
+          }
+        />
       }
-      sidebar={
-        <ElementsSidebar>
-          <div className="flex flex-1 items-end justify-center">
-            <UserProfileMobile />
-          </div>
-        </ElementsSidebar>
-      }
-    />
+    >
+      <PageBuilderConfig page={page} />
+    </DashboardShell>
+    // <EditorPageComponent
+    //   page={rest}
+    //   data={data}
+    //   breadcrumbs={
+    //     <div className="px-4 md:px-6">
+    //       <BreadcrumbsApp breadcrumbs={[projectSlug, "pages", pageId]} baseUrl={baseUrl} />
+    //     </div>
+    //   }
+    //   sidebar={
+    //     <ElementsSidebar>
+    //       <div className="flex flex-1 items-end justify-center">
+    //         <UserProfileMobile />
+    //       </div>
+    //     </ElementsSidebar>
+    //   }
+    // />
   )
 }

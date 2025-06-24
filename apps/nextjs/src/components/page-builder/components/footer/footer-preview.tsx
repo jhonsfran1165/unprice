@@ -1,4 +1,4 @@
-import { Logo } from "@unprice/ui/icons"
+import { Logo } from "~/components/layout/logo"
 import ThemeToggle from "~/components/layout/theme-toggle"
 import type { FooterComponentProps } from "./types"
 

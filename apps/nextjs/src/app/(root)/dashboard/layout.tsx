@@ -32,7 +32,7 @@ export default async function DashboardLayout({
       >
         <TooltipProvider delayDuration={300}>
           <Provider>
-            <div className="flex h-screen flex-col lg:flex-row">
+            <div className="flex h-screen flex-col overflow-hidden lg:flex-row">
               {sidebar}
               <main className="flex w-full flex-1 flex-col overflow-hidden">
                 {header}

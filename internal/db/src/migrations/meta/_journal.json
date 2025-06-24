@@ -57,6 +57,20 @@
       "when": 1749987925393,
       "tag": "0007_yellow_nicolaos",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1750773994507,
+      "tag": "0008_square_gambit",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1750774993679,
+      "tag": "0009_unusual_morlocks",
+      "breakpoints": true
     }
   ]
 }

@@ -1,13 +1,10 @@
 "use client"
-
-import { AUTH_ROUTES } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
 import { cn } from "@unprice/ui/utils"
 import { motion } from "framer-motion"
 import { Loader2 } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { signUpWithCredentials } from "~/actions/signupCredentials"
 import { useZodForm } from "~/lib/zod-form"
@@ -25,7 +22,6 @@ export const SignupSchema = z
   })
 
 export function SignUpCredentials({ className }: { className?: string }) {
-  const router = useRouter()
   const form = useZodForm({
     schema: SignupSchema,
     defaultValues: {
@@ -42,9 +38,6 @@ export function SignUpCredentials({ className }: { className?: string }) {
 
     if (!res.success) {
       form.setError("root", { message: res.message })
-    } else {
-      form.reset()
-      router.push(AUTH_ROUTES.SIGNIN)
     }
   }
 

@@ -1,7 +1,7 @@
 // app/login/actions.ts
 "use server"
-
 import { signIn } from "@unprice/auth/server"
+import { redirect } from "next/navigation"
 
 export async function loginWithCredentials({
   email,
@@ -21,16 +21,13 @@ export async function loginWithCredentials({
       }
     }
 
-    return {
-      success: true,
-      message: "Login successful",
-    }
+    redirect("/")
   } catch (error) {
     const err = error as Error & { cause: { err: Error } }
 
     return {
       success: false,
-      message: err.cause.err.message,
+      message: err.cause.err.message ?? "Invalid credentials",
     }
   }
 }

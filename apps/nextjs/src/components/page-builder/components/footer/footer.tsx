@@ -1,7 +1,7 @@
 "use client"
 
 import { type UserComponent, useNode } from "@craftjs/core"
-import { Logo } from "@unprice/ui/icons"
+import { Logo } from "~/components/layout/logo"
 import ThemeToggle from "~/components/layout/theme-toggle"
 import { FooterSettings } from "./settings"
 import type { FooterComponentProps } from "./types"
@@ -23,7 +23,7 @@ export const FooterComponent: UserComponent<FooterComponentProps> = (props) => {
       }
     >
       <div className="flex items-center gap-4 text-primary-text md:flex-row md:gap-2 md:px-0">
-        <Logo />
+        <Logo className={"size-6 text-primary-text"} />
       </div>
 
       <div className="flex flex-1 items-center justify-end">

@@ -1,5 +1,7 @@
 "use server"
 import { createUser } from "@unprice/auth/utils"
+import { AUTH_ROUTES } from "@unprice/config"
+import { redirect } from "next/navigation"
 
 export async function signUpWithCredentials({
   email,
@@ -23,10 +25,7 @@ export async function signUpWithCredentials({
       }
     }
 
-    return {
-      success: true,
-      message: "User created successfully",
-    }
+    redirect(AUTH_ROUTES.SIGNIN)
   } catch (error) {
     console.error(error)
     return {

@@ -6,7 +6,6 @@ import { Input } from "@unprice/ui/input"
 import { cn } from "@unprice/ui/utils"
 import { motion } from "framer-motion"
 import { Loader2 } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { loginWithCredentials } from "~/actions/loginCredentials"
 import { useZodForm } from "~/lib/zod-form"
@@ -17,7 +16,6 @@ export const LoginSchema = z.object({
 })
 
 export function SignInCredentials({ className }: { className?: string }) {
-  const router = useRouter()
   const form = useZodForm({
     schema: LoginSchema,
     defaultValues: {
@@ -32,9 +30,6 @@ export function SignInCredentials({ className }: { className?: string }) {
 
     if (!res.success) {
       form.setError("root", { message: res.message })
-    } else {
-      form.reset()
-      router.push("/")
     }
   }
 

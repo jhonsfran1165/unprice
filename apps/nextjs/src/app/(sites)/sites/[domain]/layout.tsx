@@ -4,6 +4,7 @@ import { siteConfig } from "~/constants/layout"
 import "~/styles/globals.css"
 import "~/styles/prosemirror.css"
 
+// TODO: get metadata from the site
 export const metadata = {
   title: {
     default: siteConfig.name,
@@ -14,16 +15,16 @@ export const metadata = {
     icon: "/favicon.ico",
   },
   openGraph: {
-    images: [{ url: "/opengraph-image.png" }],
+    images: [{ url: "/og" }],
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
-    images: [{ url: "https://acme-corp-lib.vercel.app/opengraph-image.png" }],
-    creator: "@jullerino",
+    images: [{ url: "/og" }],
+    creator: "jhonsfran",
   },
-  metadataBase: new URL("https://acme-corp.jumr.dev"),
+  metadataBase: new URL("https://sites.unprice.dev"),
 }
 
 export default function SitesLayout(props: { children: React.ReactNode }) {
