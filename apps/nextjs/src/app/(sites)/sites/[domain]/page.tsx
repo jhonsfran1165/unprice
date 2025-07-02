@@ -1,6 +1,4 @@
-import lz from "lzutf8"
 import { notFound } from "next/navigation"
-import { EditorPreview } from "~/components/page-builder/editor-preview"
 import { getPageData } from "~/lib/fetchers"
 
 export default async function DomainPage({
@@ -17,7 +15,5 @@ export default async function DomainPage({
     notFound()
   }
 
-  const data = lz.decompress(lz.decodeBase64(page.content ?? "")) as string
-
-  return <EditorPreview data={data} />
+  return <div>Hello</div>
 }

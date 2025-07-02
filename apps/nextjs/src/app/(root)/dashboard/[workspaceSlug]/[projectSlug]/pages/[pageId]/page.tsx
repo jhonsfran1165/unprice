@@ -1,9 +1,14 @@
+import { SITES_BASE_DOMAIN } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
+import { Separator } from "@unprice/ui/separator"
+import { ExternalLink } from "lucide-react"
+import Link from "next/link"
 import { notFound } from "next/navigation"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import PageBuilderConfig from "~/components/pager/builder"
 import { api } from "~/trpc/server"
+import { PageActions } from "../_components/page-actions"
 
 export default async function PageEditor({
   params: { pageId },
@@ -18,6 +23,11 @@ export default async function PageEditor({
     notFound()
   }
 
+  const isHTTPS = process.env.NODE_ENV === "production"
+  const domain = page.customDomain
+    ? `${isHTTPS ? "https" : "http"}://${page.customDomain}`
+    : `${isHTTPS ? "https" : "http"}://${page.subdomain}.${SITES_BASE_DOMAIN}`
+
   return (
     <DashboardShell
       header={
@@ -27,8 +37,18 @@ export default async function PageEditor({
           label={page.published ? "published" : "draft"}
           id={pageId}
           action={
-            <div className="flex items-center gap-2">
-              <Button variant={"ghost"}>API</Button>
+            <div className="button-primary flex items-center space-x-1 rounded-md">
+              <div className="sm:col-span-full">
+                <Link href={domain} target="_blank">
+                  <Button variant={"custom"}>
+                    <ExternalLink className="mr-2 h-4 w-4" /> Preview
+                  </Button>
+                </Link>
+              </div>
+
+              <Separator orientation="vertical" className="h-[20px] p-0" />
+
+              <PageActions page={page} />
             </div>
           }
         />
@@ -36,21 +56,5 @@ export default async function PageEditor({
     >
       <PageBuilderConfig page={page} />
     </DashboardShell>
-    // <EditorPageComponent
-    //   page={rest}
-    //   data={data}
-    //   breadcrumbs={
-    //     <div className="px-4 md:px-6">
-    //       <BreadcrumbsApp breadcrumbs={[projectSlug, "pages", pageId]} baseUrl={baseUrl} />
-    //     </div>
-    //   }
-    //   sidebar={
-    //     <ElementsSidebar>
-    //       <div className="flex flex-1 items-end justify-center">
-    //         <UserProfileMobile />
-    //       </div>
-    //     </ElementsSidebar>
-    //   }
-    // />
   )
 }

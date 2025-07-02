@@ -85,7 +85,7 @@ export function PageCard(props: {
 
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>page Form</DialogTitle>
+                    <DialogTitle>Page Form</DialogTitle>
 
                     <DialogDescription>Modify the page details below.</DialogDescription>
                   </DialogHeader>

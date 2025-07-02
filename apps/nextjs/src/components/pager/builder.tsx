@@ -7,7 +7,9 @@ import { Card, CardContent } from "@unprice/ui/card"
 import { Form } from "@unprice/ui/form"
 import { toast } from "@unprice/ui/sonner"
 import { Save } from "lucide-react"
+import { useEffect, useRef } from "react"
 import { useForm } from "react-hook-form"
+import { useDebounce } from "~/hooks/use-debounce"
 import { api } from "~/trpc/client"
 import { BasicInformation } from "./basic-information"
 import { ColorPalettePicker } from "./color-palette-picker"
@@ -23,11 +25,15 @@ export default function PageBuilderConfig({ page }: { page: Page }) {
     },
   })
 
+  const initialValuesRef = useRef(page)
+  const lastSavedValuesRef = useRef<Page>(page)
+
   const { mutateAsync: updatePage, isPending } = api.pages.update.useMutation({
     onSuccess: () => {
       toast.success("Configuration saved successfully!", {
         description: "Your page builder settings have been saved.",
       })
+      initialValuesRef.current = lastSavedValuesRef.current
     },
     onError: (error) => {
       toast.error("Failed to save configuration", {
@@ -37,10 +43,28 @@ export default function PageBuilderConfig({ page }: { page: Page }) {
   })
 
   const handleSaveConfig = async (data: Page) => {
+    lastSavedValuesRef.current = data
     await updatePage({
       ...data,
     })
   }
+
+  const watchedValues = form.watch()
+  const debouncedValues = useDebounce(watchedValues, 5000) // 5s debounce
+  const isFirstRender = useRef(true)
+
+  // primitive auto save
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+
+    // Only save if values actually changed
+    if (JSON.stringify(debouncedValues) !== JSON.stringify(initialValuesRef.current)) {
+      handleSaveConfig(debouncedValues)
+    }
+  }, [debouncedValues])
 
   return (
     <div className="flex flex-col">
@@ -54,6 +78,7 @@ export default function PageBuilderConfig({ page }: { page: Page }) {
                 control={form.control}
                 setValue={form.setValue}
                 getValues={form.getValues}
+                watch={form.watch}
               />
               <FAQSection setValue={form.setValue} getValues={form.getValues} />
             </div>
