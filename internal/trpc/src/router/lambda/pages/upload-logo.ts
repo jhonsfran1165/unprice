@@ -9,6 +9,7 @@ export const uploadLogo = protectedProjectProcedure
     z.object({
       name: z.string(),
       file: z.string().min(1),
+      type: z.string().min(1),
     })
   )
   .output(
@@ -19,11 +20,13 @@ export const uploadLogo = protectedProjectProcedure
   .mutation(async (opts) => {
     // Store the base64 string directly
     const logo = opts.input.file
+    const type = opts.input.type
 
     const pageData = await opts.ctx.db
       .update(schema.pages)
       .set({
         logo,
+        logoType: type,
       })
       .returning()
       .catch((err) => {

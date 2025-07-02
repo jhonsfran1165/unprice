@@ -21,7 +21,7 @@ export async function getPageData(domain: string) {
     [`${domain}`],
     {
       revalidate: 60 * 60 * 24, // revalidate every 24 hours
-      tags: [`${domain}`],
+      tags: [`${domain}:page-data`],
     }
   )()
 }

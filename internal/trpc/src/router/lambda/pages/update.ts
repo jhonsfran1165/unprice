@@ -23,6 +23,7 @@ export const update = protectedProjectProcedure
       title,
       description,
       logo,
+      logoType,
       colorPalette,
       faqs,
       copy,
@@ -72,6 +73,7 @@ export const update = protectedProjectProcedure
         colorPalette,
         faqs,
         selectedPlans,
+        logoType,
         updatedAtM: Date.now(),
       })
       .where(and(eq(schema.pages.id, id), eq(schema.pages.projectId, project.id)))

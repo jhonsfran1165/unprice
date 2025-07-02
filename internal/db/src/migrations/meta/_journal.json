@@ -71,6 +71,13 @@
       "when": 1750774993679,
       "tag": "0009_unusual_morlocks",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1751467151810,
+      "tag": "0010_odd_zeigeist",
+      "breakpoints": true
     }
   ]
 }

@@ -50,17 +50,18 @@ export function BasicInformation({ control }: BasicInformationProps) {
           name="copy"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Page Description</FormLabel>
+              <FormLabel>Page Copy</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Describe what your page is about"
+                  placeholder="Enter your page copy"
                   className="min-h-[100px]"
                   {...field}
                   value={field.value ?? ""}
                 />
               </FormControl>
               <FormDescription>
-                A brief description that will appear below your title
+                A brief copy that will appear below your title. This is a good place to add a call
+                to action.
               </FormDescription>
               <FormMessage />
             </FormItem>

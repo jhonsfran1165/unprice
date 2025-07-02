@@ -76,7 +76,6 @@ export const pageInsertBaseSchema = createInsertSchema(pages, {
     updatedAtM: true,
     slug: true,
     published: true,
-    content: true,
   })
   .partial({
     copy: true,
@@ -87,6 +86,7 @@ export const pageInsertBaseSchema = createInsertSchema(pages, {
     font: true,
     id: true,
     projectId: true,
+    logoType: true,
   })
 
 export type InsertPage = z.infer<typeof pageInsertBaseSchema>

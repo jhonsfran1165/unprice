@@ -10,7 +10,6 @@ export const pages = pgTableProject(
   {
     ...projectID,
     ...timestamps,
-    content: text("content"),
     title: text("title").notNull(),
     customDomain: text("custom_domain").unique(),
     subdomain: text("subdomain").unique().notNull(),
@@ -21,6 +20,7 @@ export const pages = pgTableProject(
     colorPalette: jsonb("color_palette").notNull().$type<z.infer<typeof colorPaletteSchema>>(),
     selectedPlans: jsonb("selected_plans").notNull().$type<z.infer<typeof planSchema>[]>(),
     logo: text("logo"),
+    logoType: text("logo_type"),
     font: text("font"),
     published: boolean("published").default(false).notNull(),
   },

@@ -21,7 +21,7 @@ export const metadata = {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
-    images: [{ url: "/og" }],
+    images: [{ url: "/og" }], // TODO: auto generate og image for sites
     creator: "jhonsfran",
   },
   metadataBase: new URL("https://sites.unprice.dev"),

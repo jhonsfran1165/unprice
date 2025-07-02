@@ -8,6 +8,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unpri
 import { Input } from "@unprice/ui/input"
 import { Palette, RefreshCw } from "lucide-react"
 import type { Control, UseFormSetValue, UseFormWatch } from "react-hook-form"
+import { getImageSrc, isSvgLogo } from "~/lib/image"
 import { colorPresets } from "./color-presets"
 
 interface ColorPalettePickerProps {
@@ -88,12 +89,24 @@ export function ColorPalettePicker({ control, setValue, watch }: ColorPalettePic
             className="rounded-lg border p-4"
             style={{ backgroundColor: currentPalette.background }}
           >
-            <div className="space-y-2">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <img
+                  src={getImageSrc(watch("logo"), watch("logoType") ?? "")}
+                  alt="Current page logo"
+                  className="max-h-32 max-w-32 rounded object-contain"
+                  onError={() => {
+                    console.error("Failed to load image preview")
+                  }}
+                  {...(isSvgLogo(watch("logoType") ?? "") ? { width: 128, height: 128 } : {})}
+                  aria-label="Current page logo"
+                />
+              </div>
               <h5 className="font-semibold" style={{ color: currentPalette.text }}>
-                Sample Page Title
+                {watch("title")}
               </h5>
               <p className="text-sm opacity-80" style={{ color: currentPalette.text }}>
-                This is how your page content will look with the selected colors.
+                {watch("copy")}
               </p>
               <div className="mt-3 flex gap-2">
                 <Badge

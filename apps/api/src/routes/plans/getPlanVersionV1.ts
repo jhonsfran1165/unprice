@@ -59,8 +59,12 @@ export const registerGetPlanVersionV1 = (app: App) =>
       db,
     })
 
+    // main workspace can see all plans
+    // TODO: improve this
+    const isMain = key.project.workspace.isMain
+
     const { err, val: planVersionData } = await planService.getPlanVersion({
-      projectId: key.projectId,
+      projectId: isMain ? undefined : key.projectId,
       planVersionId,
     })
 

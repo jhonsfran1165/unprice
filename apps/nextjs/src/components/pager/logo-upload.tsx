@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import type { Page } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
@@ -16,20 +14,13 @@ import {
 import { toast } from "@unprice/ui/sonner"
 import { ImageIcon, Upload, X } from "lucide-react"
 import type { Control, UseFormGetValues, UseFormSetValue } from "react-hook-form"
+import { getImageSrc, isSvgLogo } from "~/lib/image"
 import { api } from "~/trpc/client"
 
 interface LogoUploadProps {
   control: Control<Page>
   setValue: UseFormSetValue<Page>
   getValues: UseFormGetValues<Page>
-}
-
-function getLogoSrc(logo: File | string | null): string | undefined {
-  if (!logo) return undefined
-  if (logo instanceof File) return URL.createObjectURL(logo)
-  if (logo.startsWith("http")) return logo // If it's a URL
-
-  return `data:image/webp;base64,${logo}`
 }
 
 // TODO: optimize this
@@ -53,6 +44,7 @@ export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
   const { mutateAsync: uploadLogo } = api.pages.uploadLogo.useMutation({
     onSuccess: (data) => {
       setValue("logo", data.page.logo)
+      setValue("logoType", data.page.logoType)
       toast.success("Logo uploaded successfully")
     },
     onError: () => {
@@ -64,7 +56,6 @@ export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
     const file = event.target.files?.[0]
 
     if (!file) {
-      toast.error("No file selected")
       return
     }
 
@@ -85,6 +76,7 @@ export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
     await uploadLogo({
       name: file.name,
       file: base64,
+      type: file.type,
     }).catch((e) => {
       console.error(e)
       toast.error("Failed to upload logo")
@@ -93,8 +85,9 @@ export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
 
   const removeLogo = () => {
     setValue("logo", null)
+    setValue("logoType", null)
     // Reset the file input
-    const fileInput = document.getElementById("logo-upload") as HTMLInputElement
+    const fileInput = document.getElementById("logo") as HTMLInputElement
     if (fileInput) {
       fileInput.value = ""
     }
@@ -115,18 +108,31 @@ export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
               <FormLabel>Logo File</FormLabel>
               <FormControl>
                 <div className="space-y-4">
+                  {/* Hidden File Input */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                    id="logo"
+                  />
+
                   {/* Logo Preview or Upload Area */}
                   {getValues("logo") ? (
                     <div className="space-y-3">
                       <div className="relative inline-block">
                         <div className="rounded-lg border bg-muted/20 p-4">
                           <img
-                            src={getLogoSrc(getValues("logo"))}
-                            alt="Logo preview"
+                            src={getImageSrc(getValues("logo"), getValues("logoType") ?? "")}
+                            alt="Current page logo"
                             className="max-h-32 max-w-32 rounded object-contain"
                             onError={() => {
                               console.error("Failed to load image preview")
                             }}
+                            {...(isSvgLogo(getValues("logoType") ?? "")
+                              ? { width: 128, height: 128 }
+                              : {})}
+                            aria-label="Current page logo"
                           />
                         </div>
                         <Button
@@ -142,11 +148,11 @@ export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => document.getElementById("logo-upload")?.click()}
+                        onClick={() => document.getElementById("logo")?.click()}
                         className="w-full"
                       >
                         <Upload className="mr-2 h-4 w-4" />
-                        Change Logo
+                        Upload Logo
                       </Button>
                     </div>
                   ) : (
@@ -163,7 +169,7 @@ export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => document.getElementById("logo-upload")?.click()}
+                        onClick={() => document.getElementById("logo")?.click()}
                         className="w-full"
                       >
                         <Upload className="mr-2 h-4 w-4" />
@@ -171,15 +177,6 @@ export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
                       </Button>
                     </div>
                   )}
-
-                  {/* Hidden File Input */}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    className="hidden"
-                    id="logo-upload"
-                  />
                 </div>
               </FormControl>
               <FormDescription>

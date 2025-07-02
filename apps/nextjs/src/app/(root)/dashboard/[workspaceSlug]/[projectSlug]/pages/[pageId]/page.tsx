@@ -7,6 +7,7 @@ import { notFound } from "next/navigation"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import PageBuilderConfig from "~/components/pager/builder"
+import { generatePreviewToken } from "~/lib/preview"
 import { api } from "~/trpc/server"
 import { PageActions } from "../_components/page-actions"
 
@@ -28,6 +29,8 @@ export default async function PageEditor({
     ? `${isHTTPS ? "https" : "http"}://${page.customDomain}`
     : `${isHTTPS ? "https" : "http"}://${page.subdomain}.${SITES_BASE_DOMAIN}`
 
+  const previewToken = generatePreviewToken(page.customDomain ? page.customDomain : page.subdomain)
+
   return (
     <DashboardShell
       header={
@@ -39,7 +42,7 @@ export default async function PageEditor({
           action={
             <div className="button-primary flex items-center space-x-1 rounded-md">
               <div className="sm:col-span-full">
-                <Link href={domain} target="_blank">
+                <Link href={`${domain}?revalidate=${previewToken}`} target="_blank">
                   <Button variant={"custom"}>
                     <ExternalLink className="mr-2 h-4 w-4" /> Preview
                   </Button>
