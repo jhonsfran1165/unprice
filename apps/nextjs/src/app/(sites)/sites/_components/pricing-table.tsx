@@ -1,39 +1,125 @@
 "use client"
 
 import { cn } from "@unprice/ui/utils"
-import type * as React from "react"
+import { motion } from "framer-motion"
+import React from "react"
+import Balancer from "react-wrap-balancer"
 import { PricingCard, type PricingPlan } from "./pricing-card"
 
 export interface PricingTableProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string
   subtitle?: string
   plans: PricingPlan[]
-  yearlyDiscount?: number
-  discountLabel?: string
   popularPlan: string
+}
+
+// Dynamic grid class based on number of plans
+const getGridClass = (planCount: number) => {
+  const gridClasses = {
+    1: "grid-cols-1",
+    2: "grid-cols-1 md:grid-cols-2",
+    3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+    4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
+    5: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
+  }
+  return (
+    gridClasses[planCount as keyof typeof gridClasses] ||
+    "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+  )
+}
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.3,
+    },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 20,
+    },
+  },
+}
+
+const heroImageVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 20,
+      delay: 0.6,
+    },
+  },
 }
 
 export function PricingTable({
   title = "Simple, Transparent Pricing",
   subtitle = "Choose the plan that's right for you",
   plans,
-  discountLabel = "Save",
   className,
   popularPlan,
-  ...props
 }: PricingTableProps) {
-  return (
-    <div className={cn("w-full py-10", className)} {...props}>
-      <div className="mb-20 text-center">
-        <h2 className="font-bold text-3xl tracking-tight">{title}</h2>
-        <p className="mt-2 text-muted-foreground">{subtitle}</p>
-      </div>
+  // Ensure the popular plan is always in the middle
+  const reorderedPlans = React.useMemo(() => {
+    const plansCopy = [...plans]
+    const popularIndex = plansCopy.findIndex((plan) => plan.name === popularPlan)
+    if (popularIndex === -1) return plansCopy
+    const popular = plansCopy[popularIndex]
+    if (!popular) return plansCopy
+    plansCopy.splice(popularIndex, 1)
+    const middleIndex = Math.floor(plansCopy.length / 2)
+    plansCopy.splice(middleIndex, 0, popular)
+    return plansCopy
+  }, [plans, popularPlan])
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {plans.map((plan) => (
-          <PricingCard key={plan.name} plan={plan} isPopular={plan.name === popularPlan} />
-        ))}
-      </div>
-    </div>
+  return (
+    <motion.div
+      aria-labelledby="hero-title"
+      className={cn(
+        "mt-32 flex flex-col items-center justify-center text-center sm:mt-40",
+        className
+      )}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.h1
+        id="hero-title"
+        className="inline-block bg-clip-text p-2 font-bold text-4xl text-background-textContrast tracking-tighter sm:text-6xl md:text-7xl"
+        variants={itemVariants}
+      >
+        <Balancer>{title}</Balancer>
+      </motion.h1>
+      <motion.div
+        className="mt-6 max-w-2xl px-4 text-background-text text-lg md:px-0"
+        variants={itemVariants}
+      >
+        {subtitle}
+      </motion.div>
+      <motion.div
+        className="relative mx-auto my-20 h-fit w-full max-w-6xl px-4 py-10"
+        variants={heroImageVariants}
+      >
+        <section className={`grid ${getGridClass(reorderedPlans.length)} gap-6`}>
+          {reorderedPlans.map((plan) => (
+            <PricingCard key={plan.name} plan={plan} isPopular={plan.name === popularPlan} />
+          ))}
+        </section>
+      </motion.div>
+    </motion.div>
   )
 }

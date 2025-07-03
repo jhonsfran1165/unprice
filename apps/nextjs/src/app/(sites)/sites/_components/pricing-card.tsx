@@ -20,6 +20,14 @@ export interface PricingPlan {
   isEnterprisePlan: boolean
   description: string
   features: string[]
+  detailedFeatures: Record<
+    string,
+    {
+      value: string | number | boolean
+      title: string
+      type: "flat" | "usage" | "tier" | "package"
+    }
+  >[]
   cta: string
   currency: string
   billingPeriod: string
@@ -52,17 +60,22 @@ export function PricingCard({ plan, isPopular, className, ...props }: PricingCar
           </span>
         </div>
       )}
-      <CardHeader>
+      <CardHeader className="space-y-2">
         <CardTitle>{plan.name}</CardTitle>
-        <div className="mt-2">
-          {!plan.isEnterprisePlan && (
+        <CardDescription className="mt-2 line-clamp-2">{plan.description}</CardDescription>
+        <div className="mt-10">
+          {plan.isEnterprisePlan ? (
+            <div className="invisible flex items-baseline">
+              <span className="font-bold text-3xl">{currentPrice}</span>
+              <span className="ml-1 text-muted-foreground">/{plan.billingPeriod}</span>
+            </div>
+          ) : (
             <div className="flex items-baseline">
               <span className="font-bold text-3xl">{currentPrice}</span>
               <span className="ml-1 text-muted-foreground">/{plan.billingPeriod}</span>
             </div>
           )}
         </div>
-        <CardDescription className="mt-2 line-clamp-2">{plan.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         <ul className="space-y-2">
@@ -77,7 +90,7 @@ export function PricingCard({ plan, isPopular, className, ...props }: PricingCar
       <CardFooter>
         <Button
           className={cn("w-full", isPopular && "bg-primary text-primary-foreground")}
-          variant={isPopular ? "default" : "outline"}
+          variant={isPopular ? "primary" : "default"}
         >
           {plan.cta}
         </Button>

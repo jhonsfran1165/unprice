@@ -6,7 +6,9 @@ import { getPageData } from "~/lib/fetchers"
 import { getImageSrc, isSvgLogo } from "~/lib/image"
 import { verifyPreviewToken } from "~/lib/preview"
 import { unprice } from "~/lib/unprice"
+import { Faqs } from "../_components/faqs"
 import type { PricingPlan } from "../_components/pricing-card"
+import { FeatureComparison } from "../_components/pricing-comparision"
 import { PricingTable } from "../_components/pricing-table"
 
 // TODO: generate metadata https://github.com/vercel/platforms/blob/main/app/s/%5Bsubdomain%5D/page.tsx
@@ -61,12 +63,26 @@ export default async function DomainPage({
               return feature.displayFeatureText
             }) || []
 
+        const detailedFeatures =
+          version.planFeatures
+            .filter((feature) => !feature.hidden)
+            .map((feature) => {
+              return {
+                [feature.feature.title]: {
+                  value: feature.displayFeatureText,
+                  title: feature.feature.title,
+                  type: feature.featureType,
+                },
+              }
+            }) || []
+
         return {
           name: version.plan.slug,
           flatPrice: version.flatPrice,
           currency: version.currency,
           description: version.description || "No description available",
           features,
+          detailedFeatures,
           cta: version.plan.enterprisePlan ? "Contact Us" : "Get Started",
           isEnterprisePlan: version.plan.enterprisePlan || false,
           billingPeriod: version.billingConfig.billingInterval,
@@ -97,14 +113,10 @@ export default async function DomainPage({
           </Link>
         </div>
       </Header>
-      <main className="container mx-auto">
-        <PricingTable
-          plans={plans}
-          popularPlan="PRO"
-          title={page.title}
-          subtitle={page.copy}
-          className="py-10"
-        />
+      <main className="container mx-auto space-y-24 px-4 py-16">
+        <PricingTable plans={plans} popularPlan="PRO" title={page.title} subtitle={page.copy} />
+        <FeatureComparison plans={plans} />
+        <Faqs faqs={page.faqs ?? []} />
       </main>
     </div>
   )
