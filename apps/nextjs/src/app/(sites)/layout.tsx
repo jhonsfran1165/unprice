@@ -1,8 +1,8 @@
 import { TooltipProvider } from "@unprice/ui/tooltip"
 import { ThemeProvider, ToasterProvider } from "~/components/layout/theme-provider"
 import { siteConfig } from "~/constants/layout"
-import "~/styles/globals.css"
-import "~/styles/prosemirror.css"
+
+import "~/styles/sites.css"
 
 // TODO: get metadata from the site
 export const metadata = {

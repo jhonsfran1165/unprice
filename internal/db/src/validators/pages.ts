@@ -17,11 +17,6 @@ export const faqSchema = z.object({
 
 export const colorPaletteSchema = z.object({
   primary: colorSchema,
-  secondary: colorSchema,
-  accent: colorSchema,
-  background: colorSchema,
-  text: colorSchema,
-  border: colorSchema,
 })
 
 export const planSchema = z.object({

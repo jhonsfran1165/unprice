@@ -2,10 +2,12 @@ import { revalidateTag } from "next/cache"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import Header from "~/components/layout/header"
+import { generateColorsFromBackground } from "~/lib/colors"
 import { getPageData } from "~/lib/fetchers"
 import { getImageSrc, isSvgLogo } from "~/lib/image"
 import { verifyPreviewToken } from "~/lib/preview"
 import { unprice } from "~/lib/unprice"
+import { ApplyTheme } from "../_components/apply-theme"
 import { Faqs } from "../_components/faqs"
 import type { PricingPlan } from "../_components/pricing-card"
 import { FeatureComparison } from "../_components/pricing-comparision"
@@ -90,9 +92,19 @@ export default async function DomainPage({
       })
       .filter(Boolean) as PricingPlan[]) || []
 
-  // TODO: apply styles and add frequently asked questions
+  const { text } = generateColorsFromBackground(page.colorPalette?.primary)
+
   return (
     <div>
+      <ApplyTheme
+        cssVars={{
+          "amber-9": page.colorPalette?.primary,
+          "black-a12": text,
+          "white-a12": text,
+          "amber-7": page.colorPalette?.primary,
+          "amber-8": page.colorPalette?.primary,
+        }}
+      />
       {/* add small banner when the page is on preview mode */}
       {isPreview && (
         <div className="bg-info p-2 text-center text-info-foreground text-sm">

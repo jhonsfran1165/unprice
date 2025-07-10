@@ -58,11 +58,6 @@ export const create = protectedProjectProcedure
         faqs: [],
         colorPalette: {
           primary: "#000000",
-          secondary: "#000000",
-          accent: "#000000",
-          background: "#000000",
-          text: "#000000",
-          border: "#000000",
         },
         selectedPlans: [],
       })

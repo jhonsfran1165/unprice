@@ -8,6 +8,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unpri
 import { Input } from "@unprice/ui/input"
 import { Palette, RefreshCw } from "lucide-react"
 import type { Control, UseFormSetValue, UseFormWatch } from "react-hook-form"
+import { generateColorsFromBackground } from "~/lib/colors"
 import { getImageSrc, isSvgLogo } from "~/lib/image"
 import { colorPresets } from "./color-presets"
 
@@ -27,6 +28,8 @@ export function ColorPalettePicker({ control, setValue, watch }: ColorPalettePic
   const resetToDefault = () => {
     setValue("colorPalette", colorPresets[0]!.palette)
   }
+
+  const { text } = generateColorsFromBackground(currentPalette.primary)
 
   return (
     <Card>
@@ -57,24 +60,10 @@ export function ColorPalettePicker({ control, setValue, watch }: ColorPalettePic
                 onClick={() => applyPreset(preset.palette)}
               >
                 <div className="flex w-full items-center gap-2">
-                  <div className="flex gap-1">
-                    <div
-                      className="h-3 w-3 rounded-full border"
-                      style={{ backgroundColor: preset.palette.primary }}
-                    />
-                    <div
-                      className="h-3 w-3 rounded-full border"
-                      style={{ backgroundColor: preset.palette.secondary }}
-                    />
-                    <div
-                      className="h-3 w-3 rounded-full border"
-                      style={{ backgroundColor: preset.palette.accent }}
-                    />
-                    <div
-                      className="h-3 w-3 rounded-full border"
-                      style={{ backgroundColor: preset.palette.border }}
-                    />
-                  </div>
+                  <div
+                    className="h-3 w-3 rounded-full border"
+                    style={{ backgroundColor: preset.palette.primary }}
+                  />
                   <span className="font-medium text-xs">{preset.name}</span>
                 </div>
               </Button>
@@ -85,10 +74,7 @@ export function ColorPalettePicker({ control, setValue, watch }: ColorPalettePic
         {/* Current Palette Preview */}
         <div className="space-y-3">
           <h4 className="font-medium text-sm">Current Palette</h4>
-          <div
-            className="rounded-lg border p-4"
-            style={{ backgroundColor: currentPalette.background }}
-          >
+          <div className="rounded-lg border p-4">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <img
@@ -102,48 +88,11 @@ export function ColorPalettePicker({ control, setValue, watch }: ColorPalettePic
                   aria-label="Current page logo"
                 />
               </div>
-              <h5 className="font-semibold" style={{ color: currentPalette.text }}>
-                {watch("title")}
-              </h5>
-              <p className="text-sm opacity-80" style={{ color: currentPalette.text }}>
-                {watch("copy")}
-              </p>
+              <h5 className="font-semibold">{watch("title")}</h5>
+              <p className="text-sm opacity-80">{watch("copy")}</p>
               <div className="mt-3 flex gap-2">
-                <Badge
-                  style={{
-                    backgroundColor: currentPalette.primary,
-                    color: "white",
-                    borderColor: currentPalette.border,
-                  }}
-                >
+                <Badge style={{ backgroundColor: currentPalette.primary, color: text }}>
                   Primary
-                </Badge>
-                <Badge
-                  style={{
-                    backgroundColor: currentPalette.secondary,
-                    color: "white",
-                    borderColor: currentPalette.border,
-                  }}
-                >
-                  Secondary
-                </Badge>
-                <Badge
-                  style={{
-                    backgroundColor: currentPalette.accent,
-                    color: "white",
-                    borderColor: currentPalette.border,
-                  }}
-                >
-                  Accent
-                </Badge>
-                <Badge
-                  style={{
-                    backgroundColor: currentPalette.border,
-                    color: "white",
-                    borderColor: currentPalette.border,
-                  }}
-                >
-                  Border
                 </Badge>
               </div>
             </div>
@@ -160,165 +109,6 @@ export function ColorPalettePicker({ control, setValue, watch }: ColorPalettePic
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-xs">Primary</FormLabel>
-                  <FormControl>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        className="h-8 w-12 cursor-pointer rounded border p-1"
-                        value={field.value}
-                        onChange={(e) => {
-                          field.onChange(e.target.value)
-                        }}
-                      />
-                      <Input
-                        type="text"
-                        placeholder="#000000"
-                        className="flex-1 text-xs"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e.target.value)
-                        }}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="colorPalette.secondary"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Secondary</FormLabel>
-                  <FormControl>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        className="h-8 w-12 cursor-pointer rounded border p-1"
-                        value={field.value}
-                        onChange={(e) => {
-                          field.onChange(e.target.value)
-                        }}
-                      />
-                      <Input
-                        type="text"
-                        placeholder="#000000"
-                        className="flex-1 text-xs"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e.target.value)
-                        }}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="colorPalette.accent"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Accent</FormLabel>
-                  <FormControl>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        className="h-8 w-12 cursor-pointer rounded border p-1"
-                        value={field.value}
-                        onChange={(e) => {
-                          field.onChange(e.target.value)
-                        }}
-                      />
-                      <Input
-                        type="text"
-                        placeholder="#000000"
-                        className="flex-1 text-xs"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e.target.value)
-                        }}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="colorPalette.background"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Background</FormLabel>
-                  <FormControl>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        className="h-8 w-12 cursor-pointer rounded border p-1"
-                        value={field.value}
-                        onChange={(e) => {
-                          field.onChange(e.target.value)
-                        }}
-                      />
-                      <Input
-                        type="text"
-                        placeholder="#000000"
-                        className="flex-1 text-xs"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e.target.value)
-                        }}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="colorPalette.text"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Text Color</FormLabel>
-                  <FormControl>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        className="h-8 w-12 cursor-pointer rounded border p-1"
-                        value={field.value}
-                        onChange={(e) => {
-                          field.onChange(e.target.value)
-                        }}
-                      />
-                      <Input
-                        type="text"
-                        placeholder="#000000"
-                        className="flex-1 text-xs"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e.target.value)
-                        }}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="colorPalette.border"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Border Color</FormLabel>
                   <FormControl>
                     <div className="flex gap-2">
                       <input
