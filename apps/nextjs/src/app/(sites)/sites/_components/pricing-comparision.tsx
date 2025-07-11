@@ -93,7 +93,7 @@ export function FeatureComparison({ plans }: FeatureComparisonProps) {
               <div className="font-medium">{plan.name}</div>
               <div className="text-muted-foreground text-sm">
                 {plan.isEnterprisePlan
-                  ? "Custom pricing"
+                  ? "Contact us"
                   : `${plan.currency}${plan.flatPrice}/${plan.billingPeriod}`}
               </div>
             </div>
@@ -109,9 +109,8 @@ export function FeatureComparison({ plans }: FeatureComparisonProps) {
                   <span>{featureName}</span>
                 </div>
                 {plans.map((plan) => {
-                  const value = plan.detailedFeatures.find((feature) => feature[featureName])?.[
-                    featureName
-                  ]
+                  const feature = plan.detailedFeatures.find((feature) => feature[featureName])
+                  const value = feature?.[featureName]
 
                   return (
                     <div key={plan.name} className="flex items-center justify-center">

@@ -44,7 +44,6 @@ export function PlanSelection({ control, setValue, watch }: PlanSelectionProps) 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
     {
       onlyPublished: true,
-      onlyLatest: true,
     },
     {
       enabled: true,
@@ -53,24 +52,37 @@ export function PlanSelection({ control, setValue, watch }: PlanSelectionProps) 
 
   const selectedPlans = watch("selectedPlans")
 
-  const hydratedSelectedPlans =
-    data?.planVersions.filter((planVersion) =>
-      selectedPlans.some((selected) => selected.id === planVersion.id)
-    ) ?? []
+  const handlePlanSelection = (planVersionId: string) => {
+    const isSelected = selectedPlans.some((plan) => plan.id === planVersionId)
 
-  const handlePlanSelection = (planId: string) => {
-    const isSelected = hydratedSelectedPlans.some((plan) => plan.id === planId)
-    const updatedPlans = isSelected
-      ? selectedPlans.filter((plan) => plan.id !== planId)
-      : [...selectedPlans, { id: planId }]
+    if (isSelected) {
+      removePlan(planVersionId)
+      return
+    }
+
+    const planVersion = data?.planVersions.find((plan) => plan.id === planVersionId)
+
+    if (!planVersion) {
+      return
+    }
+
+    const updatedPlans = [
+      ...selectedPlans.filter((version) => version.id !== planVersionId),
+      {
+        id: planVersionId,
+        slug: planVersion.plan.slug,
+        version: planVersion.version,
+        description: planVersion.plan.description,
+      },
+    ]
 
     setValue("selectedPlans", updatedPlans)
   }
 
-  const removePlan = (planId: string) => {
+  const removePlan = (planVersionId: string) => {
     setValue(
       "selectedPlans",
-      selectedPlans.filter((plan) => plan.id !== planId)
+      selectedPlans.filter((plan) => plan.id !== planVersionId)
     )
   }
 
@@ -92,7 +104,10 @@ export function PlanSelection({ control, setValue, watch }: PlanSelectionProps) 
           <Calculator className="h-5 w-5" />
           Plans Selection
         </CardTitle>
-        <CardDescription>Choose which plans to display on your page</CardDescription>
+        <CardDescription>
+          Choose which plans to display on your page. The plans will be displayed in the order you
+          select them.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <FormField
@@ -150,7 +165,7 @@ export function PlanSelection({ control, setValue, watch }: PlanSelectionProps) 
                                       >
                                         <Checkbox
                                           className="mt-0.5 h-4 w-4 cursor-pointer"
-                                          checked={hydratedSelectedPlans.some(
+                                          checked={selectedPlans.some(
                                             (p) => p.id === planVersion.id
                                           )}
                                           onCheckedChange={() => {
@@ -186,30 +201,30 @@ export function PlanSelection({ control, setValue, watch }: PlanSelectionProps) 
                   {
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">
-                        Selected Plans ({hydratedSelectedPlans.length})
+                        Selected Plans ({selectedPlans.length})
                       </h4>
                       <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto rounded-lg border bg-muted/20 p-2">
-                        {hydratedSelectedPlans.map((planVersion) => (
+                        {selectedPlans.map((plan) => (
                           <Badge
-                            key={planVersion.id}
+                            key={plan.id}
                             variant="secondary"
                             className="flex items-center gap-1"
                           >
                             <span className="text-xs">
-                              {planVersion.plan.slug} v{planVersion.version}
+                              {plan.slug} v{plan.version}
                             </span>
                             <Button
                               type="button"
                               variant="ghost"
                               size="sm"
                               className="h-4 w-4 p-0"
-                              onClick={() => removePlan(planVersion.id)}
+                              onClick={() => removePlan(plan.id)}
                             >
                               <X className="h-3 w-3" />
                             </Button>
                           </Badge>
                         ))}
-                        {hydratedSelectedPlans.length === 0 && (
+                        {selectedPlans.length === 0 && (
                           <div className="flex items-center justify-center">
                             {isLoading ? (
                               <Skeleton className="h-4 w-10" />

@@ -1,5 +1,5 @@
 import { Dashboard } from "@unprice/ui/icons"
-import { BarChartIcon, Calculator, Key, Link, Settings, Sticker, Users } from "lucide-react"
+import { Calculator, Key, Link, Settings, Sticker, Users } from "lucide-react"
 import type { DashboardRoute } from "~/types"
 
 export const PROJECT_NAV: DashboardRoute[] = [
@@ -22,13 +22,13 @@ export const PROJECT_NAV: DashboardRoute[] = [
     href: "/pages",
     slug: "pages",
   },
-  {
-    name: "Events",
-    icon: BarChartIcon,
-    href: "/ingestions",
-    disabled: true,
-    slug: "ingestions",
-  },
+  // {
+  //   name: "Events",
+  //   icon: BarChartIcon,
+  //   href: "/ingestions",
+  //   disabled: true,
+  //   slug: "ingestions",
+  // },
   {
     name: "Api Keys",
     href: "/apikeys",

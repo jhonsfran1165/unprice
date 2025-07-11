@@ -1,3 +1,5 @@
+"use server"
+
 import { SITES_BASE_DOMAIN } from "@unprice/config"
 import { db } from "@unprice/db"
 import { unstable_cache } from "next/cache"
@@ -18,7 +20,7 @@ export async function getPageData(domain: string) {
 
       return page
     },
-    [`${domain}`],
+    [domain],
     {
       revalidate: 60 * 60 * 24, // revalidate every 24 hours
       tags: [`${domain}:page-data`],

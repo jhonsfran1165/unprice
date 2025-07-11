@@ -1,7 +1,9 @@
-import { revalidateTag } from "next/cache"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { revalidatePageDomain } from "~/actions/revalidate"
+import Footer from "~/components/layout/footer"
 import Header from "~/components/layout/header"
+import HeaderMarketing from "~/components/layout/header-marketing"
 import { generateColorsFromBackground } from "~/lib/colors"
 import { getPageData } from "~/lib/fetchers"
 import { getImageSrc, isSvgLogo } from "~/lib/image"
@@ -9,11 +11,13 @@ import { verifyPreviewToken } from "~/lib/preview"
 import { unprice } from "~/lib/unprice"
 import { ApplyTheme } from "../_components/apply-theme"
 import { Faqs } from "../_components/faqs"
+import FooterSites from "../_components/footer"
 import type { PricingPlan } from "../_components/pricing-card"
 import { FeatureComparison } from "../_components/pricing-comparision"
 import { PricingTable } from "../_components/pricing-table"
 
 // TODO: generate metadata https://github.com/vercel/platforms/blob/main/app/s/%5Bsubdomain%5D/page.tsx
+// check shadcn landing page for inspiration
 export default async function DomainPage({
   params: { domain },
   searchParams: { revalidate },
@@ -26,9 +30,10 @@ export default async function DomainPage({
   }
 }) {
   const isPreview = revalidate && verifyPreviewToken(revalidate, domain)
+
   // revalidate the page if the token is valid
   if (isPreview) {
-    revalidateTag(`sites:${domain}`)
+    revalidatePageDomain(domain)
   }
 
   // we use `getPageData` to fetch the page data and cache it.
@@ -37,6 +42,17 @@ export default async function DomainPage({
 
   if (!page) {
     notFound()
+  }
+
+  // if it's not publish and is not preview, show a 404 page
+  if (!page.published && !isPreview) {
+    return (
+      <main className="container mx-auto space-y-24 px-4 py-16">
+        <div className="flex flex-col items-center justify-center">
+          <h1 className="font-bold text-4xl">Page not found</h1>
+        </div>
+      </main>
+    )
   }
 
   const selectedPlans = page?.selectedPlans ?? []
@@ -93,6 +109,7 @@ export default async function DomainPage({
       .filter(Boolean) as PricingPlan[]) || []
 
   const { text } = generateColorsFromBackground(page.colorPalette?.primary)
+  const isUnprice = page.customDomain?.endsWith("unprice.dev")
 
   return (
     <div>
@@ -112,24 +129,29 @@ export default async function DomainPage({
         </div>
       )}
 
-      <Header>
-        <div className="flex items-center space-x-2">
-          <Link href="/">
-            <img
-              src={getImageSrc(page.logo, page.logoType ?? "")}
-              alt="Current page logo"
-              className="max-h-32 max-w-32 rounded object-contain"
-              {...(isSvgLogo(page.logoType ?? "") ? { width: 128, height: 128 } : {})}
-              aria-label="Current page logo"
-            />
-          </Link>
-        </div>
-      </Header>
+      {!isUnprice ? (
+        <Header isUnprice={isUnprice}>
+          <div className="flex items-center space-x-2">
+            <Link href="/">
+              <img
+                src={getImageSrc(page.logo, page.logoType ?? "")}
+                alt="Current page logo"
+                className="max-h-32 max-w-32 rounded object-contain"
+                {...(isSvgLogo(page.logoType ?? "") ? { width: 128, height: 128 } : {})}
+                aria-label="Current page logo"
+              />
+            </Link>
+          </div>
+        </Header>
+      ) : (
+        <HeaderMarketing />
+      )}
       <main className="container mx-auto space-y-24 px-4 py-16">
         <PricingTable plans={plans} popularPlan="PRO" title={page.title} subtitle={page.copy} />
         <FeatureComparison plans={plans} />
         <Faqs faqs={page.faqs ?? []} />
       </main>
+      {!isUnprice ? <FooterSites domain={page.customDomain ?? domain} /> : <Footer />}
     </div>
   )
 }

@@ -21,6 +21,9 @@ export const colorPaletteSchema = z.object({
 
 export const planSchema = z.object({
   id: z.string(),
+  description: z.string().optional(),
+  slug: z.string(),
+  version: z.number(),
 })
 
 const domainSchema = z.coerce.string().refine((customDomain) => {

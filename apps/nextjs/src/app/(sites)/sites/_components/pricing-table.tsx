@@ -2,7 +2,7 @@
 
 import { cn } from "@unprice/ui/utils"
 import { motion } from "framer-motion"
-import React from "react"
+import type React from "react"
 import Balancer from "react-wrap-balancer"
 import { PricingCard, type PricingPlan } from "./pricing-card"
 
@@ -74,17 +74,17 @@ export function PricingTable({
   popularPlan,
 }: PricingTableProps) {
   // Ensure the popular plan is always in the middle
-  const reorderedPlans = React.useMemo(() => {
-    const plansCopy = [...plans]
-    const popularIndex = plansCopy.findIndex((plan) => plan.name === popularPlan)
-    if (popularIndex === -1) return plansCopy
-    const popular = plansCopy[popularIndex]
-    if (!popular) return plansCopy
-    plansCopy.splice(popularIndex, 1)
-    const middleIndex = Math.floor(plansCopy.length / 2)
-    plansCopy.splice(middleIndex, 0, popular)
-    return plansCopy
-  }, [plans, popularPlan])
+  // const reorderedPlans = React.useMemo(() => {
+  //   const plansCopy = [...plans]
+  //   const popularIndex = plansCopy.findIndex((plan) => plan.name === popularPlan)
+  //   if (popularIndex === -1) return plansCopy
+  //   const popular = plansCopy[popularIndex]
+  //   if (!popular) return plansCopy
+  //   plansCopy.splice(popularIndex, 1)
+  //   const middleIndex = Math.floor(plansCopy.length / 2)
+  //   plansCopy.splice(middleIndex, 0, popular)
+  //   return plansCopy
+  // }, [plans, popularPlan])
 
   return (
     <motion.div
@@ -111,11 +111,11 @@ export function PricingTable({
         {subtitle}
       </motion.div>
       <motion.div
-        className="relative mx-auto my-20 h-fit w-full max-w-6xl px-4 py-10"
+        className="relative mx-auto mt-20 h-fit w-full max-w-6xl px-4 py-10"
         variants={heroImageVariants}
       >
-        <section className={`grid ${getGridClass(reorderedPlans.length)} gap-6`}>
-          {reorderedPlans.map((plan) => (
+        <section className={`grid ${getGridClass(plans.length)} gap-6`}>
+          {plans.map((plan) => (
             <PricingCard key={plan.name} plan={plan} isPopular={plan.name === popularPlan} />
           ))}
         </section>
