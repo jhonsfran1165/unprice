@@ -67,6 +67,27 @@ export function BasicInformation({ control }: BasicInformationProps) {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={control}
+          name="ctaLink"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>CTA Link</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="https://example.com/auth"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormDescription>
+                The link that will be used for the CTA button. We'll add the plan Id to the link.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </CardContent>
     </Card>
   )

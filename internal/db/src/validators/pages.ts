@@ -68,6 +68,7 @@ export const pageInsertBaseSchema = createInsertSchema(pages, {
   colorPalette: colorPaletteSchema,
   faqs: faqSchema.array(),
   selectedPlans: planSchema.array(),
+  ctaLink: z.string().url(),
 })
   .omit({
     createdAtM: true,

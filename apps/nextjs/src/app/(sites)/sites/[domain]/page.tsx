@@ -95,6 +95,7 @@ export default async function DomainPage({
             }) || []
 
         return {
+          id: version.plan.id,
           name: version.plan.slug,
           flatPrice: version.flatPrice,
           currency: version.currency,
@@ -102,6 +103,7 @@ export default async function DomainPage({
           features,
           detailedFeatures,
           cta: version.plan.enterprisePlan ? "Contact Us" : "Get Started",
+          ctaLink: page.ctaLink,
           isEnterprisePlan: version.plan.enterprisePlan || false,
           billingPeriod: version.billingConfig.billingInterval,
         }
@@ -115,11 +117,13 @@ export default async function DomainPage({
     <div>
       <ApplyTheme
         cssVars={{
-          "amber-9": page.colorPalette?.primary,
           "black-a12": text,
           "white-a12": text,
-          "amber-7": page.colorPalette?.primary,
-          "amber-8": page.colorPalette?.primary,
+          "amber-5": page.colorPalette.primary,
+          "amber-6": page.colorPalette.primary,
+          "amber-7": page.colorPalette.primary,
+          "amber-8": page.colorPalette.primary,
+          "amber-9": page.colorPalette.primary,
         }}
       />
       {/* add small banner when the page is on preview mode */}
@@ -147,7 +151,13 @@ export default async function DomainPage({
         <HeaderMarketing />
       )}
       <main className="container mx-auto space-y-24 px-4 py-16">
-        <PricingTable plans={plans} popularPlan="PRO" title={page.title} subtitle={page.copy} />
+        <PricingTable
+          plans={plans}
+          popularPlan="PRO"
+          title={page.title}
+          subtitle={page.copy}
+          sessionId={`${page.id}-${Date.now()}`}
+        />
         <FeatureComparison plans={plans} />
         <Faqs faqs={page.faqs ?? []} />
       </main>

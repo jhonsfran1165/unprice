@@ -8,7 +8,12 @@ import { SignInGithub } from "../_components/github-signin"
 import { SignInGoogle } from "../_components/google-signin"
 import { SignInCredentials } from "./credentials-signin"
 
-export default async function AuthenticationPage() {
+export default async function AuthenticationPage(_props: {
+  searchParams: {
+    sessionId?: string
+  }
+}) {
+  // TODO: report to analytics with sessionId
   const session = await getSession()
 
   if (session?.user?.id) {

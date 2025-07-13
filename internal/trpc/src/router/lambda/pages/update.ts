@@ -28,6 +28,7 @@ export const update = protectedProjectProcedure
       faqs,
       copy,
       selectedPlans,
+      ctaLink,
     } = opts.input
     const project = opts.ctx.project
     const workspace = opts.ctx.project.workspace
@@ -74,6 +75,7 @@ export const update = protectedProjectProcedure
         faqs,
         selectedPlans,
         logoType,
+        ctaLink,
         updatedAtM: Date.now(),
       })
       .where(and(eq(schema.pages.id, id), eq(schema.pages.projectId, project.id)))

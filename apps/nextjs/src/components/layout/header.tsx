@@ -19,8 +19,8 @@ export default function Header({
         <div className="flex items-center justify-start">{children}</div>
 
         <div className="flex flex-1 items-center justify-end space-x-2">
-          {!isUnprice && <MainNav />}
-          {!isUnprice && <SearchTool className="hidden" />}
+          {isUnprice && <MainNav />}
+          {isUnprice && <SearchTool className="hidden" />}
           {<ThemeToggle />}
         </div>
       </div>

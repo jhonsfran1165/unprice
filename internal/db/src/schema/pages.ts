@@ -14,6 +14,7 @@ export const pages = pgTableProject(
     customDomain: text("custom_domain").unique(),
     subdomain: text("subdomain").unique().notNull(),
     slug: text("slug").notNull(),
+    ctaLink: text("cta_link").notNull().default(""),
     description: text("description"),
     copy: text("copy").notNull().default(""),
     faqs: jsonb("faqs").notNull().$type<z.infer<typeof faqSchema>[]>(),

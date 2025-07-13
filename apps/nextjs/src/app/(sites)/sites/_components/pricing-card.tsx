@@ -16,6 +16,7 @@ import { cn } from "@unprice/ui/utils"
 
 export interface PricingPlan {
   name: string
+  id: string
   flatPrice: string
   isEnterprisePlan: boolean
   description: string
@@ -29,6 +30,7 @@ export interface PricingPlan {
     }
   >[]
   cta: string
+  ctaLink: string
   currency: string
   billingPeriod: string
 }
@@ -36,9 +38,10 @@ export interface PricingPlan {
 export interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
   plan: PricingPlan
   isPopular: boolean
+  sessionId: string
 }
 
-export function PricingCard({ plan, isPopular, className, ...props }: PricingCardProps) {
+export function PricingCard({ plan, isPopular, className, sessionId, ...props }: PricingCardProps) {
   const currentPrice = plan.flatPrice
 
   return (
@@ -91,6 +94,12 @@ export function PricingCard({ plan, isPopular, className, ...props }: PricingCar
         <Button
           className={cn("w-full", isPopular && "bg-primary text-primary-foreground")}
           variant={isPopular ? "primary" : "default"}
+          onClick={() => {
+            const ctaLink = new URL(plan.ctaLink)
+            ctaLink.searchParams.set("sessionId", sessionId)
+            // TODO: report to analytics with sessionId
+            window.open(ctaLink.toString(), "_blank")
+          }}
         >
           {plan.cta}
         </Button>

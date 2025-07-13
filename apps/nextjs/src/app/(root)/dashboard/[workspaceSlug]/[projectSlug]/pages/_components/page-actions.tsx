@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+
 import { Button } from "@unprice/ui/button"
 import {
   Dialog,
@@ -17,17 +19,21 @@ import {
 } from "@unprice/ui/dropdown-menu"
 import { ChevronDown } from "lucide-react"
 
-import type { InsertPage } from "@unprice/db/validators"
+import type { Page } from "@unprice/db/validators"
 import { PageForm } from "./page-form"
+import { PagePublish } from "./page-publish"
 
 export function PageActions({
   page,
 }: {
-  page: InsertPage
+  page: Page
 }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [isOpenDialog, setIsOpenDialog] = useState(false)
+
   return (
-    <Dialog>
-      <DropdownMenu>
+    <Dialog onOpenChange={setIsOpenDialog} open={isOpenDialog}>
+      <DropdownMenu onOpenChange={setIsOpen} open={isOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant={"custom"}>
             <span className="sr-only">Actions</span>
@@ -39,7 +45,14 @@ export function PageActions({
             <DropdownMenuItem>Edit page</DropdownMenuItem>
           </DialogTrigger>
           <DialogTrigger asChild>
-            <DropdownMenuItem>Publish page</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <PagePublish
+                pageId={page.id}
+                variant="custom"
+                onConfirmAction={() => setIsOpen(false)}
+                classNames="w-full relative flex cursor-pointer justify-start select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-background-bgHover hover:text-background-textContrast font-normal"
+              />
+            </DropdownMenuItem>
           </DialogTrigger>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -48,7 +61,7 @@ export function PageActions({
           <DialogTitle>Plan Form</DialogTitle>
           <DialogDescription>Modify the plan details below.</DialogDescription>
         </DialogHeader>
-        <PageForm defaultValues={page} />
+        <PageForm defaultValues={page} setDialogOpen={setIsOpenDialog} />
       </DialogContent>
     </Dialog>
   )
