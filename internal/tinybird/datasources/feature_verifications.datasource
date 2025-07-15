@@ -27,4 +27,4 @@ ENGINE_SORTING_KEY (timestamp, projectId, customerId, entitlementId, featureSlug
 ENGINE_TTL toDate(fromUnixTimestamp64Milli(timestamp)) + INTERVAL 6 MONTH
 
 FORWARD_QUERY >
-  SELECT timestamp, createdAt, featureSlug, customerId, latency, featurePlanVersionId, requestId, projectId, entitlementId, subscriptionId, subscriptionItemId, subscriptionPhaseId, deniedReason, CAST('{}', 'Map(String, String)') AS metadata
+  SELECT timestamp, createdAt, featureSlug, customerId, latency, featurePlanVersionId, requestId, projectId, entitlementId, subscriptionId, subscriptionItemId, subscriptionPhaseId, deniedReason, CAST(metadata, 'Map(String, String)') AS metadata,
