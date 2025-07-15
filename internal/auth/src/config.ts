@@ -2,13 +2,14 @@ import Credentials from "@auth/core/providers/credentials"
 import GitHub from "@auth/core/providers/github"
 import Google from "@auth/core/providers/google"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
+import { COOKIES_APP } from "@unprice/config"
 import { db } from "@unprice/db"
 import { createWorkspacesByUserQuery } from "@unprice/db/queries"
 import * as schema from "@unprice/db/schema"
 import type { WorkspacesJWTPayload } from "@unprice/db/validators"
 import bcrypt from "bcryptjs"
 import type { NextAuthConfig } from "next-auth"
-
+import { cookies } from "next/headers"
 import { env } from "./env"
 import { createUser } from "./utils"
 
@@ -43,6 +44,22 @@ export const authConfig: NextAuthConfig = {
     newUser: "/auth/new-user",
   },
   events: {
+    signIn: async ({ user, account, profile, isNewUser }) => {
+      console.info("signIn", user, account, profile, isNewUser)
+      const cookieStore = cookies()
+      const sessionId = cookieStore.get(COOKIES_APP.SESSION)?.value
+      if (sessionId) {
+        // TODO: send to analytics
+        console.info("track", {
+          sessionId,
+          userId: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+          isNewUser,
+        })
+      }
+    },
     // createUser: async ({ user }) => {
     //   // send email to user
     // },

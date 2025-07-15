@@ -1,3 +1,4 @@
+import { newId } from "@unprice/db/utils"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { revalidatePageDomain } from "~/actions/revalidate"
@@ -112,6 +113,7 @@ export default async function DomainPage({
 
   const { text } = generateColorsFromBackground(page.colorPalette?.primary)
   const isUnprice = page.customDomain?.endsWith("unprice.dev")
+  const sessionId = newId("session")
 
   return (
     <div>
@@ -156,7 +158,7 @@ export default async function DomainPage({
           popularPlan="PRO"
           title={page.title}
           subtitle={page.copy}
-          sessionId={`${page.id}-${Date.now()}`}
+          sessionId={sessionId}
         />
         <FeatureComparison plans={plans} />
         <Faqs faqs={page.faqs ?? []} />

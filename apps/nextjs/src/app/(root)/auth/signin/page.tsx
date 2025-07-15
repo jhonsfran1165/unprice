@@ -6,9 +6,12 @@ import { cn } from "@unprice/ui/utils"
 import { env } from "~/env"
 import { SignInGithub } from "../_components/github-signin"
 import { SignInGoogle } from "../_components/google-signin"
+import { UpdateMarketingCookie } from "../_components/update-marketing-cookie"
 import { SignInCredentials } from "./credentials-signin"
 
-export default async function AuthenticationPage(_props: {
+export default async function AuthenticationPage({
+  searchParams: { sessionId },
+}: {
   searchParams: {
     sessionId?: string
   }
@@ -22,6 +25,7 @@ export default async function AuthenticationPage(_props: {
 
   return (
     <div className={cn("flex flex-col gap-6")}>
+      <UpdateMarketingCookie sessionId={sessionId} />
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome back</CardTitle>

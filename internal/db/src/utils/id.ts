@@ -29,6 +29,7 @@ export const prefixes = {
   invoice: "inv",
   payment_provider_config: "ppc",
   isolate: "iso",
+  session: "sess",
 } as const
 
 // Thread-local counter for monotonicity within the same millisecond
