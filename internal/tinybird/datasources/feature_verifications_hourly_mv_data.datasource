@@ -17,5 +17,3 @@ ENGINE_PARTITION_KEY toYYYYMM(date)
 ENGINE_SORTING_KEY (date, projectId, customerId, featureSlug, entitlementId)
 ENGINE_TTL date + INTERVAL 6 MONTH
 
-FORWARD_QUERY >
-  SELECT timestamp, createdAt, featureSlug, customerId, latency, featurePlanVersionId, requestId, projectId, entitlementId, subscriptionId, subscriptionItemId, subscriptionPhaseId, deniedReason, CAST(metadata, 'Map(String,String)') AS metadata

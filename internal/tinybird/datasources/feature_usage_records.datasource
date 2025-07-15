@@ -30,4 +30,4 @@ ENGINE_TTL toDate(fromUnixTimestamp64Milli(timestamp)) + INTERVAL 6 MONTH
 ENGINE_VER timestamp
 
 FORWARD_QUERY >
-  SELECT timestamp, featureSlug, customerId, usage, requestId, idempotenceKey, projectId, entitlementId, featurePlanVersionId, subscriptionId, subscriptionItemId, subscriptionPhaseId, createdAt, CAST(metadata, 'Map(String,String)') AS metadata, deleted
+  SELECT timestamp, featureSlug, customerId, usage, requestId, idempotenceKey, projectId, entitlementId, featurePlanVersionId, subscriptionId, subscriptionItemId, subscriptionPhaseId, createdAt, accurateCastOrDefault(metadata, 'Map(String,String)') AS metadata, deleted
