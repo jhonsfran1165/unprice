@@ -55,7 +55,7 @@
     "@vercel/otel": "^1.10.1",
     "@vercel/speed-insights": "^1.0.12",
     "@vercel/toolbar": "^0.1.36",
-    "ai": "^3.2.16",
+    "ai": "^4.3.19",
     "class-variance-authority": "^0.7.0",
     "cobe": "^0.6.3",
     "date-fns": "^3.3.1",
