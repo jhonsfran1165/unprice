@@ -9,16 +9,12 @@ export async function getPageData(domain: string) {
     ? domain.replace(`.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, "")
     : domain
 
-  console.info(subdomain)
-
   return await unstable_cache(
     async () => {
       const page = await db.query.pages.findFirst({
         where: (page, { eq, or }) =>
           or(eq(page.customDomain, subdomain), eq(page.subdomain, subdomain)),
       })
-
-      console.info(page)
 
       if (!page?.id) return null
 

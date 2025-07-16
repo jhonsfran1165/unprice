@@ -30,7 +30,6 @@ export default async function DomainPage({
     revalidate?: string
   }
 }) {
-  console.info("domain", domain)
   const isPreview = revalidate && verifyPreviewToken(revalidate, domain)
 
   // revalidate the page if the token is valid
@@ -41,7 +40,6 @@ export default async function DomainPage({
   // we use `getPageData` to fetch the page data and cache it.
   // Instead of using `api.pages.findFirst` directly
   const page = await getPageData(domain)
-  console.info("page", page)
 
   if (!page) {
     notFound()

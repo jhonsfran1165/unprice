@@ -69,11 +69,16 @@ export function FeatureComparison({ plans }: FeatureComparisonProps) {
   // Dynamic grid columns based on number of plans
   const gridColsClass =
     {
-      2: "grid-cols-3", // 1 feature + 2 plans
-      3: "grid-cols-4", // 1 feature + 3 plans
-      4: "grid-cols-5", // 1 feature + 4 plans
-      5: "grid-cols-6", // 1 feature + 5 plans
+      1: "grid-cols-2", // 1 feature + 1 plan
+      2: "grid-cols-3",
+      3: "grid-cols-4",
+      4: "grid-cols-5",
+      5: "grid-cols-6",
     }[plans.length] || "grid-cols-5"
+
+  if (plans.length === 1) {
+    return null
+  }
 
   return (
     <motion.div

@@ -44,8 +44,7 @@ export const authConfig: NextAuthConfig = {
     newUser: "/auth/new-user",
   },
   events: {
-    signIn: async ({ user, account, profile, isNewUser }) => {
-      console.info("signIn", user, account, profile, isNewUser)
+    signIn: async ({ user, isNewUser }) => {
       const cookieStore = cookies()
       const sessionId = cookieStore.get(COOKIES_APP.SESSION)?.value
       if (sessionId) {
