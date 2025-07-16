@@ -43,7 +43,12 @@ export default function VersionOverview({
                 <span className="ml-1">{planVersion.status}</span>
               </div>
             </div>
-            <PlanVersionDialog defaultValues={planVersion}>
+            <PlanVersionDialog
+              defaultValues={{
+                ...planVersion,
+                isDefault: planVersion.plan.defaultPlan ?? false,
+              }}
+            >
               <Button size="sm" variant="default">
                 <Pencil className="h-3.5 w-3.5" />
               </Button>

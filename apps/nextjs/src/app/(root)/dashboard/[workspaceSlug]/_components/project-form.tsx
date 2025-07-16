@@ -21,6 +21,7 @@ import { Input } from "@unprice/ui/input"
 
 import { CURRENCIES } from "@unprice/db/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+import { CopyButton } from "~/components/copy-button"
 import TimeZoneFormField from "~/components/forms/timezone-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -86,6 +87,15 @@ export function ProjectForm(props: {
   return (
     <Form {...form}>
       <form className="space-y-6">
+        {editMode && (
+          <div className="flex items-center justify-between">
+            <div>
+              <FormLabel>Project ID</FormLabel>
+              <FormDescription>{props.defaultValues.id}</FormDescription>
+            </div>
+            <CopyButton value={props.defaultValues.id ?? ""} className="size-4" />
+          </div>
+        )}
         <div className="space-y-8">
           <FormField
             control={form.control}

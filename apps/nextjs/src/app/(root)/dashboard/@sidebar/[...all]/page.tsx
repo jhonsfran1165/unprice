@@ -21,9 +21,9 @@ export default async function DashboardNavigationDesktopSlot(props: {
   all.shift()
 
   // pages has another layout
-  if (all.length > 3 && all.includes("pages")) {
-    return null
-  }
+  // if (all.length > 3 && all.includes("pages")) {
+  //   return null
+  // }
 
   let routes = [] as DashboardRoute[]
   let shortcuts = [] as Shortcut[]

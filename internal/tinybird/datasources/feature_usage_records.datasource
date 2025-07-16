@@ -19,7 +19,7 @@ SCHEMA >
     `subscriptionItemId` Nullable(String) `json:$.subscriptionItemId`,
     `subscriptionPhaseId` Nullable(String) `json:$.subscriptionPhaseId`,
     `createdAt` Int64 `json:$.createdAt`,
-    `metadata` Nullable(String) `json:$.metadata`,
+    `metadata` Map(String, String) `json:$.metadata`,
     `deleted` UInt8 `json:$.deleted` DEFAULT 0
 
 ENGINE ReplacingMergeTree
@@ -28,3 +28,6 @@ ENGINE_PARTITION_KEY toYYYYMM(fromUnixTimestamp64Milli(timestamp))
 ENGINE_SORTING_KEY idempotenceKey
 ENGINE_TTL toDate(fromUnixTimestamp64Milli(timestamp)) + INTERVAL 6 MONTH
 ENGINE_VER timestamp
+
+FORWARD_QUERY >
+    SELECT timestamp, featureSlug, customerId, usage, requestId, idempotenceKey, projectId, entitlementId, featurePlanVersionId, subscriptionId, subscriptionItemId, subscriptionPhaseId, createdAt, CAST([] AS Map(String, String)) AS metadata, deleted

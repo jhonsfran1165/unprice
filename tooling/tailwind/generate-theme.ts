@@ -70,7 +70,7 @@ export const generateVariantRadixColors = (color: string) => {
   const foreground = foregroundPairs[color] ?? "white"
   return {
     DEFAULT: `var(--${color}-9)`,
-    foreground: `${foreground}`,
+    foreground: `var(--${foreground}-a12)`,
     base: `var(--${color}-1)`,
     bgSubtle: `var(--${color}-2)`,
     bg: `var(--${color}-3)`,

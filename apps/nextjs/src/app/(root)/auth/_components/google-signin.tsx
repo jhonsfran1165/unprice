@@ -1,5 +1,4 @@
 import { signIn } from "@unprice/auth/server"
-import { APP_DOMAIN } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
 import { Google } from "@unprice/ui/icons"
 import { cn } from "@unprice/ui/utils"
@@ -14,7 +13,6 @@ export function SignInGoogle({ className }: { className?: string }) {
           "use server"
           await signIn("google", {
             redirect: true,
-            redirectTo: APP_DOMAIN,
           })
         }}
       >

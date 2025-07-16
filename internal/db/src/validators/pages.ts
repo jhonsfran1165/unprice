@@ -3,8 +3,27 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 import { pages } from "../schema/pages"
 
+const colorSchema = z.string().regex(/^#[0-9A-F]{6}$/i, "Must be a valid hex color")
+
 export const pageContentSchema = z.object({
   planVersions: z.array(z.string()),
+})
+
+export const faqSchema = z.object({
+  id: z.string(),
+  question: z.string(),
+  answer: z.string(),
+})
+
+export const colorPaletteSchema = z.object({
+  primary: colorSchema,
+})
+
+export const planSchema = z.object({
+  id: z.string(),
+  description: z.string().optional(),
+  slug: z.string(),
+  version: z.number(),
 })
 
 const domainSchema = z.coerce.string().refine((customDomain) => {
@@ -37,21 +56,37 @@ const subdomainSchema = z.coerce
 export const pageSelectBaseSchema = createSelectSchema(pages, {
   customDomain: domainSchema.optional(),
   subdomain: subdomainSchema,
+  colorPalette: colorPaletteSchema,
+  faqs: faqSchema.array(),
+  selectedPlans: planSchema.array(),
 })
 
 export const pageInsertBaseSchema = createInsertSchema(pages, {
   customDomain: domainSchema.optional(),
   subdomain: subdomainSchema,
   title: z.string().min(3).max(50),
+  colorPalette: colorPaletteSchema,
+  faqs: faqSchema.array(),
+  selectedPlans: planSchema.array(),
+  ctaLink: z.string().url(),
 })
   .omit({
     createdAtM: true,
     updatedAtM: true,
     slug: true,
+    published: true,
   })
   .partial({
+    copy: true,
+    selectedPlans: true,
+    faqs: true,
+    colorPalette: true,
+    logo: true,
+    font: true,
     id: true,
     projectId: true,
+    logoType: true,
+    ctaLink: true,
   })
 
 export type InsertPage = z.infer<typeof pageInsertBaseSchema>

@@ -11,24 +11,21 @@ import {
 import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import { useFilter } from "~/hooks/use-filter"
-import { api } from "~/trpc/client"
+import type { RouterOutputs } from "#index"
 import { CodeApiSheet } from "../forms/code-api-sheet"
+
 const chartConfig = {
   usage: {
     label: "Usage",
   },
 } satisfies ChartConfig
 
-export function UsageChart() {
-  const [{ interval }] = useFilter() // read-only
-
-  // this is prefetched from the server
-  const [data] = api.analytics.getUsage.useSuspenseQuery({
-    range: interval,
-  })
-
-  const chartData = data.usage.map((v) => ({
+export function UsageChart({
+  usage,
+}: {
+  usage: RouterOutputs["analytics"]["getUsage"]["usage"]
+}) {
+  const chartData = usage.map((v) => ({
     feature: v.featureSlug,
     usage: v.sum,
   }))

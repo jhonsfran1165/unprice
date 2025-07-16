@@ -30,9 +30,9 @@ export default async function Page(props: {
   all.shift()
 
   // pages has another layout
-  if (all.length > 3 && all.includes("pages")) {
-    return null
-  }
+  // if (all.length > 3 && all.includes("pages")) {
+  //   return null
+  // }
 
   let workspace: string | null = null
   let project: string | null = null

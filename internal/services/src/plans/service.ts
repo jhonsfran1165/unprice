@@ -146,7 +146,7 @@ export class PlanService {
     projectId,
     planVersionId,
   }: {
-    projectId: string
+    projectId?: string
     planVersionId: string
   }): Promise<PlanVersionApi | null> {
     const start = performance.now()
@@ -166,7 +166,7 @@ export class PlanService {
         },
         where: (version, { and, eq }) =>
           and(
-            eq(version.projectId, projectId),
+            projectId ? eq(version.projectId, projectId) : undefined,
             eq(version.id, planVersionId),
             eq(version.active, true),
             eq(version.status, "published")
@@ -358,13 +358,13 @@ export class PlanService {
     planVersionId,
     opts,
   }: {
-    projectId: string
+    projectId?: string
     planVersionId: string
     opts?: {
       skipCache?: boolean // skip cache to force revalidation
     }
   }): Promise<Result<PlanVersionApi | null, FetchError>> {
-    const cachekey = `${projectId}:${planVersionId}`
+    const cachekey = `${planVersionId}`
 
     // first try to get the entitlement from cache
     const { val, err } = opts?.skipCache

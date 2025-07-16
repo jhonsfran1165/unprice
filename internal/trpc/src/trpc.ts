@@ -301,16 +301,4 @@ export const protectedProjectProcedure = protectedProcedure.use(
   }
 )
 
-/**
- * Procedure to parse form data and put it in the rawInput and authenticate requests with an API key
- */
-export const protectedApiFormDataProcedure = protectedProcedure.use(async function formData(opts) {
-  const data = await opts.ctx.req?.formData?.()
-  if (!formData) throw new TRPCError({ code: "BAD_REQUEST" })
-
-  return opts.next({
-    input: data,
-  })
-})
-
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>

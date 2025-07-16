@@ -32,9 +32,12 @@ export function SignInCredentials({ className }: { className?: string }) {
 
     if (!res.success) {
       form.setError("root", { message: res.message })
-    } else {
-      form.reset()
-      router.push("/")
+      return
+    }
+
+    if (res.redirect) {
+      router.push(res.redirect)
+      return
     }
   }
 

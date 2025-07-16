@@ -1,20 +1,27 @@
-import { boolean, index, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
+import { boolean, index, jsonb, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
+import type { z } from "zod"
 import { pgTableProject } from "../utils/_table"
 import { timestamps } from "../utils/fields"
 import { projectID } from "../utils/sql"
+import type { colorPaletteSchema, faqSchema, planSchema } from "../validators/pages"
 
 export const pages = pgTableProject(
   "pages",
   {
     ...projectID,
     ...timestamps,
-    content: text("content"),
     title: text("title").notNull(),
     customDomain: text("custom_domain").unique(),
     subdomain: text("subdomain").unique().notNull(),
     slug: text("slug").notNull(),
+    ctaLink: text("cta_link").notNull().default(""),
     description: text("description"),
+    copy: text("copy").notNull().default(""),
+    faqs: jsonb("faqs").notNull().$type<z.infer<typeof faqSchema>[]>(),
+    colorPalette: jsonb("color_palette").notNull().$type<z.infer<typeof colorPaletteSchema>>(),
+    selectedPlans: jsonb("selected_plans").notNull().$type<z.infer<typeof planSchema>[]>(),
     logo: text("logo"),
+    logoType: text("logo_type"),
     font: text("font"),
     published: boolean("published").default(false).notNull(),
   },

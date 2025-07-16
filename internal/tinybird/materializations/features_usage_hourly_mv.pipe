@@ -13,6 +13,7 @@ SQL >
     FROM feature_usage_records
     WHERE deleted = 0
     GROUP BY date, projectId, customerId, featureSlug, entitlementId
+    ORDER BY date DESC
 
 TYPE MATERIALIZED
 DATASOURCE feature_usage_hourly_mv_data

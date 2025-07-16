@@ -10,7 +10,7 @@ import { featureGuard } from "#utils/feature-guard"
 import { reportUsageFeature } from "#utils/shared"
 
 export const create = protectedProjectProcedure
-  .input(pageInsertBaseSchema)
+  .input(pageInsertBaseSchema.omit({ ctaLink: true }))
   .output(
     z.object({
       page: pageSelectBaseSchema,
@@ -55,6 +55,11 @@ export const create = protectedProjectProcedure
         description,
         subdomain,
         customDomain: customDomain || null,
+        faqs: [],
+        colorPalette: {
+          primary: "#000000",
+        },
+        selectedPlans: [],
       })
       .returning()
       .catch((err) => {

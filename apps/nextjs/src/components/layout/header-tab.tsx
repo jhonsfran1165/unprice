@@ -26,14 +26,16 @@ export default function HeaderTab({
           {label && (
             <Badge
               className={cn("ml-2 hidden md:flex", {
-                info: label === "active",
-                danger: label === "inactive",
+                info: ["active", "published"].includes(label),
+                danger: ["inactive"].includes(label),
+                default: ["archived", "draft"].includes(label),
               })}
             >
               <span
                 className={cn("flex h-2 w-2 rounded-full", {
-                  "bg-info-solid": label === "active",
-                  "bg-danger-solid": label === "inactive",
+                  "bg-info-solid": ["active", "published"].includes(label),
+                  "bg-danger-solid": ["inactive"].includes(label),
+                  "bg-gray-solid": ["archived", "draft"].includes(label),
                 })}
               />
               <span className="ml-1">{label}</span>

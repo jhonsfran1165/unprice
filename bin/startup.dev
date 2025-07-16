@@ -105,7 +105,7 @@ if [ "$MODE_ID" = "dev" ]; then
 
   # We need to override on development some variables so we can work with local first tools.
   # TB_TOKEN=$(curl -s http://localhost:7181/tokens | jq -r ".workspace_admin_token")
-  TB_TOKEN=$(tb token ls | awk '/name: admin local_testing@tinybird.co/{getline; print $2}')
+  TB_TOKEN=$(tb --output=json info | jq .local.token)
 
   # auth tb with the admin token
   echo "Authenticating Tinybird"
@@ -140,8 +140,7 @@ elif [ "$MODE_ID" = "preview" ]; then
   NODE_ENV="preview"
   VERCEL_ENV="preview"
 
-
-curl -X GET -H "Authorization: Bearer $TB_TOKEN" "http://localhost:7181/v0/pipes"
+  # curl -X GET -H "Authorization: Bearer $TB_TOKEN" "http://localhost:7181/v0/pipes"
   cd internal/tinybird
 
   # auth tb with the admin token

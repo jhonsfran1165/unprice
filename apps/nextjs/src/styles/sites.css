@@ -1,0 +1,263 @@
+@import "@unprice/tailwind-config/themes/sunset.css";
+/* @import "@unprice/tailwind-config/themes/slate.css"; */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+
+    /* chart colors */
+    --chart-1: 220 70% 50%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --radius: 0.5rem;
+
+    /* chart colors */
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  /* default styles */
+  h1 {
+    @apply font-primary text-2xl font-extrabold;
+  }
+
+  h2 {
+    @apply font-primary font-bold text-xl;
+  }
+
+  h3 {
+    @apply font-primary text-lg font-bold;
+  }
+
+  h4 {
+    @apply font-secondary text-lg font-semibold;
+  }
+
+  h5 {
+    @apply font-secondary font-semibold text-base leading-none tracking-tight;
+  }
+
+  h6 {
+    @apply font-secondary font-semibold leading-none tracking-tight;
+  }
+
+  p {
+    @apply font-secondary text-xs font-normal;
+  }
+
+  body {
+    @apply bg-background-base font-secondary text-background-text font-normal;
+
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  .container {
+    @apply max-sm:px-4;
+  }
+}
+
+/* alias classes to override shadcn ui */
+@layer components {
+  .primary {
+    @apply border border-primary-border bg-primary-bg text-primary-text;
+  }
+
+  .secondary {
+    @apply border border-secondary-border bg-secondary-bg text-secondary-text;
+  }
+
+  .warning {
+    @apply border border-warning-border bg-warning-bg text-warning-text;
+  }
+
+  .default {
+    @apply border bg-background-bg text-background-text;
+  }
+
+  .transparent {
+    @apply bg-transparent text-background-text;
+  }
+
+  .danger {
+    @apply border border-danger-border bg-danger-bg text-danger-text;
+  }
+
+  .info {
+    @apply border border-info-border bg-info-bg text-info-text;
+  }
+
+  .success {
+    @apply border border-success-border bg-success-bg text-success-text;
+  }
+
+  .button-ghost {
+    @apply transparent hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
+  }
+
+  .button-default {
+    @apply default text-background-text hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
+  }
+
+  .link {
+    @apply transparent;
+  }
+
+  .button-link {
+    @apply transparent hover:text-background-textContrast active:text-background-bgActive;
+  }
+
+  .button-danger {
+    @apply danger hover:border-danger-borderHover hover:bg-danger-solid hover:text-danger-foreground active:bg-danger-bgActive;
+  }
+
+  .button-info {
+    @apply info hover:border-info-borderHover hover:bg-info-solid hover:text-info-foreground active:bg-info-bgActive;
+  }
+
+  .button-primary {
+    @apply primary hover:border-primary-borderHover hover:bg-primary-solid hover:text-primary-foreground active:bg-primary-bgActive;
+  }
+
+  .button-success {
+    @apply success hover:border-success-borderHover hover:bg-success-solid hover:text-success-foreground active:bg-success-bgActive;
+  }
+
+  .button-warning {
+    @apply warning hover:border-warning-borderHover hover:bg-warning-solid hover:text-warning-foreground active:bg-warning-bgActive;
+  }
+
+  .button-secondary {
+    @apply secondary hover:border-secondary-borderHover hover:bg-secondary-solid hover:text-secondary-foreground active:bg-secondary-bgActive;
+  }
+}
+
+@layer utilities {
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome, Safari and Opera */
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* Hide scrollbar for Internet Explorer and Edge */
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    --scrollbar-size: 0px;
+  }
+
+  .hide-scrollbar [data-radix-scroll-area-viewport] > div {
+    padding-right: 0 !important;
+  }
+
+  .hide-scrollbar [data-radix-scroll-area-viewport]::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar [data-radix-scroll-area-viewport] {
+    scrollbar-width: none;
+  }
+}
+
+/** Prevent scrolling on body when modal is open */
+body[style*="pointer-events: none"] .overflow-auto,
+body[style*="pointer-events: none"] .overflow-y-auto,
+body[style*="pointer-events: none"] .overflow-x-auto {
+  overflow: hidden !important;
+}
+
+@media (max-width: 640px) {
+  .container {
+    @apply px-4;
+  }
+}
+
+.component-selected {
+  @apply relative;
+}
+.component-selected::after {
+  content: " ";
+  @apply border-info border border-dashed w-full h-full absolute left-0 top-0 pointer-events-none block z-30;
+}
+
+pre {
+  background: #0d0d0d;
+  border-radius: 0.5rem;
+  color: #fff;
+  font-family: "JetBrainsMono", monospace;
+  padding: 0.75rem 1rem;
+
+  code {
+    background: none;
+    color: inherit;
+    font-size: 0.8rem;
+    padding: 0;
+  }
+
+  .hljs-comment,
+  .hljs-quote {
+    color: #616161;
+  }
+
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-attribute,
+  .hljs-tag,
+  .hljs-name,
+  .hljs-regexp,
+  .hljs-link,
+  .hljs-name,
+  .hljs-selector-id,
+  .hljs-selector-class {
+    color: #f98181;
+  }
+
+  .hljs-number,
+  .hljs-meta,
+  .hljs-built_in,
+  .hljs-builtin-name,
+  .hljs-literal,
+  .hljs-type,
+  .hljs-params {
+    color: #fbbc88;
+  }
+
+  .hljs-string,
+  .hljs-symbol,
+  .hljs-bullet {
+    color: #b9f18d;
+  }
+
+  .hljs-title,
+  .hljs-section {
+    color: #faf594;
+  }
+
+  .hljs-keyword,
+  .hljs-selector-tag {
+    color: #70cff8;
+  }
+
+  .hljs-emphasis {
+    font-style: italic;
+  }
+
+  .hljs-strong {
+    font-weight: 700;
+  }
+}

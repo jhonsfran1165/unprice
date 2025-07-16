@@ -8,6 +8,7 @@ set -o posix    # more strict failures in subshells
 echo "Running pre-commit hook"
 
 pnpm lint-staged
+pnpm typecheck
 pnpm test
 
 echo "Checking tinybird deployment"

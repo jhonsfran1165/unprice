@@ -12,7 +12,7 @@ export default function NotFound() {
         height={400}
         className="invert-0 filter dark:invert"
       />
-      <p className="text-lg text-stone-500">TODO: create this page</p>
+      <p className="text-lg text-stone-500">Page not found</p>
     </div>
   )
 }

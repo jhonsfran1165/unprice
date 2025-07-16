@@ -259,7 +259,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                   freeUnits === Number.POSITIVE_INFINITY
                     ? feature.limit
                       ? `Up to ${nFormatter(feature.limit)}`
-                      : "∞"
+                      : "Unlimited"
                     : freeUnits === 0
                       ? feature.limit
                         ? `Up to ${nFormatter(feature.limit)}`
@@ -296,7 +296,12 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                             </Dialog>
                           </PropagationStopper>
                         )}
-                        <PricingItem feature={feature} withCalculator noCheckIcon />
+                        <PricingItem
+                          feature={feature}
+                          withCalculator
+                          noCheckIcon
+                          withQuantity={false}
+                        />
                       </div>
                     </TableCell>
                     <TableCell className="table-cell">

@@ -9,8 +9,10 @@ import { columns as columnsInvites } from "./_components/table-invites/columns"
 import { columns as columnsMembers } from "./_components/table-members/columns"
 
 export default async function WorkspaceMembersPage() {
-  const { members } = await api.workspaces.listMembersByActiveWorkspace()
-  const { invites } = await api.workspaces.listInvitesByActiveWorkspace()
+  const [members, invites] = await Promise.all([
+    api.workspaces.listMembersByActiveWorkspace(),
+    api.workspaces.listInvitesByActiveWorkspace(),
+  ])
 
   return (
     <DashboardShell
@@ -31,7 +33,7 @@ export default async function WorkspaceMembersPage() {
           <DataTable
             className="mt-10"
             columns={columnsMembers}
-            data={members}
+            data={members.members}
             filterOptions={{
               filterBy: "name",
               filterColumns: true,
@@ -44,7 +46,7 @@ export default async function WorkspaceMembersPage() {
           <DataTable
             className="mt-10"
             columns={columnsInvites}
-            data={invites}
+            data={invites.invites}
             filterOptions={{
               filterBy: "email",
               filterColumns: true,

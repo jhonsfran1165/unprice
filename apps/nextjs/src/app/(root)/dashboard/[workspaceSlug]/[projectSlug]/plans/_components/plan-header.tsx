@@ -74,6 +74,7 @@ export default function PlanHeader(props: {
                     billingAnchor: "dayOfCreation",
                     planType: "recurring",
                   },
+                  isDefault: plan.defaultPlan ?? false,
                 }}
               >
                 <Button variant={"custom"}>

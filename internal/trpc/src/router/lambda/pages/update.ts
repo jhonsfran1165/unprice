@@ -16,7 +16,20 @@ export const update = protectedProjectProcedure
     })
   )
   .mutation(async (opts) => {
-    const { id, subdomain, customDomain, title, content, description } = opts.input
+    const {
+      id,
+      subdomain,
+      customDomain,
+      title,
+      description,
+      logo,
+      logoType,
+      colorPalette,
+      faqs,
+      copy,
+      selectedPlans,
+      ctaLink,
+    } = opts.input
     const project = opts.ctx.project
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
@@ -56,7 +69,13 @@ export const update = protectedProjectProcedure
         customDomain,
         description,
         title,
-        content,
+        copy,
+        logo,
+        colorPalette,
+        faqs,
+        selectedPlans,
+        logoType,
+        ctaLink,
         updatedAtM: Date.now(),
       })
       .where(and(eq(schema.pages.id, id), eq(schema.pages.projectId, project.id)))

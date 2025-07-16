@@ -94,6 +94,7 @@ export const APP_NAME = "unprice"
 export const COOKIES_APP = {
   WORKSPACE: "workspace-slug",
   PROJECT: "project-slug",
+  SESSION: "session-id",
 }
 
 // TODO: add this to migrations

@@ -82,17 +82,13 @@ export const registerGetAnalyticsVerificationsV1 = (app: App) =>
 
     // TODO: improve this
     const start =
-      range === "60m"
-        ? now - 1000 * 60 * 60
-        : range === "24h"
-          ? now - 1000 * 60 * 60 * 24
-          : range === "7d"
-            ? now - 1000 * 60 * 60 * 24 * 7
-            : range === "30d"
-              ? now - 1000 * 60 * 60 * 24 * 30
-              : range === "90d"
-                ? now - 1000 * 60 * 60 * 24 * 90
-                : now - 1000 * 60 * 60 * 24 * 24
+      range === "24h"
+        ? now - 1000 * 60 * 60 * 24
+        : range === "7d"
+          ? now - 1000 * 60 * 60 * 24 * 7
+          : range === "30d"
+            ? now - 1000 * 60 * 60 * 24 * 30
+            : now - 1000 * 60 * 60 * 24 * 24
 
     const end = now
     // main workspace can see all verifications

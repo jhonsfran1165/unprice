@@ -17,9 +17,9 @@ export default function Page(props: {
   all.shift()
 
   // pages has another layout
-  if (all.length > 3 && all.includes("pages")) {
-    return null
-  }
+  // if (all.length > 3 && all.includes("pages")) {
+  //   return null
+  // }
 
   let baseUrl = "/"
 

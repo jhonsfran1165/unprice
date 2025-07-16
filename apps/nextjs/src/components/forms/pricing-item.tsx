@@ -23,12 +23,14 @@ import { useDebounce } from "~/hooks/use-debounce"
 export function PricingItem({
   feature,
   withCalculator,
+  withQuantity,
   onQuantityChange,
   noCheckIcon = false,
   className,
 }: {
   feature: PlanVersionExtended["planFeatures"][number]
   withCalculator?: boolean
+  withQuantity?: boolean
   onQuantityChange?: (quantity: number) => void
   noCheckIcon?: boolean
   className?: string
@@ -89,13 +91,17 @@ export function PricingItem({
 
     case "tier": {
       const lastTier = feature.config?.tiers![feature.config.tiers!.length - 1]
-      displayFeature = `${freeUnitsText} ${feature.feature.title}`
+      displayFeature = withQuantity
+        ? `${freeUnitsText} ${feature.feature.title}`
+        : feature.feature.title
       calculatorParams.max = feature.limit ?? lastTier?.lastUnit ?? 100000
       break
     }
 
     case "usage": {
-      displayFeature = `${freeUnitsText} ${feature.feature.title}`
+      displayFeature = withQuantity
+        ? `${freeUnitsText} ${feature.feature.title}`
+        : feature.feature.title
       calculatorParams.max = feature.limit ?? 100000
 
       if (feature.config?.usageMode === "tier") {
@@ -107,7 +113,9 @@ export function PricingItem({
     }
 
     case "package": {
-      displayFeature = `${freeUnitsText} ${feature.feature.title}`
+      displayFeature = withQuantity
+        ? `${freeUnitsText} ${feature.feature.title}`
+        : feature.feature.title
       calculatorParams.max = feature.config?.units! * 10
       break
     }

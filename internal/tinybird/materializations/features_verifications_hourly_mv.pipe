@@ -1,0 +1,18 @@
+NODE features_verifications_hourly_mv_node
+SQL >
+    SELECT
+        toStartOfHour(fromUnixTimestamp64Milli(timestamp)) as date,
+        projectId,
+        customerId,
+        featureSlug,
+        entitlementId,
+        countState() AS count,
+        quantileTDigestState(0.95)(latency) AS p95_latency,
+        maxState(latency) AS max_latency,
+        argMaxState(latency, timestamp) AS latest_latency
+    FROM feature_verifications
+    GROUP BY date, projectId, customerId, featureSlug, entitlementId
+    ORDER BY date DESC
+
+TYPE MATERIALIZED
+DATASOURCE feature_verifications_hourly_mv_data

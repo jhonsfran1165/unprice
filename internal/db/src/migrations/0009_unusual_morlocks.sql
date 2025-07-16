@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_pages" RENAME COLUMN "selected_plants" TO "selected_plans";

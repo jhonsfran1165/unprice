@@ -1,6 +1,7 @@
 "use client"
 
 import { COOKIES_APP } from "@unprice/config"
+import Cookies from "js-cookie"
 import { useEffect } from "react"
 
 /**
@@ -14,18 +15,29 @@ export function UpdateClientCookie({
   workspaceSlug,
 }: { projectSlug: string | null; workspaceSlug: string | null }) {
   // just to make we sync the cookie with the current project and workspace
+  const cookieOptions = {
+    path: "/",
+    sameSite: "lax",
+    expires: 7,
+    secure: process.env.NODE_ENV === "production",
+  } as Cookies.CookieAttributes
+
   const onFocus = () => {
-    if (document) {
-      document.cookie = `${COOKIES_APP.PROJECT}=${projectSlug}; path=/`
-      document.cookie = `${COOKIES_APP.WORKSPACE}=${workspaceSlug}; path=/`
-    }
+    Cookies.set(COOKIES_APP.PROJECT, projectSlug ?? "", {
+      ...cookieOptions,
+    })
+    Cookies.set(COOKIES_APP.WORKSPACE, workspaceSlug ?? "", {
+      ...cookieOptions,
+    })
   }
 
   useEffect(() => {
-    if (document) {
-      document.cookie = `${COOKIES_APP.PROJECT}=${projectSlug}; path=/`
-      document.cookie = `${COOKIES_APP.WORKSPACE}=${workspaceSlug}; path=/`
-    }
+    Cookies.set(COOKIES_APP.PROJECT, projectSlug ?? "", {
+      ...cookieOptions,
+    })
+    Cookies.set(COOKIES_APP.WORKSPACE, workspaceSlug ?? "", {
+      ...cookieOptions,
+    })
 
     window.addEventListener("focus", onFocus)
 

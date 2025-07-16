@@ -3,8 +3,8 @@ import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import type { Metadata, Viewport } from "next"
 import { ViewTransitions } from "next-view-transitions"
+
 import "~/styles/globals.css"
-import "~/styles/prosemirror.css"
 
 import { VercelToolbar } from "@vercel/toolbar/next"
 import { TailwindIndicator } from "~/components/layout/tailwind-indicator"
@@ -57,7 +57,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         </head>
         <body
           className={cn(
-            "min-h-screen antialiased",
+            "min-h-screen overflow-hidden antialiased",
             fontMapper["font-primary"],
             fontMapper["font-secondary"],
             fontMapper["font-mono"]

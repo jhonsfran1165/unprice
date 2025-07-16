@@ -6,7 +6,8 @@ import ThemeToggle from "./theme-toggle"
 export default function Header({
   children,
   className,
-}: { children?: React.ReactNode; className?: string }) {
+  isUnprice = true,
+}: { children?: React.ReactNode; className?: string; isUnprice?: boolean }) {
   return (
     <header
       className={cn(
@@ -18,9 +19,9 @@ export default function Header({
         <div className="flex items-center justify-start">{children}</div>
 
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <MainNav />
-          <SearchTool className="hidden" />
-          <ThemeToggle />
+          {isUnprice && <MainNav />}
+          {isUnprice && <SearchTool className="hidden" />}
+          {<ThemeToggle />}
         </div>
       </div>
     </header>
