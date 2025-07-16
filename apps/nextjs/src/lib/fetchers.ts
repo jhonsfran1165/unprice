@@ -9,6 +9,8 @@ export async function getPageData(domain: string) {
     ? domain.replace(`.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, "")
     : domain
 
+  console.info(subdomain)
+
   return await unstable_cache(
     async () => {
       const page = await db.query.pages.findFirst({

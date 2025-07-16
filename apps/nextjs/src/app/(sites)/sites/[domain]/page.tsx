@@ -50,7 +50,7 @@ export default async function DomainPage({
     return (
       <main className="container mx-auto space-y-24 px-4 py-16">
         <div className="flex flex-col items-center justify-center">
-          <h1 className="font-bold text-4xl">Page not found</h1>
+          <h1 className="font-bold text-4xl">Site is not published</h1>
         </div>
       </main>
     )
