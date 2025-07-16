@@ -11,10 +11,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@unprice/ui/form"
-import { toast } from "@unprice/ui/sonner"
 import { ImageIcon, Upload, X } from "lucide-react"
 import type { Control, UseFormGetValues, UseFormSetValue } from "react-hook-form"
 import { getImageSrc, isSvgLogo } from "~/lib/image"
+import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
 interface LogoUploadProps {
@@ -45,10 +45,10 @@ export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
     onSuccess: (data) => {
       setValue("logo", data.page.logo)
       setValue("logoType", data.page.logoType)
-      toast.success("Logo uploaded successfully")
+      toastAction("success", "Logo uploaded successfully")
     },
     onError: () => {
-      toast.error("Failed to upload logo")
+      toastAction("error", "Failed to upload logo")
     },
   })
 
@@ -61,13 +61,13 @@ export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
 
     // max 1mb
     if (file && file.size > 1024 * 1024) {
-      toast.error("Logo must be less than 1MB")
+      toastAction("error", "Logo must be less than 1MB")
       return
     }
 
     // only allow png, jpg, svg
     if (file && !file.type.includes("image")) {
-      toast.error("Logo must be a PNG, JPG, or SVG")
+      toastAction("error", "Logo must be a PNG, JPG, or SVG")
       return
     }
 
@@ -79,7 +79,7 @@ export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
       type: file.type,
     }).catch((e) => {
       console.error(e)
-      toast.error("Failed to upload logo")
+      toastAction("error", "Failed to upload logo")
     })
   }
 
