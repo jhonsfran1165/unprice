@@ -86,6 +86,7 @@ export const pageInsertBaseSchema = createInsertSchema(pages, {
     id: true,
     projectId: true,
     logoType: true,
+    ctaLink: true,
   })
 
 export type InsertPage = z.infer<typeof pageInsertBaseSchema>

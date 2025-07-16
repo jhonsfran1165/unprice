@@ -44,6 +44,12 @@ export default function PageBuilderConfig({ page }: { page: Page }) {
 
   const handleSaveConfig = async (data: Page) => {
     lastSavedValuesRef.current = data
+
+    // if form is invalid don't save
+    if (Object.keys(form.formState.errors).length > 0) {
+      return
+    }
+
     await updatePage({
       ...data,
     })
