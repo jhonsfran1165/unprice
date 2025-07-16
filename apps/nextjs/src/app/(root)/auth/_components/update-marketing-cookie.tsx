@@ -5,7 +5,7 @@ import { newId } from "@unprice/db/utils"
 import Cookies from "js-cookie"
 import { useEffect } from "react"
 
-// A simple function to generate a UUID if you don't have one from an ad campaign
+// A simple function to generate a ID if you don't have one from an ad campaign
 export const getOrCreateConversionId = (sessionId?: string): string => {
   if (sessionId) return sessionId
   let id = Cookies.get(COOKIES_APP.SESSION)
@@ -21,7 +21,7 @@ export function UpdateMarketingCookie({ sessionId }: { sessionId?: string }) {
   const cookieOptions = {
     path: "/",
     sameSite: "lax",
-    expires: 7,
+    expires: 1,
     secure: process.env.NODE_ENV === "production",
   } as Cookies.CookieAttributes
 

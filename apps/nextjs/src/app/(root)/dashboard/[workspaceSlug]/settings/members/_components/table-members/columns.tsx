@@ -53,17 +53,21 @@ export const columns: ColumnDef<Member>[] = [
     ),
   },
   {
-    accessorKey: "createdAtM",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Joined at" />,
-    cell: ({ row }) => <div>{formatRelative(row.getValue("createdAtM"), new Date())}</div>,
-    enableSorting: true,
-    enableHiding: true,
-  },
-  {
     accessorKey: "role",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
     cell: ({ row }) => <div>{row.getValue("role")}</div>,
     enableSorting: false,
+    enableHiding: true,
+  },
+  {
+    accessorKey: "createdAtM",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Joined at" />,
+    cell: ({ row }) => (
+      <div className="text-muted-foreground text-sm">
+        {formatRelative(row.getValue("createdAtM"), new Date())}
+      </div>
+    ),
+    enableSorting: true,
     enableHiding: true,
   },
   {

@@ -38,20 +38,37 @@ export const columns: ColumnDef<Member>[] = [
   {
     accessorKey: "email",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
-    cell: ({ row }) => <div className="text-muted-foreground text-sm">{row.original.email}</div>,
-  },
-  {
-    accessorKey: "createdAtM",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
-    cell: ({ row }) => <div>{formatRelative(row.getValue("createdAtM"), new Date())}</div>,
-    enableSorting: true,
-    enableHiding: true,
+    cell: ({ row }) => <div>{row.original.email}</div>,
   },
   {
     accessorKey: "role",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
     cell: ({ row }) => <div>{row.getValue("role")}</div>,
     enableSorting: false,
+    enableHiding: true,
+  },
+  {
+    accessorKey: "createdAtM",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
+    cell: ({ row }) => (
+      <div className="text-muted-foreground text-sm">
+        {formatRelative(row.getValue("createdAtM"), new Date())}
+      </div>
+    ),
+    enableSorting: true,
+    enableHiding: true,
+  },
+  {
+    accessorKey: "acceptedAt",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Accepted at" />,
+    cell: ({ row }) => (
+      <div className="text-muted-foreground text-sm">
+        {row.getValue("acceptedAt")
+          ? formatRelative(row.getValue("acceptedAt"), new Date())
+          : "Pending"}
+      </div>
+    ),
+    enableSorting: true,
     enableHiding: true,
   },
   {
