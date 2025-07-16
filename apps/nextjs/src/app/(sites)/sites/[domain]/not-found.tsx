@@ -4,7 +4,7 @@ import Image from "next/image"
 export default function NotFound() {
   return (
     <div className="mt-20 flex flex-col items-center space-x-4">
-      <Typography variant="h1">404</Typography>
+      <Typography variant="h1">Missing site</Typography>
       <Image
         alt="missing site"
         src="/app-launch.svg"

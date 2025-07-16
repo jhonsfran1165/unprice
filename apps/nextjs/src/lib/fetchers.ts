@@ -18,6 +18,8 @@ export async function getPageData(domain: string) {
           or(eq(page.customDomain, subdomain), eq(page.subdomain, subdomain)),
       })
 
+      console.info(page)
+
       if (!page?.id) return null
 
       return page
