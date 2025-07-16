@@ -1,7 +1,6 @@
 import { newId } from "@unprice/db/utils"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { revalidatePageDomain } from "~/actions/revalidate"
 import Footer from "~/components/layout/footer"
 import Header from "~/components/layout/header"
 import HeaderMarketing from "~/components/layout/header-marketing"
@@ -13,6 +12,7 @@ import { unprice } from "~/lib/unprice"
 import { ApplyTheme } from "../_components/apply-theme"
 import { Faqs } from "../_components/faqs"
 import FooterSites from "../_components/footer"
+import { ForceRefreshOnPreview } from "../_components/force-revalidate"
 import type { PricingPlan } from "../_components/pricing-card"
 import { FeatureComparison } from "../_components/pricing-comparision"
 import { PricingTable } from "../_components/pricing-table"
@@ -30,12 +30,7 @@ export default async function DomainPage({
     revalidate?: string
   }
 }) {
-  const isPreview = revalidate && verifyPreviewToken(revalidate, domain)
-
-  // revalidate the page if the token is valid
-  if (isPreview) {
-    revalidatePageDomain(domain)
-  }
+  const isPreview = !!(revalidate && verifyPreviewToken(revalidate, domain))
 
   // we use `getPageData` to fetch the page data and cache it.
   // Instead of using `api.pages.findFirst` directly
@@ -51,6 +46,10 @@ export default async function DomainPage({
       <main className="container mx-auto space-y-24 px-4 py-16">
         <div className="flex flex-col items-center justify-center">
           <h1 className="font-bold text-4xl">Site is not published</h1>
+          <p className="text-muted-foreground text-sm">
+            This site is not published yet. If you are the owner please enter in preview mode to see
+            the site.
+          </p>
         </div>
       </main>
     )
@@ -128,6 +127,7 @@ export default async function DomainPage({
           "amber-9": page.colorPalette.primary,
         }}
       />
+      <ForceRefreshOnPreview isPreview={isPreview} domain={domain} />
       {/* add small banner when the page is on preview mode */}
       {isPreview && (
         <div className="bg-info p-2 text-center text-info-foreground text-sm">
