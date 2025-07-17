@@ -1,22 +1,17 @@
 "use client"
 
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { useHydrateAtoms } from "jotai/utils"
 import { FileStack, Search } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import type { RouterOutputs } from "@unprice/trpc"
 import { Input } from "@unprice/ui/input"
 import { Separator } from "@unprice/ui/separator"
 
 import { Typography } from "@unprice/ui/typography"
+import { useRouter } from "next/navigation"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import {
-  configActivePlanAtom,
-  configActivePlanVersionAtom,
-  configPlanFeaturesListAtom,
-  usePlanFeaturesList,
-} from "~/hooks/use-features"
+import { useActivePlan, useActivePlanVersion, usePlanFeaturesList } from "~/hooks/use-features"
 import { DroppableContainer } from "../../_components/droppable"
 import { SortableFeature } from "../../_components/sortable-feature"
 
@@ -26,23 +21,30 @@ interface PlanFeatureListProps {
 
 export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
   const [filter, setFilter] = useState("")
+  const router = useRouter()
 
   if (!planVersion) return null
 
   const { planFeatures, plan, ...activePlanVersion } = planVersion
 
-  // hydrate atoms with initial data
-  // TODO: this atoms should be refetch when the planVersion changes
-  useHydrateAtoms([[configPlanFeaturesListAtom, planFeatures]])
-  useHydrateAtoms([[configActivePlanVersionAtom, activePlanVersion]])
-  useHydrateAtoms([[configActivePlanAtom, plan]])
-
-  const [featuresList] = usePlanFeaturesList()
+  const [featuresList, setPlanFeaturesList] = usePlanFeaturesList()
+  const [_, setActivePlanVersion] = useActivePlanVersion()
+  const [__, setActivePlan] = useActivePlan()
 
   const filteredFeatures =
     featuresList.filter((feature) =>
       feature.feature.title.toLowerCase().includes(filter.toLowerCase())
     ) ?? featuresList
+
+  useEffect(() => {
+    // rehydrate atoms when the planVersion id changes
+    setPlanFeaturesList(planFeatures)
+    setActivePlanVersion(activePlanVersion)
+    setActivePlan(plan)
+
+    // refresh the page when the planVersion id changes
+    router.refresh()
+  }, [planVersion.id])
 
   return (
     <div className="flex h-full flex-col">

@@ -75,7 +75,11 @@ export const getStats = protectedProjectProcedure
     }
 
     for (const subscription of data) {
-      const planVersion = subscription.phases[0]!.planVersion
+      const planVersion = subscription.phases[0]?.planVersion
+
+      if (!planVersion) {
+        continue
+      }
 
       const { err, val } = calculateFlatPricePlan({
         planVersion,

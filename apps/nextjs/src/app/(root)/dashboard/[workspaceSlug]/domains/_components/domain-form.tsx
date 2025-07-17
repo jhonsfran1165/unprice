@@ -136,7 +136,7 @@ export function DomainForm({
                 onDelete()
               }}
             >
-              <Button variant={"destructive"}>Delete</Button>
+              <Button variant={"ghost"}>Delete</Button>
             </ConfirmAction>
           )}
           <SubmitButton
