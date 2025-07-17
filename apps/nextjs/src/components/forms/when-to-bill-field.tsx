@@ -32,7 +32,11 @@ export default function WhenToBillFormField<TFieldValues extends FormValues>({
         <FormItem className="flex w-full flex-col">
           <FormLabel>When to bill</FormLabel>
           <FormDescription>Billing at the start or end of the cycle?</FormDescription>
-          <Select onValueChange={field.onChange} value={field.value ?? ""} disabled={isDisabled}>
+          <Select
+            onValueChange={field.onChange}
+            value={field.value?.toString() ?? ""}
+            disabled={isDisabled}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select when to bill" />
@@ -40,7 +44,7 @@ export default function WhenToBillFormField<TFieldValues extends FormValues>({
             </FormControl>
             <SelectContent>
               {/* // TODO: add pay_in_arrear to the when to bill */}
-              {WHEN_TO_BILLING.filter((type) => type !== "pay_in_arrear").map((type) => (
+              {WHEN_TO_BILLING.filter((type) => type !== "pay_in_advance").map((type) => (
                 <SelectItem key={type} value={type}>
                   {type}
                 </SelectItem>

@@ -167,7 +167,7 @@ export function PlanVersionForm({
             projectSlug={params.projectSlug as string}
           />
 
-          <DescriptionFormField form={form} isDisabled={isPublished} />
+          <DescriptionFormField form={form} />
         </div>
 
         <div className="mt-8 flex justify-end space-x-4">

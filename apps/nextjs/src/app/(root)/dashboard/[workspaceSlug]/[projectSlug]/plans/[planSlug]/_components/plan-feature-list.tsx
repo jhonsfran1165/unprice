@@ -9,9 +9,17 @@ import { Input } from "@unprice/ui/input"
 import { Separator } from "@unprice/ui/separator"
 
 import { Typography } from "@unprice/ui/typography"
+import { useHydrateAtoms } from "jotai/utils"
 import { useRouter } from "next/navigation"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import { useActivePlan, useActivePlanVersion, usePlanFeaturesList } from "~/hooks/use-features"
+import {
+  configActivePlanAtom,
+  configActivePlanVersionAtom,
+  configPlanFeaturesListAtom,
+  useActivePlan,
+  useActivePlanVersion,
+  usePlanFeaturesList,
+} from "~/hooks/use-features"
 import { DroppableContainer } from "../../_components/droppable"
 import { SortableFeature } from "../../_components/sortable-feature"
 
@@ -26,6 +34,11 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
   if (!planVersion) return null
 
   const { planFeatures, plan, ...activePlanVersion } = planVersion
+
+  // hydrate atoms with initial data from the server to avoid hydration errors
+  useHydrateAtoms([[configPlanFeaturesListAtom, planFeatures]])
+  useHydrateAtoms([[configActivePlanVersionAtom, activePlanVersion]])
+  useHydrateAtoms([[configActivePlanAtom, plan]])
 
   const [featuresList, setPlanFeaturesList] = usePlanFeaturesList()
   const [_, setActivePlanVersion] = useActivePlanVersion()
