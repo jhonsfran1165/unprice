@@ -10,6 +10,7 @@ import { getImageSrc, isSvgLogo } from "~/lib/image"
 import { verifyPreviewToken } from "~/lib/preview"
 import { unprice } from "~/lib/unprice"
 import { ApplyTheme } from "../_components/apply-theme"
+import { ErrorMessage } from "../_components/error-message"
 import { Faqs } from "../_components/faqs"
 import FooterSites from "../_components/footer"
 import { ForceRefreshOnPreview } from "../_components/force-revalidate"
@@ -30,8 +31,6 @@ export default async function DomainPage({
     revalidate?: string
   }
 }) {
-  const isPreview = !!(revalidate && verifyPreviewToken(revalidate, domain))
-
   // we use `getPageData` to fetch the page data and cache it.
   // Instead of using `api.pages.findFirst` directly
   const page = await getPageData(domain)
@@ -40,19 +39,12 @@ export default async function DomainPage({
     notFound()
   }
 
+  // activate preview mode
+  const isPreview = !!(revalidate && verifyPreviewToken(revalidate, page.id))
+
   // if it's not publish and is not preview, show a 404 page
   if (!page.published && !isPreview) {
-    return (
-      <main className="container mx-auto space-y-24 px-4 py-16">
-        <div className="flex flex-col items-center justify-center">
-          <h1 className="font-bold text-4xl">Site is not published</h1>
-          <p className="text-muted-foreground text-sm">
-            This site is not published yet. If you are the owner please enter in preview mode to see
-            the site.
-          </p>
-        </div>
-      </main>
-    )
+    return <ErrorMessage isPreview={isPreview} published={page.published} />
   }
 
   const selectedPlans = page?.selectedPlans ?? []

@@ -3,7 +3,7 @@ import { TooltipProvider } from "@unprice/ui/tooltip"
 import { allEndpointsProcedures } from "@unprice/trpc/routes"
 import { Provider } from "jotai"
 import { cookies } from "next/headers"
-import { Fragment, type ReactNode } from "react"
+import type { ReactNode } from "react"
 import { cloakSSROnlySecret } from "ssr-only-secrets"
 import { ToasterProvider } from "~/components/layout/theme-provider"
 import { TRPCReactProvider } from "~/trpc/client"
@@ -25,7 +25,7 @@ export default async function DashboardLayout({
   })
 
   return (
-    <Fragment>
+    <div className="min-h-screen overflow-hidden ">
       <TRPCReactProvider
         allEndpointsProcedures={allEndpointsProcedures}
         cookiePromise={encryptedCookiePromise}
@@ -44,6 +44,6 @@ export default async function DashboardLayout({
         </TooltipProvider>
       </TRPCReactProvider>
       <ToasterProvider />
-    </Fragment>
+    </div>
   )
 }

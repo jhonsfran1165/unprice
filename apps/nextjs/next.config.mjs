@@ -6,9 +6,9 @@ const jiti = createJiti(fileURLToPath(import.meta.url))
 
 jiti.import("./src/env")
 
-import path from "node:path"
+// import path from "node:path"
 
-const __dirname = path.resolve()
+// const __dirname = path.resolve()
 
 // import MillionLint from "@million/lint"
 import createMDX from "@next/mdx"
@@ -47,7 +47,7 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      "#": path.resolve(__dirname, "../../internal/api/src/"),
+      // "#": path.resolve(__dirname, "../../internal/trpc/src/"),
     }
     return config
   },

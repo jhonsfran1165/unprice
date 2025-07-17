@@ -39,9 +39,17 @@ export interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
   plan: PricingPlan
   isPopular: boolean
   sessionId: string
+  isOnly: boolean
 }
 
-export function PricingCard({ plan, isPopular, className, sessionId, ...props }: PricingCardProps) {
+export function PricingCard({
+  plan,
+  isPopular,
+  className,
+  sessionId,
+  isOnly,
+  ...props
+}: PricingCardProps) {
   const currentPrice = plan.flatPrice
 
   return (
@@ -92,8 +100,10 @@ export function PricingCard({ plan, isPopular, className, sessionId, ...props }:
       </CardContent>
       <CardFooter>
         <Button
-          className={cn("w-full", isPopular && "bg-primary text-primary-foreground")}
-          variant={isPopular ? "primary" : "default"}
+          className={cn("w-full", {
+            "bg-primary text-primary-foreground": isPopular || isOnly,
+          })}
+          variant={isPopular || isOnly ? "primary" : "default"}
           onClick={() => {
             const ctaLink = new URL(plan.ctaLink)
             ctaLink.searchParams.set("sessionId", sessionId)

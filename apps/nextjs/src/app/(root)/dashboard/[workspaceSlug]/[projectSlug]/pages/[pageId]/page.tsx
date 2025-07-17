@@ -29,7 +29,7 @@ export default async function PageEditor({
     ? `${isHTTPS ? "https" : "http"}://${page.customDomain}`
     : `${isHTTPS ? "https" : "http"}://${page.subdomain}.${SITES_BASE_DOMAIN}`
 
-  const previewToken = generatePreviewToken(page.customDomain ? page.customDomain : page.subdomain)
+  const previewToken = generatePreviewToken(page.id)
 
   return (
     <DashboardShell

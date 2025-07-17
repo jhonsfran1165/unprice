@@ -68,6 +68,13 @@ export const DOCS_DOMAIN =
       ? `https://docs.${MAIN_DOMAIN}/`
       : "http://localhost:3333/"
 
+export const PRICING_DOMAIN =
+  VERCEL_ENV === "production"
+    ? `https://price.${MAIN_DOMAIN}/`
+    : VERCEL_ENV === "preview"
+      ? `https://price.${MAIN_DOMAIN}/`
+      : "http://price.localhost:3000/"
+
 export const AUTH_ROUTES = {
   SIGNIN: "/auth/signin",
   SIGNUP: "/auth/signup",

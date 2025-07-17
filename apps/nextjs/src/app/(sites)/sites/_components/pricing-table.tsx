@@ -128,6 +128,7 @@ export function PricingTable({
               key={plan.name}
               plan={plan}
               isPopular={plan.name === popularPlan}
+              isOnly={plans.length === 1}
               sessionId={sessionId}
             />
           ))}

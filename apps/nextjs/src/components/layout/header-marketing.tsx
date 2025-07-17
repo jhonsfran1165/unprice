@@ -25,7 +25,10 @@ export default function HeaderMarketing() {
         <div className="flex flex-1 items-center justify-end space-x-2">
           <MainNav />
           <div className="ml-auto flex items-center pl-8">
-            <Link href={`${APP_DOMAIN}`} className={buttonVariants({ variant: "primary" })}>
+            <Link
+              href={`${APP_DOMAIN}`}
+              className={cn(buttonVariants({ variant: "primary" }), "border-primary-solid")}
+            >
               Login
               <ChevronRight className="ml-1 h-4 w-4" />
             </Link>

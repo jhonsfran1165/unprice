@@ -57,7 +57,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         </head>
         <body
           className={cn(
-            "min-h-screen overflow-hidden antialiased",
+            "antialiased",
             fontMapper["font-primary"],
             fontMapper["font-secondary"],
             fontMapper["font-mono"]
