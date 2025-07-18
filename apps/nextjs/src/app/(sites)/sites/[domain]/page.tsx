@@ -128,7 +128,7 @@ export default async function DomainPage({
       )}
 
       {!isUnprice ? (
-        <Header isUnprice={isUnprice}>
+        <Header isUnprice={false}>
           <div className="flex items-center space-x-2">
             <Link href="/">
               <img

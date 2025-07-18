@@ -37,7 +37,7 @@ export function PageDialog({
         <PageForm
           defaultValues={
             defaultValues ?? {
-              title: "",
+              name: "",
               subdomain: "",
               customDomain: "",
               projectId: "",
