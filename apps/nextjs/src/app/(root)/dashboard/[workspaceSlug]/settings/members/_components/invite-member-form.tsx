@@ -34,6 +34,7 @@ export const InviteMemberForm = ({
     defaultValues: {
       email: "",
       role: utils.ROLES_APP[0],
+      name: "",
     },
   })
 
@@ -56,6 +57,21 @@ export const InviteMemberForm = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormDescription>The name of the person you want to invite.</FormDescription>
+                <FormControl>
+                  <Input {...field} placeholder="John Doe" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="email"

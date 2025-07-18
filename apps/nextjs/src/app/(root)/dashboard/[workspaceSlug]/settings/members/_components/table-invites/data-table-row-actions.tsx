@@ -24,8 +24,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@unprice/ui/dropdown-menu"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@unprice/ui/dialog"
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+
+import { ROLES_APP } from "@unprice/db/utils"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
+import type { WorkspaceRole } from "@unprice/db/validators"
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
@@ -37,25 +51,66 @@ interface DataTableRowActionsProps<TData> {
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
   const invite = invitesSelectBase.parse(row.original)
   const [alertOpen, setAlertOpen] = React.useState(false)
+  const [open, setIsOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
-
+  const [selectedRole, setSelectedRole] = React.useState<WorkspaceRole>(invite.role)
   const apiUtils = api.useUtils()
   const router = useRouter()
 
+  const changeRoleInvite = api.workspaces.changeRoleInvite.useMutation({
+    onSettled: async () => {
+      await apiUtils.workspaces.listInvitesByActiveWorkspace.invalidate()
+      router.refresh()
+    },
+    onSuccess: () => {
+      toastAction("success", "Role changed")
+      setIsOpen(false)
+    },
+  })
+
   const deleteInvite = api.workspaces.deleteInvite.useMutation({
     onSettled: async () => {
-      setAlertOpen(false)
       await apiUtils.workspaces.listInvitesByActiveWorkspace.invalidate()
       router.refresh()
     },
     onSuccess: () => {
       toastAction("deleted")
+      setAlertOpen(false)
+    },
+  })
+
+  const resendInvite = api.workspaces.resendInvite.useMutation({
+    onSettled: async () => {
+      await apiUtils.workspaces.listInvitesByActiveWorkspace.invalidate()
+      router.refresh()
+    },
+    onSuccess: () => {
+      toastAction("success", "Invite resent")
+      setIsOpen(false)
+      setAlertOpen(false)
     },
   })
 
   function onDelete() {
     startTransition(async () => {
       await deleteInvite.mutateAsync({
+        email: invite.email,
+      })
+    })
+  }
+
+  function onResend() {
+    startTransition(async () => {
+      await resendInvite.mutateAsync({
+        email: invite.email,
+      })
+    })
+  }
+
+  function onChangeRole() {
+    startTransition(async () => {
+      await changeRoleInvite.mutateAsync({
+        role: selectedRole,
         email: invite.email,
       })
     })
@@ -74,17 +129,71 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
           <DropdownMenuItem
             onClick={() => {
               setAlertOpen(false)
+              setIsOpen(true)
             }}
           >
             Change role
           </DropdownMenuItem>
-          <AlertDialogTrigger asChild disabled={!["OWNER", "ADMIN"].includes(invite.role)}>
-            <DropdownMenuItem className="text-destructive focus:bg-destructive focus:text-background">
-              Delete invite from workspace
+          <DropdownMenuItem onClick={onResend} disabled={resendInvite.isPending}>
+            Resend invite {resendInvite.isPending && <LoadingAnimation />}
+          </DropdownMenuItem>
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem
+              disabled={deleteInvite.isPending}
+              className="text-destructive focus:bg-destructive focus:text-background"
+            >
+              Delete invite from workspace {deleteInvite.isPending && <LoadingAnimation />}
             </DropdownMenuItem>
           </AlertDialogTrigger>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <Dialog open={open} onOpenChange={setIsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change role</DialogTitle>
+            <DialogDescription>Select a new role for this user</DialogDescription>
+          </DialogHeader>
+          <Select
+            onValueChange={(data: WorkspaceRole) => {
+              setSelectedRole(data)
+            }}
+            defaultValue={selectedRole}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a new role for this user" />
+            </SelectTrigger>
+            <SelectContent>
+              {ROLES_APP.map((role) => {
+                return (
+                  <SelectItem key={role} value={role}>
+                    {role}
+                  </SelectItem>
+                )
+              })}
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setIsOpen(false)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={(e) => {
+                e.preventDefault()
+                onChangeRole()
+              }}
+              disabled={changeRoleInvite.isPending}
+            >
+              Change role {changeRoleInvite.isPending && <LoadingAnimation />}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialogContent>
         <AlertDialogHeader>

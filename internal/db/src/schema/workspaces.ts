@@ -73,6 +73,7 @@ export const invites = pgTableProject(
   {
     ...timestamps,
     ...workspaceID,
+    name: text("name").notNull(),
     email: text("email").notNull(),
     role: teamRolesEnum("role").default("MEMBER").notNull(),
     acceptedAt: bigint("accepted_at_m", { mode: "number" }),

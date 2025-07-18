@@ -17,7 +17,7 @@ export const inviteMember = protectedWorkspaceProcedure
     })
   )
   .mutation(async (opts) => {
-    const { email, role } = opts.input
+    const { email, role, name } = opts.input
     const workspace = opts.ctx.workspace
     const featureSlug = FEATURE_SLUGS.ACCESS_PRO
 
@@ -82,6 +82,7 @@ export const inviteMember = protectedWorkspaceProcedure
         email: email,
         workspaceId: workspace.id,
         role: role,
+        name: name,
       })
       .returning()
       .then((res) => {
@@ -89,13 +90,11 @@ export const inviteMember = protectedWorkspaceProcedure
       })
 
     await sendEmail({
-      from:
-        process.env.NODE_ENV === "development"
-          ? "delivered@resend.dev"
-          : "Sebastian Franco <sebastian@unprice.dev>",
       subject: "Welcome to Unprice 👋",
       to: [email],
-      react: WelcomeEmail(),
+      react: WelcomeEmail({
+        firstName: name,
+      }),
     })
 
     return {
