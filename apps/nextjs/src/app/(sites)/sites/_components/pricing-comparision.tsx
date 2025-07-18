@@ -1,5 +1,6 @@
 "use client"
 
+import { cn } from "@unprice/ui/utils"
 import { motion } from "framer-motion"
 import { Check, X } from "lucide-react"
 import type { PricingPlan } from "./pricing-card"
@@ -89,10 +90,17 @@ export function FeatureComparison({ plans }: FeatureComparisonProps) {
     >
       <h2 className="mb-8 text-center font-bold text-3xl">Compare all features</h2>
 
-      <div className="overflow-hidden rounded-lg border bg-card backdrop-blur-sm">
+      <div
+        className={cn("overflow-hidden rounded-lg border bg-card backdrop-blur-sm", {
+          "mx-auto md:max-w-4xl": plans.length === 2,
+        })}
+      >
         {/* Header */}
-        <div className={`grid ${gridColsClass} gap-4 border-b bg-muted/50 p-6`}>
-          <div className="font-medium">Features</div>
+        <div className={cn(`grid ${gridColsClass} gap-4 border-b bg-muted/50 p-6`)}>
+          <div className="flex flex-col items-start font-medium">
+            <div>Features</div>
+            <div className="text-left text-muted-foreground text-sm">Pricing</div>
+          </div>
           {plans.map((plan) => (
             <div key={plan.name} className="text-center">
               <div className="font-medium">{plan.name}</div>

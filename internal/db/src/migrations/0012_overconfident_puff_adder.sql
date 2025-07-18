@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_invites" ADD COLUMN "name" text NOT NULL;

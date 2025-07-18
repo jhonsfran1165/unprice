@@ -1,0 +1,2 @@
+ALTER TABLE "unprice_invites" ADD COLUMN "invited_by" varchar(36) NOT NULL;--> statement-breakpoint
+ALTER TABLE "unprice_invites" ADD CONSTRAINT "invites_invited_by_fkey" FOREIGN KEY ("invited_by") REFERENCES "public"."unprice_user"("id") ON DELETE cascade ON UPDATE no action;

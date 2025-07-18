@@ -113,15 +113,14 @@ export function PricingTable({
         {subtitle}
       </motion.div>
       <motion.div
-        className="relative mx-auto mt-20 h-fit w-full max-w-6xl py-10 sm:px-4"
+        className="relative mx-auto mt-20 h-fit w-full max-w-6xl py-10 md:px-4"
         variants={heroImageVariants}
       >
         <section
-          className={cn(
-            "grid gap-6",
-            getGridClass(plans.length),
-            plans.length === 1 && "mx-auto justify-center sm:max-w-xs"
-          )}
+          className={cn("grid gap-6", getGridClass(plans.length), {
+            "mx-auto justify-center md:max-w-sm": plans.length === 1,
+            "mx-auto justify-center md:max-w-2xl": plans.length === 2,
+          })}
         >
           {plans.map((plan) => (
             <PricingCard

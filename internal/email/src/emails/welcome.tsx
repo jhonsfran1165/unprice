@@ -1,13 +1,16 @@
 import {
   Body,
   Button,
+  Column,
   Container,
   Head,
   Heading,
+  Hr,
   Html,
   Img,
   Link,
   Preview,
+  Row,
   Section,
   Tailwind,
   Text,
@@ -23,80 +26,76 @@ const WelcomeEmail = ({
       <Tailwind>
         <Head />
         <Preview>Welcome to Unprice - Create your first adaptive pricing plan</Preview>
-        <Body className="bg-[#191918] font-sans py-[40px]">
-          <Container className="bg-[#111110] rounded-[8px] px-[32px] py-[40px] max-w-[600px] mx-auto">
+        <Body className="bg-[#191918] py-[40px] font-sans">
+          <Container className="mx-auto max-w-[600px] rounded-[8px] bg-[#111110] px-[32px] py-[40px]">
             {/* Logo */}
-            <Section className="text-center mb-[32px]">
+            <Section className="mb-[32px] text-center">
               <Img
                 src="https://di867tnz6fwga.cloudfront.net/brand-kits/4eeedaec-95df-435b-a811-9054368784f0/primary/1f533c45-269c-4546-b4d3-ef7ae78c420a.png"
                 alt="Unprice"
-                className="w-full h-auto max-w-[200px] mx-auto"
+                className="mx-auto h-auto w-full max-w-[200px]"
               />
             </Section>
 
             {/* Main Content */}
             <Section>
-              <Heading className="text-[#ffffff] text-[28px] font-bold mb-[24px] text-center">
+              <Heading className="mb-[24px] text-center font-bold text-[#ffffff] text-[28px]">
                 Welcome to Unprice, {firstName}!
               </Heading>
 
-              <Text className="text-[#ffffff] text-[16px] leading-[24px] mb-[24px]">
+              <Text className="mb-[24px] text-[#ffffff] text-[16px] leading-[24px]">
                 You've just broken free from the invisible chains of static pricing. No more rigid
                 tiers that stifle growth or endless engineering overhauls.
               </Text>
 
-              <Text className="text-[#ffffff] text-[16px] leading-[24px] mb-[32px]">
+              <Text className="mb-[32px] text-[#ffffff] text-[16px] leading-[24px]">
                 With Unprice, you can launch adaptive models like usage-based billing with our
                 simple TypeScript SDK—no rewrites required. Your pricing will scale seamlessly with
                 your product, unlocking millions in potential.
               </Text>
 
-              <Text className="text-[#ffffff] text-[16px] leading-[24px] mb-[24px] font-semibold">
+              <Text className="mb-[24px] font-semibold text-[#ffffff] text-[16px] leading-[24px]">
                 Ready to evolve from frustrated builder to revenue leader?
               </Text>
 
               {/* CTA Button */}
-              <Section className="text-center mb-[32px]">
+              <Section className="mb-[32px] text-center">
                 <Button
                   href="https://unprice.dev/dashboard/plans/new"
-                  className="bg-[#ffc53d] text-[#111110] px-[32px] py-[16px] rounded-[8px] text-[16px] font-semibold no-underline box-border"
+                  className="box-border rounded-[8px] bg-[#ffc53d] px-[32px] py-[16px] font-semibold text-[#111110] text-[16px] no-underline"
                 >
                   Create Your First Plan
                 </Button>
               </Section>
 
-              <Text className="text-[#ffffff] text-[14px] leading-[20px] text-center">
+              <Text className="text-center text-[#ffffff] text-[14px] leading-[20px]">
                 Questions? Simply reply to this email—we're here to help you succeed.
               </Text>
             </Section>
 
             {/* Footer */}
-            <Hr className="border-[#333333] my-[32px]" />
+            <Hr className="my-[32px] border-[#333333]" />
 
             <Section>
               <Row>
-                <Column className="text-center">
+                <Column className="text-center" align="center">
                   <Link href="https://github.com/jhonsfran1165/unprice" className="inline-block">
                     <Img
                       src="https://new.email/static/emails/social/social-github.png"
                       alt="GitHub"
-                      className="w-[24px] h-[24px]"
+                      className="h-[40px] w-[40px]"
                     />
                   </Link>
                 </Column>
               </Row>
-
-              <Text className="text-[#ffffff] text-[12px] leading-[16px] text-center mt-[16px] mb-[8px]">
+              <Text className="mt-[16px] mb-[8px] text-center text-[#ffffff] text-[12px] leading-[16px]">
                 <Link href="https://unprice.dev" className="text-[#ffc53d] no-underline">
                   unprice.dev
                 </Link>
               </Text>
 
-              <Text className="text-[#ffffff] text-[12px] leading-[16px] text-center mb-[8px] m-0">
-                Berlin, Germany
-              </Text>
-
-              <Text className="text-[#ffffff] text-[12px] leading-[16px] text-center mb-[8px]">
+              <Text className="mb-[8px] text-center text-[#ffffff] text-[12px] leading-[16px]">
+                Berlin, Germany &nbsp;&middot;&nbsp;
                 <Link
                   href="https://unprice.dev/unsubscribe"
                   className="text-[#ffc53d] no-underline"
@@ -105,7 +104,7 @@ const WelcomeEmail = ({
                 </Link>
               </Text>
 
-              <Text className="text-[#ffffff] text-[12px] leading-[16px] text-center m-0">
+              <Text className="m-0 text-center text-[#ffffff] text-[12px] leading-[16px]">
                 © 2025 Unprice, Inc.
               </Text>
             </Section>
@@ -118,7 +117,6 @@ const WelcomeEmail = ({
 
 WelcomeEmail.PreviewProps = {
   firstName: "John",
-  setupUrl: "https://yourplatform.com/setup",
 }
 
 export default WelcomeEmail

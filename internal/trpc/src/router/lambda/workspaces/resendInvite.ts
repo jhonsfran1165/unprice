@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { invitesSelectBase } from "@unprice/db/validators"
-import { WelcomeEmail, sendEmail } from "@unprice/email"
+import { InviteEmail, sendEmail } from "@unprice/email"
 import { z } from "zod"
 
 import { FEATURE_SLUGS } from "@unprice/config"
@@ -49,6 +49,9 @@ export const resendInvite = protectedWorkspaceProcedure
 
     const invite = await opts.ctx.db.query.invites.findFirst({
       where: and(eq(schema.invites.email, email), eq(schema.invites.workspaceId, workspace.id)),
+      with: {
+        invitedBy: true,
+      },
     })
 
     if (!invite) {
@@ -58,13 +61,17 @@ export const resendInvite = protectedWorkspaceProcedure
       })
     }
 
-    await sendEmail({
-      subject: "Welcome to Unprice 👋",
-      to: [email],
-      react: WelcomeEmail({
-        firstName: invite.name,
-      }),
-    })
+    opts.ctx.waitUntil(
+      sendEmail({
+        subject: "You're invited to join Unprice",
+        to: [email],
+        react: InviteEmail({
+          inviterName: invite.invitedBy.name ?? invite.invitedBy.email,
+          inviteeName: invite.name,
+          workspaceName: workspace.name,
+        }),
+      })
+    )
 
     return {
       resended: true,

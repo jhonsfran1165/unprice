@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { inviteMembersSchema, invitesSelectBase } from "@unprice/db/validators"
-import { WelcomeEmail, sendEmail } from "@unprice/email"
+import { InviteEmail, sendEmail } from "@unprice/email"
 import { z } from "zod"
 
 import { FEATURE_SLUGS } from "@unprice/config"
@@ -18,6 +18,7 @@ export const inviteMember = protectedWorkspaceProcedure
   )
   .mutation(async (opts) => {
     const { email, role, name } = opts.input
+    const userId = opts.ctx.userId
     const workspace = opts.ctx.workspace
     const featureSlug = FEATURE_SLUGS.ACCESS_PRO
 
@@ -65,15 +66,30 @@ export const inviteMember = protectedWorkspaceProcedure
           message: "User is already a member of the workspace",
         })
       }
-      await opts.ctx.db.insert(schema.members).values({
-        userId: userByEmail.id,
-        workspaceId: workspace.id,
-        role: role,
-      })
+
+      await opts.ctx.db
+        .insert(schema.members)
+        .values({
+          userId: userByEmail.id,
+          workspaceId: workspace.id,
+          role: role,
+        })
+        .returning()
 
       return {
         invite: undefined,
       }
+    }
+
+    const user = await opts.ctx.db.query.users.findFirst({
+      where: eq(schema.users.id, userId),
+    })
+
+    if (!user) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "User not found",
+      })
     }
 
     const memberInvited = await opts.ctx.db
@@ -83,19 +99,24 @@ export const inviteMember = protectedWorkspaceProcedure
         workspaceId: workspace.id,
         role: role,
         name: name,
+        invitedBy: userId,
       })
       .returning()
       .then((res) => {
         return res[0]
       })
 
-    await sendEmail({
-      subject: "Welcome to Unprice 👋",
-      to: [email],
-      react: WelcomeEmail({
-        firstName: name,
-      }),
-    })
+    opts.ctx.waitUntil(
+      sendEmail({
+        subject: "You're invited to join Unprice",
+        to: [email],
+        react: InviteEmail({
+          inviterName: user.name ?? user.email,
+          inviteeName: name,
+          workspaceName: workspace.name,
+        }),
+      })
+    )
 
     return {
       invite: memberInvited,
