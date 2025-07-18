@@ -2,6 +2,7 @@ import { newId } from "@unprice/db/utils"
 import { signUpResponseSchema, workspaceSignupSchema } from "@unprice/db/validators"
 
 import { TRPCError } from "@trpc/server"
+import { WelcomeEmail, sendEmail } from "@unprice/email"
 import { protectedProcedure } from "#trpc"
 import { unprice } from "#utils/unprice"
 
@@ -30,6 +31,14 @@ export const signUp = protectedProcedure
         message: error.message,
       })
     }
+
+    opts.ctx.waitUntil(
+      sendEmail({
+        subject: "Welcome to Unprice 👋",
+        to: [user.email],
+        react: WelcomeEmail({ firstName: user.name ?? user.email }),
+      })
+    )
 
     return result
   })

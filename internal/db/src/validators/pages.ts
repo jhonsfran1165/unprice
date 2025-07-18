@@ -64,6 +64,7 @@ export const pageSelectBaseSchema = createSelectSchema(pages, {
 export const pageInsertBaseSchema = createInsertSchema(pages, {
   customDomain: domainSchema.optional(),
   subdomain: subdomainSchema,
+  name: z.string().min(3).max(50),
   title: z.string().min(3).max(50),
   colorPalette: colorPaletteSchema,
   faqs: faqSchema.array(),
@@ -78,6 +79,7 @@ export const pageInsertBaseSchema = createInsertSchema(pages, {
   })
   .partial({
     copy: true,
+    title: true,
     selectedPlans: true,
     faqs: true,
     colorPalette: true,

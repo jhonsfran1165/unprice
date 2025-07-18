@@ -1,8 +1,6 @@
-import { Alert, EmailDataSchema } from "./emails/alert"
-import SubscribeEmail from "./emails/subscribe"
-import WaitingList from "./emails/waiting-list"
+import InviteEmail from "./emails/invite"
 import WelcomeEmail from "./emails/welcome"
 
-export { Alert, EmailDataSchema, SubscribeEmail, WaitingList, WelcomeEmail }
+export { InviteEmail, WelcomeEmail }
 
 export { sendEmail, sendEmailHtml } from "./send"

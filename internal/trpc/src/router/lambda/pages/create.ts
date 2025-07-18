@@ -17,7 +17,7 @@ export const create = protectedProjectProcedure
     })
   )
   .mutation(async (opts) => {
-    const { title, subdomain, customDomain, description } = opts.input
+    const { name, subdomain, customDomain, description } = opts.input
     const project = opts.ctx.project
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
@@ -50,7 +50,7 @@ export const create = protectedProjectProcedure
       .values({
         id: pageId,
         slug,
-        title,
+        name,
         projectId: project.id,
         description,
         subdomain,
