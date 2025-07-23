@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@unprice/ui/card"
 import { cn } from "@unprice/ui/utils"
+import Cookies from "js-cookie"
 
 export interface PricingPlan {
   name: string
@@ -21,6 +22,7 @@ export interface PricingPlan {
   isEnterprisePlan: boolean
   description: string
   features: string[]
+  pageId: string
   detailedFeatures: Record<
     string,
     {
@@ -38,18 +40,10 @@ export interface PricingPlan {
 export interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
   plan: PricingPlan
   isPopular: boolean
-  sessionId: string
   isOnly: boolean
 }
 
-export function PricingCard({
-  plan,
-  isPopular,
-  className,
-  sessionId,
-  isOnly,
-  ...props
-}: PricingCardProps) {
+export function PricingCard({ plan, isPopular, className, isOnly, ...props }: PricingCardProps) {
   const currentPrice = plan.flatPrice
 
   return (
@@ -106,8 +100,15 @@ export function PricingCard({
           variant={isPopular || isOnly ? "primary" : "default"}
           onClick={() => {
             const ctaLink = new URL(plan.ctaLink)
-            ctaLink.searchParams.set("sessionId", sessionId)
-            // TODO: report to analytics with sessionId
+            const sessionId = Cookies.get("session-id")
+            ctaLink.searchParams.set("sessionId", sessionId ?? "")
+
+            // @ts-ignore
+            window.Tinybird.trackEvent("plan_click", {
+              plan_version_id: plan.id,
+              page_id: plan.pageId,
+            })
+
             window.open(ctaLink.toString(), "_blank")
           }}
         >

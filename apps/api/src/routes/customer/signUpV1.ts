@@ -54,9 +54,10 @@ export const registerSignUpV1 = (app: App) =>
       planSlug,
       billingInterval,
       metadata,
+      sessionId,
     } = c.req.valid("json")
-    const { customer } = c.get("services")
-    const analytics = c.get("analytics")
+    const { customer, analytics } = c.get("services")
+    const stats = c.get("stats")
 
     // validate the request
     const key = await keyAuth(c)
@@ -75,9 +76,10 @@ export const registerSignUpV1 = (app: App) =>
         config,
         externalId,
         billingInterval,
+        sessionId,
         metadata: {
           ...metadata,
-          ...analytics,
+          ...stats,
         },
       },
       projectId: key.projectId,
@@ -86,6 +88,27 @@ export const registerSignUpV1 = (app: App) =>
     if (result.err) {
       throw result.err
     }
+
+    // send event to analytics for tracking conversions
+    c.executionCtx.waitUntil(
+      analytics.ingestEvents({
+        action: "sign_up",
+        version: "1",
+        session_id: sessionId ?? "",
+        timestamp: new Date().toISOString(),
+        payload: {
+          customer_id: result.val.customerId,
+          plan_version_id: planVersionId ?? "",
+          agent: stats.ua,
+          country: stats.country,
+          city: stats.city,
+          is_country_eu: stats.isEUCountry,
+          region: stats.region,
+          continent: stats.continent,
+          colo: stats.colo,
+        },
+      })
+    )
 
     return c.json(result.val, HttpStatusCodes.OK)
   })

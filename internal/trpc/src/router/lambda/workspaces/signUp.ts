@@ -10,7 +10,7 @@ export const signUp = protectedProcedure
   .input(workspaceSignupSchema)
   .output(signUpResponseSchema)
   .mutation(async (opts) => {
-    const { name, planVersionId, config, successUrl, cancelUrl } = opts.input
+    const { name, planVersionId, config, successUrl, cancelUrl, sessionId } = opts.input
     const user = opts.ctx.session?.user
     const workspaceId = newId("workspace")
 
@@ -23,6 +23,7 @@ export const signUp = protectedProcedure
       successUrl,
       cancelUrl,
       externalId: workspaceId,
+      sessionId,
     })
 
     if (error) {

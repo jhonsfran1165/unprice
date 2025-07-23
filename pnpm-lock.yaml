@@ -419,6 +419,9 @@ importers:
       '@unprice/error':
         specifier: workspace:^
         version: link:../error
+      '@unprice/tinybird':
+        specifier: workspace:^
+        version: link:../tinybird
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.2

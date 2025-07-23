@@ -16,13 +16,17 @@ export const SignupSchema = z
     password: z.string().min(6),
     confirmPassword: z.string().min(6),
     name: z.string().min(3),
+    sessionId: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
     message: "Passwords do not match",
   })
 
-export function SignUpCredentials({ className }: { className?: string }) {
+export function SignUpCredentials({
+  className,
+  sessionId,
+}: { className?: string; sessionId?: string }) {
   const router = useRouter()
 
   const form = useZodForm({
@@ -32,6 +36,7 @@ export function SignUpCredentials({ className }: { className?: string }) {
       password: "",
       name: "",
       confirmPassword: "",
+      sessionId,
     },
     reValidateMode: "onSubmit",
   })

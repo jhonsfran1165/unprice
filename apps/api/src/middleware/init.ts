@@ -71,10 +71,10 @@ export function init(): MiddlewareHandler<HonoEnv> {
         requestId: c.get("requestId"),
         requestStartedAt: c.get("requestStartedAt"),
         performanceStart: c.get("performanceStart"),
-        location: c.get("analytics").colo,
+        location: c.get("stats").colo,
         workspaceId: c.get("workspaceId"),
         projectId: c.get("projectId"),
-        userAgent: c.get("analytics").ua,
+        userAgent: c.get("stats").ua,
         path: c.req.path,
       },
     })

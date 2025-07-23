@@ -11,7 +11,6 @@ export interface PricingTableProps extends React.HTMLAttributes<HTMLDivElement> 
   subtitle?: string
   plans: PricingPlan[]
   popularPlan: string
-  sessionId: string
 }
 
 // Dynamic grid class based on number of plans
@@ -73,7 +72,6 @@ export function PricingTable({
   plans,
   className,
   popularPlan,
-  sessionId,
 }: PricingTableProps) {
   // Ensure the popular plan is always in the middle
   // const reorderedPlans = React.useMemo(() => {
@@ -128,7 +126,6 @@ export function PricingTable({
               plan={plan}
               isPopular={plan.name === popularPlan}
               isOnly={plans.length === 1}
-              sessionId={sessionId}
             />
           ))}
         </section>

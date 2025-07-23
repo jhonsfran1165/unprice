@@ -1,5 +1,5 @@
 {
-  "id": "2b3ba304-4747-4159-8d03-c14b71bf9ced",
+  "id": "c3e94884-ac3a-4009-bbc8-a1e88d30d190",
   "prevId": "e105705e-c6a6-4cfe-8a38-6c0e9a00e4c6",
   "version": "7",
   "dialect": "postgresql",
@@ -1310,7 +1310,8 @@
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "''"
         },
         "custom_domain": {
           "name": "custom_domain",

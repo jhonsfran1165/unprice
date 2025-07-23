@@ -1,5 +1,8 @@
+import { COOKIES_APP } from "@unprice/config"
+import { analytics } from "@unprice/tinybird/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import { UserIcon } from "lucide-react"
+import { cookies } from "next/headers"
 import { Suspense } from "react"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -14,18 +17,34 @@ export default async function NewPage(props: {
   }
 }) {
   const { customer_id } = props.searchParams
+  const cookieStore = cookies()
+  const sessionId = cookieStore.get(COOKIES_APP.SESSION)?.value
+
+  const data = await analytics.clickPlans({
+    sessionId: sessionId ?? "",
+  })
+
+  const session = data.data.at(0)
 
   return (
     <Suspense fallback={<LayoutLoader />}>
-      <Content customerId={customer_id ?? undefined} />
+      <Content
+        customerId={customer_id}
+        planVersionId={session?.planVersionId}
+        sessionId={sessionId}
+      />
     </Suspense>
   )
 }
 
 async function Content({
   customerId,
+  planVersionId,
+  sessionId,
 }: {
   customerId: string | undefined
+  planVersionId: string | undefined
+  sessionId: string | undefined
 }) {
   if (!customerId || customerId === "") {
     return (
@@ -40,10 +59,12 @@ async function Content({
               <NewWorkspaceForm
                 defaultValues={{
                   name: "",
-                  planVersionId: "",
+                  // preselect the plan version if it exists
+                  planVersionId: planVersionId ?? "",
                   config: [],
                   successUrl: "",
                   cancelUrl: "",
+                  sessionId: sessionId,
                 }}
               />
             </CardContent>

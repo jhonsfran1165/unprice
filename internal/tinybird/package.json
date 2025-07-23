@@ -5,7 +5,8 @@
   "version": "0.1.0",
   "exports": {
     ".": "./src/index.ts",
-    "./env": "./env.ts"
+    "./env": "./env.ts",
+    "./client": "./src/client.ts"
   },
   "typesVersions": {
     "*": {

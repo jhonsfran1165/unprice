@@ -10,7 +10,7 @@ export const pages = pgTableProject(
   {
     ...projectID,
     ...timestamps,
-    name: text("name").notNull(),
+    name: text("name").default("").notNull(),
     customDomain: text("custom_domain").unique(),
     subdomain: text("subdomain").unique().notNull(),
     slug: text("slug").notNull(),

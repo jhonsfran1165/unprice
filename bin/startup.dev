@@ -105,7 +105,7 @@ if [ "$MODE_ID" = "dev" ]; then
 
   # We need to override on development some variables so we can work with local first tools.
   # TB_TOKEN=$(curl -s http://localhost:7181/tokens | jq -r ".workspace_admin_token")
-  TB_TOKEN=$(tb --output=json info | jq .local.token)
+  TB_TOKEN=$(tb --output=json info | jq .local.token | tr -d '"')
 
   # auth tb with the admin token
   echo "Authenticating Tinybird"
@@ -123,7 +123,7 @@ if [ "$MODE_ID" = "dev" ]; then
   cd ../../
 
   echo "Starting the application"
-  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" AUTH_REDIRECT_PROXY_URL="$AUTH_REDIRECT_PROXY_URL" UNPRICE_API_URL="$UNPRICE_API_URL" UNPRICE_API_KEY="$UNPRICE_API_KEY" DRIZZLE_LOG="$DRIZZLE_LOG" EMIT_METRICS_LOGS="$EMIT_METRICS_LOGS" EMIT_ANALYTICS="$EMIT_ANALYTICS" pnpm run dev
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN=$TB_TOKEN TINYBIRD_URL=$TB_HOST AUTH_REDIRECT_PROXY_URL=$AUTH_REDIRECT_PROXY_URL UNPRICE_API_URL=$UNPRICE_API_URL UNPRICE_API_KEY=$UNPRICE_API_KEY DRIZZLE_LOG=$DRIZZLE_LOG EMIT_METRICS_LOGS=$EMIT_METRICS_LOGS EMIT_ANALYTICS=$EMIT_ANALYTICS pnpm run dev
 
 elif [ "$MODE_ID" = "preview" ]; then
   # banner to show the user that we are using the preview environment

@@ -2489,6 +2489,11 @@ export interface operations {
            */
           planSlug?: string
           /**
+           * @description The session id of the customer. This is used to track conversion from pricing pages
+           * @example sess_1234567890
+           */
+          sessionId?: string
+          /**
            * @description The plan version the customer is signing up for
            * @example pv_1234567890
            */
@@ -2553,6 +2558,23 @@ export interface operations {
            * @example https://example.com/login
            */
           cancelUrl: string
+          /**
+           * @description The metadata of the customer
+           * @example {
+           *       "externalId": "1234567890"
+           *     }
+           */
+          metadata?: {
+            externalId?: string
+            stripeSubscriptionId?: string
+            stripeDefaultPaymentMethodId?: string
+            continent?: string
+            country?: string
+            region?: string
+            colo?: string
+            city?: string
+            isEUCountry?: boolean | null
+          }
         }
       }
     }
@@ -3850,7 +3872,7 @@ export interface operations {
            * @example 24h
            * @enum {string}
            */
-          range: "60m" | "24h" | "7d" | "30d" | "90d"
+          range: "24h" | "7d" | "30d"
         }
       }
     }
@@ -3975,7 +3997,7 @@ export interface operations {
            * @example 24h
            * @enum {string}
            */
-          range: "60m" | "24h" | "7d" | "30d" | "90d"
+          range: "24h" | "7d" | "30d"
         }
       }
     }

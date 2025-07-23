@@ -1115,6 +1115,7 @@ export class CustomerService {
       defaultCurrency,
       externalId,
       planSlug,
+      sessionId,
       billingInterval,
       metadata,
     } = input
@@ -1123,7 +1124,35 @@ export class CustomerService {
     // given the currency, the plan slug and the version
     let planVersion: (PlanVersion & { project: Project; plan: Plan }) | null = null
 
-    if (planVersionId) {
+    if (sessionId) {
+      // if session id is provided, we need to get the plan version from the session
+      // get the session from analytics
+      const data = await this.analytics.clickPlans({
+        sessionId: sessionId,
+      })
+
+      const session = data.data.at(0)
+
+      if (!session) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "PLAN_VERSION_NOT_FOUND",
+            message: "Session not found",
+          })
+        )
+      }
+
+      planVersion = await this.db.query.versions
+        .findFirst({
+          with: {
+            project: true,
+            plan: true,
+          },
+          where: (version, { eq, and }) =>
+            and(eq(version.id, session.planVersionId), eq(version.projectId, projectId)),
+        })
+        .then((data) => data ?? null)
+    } else if (planVersionId) {
       planVersion = await this.db.query.versions
         .findFirst({
           with: {
@@ -1193,12 +1222,36 @@ export class CustomerService {
 
       planVersion = plan.versions[0] ?? null
     } else {
-      return Err(
-        new UnPriceCustomerError({
-          code: "PLAN_VERSION_NOT_FOUND",
-          message: "Plan version not found, either planVersionId or planSlug is required",
+      // if no plan version is provided, we use the default plan
+      const defaultPlan = await this.db.query.plans.findFirst({
+        where: (plan, { eq, and }) =>
+          and(eq(plan.projectId, projectId), eq(plan.defaultPlan, true)),
+      })
+
+      if (!defaultPlan) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "NO_DEFAULT_PLAN_FOUND",
+            message: "Default plan not found, provide a plan version id, slug or session id",
+          })
+        )
+      }
+
+      planVersion = await this.db.query.versions
+        .findFirst({
+          with: {
+            project: true,
+            plan: true,
+          },
+          where: (version, { eq, and }) =>
+            and(
+              eq(version.planId, defaultPlan.id),
+              eq(version.latest, true),
+              eq(version.status, "published"),
+              eq(version.active, true)
+            ),
         })
-      )
+        .then((data) => data ?? null)
     }
 
     if (!planVersion) {

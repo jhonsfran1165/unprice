@@ -5,7 +5,7 @@ import type { Context as GenericContext } from "hono"
 import { prettyJSON } from "hono/pretty-json"
 import { handleError, handleZodError } from "~/errors"
 import type { HonoEnv } from "~/hono/env"
-import { getAnalytics } from "~/util/analytics"
+import { getStats } from "~/util/stats"
 
 export function newApp() {
   const app = new OpenAPIHono<HonoEnv>({
@@ -17,7 +17,7 @@ export function newApp() {
 
   app.use("*", async (c, next) => {
     // Set analytics here to have access to browser info
-    c.set("analytics", getAnalytics(c))
+    c.set("stats", getStats(c))
     return next()
   })
 

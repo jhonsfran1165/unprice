@@ -1,4 +1,3 @@
-import { newId } from "@unprice/db/utils"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import Footer from "~/components/layout/footer"
@@ -87,7 +86,7 @@ export default async function DomainPage({
             }) || []
 
         return {
-          id: version.plan.id,
+          id: version.id,
           name: version.plan.slug,
           flatPrice: version.flatPrice,
           currency: version.currency,
@@ -98,13 +97,13 @@ export default async function DomainPage({
           ctaLink: page.ctaLink,
           isEnterprisePlan: version.plan.enterprisePlan || false,
           billingPeriod: version.billingConfig.billingInterval,
+          pageId: page.id,
         }
       })
       .filter(Boolean) as PricingPlan[]) || []
 
   const { text } = generateColorsFromBackground(page.colorPalette?.primary)
   const isUnprice = page.customDomain?.endsWith("unprice.dev")
-  const sessionId = newId("session")
 
   return (
     <div>
@@ -145,13 +144,7 @@ export default async function DomainPage({
         <HeaderMarketing />
       )}
       <main className="container mx-auto space-y-24 px-4 py-16">
-        <PricingTable
-          plans={plans}
-          popularPlan="PRO"
-          title={page.title}
-          subtitle={page.copy}
-          sessionId={sessionId}
-        />
+        <PricingTable plans={plans} popularPlan="PRO" title={page.title} subtitle={page.copy} />
         <FeatureComparison plans={plans} />
         <Faqs faqs={page.faqs ?? []} />
       </main>

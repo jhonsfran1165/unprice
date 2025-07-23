@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
+import { useEffect } from "react"
 import ConfigItemsFormField from "~/components/forms/items-fields"
 import SelectPlanFormField from "~/components/forms/select-plan-field"
 import { SubmitButton } from "~/components/submit-button"
@@ -61,6 +62,12 @@ export default function NewWorkspaceForm({
   if (error) {
     toastAction("error", error.message)
   }
+
+  useEffect(() => {
+    if (defaultValues.planVersionId) {
+      form.setValue("planVersionId", defaultValues.planVersionId)
+    }
+  }, [isLoading])
 
   return (
     <Form {...form}>

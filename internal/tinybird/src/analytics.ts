@@ -1,6 +1,11 @@
 import { NoopTinybird, Tinybird } from "@chronark/zod-bird"
 import { z } from "zod"
-import { auditLogSchemaV1, featureUsageSchemaV1, featureVerificationSchemaV1 } from "./validators"
+import {
+  analyticsEventSchema,
+  auditLogSchemaV1,
+  featureUsageSchemaV1,
+  featureVerificationSchemaV1,
+} from "./validators"
 
 export class Analytics {
   public readonly readClient: Tinybird | NoopTinybird
@@ -75,6 +80,35 @@ export class Analytics {
       event: featureUsageSchemaV1,
       // we need to wait for the ingestion to be done before returning
       wait: true,
+    })
+  }
+
+  public get ingestEvents() {
+    return this.writeClient.buildIngestEndpoint({
+      datasource: "analytics_events",
+      event: analyticsEventSchema,
+      // we need to wait for the ingestion to be done before returning
+      wait: true,
+    })
+  }
+
+  public get clickPlans() {
+    return this.readClient.buildPipe({
+      pipe: "click_plans",
+      parameters: z.object({
+        sessionId: z.string(),
+      }),
+      data: z.object({
+        planVersionId: z.string(),
+        pageId: z.string(),
+        timestamp: z.coerce.date(),
+        action: z.string(),
+        version: z.string(),
+        sessionId: z.string(),
+      }),
+      opts: {
+        cache: "no-store",
+      },
     })
   }
 

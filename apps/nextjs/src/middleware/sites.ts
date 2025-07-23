@@ -7,6 +7,12 @@ import { getValidSubdomain, parse } from "~/lib/domains"
 export default function SitesMiddleware(req: NextAuthRequest) {
   const { domain, path } = parse(req)
   const subdomain = getValidSubdomain(domain)
+  const isTrackingRoute = path.startsWith("/api/tracking")
+
+  if (isTrackingRoute) {
+    return NextResponse.next()
+  }
+
   // retrieve the current response
   const url = req.nextUrl
 
