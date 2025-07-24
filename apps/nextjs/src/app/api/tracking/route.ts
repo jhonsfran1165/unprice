@@ -37,6 +37,8 @@ const _postEvent = async (event: {
   }
 }
 
+export const runtime = "edge"
+
 export async function POST(req: Request) {
   const body = await req.json()
   const response = await _postEvent(body)

@@ -1,9 +1,11 @@
+import { relations } from "drizzle-orm"
 import { boolean, index, jsonb, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
 import type { z } from "zod"
 import { pgTableProject } from "../utils/_table"
 import { timestamps } from "../utils/fields"
 import { projectID } from "../utils/sql"
 import type { colorPaletteSchema, faqSchema, planSchema } from "../validators/pages"
+import { projects } from "./projects"
 
 export const pages = pgTableProject(
   "pages",
@@ -36,3 +38,10 @@ export const pages = pgTableProject(
     indexCustomDomain: index("custom_domain_index").on(table.customDomain),
   })
 )
+
+export const pagesRelations = relations(pages, ({ one }) => ({
+  project: one(projects, {
+    fields: [pages.projectId],
+    references: [projects.id],
+  }),
+}))

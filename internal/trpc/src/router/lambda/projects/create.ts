@@ -12,7 +12,7 @@ export const create = protectedWorkspaceProcedure
   .input(projectInsertBaseSchema)
   .output(z.object({ project: projectSelectBaseSchema }))
   .mutation(async (opts) => {
-    const { name, url, defaultCurrency, timezone } = opts.input
+    const { name, url, defaultCurrency, timezone, contactEmail } = opts.input
     const workspace = opts.ctx.workspace
     const customerId = workspace.unPriceCustomerId
     const featureSlug = FEATURE_SLUGS.PROJECTS
@@ -52,6 +52,7 @@ export const create = protectedWorkspaceProcedure
         timezone,
         isMain: false,
         isInternal: workspace.isInternal,
+        contactEmail,
       })
       .returning()
       .catch((err) => {

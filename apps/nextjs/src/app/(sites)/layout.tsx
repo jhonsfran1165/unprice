@@ -1,8 +1,6 @@
 import { TooltipProvider } from "@unprice/ui/tooltip"
-import Script from "next/script"
 import { ThemeProvider, ToasterProvider } from "~/components/layout/theme-provider"
 import { siteConfig } from "~/constants/layout"
-import { env } from "~/env"
 
 import "~/styles/sites.css"
 import { UpdateMarketingCookie } from "../(root)/auth/_components/update-marketing-cookie"
@@ -38,16 +36,6 @@ export default function SitesLayout(props: { children: React.ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
         />
-        {env.TINYBIRD_TOKEN ? (
-          <Script
-            defer
-            src="https://unpkg.com/@tinybirdco/flock.js"
-            data-host={env.TINYBIRD_URL}
-            data-proxy={" "}
-            data-storage={"cookie"}
-            data-token={env.TINYBIRD_TOKEN}
-          />
-        ) : null}
       </head>
       <body className={"min-h-screen antialiased"}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

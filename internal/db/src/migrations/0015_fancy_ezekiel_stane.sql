@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_projects" ADD COLUMN "contact_email" text DEFAULT '' NOT NULL;

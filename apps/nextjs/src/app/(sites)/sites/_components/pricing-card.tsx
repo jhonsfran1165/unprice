@@ -20,9 +20,9 @@ export interface PricingPlan {
   id: string
   flatPrice: string
   isEnterprisePlan: boolean
+  contactEmail: string
   description: string
   features: string[]
-  pageId: string
   detailedFeatures: Record<
     string,
     {
@@ -105,11 +105,19 @@ export function PricingCard({ plan, isPopular, className, isOnly, ...props }: Pr
 
             // @ts-ignore
             window.Tinybird.trackEvent("plan_click", {
-              plan_version_id: plan.id,
-              page_id: plan.pageId,
+              id: plan.id,
+              slug: plan.name,
             })
 
-            window.open(ctaLink.toString(), "_blank")
+            // if enterprise we need email
+            if (plan.isEnterprisePlan) {
+              // open mailto: with the email with subject and body
+              const subject = `Enterprise Plan Inquiry for ${plan.name}`
+              const body = `I'm interested in the ${plan.name} (enterprise plan). Please contact me.`
+              window.open(`mailto:${plan.contactEmail}?subject=${subject}&body=${body}`, "_blank")
+            } else {
+              window.open(ctaLink.toString(), "_blank")
+            }
           }}
         >
           {plan.cta}

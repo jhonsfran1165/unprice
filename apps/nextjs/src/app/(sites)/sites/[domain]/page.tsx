@@ -1,8 +1,10 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import Script from "next/script"
 import Footer from "~/components/layout/footer"
 import Header from "~/components/layout/header"
 import HeaderMarketing from "~/components/layout/header-marketing"
+import { env } from "~/env"
 import { generateColorsFromBackground } from "~/lib/colors"
 import { getPageData } from "~/lib/fetchers"
 import { getImageSrc, isSvgLogo } from "~/lib/image"
@@ -97,7 +99,7 @@ export default async function DomainPage({
           ctaLink: page.ctaLink,
           isEnterprisePlan: version.plan.enterprisePlan || false,
           billingPeriod: version.billingConfig.billingInterval,
-          pageId: page.id,
+          contactEmail: page.project.contactEmail,
         }
       })
       .filter(Boolean) as PricingPlan[]) || []
@@ -107,6 +109,17 @@ export default async function DomainPage({
 
   return (
     <div>
+      {env.TINYBIRD_TOKEN ? (
+        <Script
+          defer
+          src="https://unpkg.com/@tinybirdco/flock.js"
+          data-host={env.TINYBIRD_URL}
+          data-proxy={" "}
+          data-storage={"cookie"}
+          data-token={env.TINYBIRD_TOKEN}
+          data-tb-page_id={page.id}
+        />
+      ) : null}
       <ApplyTheme
         cssVars={{
           "black-a12": text,

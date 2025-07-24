@@ -1123,6 +1123,7 @@ export class CustomerService {
     // plan version clould be empty, in which case we have to guess the best plan for the customer
     // given the currency, the plan slug and the version
     let planVersion: (PlanVersion & { project: Project; plan: Plan }) | null = null
+    let pageId: string | null = null
 
     if (sessionId) {
       // if session id is provided, we need to get the plan version from the session
@@ -1141,6 +1142,8 @@ export class CustomerService {
           })
         )
       }
+
+      pageId = session.pageId
 
       planVersion = await this.db.query.versions
         .findFirst({
@@ -1413,6 +1416,22 @@ export class CustomerService {
         )
       }
 
+      // send event to analytics for tracking conversions
+      this.waitUntil(
+        this.analytics.ingestEvents({
+          action: "sign_up",
+          version: "1",
+          session_id: sessionId ?? "",
+          timestamp: new Date().toISOString(),
+          payload: {
+            customer_id: customerId,
+            plan_version_id: planVersion.id,
+            page_id: pageId,
+            status: "payment_provider_signup",
+          },
+        })
+      )
+
       return Ok({
         success: true,
         url: val.url,
@@ -1504,6 +1523,22 @@ export class CustomerService {
 
         return { newCustomer, newSubscription }
       })
+
+      // send event to analytics for tracking conversions
+      this.waitUntil(
+        this.analytics.ingestEvents({
+          action: "sign_up",
+          version: "1",
+          session_id: sessionId ?? "",
+          timestamp: new Date().toISOString(),
+          payload: {
+            customer_id: customerId,
+            plan_version_id: planVersion.id,
+            page_id: pageId,
+            status: "direct_signup",
+          },
+        })
+      )
 
       return Ok({
         success: true,
