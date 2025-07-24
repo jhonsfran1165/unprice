@@ -1,119 +1,106 @@
-// src/utils/emails.ts or lib/emails.ts (adjust path as needed)
-
-import { render } from "@react-email/render" // Import the render function
-import nodemailer from "nodemailer" // Import nodemailer
+import { render } from "@react-email/render"
 import { Resend } from "resend"
-import { env } from "./env" // Assuming this handles your environment variables
+import { env } from "./env"
 
-// --- Resend/Production Setup ---
-// Initialize Resend once for production use
 export const resend = new Resend(env.RESEND_API_KEY)
 
-// IMPORTANT: This should be a verified domain/email with Resend for production
-// For Mailpit testing, this value is not strictly used by Mailpit itself.
 const RESEND_DEFAULT_FROM_EMAIL = "Seb from Unprice <seb@unprice.dev>"
 
-// --- Mailpit/Development Setup ---
-let mailpitTransporter: nodemailer.Transporter | null = null
+// Lazy load nodemailer only when needed (development + server)
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+let mailpitTransporter: any = null
 
-const getMailpitTransporter = () => {
+async function getMailpitTransporter() {
   if (!mailpitTransporter) {
+    const nodemailer = await import("nodemailer") // Dynamic import
     mailpitTransporter = nodemailer.createTransport({
       host: "localhost",
       port: 1025,
-      secure: false, // Mailpit runs without TLS by default on 1025
-      ignoreTLS: true, // Don't require TLS for local testing
+      secure: false,
+      ignoreTLS: true,
     })
   }
   return mailpitTransporter
 }
 
-// --- Common Interfaces ---
 export interface Emails {
-  react: JSX.Element // Your React Email component
+  react: JSX.Element
   subject: string
   to: string[]
-  from?: string // Make from optional, will default to RESEND_DEFAULT_FROM_EMAIL
+  from?: string
 }
 
-// Keep EmailHtml if you still have a separate use case for pre-rendered HTML
 export interface EmailHtml {
   html: string
   subject: string
   to: string[]
-  from?: string // Make from optional
+  from?: string
 }
 
-// --- Unified Email Sending Function ---
-export const sendEmail = async (emailOptions: Emails) => {
-  const { react, subject, to, from = RESEND_DEFAULT_FROM_EMAIL } = emailOptions
-
-  // Render the React Email component to HTML and plain text
-  const htmlContent = await render(react)
-  const textContent = await render(react, { plainText: true })
-
-  const emailPayload = {
-    to,
-    from,
-    subject,
-    html: htmlContent,
-    text: textContent, // Include plain text for better email client compatibility
-    react,
-  }
+// --- Main React Email Sender ---
+export const sendEmail = async ({
+  react,
+  subject,
+  to,
+  from = RESEND_DEFAULT_FROM_EMAIL,
+}: Emails) => {
+  const html = await render(react)
+  const text = await render(react, { plainText: true })
 
   if (env.NODE_ENV === "development") {
     try {
-      const transporter = getMailpitTransporter()
-      const info = await transporter.sendMail(emailPayload)
-      return { data: info, error: null } // Mimic Resend's return structure
+      const transporter = await getMailpitTransporter()
+      const info = await transporter.sendMail({ from, to, subject, html, text })
+      return { data: info, error: null }
     } catch (error) {
       console.error("Error sending email to Mailpit:", error)
-      return { data: null, error: error }
+      return { data: null, error }
     }
-  } else {
-    // Production environment: Use Resend
-    try {
-      const { data, error } = await resend.emails.send({ react, subject, to, from })
-      return { data, error }
-    } catch (error) {
-      return { data: null, error: error }
-    }
+  }
+
+  try {
+    return await resend.emails.send({ react, subject, to, from })
+  } catch (error) {
+    return { data: null, error }
   }
 }
 
-// Keep sendEmailHtml if you still need it for specific cases,
-// but it won't benefit from React Email rendering directly.
-// You'd need to manually render the HTML before calling this.
-export const sendEmailHtml = async (email: EmailHtml) => {
-  const { html, subject, to, from = RESEND_DEFAULT_FROM_EMAIL } = email
-
+// --- Pre-rendered HTML Email Sender ---
+export const sendEmailHtml = async ({
+  html,
+  subject,
+  to,
+  from = RESEND_DEFAULT_FROM_EMAIL,
+}: EmailHtml) => {
   if (env.NODE_ENV === "development") {
-    console.info("Sending pre-rendered HTML email to Mailpit (development mode)...")
     try {
-      const transporter = getMailpitTransporter()
-      const info = await transporter.sendMail({
-        from,
-        to,
-        subject,
-        html,
-      })
+      const transporter = await getMailpitTransporter()
+      const info = await transporter.sendMail({ from, to, subject, html })
       console.info("Pre-rendered HTML email sent to Mailpit:", info.messageId)
+      return { data: info, error: null }
     } catch (error) {
       console.error("Error sending pre-rendered HTML email to Mailpit:", error)
+      return { data: null, error }
     }
-  } else {
-    await fetch("https://api.resend.com/emails", {
+  }
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${env.RESEND_API_KEY}`,
       },
-      body: JSON.stringify({
-        to: email.to,
-        from: email.from,
-        subject: email.subject,
-        html: email.html,
-      }),
+      body: JSON.stringify({ to, from, subject, html }),
     })
+
+    if (!res.ok) {
+      throw new Error(`Failed to send email via Resend: ${res.statusText}`)
+    }
+
+    const data = await res.json()
+    return { data, error: null }
+  } catch (error) {
+    return { data: null, error }
   }
 }
