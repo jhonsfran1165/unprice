@@ -1,8 +1,10 @@
+"use server"
+
 import { render } from "@react-email/render"
 import { Resend } from "resend"
 import { env } from "./env"
 
-export const resend = new Resend(env.RESEND_API_KEY)
+const resend = new Resend(env.RESEND_API_KEY)
 
 const RESEND_DEFAULT_FROM_EMAIL = "Seb from Unprice <seb@unprice.dev>"
 
@@ -23,14 +25,14 @@ async function getMailpitTransporter() {
   return mailpitTransporter
 }
 
-export interface Emails {
+interface Emails {
   react: JSX.Element
   subject: string
   to: string[]
   from?: string
 }
 
-export interface EmailHtml {
+interface EmailHtml {
   html: string
   subject: string
   to: string[]
