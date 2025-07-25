@@ -5,7 +5,7 @@ import { use } from "react"
 
 import type { ProjectTransferToWorkspace } from "@unprice/db/validators"
 import { transferToWorkspaceSchema } from "@unprice/db/validators"
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import {

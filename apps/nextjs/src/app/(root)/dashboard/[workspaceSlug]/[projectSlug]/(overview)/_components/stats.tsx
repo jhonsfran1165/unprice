@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Card, CardContent, CardHeader, CardTitle } from "@unprice/ui/card"
 import { Activity, CreditCard, DollarSign, Users } from "lucide-react"
 

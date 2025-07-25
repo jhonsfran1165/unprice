@@ -13,7 +13,7 @@
     "clean": "git clean -xdf .next .turbo node_modules && rm -rf .turbo && rm -rf node_modules && rm -rf .next",
     "dev:turbo": "next dev --turbo",
     "dev": "next dev",
-    "fmt": "pnpm biome format . --write && pnpm biome check . --apply",
+    "fmt": "pnpm biome format . --write && pnpm biome check . --write",
     "start": "next start",
     "typecheck": "tsc --noEmit"
   },

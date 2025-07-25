@@ -3,7 +3,7 @@
 import type { Row } from "@tanstack/react-table"
 import { Button } from "@unprice/ui/button"
 
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import {
   DropdownMenu,
   DropdownMenuContent,

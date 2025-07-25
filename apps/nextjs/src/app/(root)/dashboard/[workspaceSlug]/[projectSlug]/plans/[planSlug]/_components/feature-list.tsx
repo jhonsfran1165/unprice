@@ -4,7 +4,7 @@ import { FileStack, Search } from "lucide-react"
 import { Fragment, use, useState } from "react"
 
 import type { PlanVersionFeatureDragDrop } from "@unprice/db/validators"
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
 import { Input } from "@unprice/ui/input"
 import { ScrollArea } from "@unprice/ui/scroll-area"

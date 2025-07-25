@@ -4,7 +4,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { FileStack, Search } from "lucide-react"
 import { useEffect, useState } from "react"
 
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Input } from "@unprice/ui/input"
 import { Separator } from "@unprice/ui/separator"
 

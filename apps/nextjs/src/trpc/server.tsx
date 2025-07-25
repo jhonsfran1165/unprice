@@ -7,7 +7,8 @@ import { createHydrationHelpers } from "@trpc/react-query/rsc"
 import { getSession } from "@unprice/auth/server-rsc"
 import { COOKIES_APP } from "@unprice/config"
 import { newId } from "@unprice/db/utils"
-import { type appRouter, createCaller, createTRPCContext } from "@unprice/trpc"
+import { createCallerFactory, createTRPCContext } from "@unprice/trpc"
+import { appRouter } from "@unprice/trpc/routes"
 import { createQueryClient } from "./shared"
 
 /**
@@ -36,6 +37,6 @@ const createContext = cache(async () => {
  */
 const getQueryClient = cache(createQueryClient)
 
-export const api = createCaller(createContext)
+export const api = createCallerFactory(appRouter)(createContext)
 
 export const { trpc, HydrateClient } = createHydrationHelpers<typeof appRouter>(api, getQueryClient)

@@ -6,6 +6,8 @@
     ".": "./src/index.ts",
     "./env": "./src/env.ts",
     "./routes": "./src/routes.ts",
+    "./router/edge": "./src/router/edge/index.ts",
+    "./router/lambda": "./src/router/lambda/index.ts",
     "./transformer": "./src/transformer.ts",
     "./services/subscriptions": "./src/services/subscriptions/index.ts",
     "./services/customers": "./src/services/customers/index.ts",
