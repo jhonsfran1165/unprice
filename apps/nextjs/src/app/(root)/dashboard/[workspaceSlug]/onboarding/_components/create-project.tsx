@@ -80,6 +80,7 @@ export default function CreateProject() {
                 timezone: "UTC",
                 name: "Acme project",
                 url: "https://acme.com",
+                contactEmail: "",
               }}
             />
           </m.div>

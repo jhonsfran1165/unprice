@@ -143,15 +143,6 @@ export const payloadEventSchema = z.object({
   payload: z.any(),
 })
 
-export const eventSchema = z.object({
-  ...payloadEventSchema.shape,
-  id: z.string(),
-  domain: z.string().optional().default("Unknown"),
-  subdomain: z.string().optional().default("Unknown"),
-  time: z.number().int(),
-  timestamp: z.string().datetime(),
-})
-
 export const getAnalyticsVerificationsResponseSchema = z.object({
   projectId: z.string(),
   customerId: z.string().optional(),
@@ -174,5 +165,44 @@ export const getUsageResponseSchema = z.object({
   last_during_period: z.number(),
 })
 
+export const analyticsEventSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("sign_up"),
+    version: z.string(),
+    timestamp: z.string().datetime(),
+    session_id: z.string(),
+    payload: metadataSchema,
+  }),
+  z.object({
+    action: z.literal("sign_in"),
+    version: z.string(),
+    timestamp: z.string().datetime(),
+    session_id: z.string(),
+    payload: metadataSchema,
+  }),
+  z.object({
+    action: z.literal("plan_click"),
+    version: z.string(),
+    timestamp: z.string().datetime(),
+    session_id: z.string(),
+    payload: metadataSchema,
+  }),
+  z.object({
+    action: z.literal("page_hit"),
+    version: z.string(),
+    timestamp: z.string().datetime(),
+    session_id: z.string(),
+    payload: metadataSchema,
+  }),
+  z.object({
+    action: z.literal("web_vital"),
+    version: z.string(),
+    timestamp: z.string().datetime(),
+    session_id: z.string(),
+    payload: metadataSchema,
+  }),
+])
+
+export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>
 export type GetUsageResponse = z.infer<typeof getUsageResponseSchema>
 export type PayloadEventType = z.infer<typeof payloadEventSchema>

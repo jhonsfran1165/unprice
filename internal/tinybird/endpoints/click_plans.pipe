@@ -1,0 +1,25 @@
+DESCRIPTION >
+    Parsed `plan_click` events, implementing plan click tracking logic.
+
+TOKEN "web-apps" READ
+
+NODE click_plans_node
+DESCRIPTION >
+    Parse raw plan_click events
+
+SQL >
+    %
+    SELECT
+        timestamp,
+        action,
+        version,
+        coalesce(session_id, '0') as sessionId,
+        JSONExtractString(payload, 'plan_version_id') as planVersionId,
+        JSONExtractString(payload, 'page_id') as pageId
+    FROM analytics_events
+    where action = 'plan_click'
+        AND timestamp >= (now() - interval 12 hour)
+        AND session_id = {{ String(sessionId) }}
+    LIMIT 1
+
+TYPE endpoint

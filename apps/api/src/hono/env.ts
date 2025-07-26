@@ -9,7 +9,7 @@ import type { ApiKeysService } from "~/apikey/service"
 import type { EntitlementService } from "~/entitlement"
 import type { Env } from "~/env"
 import type { ApiProjectService } from "~/project"
-import type { Analytics as AnalyticsType } from "~/util/analytics"
+import type { Stats as StatsType } from "~/util/stats"
 
 export type ServiceContext = {
   version: string
@@ -37,6 +37,6 @@ export type HonoEnv = {
     workspaceId?: string
     projectId?: string
     services: ServiceContext
-    analytics: AnalyticsType
+    stats: StatsType
   }
 }

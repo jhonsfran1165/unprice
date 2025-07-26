@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { useState } from "react"
 
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
 import { Checkbox } from "@unprice/ui/checkbox"
 import { Eye, EyeOff } from "@unprice/ui/icons"

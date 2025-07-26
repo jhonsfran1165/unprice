@@ -65,5 +65,20 @@ services:
   #     SRH_TOKEN: example_token
   #     SRH_CONNECTION_STRING: "redis://redis:6379" # Using `redis` hostname since they're in the same Docker network.
 
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: always
+    volumes:
+      - ./mailpit:/data
+    ports:
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP server
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
 volumes:
   pgdata:

@@ -1,5 +1,6 @@
 import { createEnv } from "@t3-oss/env-core"
 import { env as dbEnv } from "@unprice/db/env"
+import { env as tinybirdEnv } from "@unprice/tinybird/env"
 import { z } from "zod"
 
 export const env = createEnv({
@@ -20,7 +21,7 @@ export const env = createEnv({
   },
   runtimeEnv: process.env,
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
-  extends: [dbEnv],
+  extends: [dbEnv, tinybirdEnv],
   onValidationError: (issues) => {
     throw new Error(`Invalid environment variables in Auth: ${JSON.stringify(issues, null, 2)}`)
   },

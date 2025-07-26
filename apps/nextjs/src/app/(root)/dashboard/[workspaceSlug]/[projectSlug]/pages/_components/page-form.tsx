@@ -118,12 +118,12 @@ export function PageForm({
         <div className="space-y-8">
           <FormField
             control={form.control}
-            name="title"
+            name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Page Title</FormLabel>
+                <FormLabel>Page Name</FormLabel>
                 <FormDescription>
-                  The title is publicly visible and is used to identify the page.
+                  The name is publicly visible and is used to identify the page.
                 </FormDescription>
                 <FormControl>
                   <Input {...field} placeholder="production price page" />

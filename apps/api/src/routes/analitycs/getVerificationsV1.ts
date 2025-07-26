@@ -60,6 +60,7 @@ export type GetAnalyticsVerificationsRequest = z.infer<
 export type GetAnalyticsVerificationsResponse = z.infer<
   (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >
+
 export const registerGetAnalyticsVerificationsV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { customerId, range, projectId } = c.req.valid("json")

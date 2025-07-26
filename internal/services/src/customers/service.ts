@@ -1115,6 +1115,7 @@ export class CustomerService {
       defaultCurrency,
       externalId,
       planSlug,
+      sessionId,
       billingInterval,
       metadata,
     } = input
@@ -1122,8 +1123,39 @@ export class CustomerService {
     // plan version clould be empty, in which case we have to guess the best plan for the customer
     // given the currency, the plan slug and the version
     let planVersion: (PlanVersion & { project: Project; plan: Plan }) | null = null
+    let pageId: string | null = null
 
-    if (planVersionId) {
+    if (sessionId) {
+      // if session id is provided, we need to get the plan version from the session
+      // get the session from analytics
+      const data = await this.analytics.clickPlans({
+        sessionId: sessionId,
+      })
+
+      const session = data.data.at(0)
+
+      if (!session) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "PLAN_VERSION_NOT_FOUND",
+            message: "Session not found",
+          })
+        )
+      }
+
+      pageId = session.pageId
+
+      planVersion = await this.db.query.versions
+        .findFirst({
+          with: {
+            project: true,
+            plan: true,
+          },
+          where: (version, { eq, and }) =>
+            and(eq(version.id, session.planVersionId), eq(version.projectId, projectId)),
+        })
+        .then((data) => data ?? null)
+    } else if (planVersionId) {
       planVersion = await this.db.query.versions
         .findFirst({
           with: {
@@ -1193,12 +1225,36 @@ export class CustomerService {
 
       planVersion = plan.versions[0] ?? null
     } else {
-      return Err(
-        new UnPriceCustomerError({
-          code: "PLAN_VERSION_NOT_FOUND",
-          message: "Plan version not found, either planVersionId or planSlug is required",
+      // if no plan version is provided, we use the default plan
+      const defaultPlan = await this.db.query.plans.findFirst({
+        where: (plan, { eq, and }) =>
+          and(eq(plan.projectId, projectId), eq(plan.defaultPlan, true)),
+      })
+
+      if (!defaultPlan) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "NO_DEFAULT_PLAN_FOUND",
+            message: "Default plan not found, provide a plan version id, slug or session id",
+          })
+        )
+      }
+
+      planVersion = await this.db.query.versions
+        .findFirst({
+          with: {
+            project: true,
+            plan: true,
+          },
+          where: (version, { eq, and }) =>
+            and(
+              eq(version.planId, defaultPlan.id),
+              eq(version.latest, true),
+              eq(version.status, "published"),
+              eq(version.active, true)
+            ),
         })
-      )
+        .then((data) => data ?? null)
     }
 
     if (!planVersion) {
@@ -1360,6 +1416,22 @@ export class CustomerService {
         )
       }
 
+      // send event to analytics for tracking conversions
+      this.waitUntil(
+        this.analytics.ingestEvents({
+          action: "sign_up",
+          version: "1",
+          session_id: sessionId ?? "",
+          timestamp: new Date().toISOString(),
+          payload: {
+            customer_id: customerId,
+            plan_version_id: planVersion.id,
+            page_id: pageId,
+            status: "payment_provider_signup",
+          },
+        })
+      )
+
       return Ok({
         success: true,
         url: val.url,
@@ -1451,6 +1523,22 @@ export class CustomerService {
 
         return { newCustomer, newSubscription }
       })
+
+      // send event to analytics for tracking conversions
+      this.waitUntil(
+        this.analytics.ingestEvents({
+          action: "sign_up",
+          version: "1",
+          session_id: sessionId ?? "",
+          timestamp: new Date().toISOString(),
+          payload: {
+            customer_id: customerId,
+            plan_version_id: planVersion.id,
+            page_id: pageId,
+            status: "direct_signup",
+          },
+        })
+      )
 
       return Ok({
         success: true,

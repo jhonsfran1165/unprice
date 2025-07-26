@@ -2,7 +2,7 @@ import type { Context } from "hono"
 import { UAParser } from "ua-parser-js"
 import { isBot } from "ua-parser-js/helpers"
 
-export interface Analytics {
+export interface Stats {
   ip: string
   continent: string
   country: string
@@ -31,7 +31,7 @@ function capitalize(type: string): string {
   return type.charAt(0).toUpperCase() + type.slice(1)
 }
 
-export const getAnalytics = (c: Context): Analytics => {
+export const getStats = (c: Context): Stats => {
   const continent = c.req.raw?.cf?.continent as string
   const country = c.req.raw?.cf?.country as string
   const city = c.req.raw?.cf?.city as string

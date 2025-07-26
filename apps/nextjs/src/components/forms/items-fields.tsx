@@ -27,7 +27,7 @@ import {
   calculatePricePerFeature,
   createDefaultSubscriptionConfig,
 } from "@unprice/db/validators"
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
 import {
   Dialog,
