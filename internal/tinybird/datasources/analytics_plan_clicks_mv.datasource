@@ -1,0 +1,12 @@
+SCHEMA >
+    `date` Date,
+    `action` LowCardinality(String),
+    `version` LowCardinality(String),
+    `session_id` String,
+    `plan_version_id` String,
+    `page_id` String,
+    `clicks` AggregateFunction(count)
+
+ENGINE AggregatingMergeTree
+ENGINE_PARTITION_KEY toYYYYMM(date)
+ENGINE_SORTING_KEY date, action, page_id, plan_version_id

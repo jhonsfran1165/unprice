@@ -31,10 +31,10 @@ const domainSchema = z.coerce.string().refine((customDomain) => {
     return true
   }
 
-  // custom domain regex
+  // custom domain regex (e.g. builder.ai) numbers and lowercase letters only
   const parsed = z
     .string()
-    .regex(/^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/)
+    .regex(/^[a-z0-9-]+(\.[a-z0-9-]+)+$/)
     .safeParse(customDomain)
 
   return parsed.success
