@@ -9,13 +9,17 @@ SQL >
     SELECT
         date,
         plan_version_id,
+        plan_slug,
+        plan_version,
         page_id,
         countMerge(clicks) AS total_clicks
     FROM analytics_plan_clicks_mv
     WHERE
         1 = 1
-        {% if defined(page_id) %} AND page_id = {{ String(page_id) }} {% end %}
-        {% if defined(plan_version_id) %} AND plan_version_id = {{ String(plan_version_id) }} {% end %}
+        {% if defined(page_id) %} AND page_id = {{ String(pageId) }} {% end %}
+        {% if defined(plan_version_id) %} AND plan_version_id = {{ String(planVersionId) }} {% end %}
+        {% if defined(plan_slug) %} AND plan_slug = {{ String(planSlug) }} {% end %}
+        {% if defined(plan_version) %} AND plan_version = {{ String(planVersion) }} {% end %}
         {% if defined(date_from) %}
             AND date >= {{ Date(date_from, description="Starting day for filtering a date range", required=False) }}
         {% else %} AND date >= timestampAdd(today(), interval -30 day)
@@ -24,7 +28,7 @@ SQL >
             AND date <= {{ Date(date_to, description="Finishing day for filtering a date range", required=False) }}
         {% else %} AND date <= today()
         {% end %}
-    GROUP BY date, plan_version_id, page_id
+    GROUP BY date, plan_version_id, plan_slug, plan_version, page_id
     ORDER BY date DESC, total_clicks DESC
 
 TYPE endpoint

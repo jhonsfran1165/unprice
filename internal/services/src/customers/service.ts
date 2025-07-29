@@ -1224,7 +1224,10 @@ export class CustomerService {
       }
 
       planVersion = plan.versions[0] ?? null
-    } else {
+    }
+
+    // if no plan version is provided, we use the default plan
+    if (!planVersion) {
       // if no plan version is provided, we use the default plan
       const defaultPlan = await this.db.query.plans.findFirst({
         where: (plan, { eq, and }) =>
@@ -1283,6 +1286,7 @@ export class CustomerService {
         })
       )
     }
+
     const planProject = planVersion.project
     const paymentProvider = planVersion.paymentProvider
     const paymentRequired = planVersion.paymentMethodRequired

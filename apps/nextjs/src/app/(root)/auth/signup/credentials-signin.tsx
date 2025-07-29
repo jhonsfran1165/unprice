@@ -6,6 +6,7 @@ import { cn } from "@unprice/ui/utils"
 import { motion } from "framer-motion"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { z } from "zod"
 import { signUpWithCredentials } from "~/actions/signupCredentials"
 import { useZodForm } from "~/lib/zod-form"
@@ -28,7 +29,7 @@ export function SignUpCredentials({
   sessionId,
 }: { className?: string; sessionId?: string }) {
   const router = useRouter()
-
+  const [isLoading, setIsLoading] = useState(false)
   const form = useZodForm({
     schema: SignupSchema,
     defaultValues: {
@@ -42,15 +43,23 @@ export function SignUpCredentials({
   })
 
   const onSubmit = async (data: z.infer<typeof SignupSchema>) => {
+    setIsLoading(true)
     const res = await signUpWithCredentials(data)
 
     if (!res.success) {
       form.setError("root", { message: res.message })
+      setIsLoading(false)
       return
     }
 
     if (res.redirect) {
-      router.push(res.redirect)
+      // add sessionId to the redirect url the url is a path
+      let url = res.redirect
+      if (sessionId) {
+        url += `?sessionId=${sessionId}`
+      }
+      router.push(url)
+      setIsLoading(false)
       return
     }
   }
@@ -123,8 +132,8 @@ export function SignUpCredentials({
               </FormItem>
             )}
           />
-          <Button type="submit" className="mt-2 w-full" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
+          <Button type="submit" className="mt-2 w-full" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
             Sign up
           </Button>
         </div>

@@ -4,6 +4,8 @@ SCHEMA >
     `version` LowCardinality(String),
     `session_id` String,
     `plan_version_id` String,
+    `plan_slug` LowCardinality(String),
+    `plan_version` String,
     `page_id` String,
     `clicks` AggregateFunction(count)
 

@@ -206,3 +206,20 @@ export const analyticsEventSchema = z.discriminatedUnion("action", [
 export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>
 export type GetUsageResponse = z.infer<typeof getUsageResponseSchema>
 export type PayloadEventType = z.infer<typeof payloadEventSchema>
+
+// Plan conversion response schemas
+export const planConversionResponseSchema = z.object({
+  date: z.string(),
+  plan_id: z.string(),
+  plan_slug: z.string().nullable(),
+  plan_version: z.string().nullable(),
+  page_id: z.string().nullable(),
+  page_views: z.number(),
+  clicks: z.number(),
+  conversions: z.number(),
+  conversion_rate: z.number(),
+  click_through_rate: z.number(),
+  overall_conversion_rate: z.number(),
+})
+
+export type PlanConversionResponse = z.infer<typeof planConversionResponseSchema>

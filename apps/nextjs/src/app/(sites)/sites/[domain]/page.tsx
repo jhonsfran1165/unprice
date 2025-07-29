@@ -100,6 +100,7 @@ export default async function DomainPage({
           isEnterprisePlan: version.plan.enterprisePlan || false,
           billingPeriod: version.billingConfig.billingInterval,
           contactEmail: page.project.contactEmail,
+          version: version.version.toString(),
         }
       })
       .filter(Boolean) as PricingPlan[]) || []
@@ -112,12 +113,14 @@ export default async function DomainPage({
       {env.TINYBIRD_TOKEN ? (
         <Script
           defer
-          src="https://unpkg.com/@tinybirdco/flock.js"
+          strategy="afterInteractive"
+          src="/track.js"
           data-host={env.TINYBIRD_URL}
           data-proxy={" "}
           data-storage={"cookie"}
           data-token={env.TINYBIRD_TOKEN}
           data-tb-page_id={page.id}
+          data-plan-ids={plans.map((plan) => plan.id).join(",")}
         />
       ) : null}
       <ApplyTheme

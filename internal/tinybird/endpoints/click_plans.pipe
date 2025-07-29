@@ -15,11 +15,14 @@ SQL >
         version,
         coalesce(session_id, '0') as sessionId,
         JSONExtractString(payload, 'plan_version_id') as planVersionId,
+        JSONExtractString(payload, 'plan_slug') as planSlug,
+        JSONExtractString(payload, 'plan_version') as planVersion,
         JSONExtractString(payload, 'page_id') as pageId
     FROM analytics_events
     where action = 'plan_click'
         AND timestamp >= (now() - interval 12 hour)
         AND session_id = {{ String(sessionId) }}
+    ORDER BY timestamp DESC
     LIMIT 1
 
 TYPE endpoint

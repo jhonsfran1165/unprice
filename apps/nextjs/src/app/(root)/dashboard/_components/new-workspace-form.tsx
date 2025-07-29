@@ -64,7 +64,7 @@ export default function NewWorkspaceForm({
   }
 
   useEffect(() => {
-    if (defaultValues.planVersionId) {
+    if (defaultValues.planVersionId && defaultValues.planVersionId !== "") {
       form.setValue("planVersionId", defaultValues.planVersionId)
     }
   }, [isLoading])

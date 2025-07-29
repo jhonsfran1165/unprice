@@ -35,6 +35,7 @@ export interface PricingPlan {
   ctaLink: string
   currency: string
   billingPeriod: string
+  version: string
 }
 
 export interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -105,8 +106,9 @@ export function PricingCard({ plan, isPopular, className, isOnly, ...props }: Pr
 
             // @ts-ignore
             window.Tinybird.trackEvent("plan_click", {
-              id: plan.id,
-              slug: plan.name,
+              plan_version_id: plan.id,
+              plan_slug: plan.name,
+              plan_version: plan.version,
             })
 
             // if enterprise we need email

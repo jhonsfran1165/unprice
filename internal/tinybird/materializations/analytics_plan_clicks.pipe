@@ -9,11 +9,13 @@ SQL >
         version,
         coalesce(session_id, '0') as session_id,
         JSONExtractString(payload, 'plan_version_id') as plan_version_id,
+        JSONExtractString(payload, 'plan_slug') as plan_slug,
+        JSONExtractString(payload, 'plan_version') as plan_version,
         JSONExtractString(payload, 'page_id') as page_id,
         countState() AS clicks
     FROM analytics_events
     WHERE action = 'plan_click'
-    GROUP BY date, action, version, session_id, plan_version_id, page_id
+    GROUP BY date, action, version, session_id, plan_version_id, plan_slug, plan_version, page_id
 
 TYPE MATERIALIZED
 DATASOURCE analytics_plan_clicks_mv

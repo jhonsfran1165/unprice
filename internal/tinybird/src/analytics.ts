@@ -100,6 +100,8 @@ export class Analytics {
       }),
       data: z.object({
         planVersionId: z.string(),
+        planSlug: z.string(),
+        planVersion: z.string(),
         pageId: z.string(),
         timestamp: z.coerce.date(),
         action: z.string(),
