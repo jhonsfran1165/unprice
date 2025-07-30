@@ -1,0 +1,14 @@
+SCHEMA >
+    `date` Date,
+    `session_id` String,
+    `customer_id` String,
+    `plan_version_id` String,
+    `plan_slug` LowCardinality(String),
+    `plan_version` String,
+    `page_id` String,
+    `status` LowCardinality(String),
+    `unique_signups` AggregateFunction(uniq, String)
+
+ENGINE AggregatingMergeTree
+ENGINE_PARTITION_KEY toYYYYMM(date)
+ENGINE_SORTING_KEY date, session_id, page_id, customer_id, plan_version_id

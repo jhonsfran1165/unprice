@@ -27,7 +27,7 @@ export function ProjectCard(props: {
 }) {
   const { project } = props
   return (
-    <SuperLink href={`/${props.workspaceSlug}/${project.slug}`}>
+    <SuperLink href={`/${props.workspaceSlug}/${project.slug}/dashboard`}>
       <Card className="overflow-hidden">
         <div className="h-32" style={project.styles} />
         <CardHeader>

@@ -244,6 +244,9 @@ importers:
       '@vercel/edge':
         specifier: ^1.1.2
         version: 1.2.1
+      '@vercel/functions':
+        specifier: ^1.0.2
+        version: 1.6.0
       '@vercel/og':
         specifier: ^0.6.8
         version: 0.6.8

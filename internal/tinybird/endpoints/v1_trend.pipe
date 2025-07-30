@@ -19,7 +19,7 @@ DESCRIPTION >
 
 SQL >
     select toStartOfMinute(timestamp) as t, uniq(session_id) as visits
-    from analytics_hits
+    from unprice_page_events
     where timestamp >= (now() - interval 30 minute)
     group by toStartOfMinute(timestamp)
     order by toStartOfMinute(timestamp)

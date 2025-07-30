@@ -8,27 +8,24 @@ SQL >
     %
     SELECT
         date,
-        plan_version_id,
-        plan_slug,
-        plan_version,
-        page_id,
-        countMerge(clicks) AS total_clicks
-    FROM analytics_plan_clicks_mv
+        session_id as sessionId,
+        plan_version_id as planVersionId,
+        plan_slug as planSlug,
+        plan_version as planVersion,
+        page_id as pageId,
+        countMerge(total_clicks) AS totalClicks,
+        uniqMerge(unique_clicks) AS uniqueClicks
+    FROM analytics_plans_mv
     WHERE
         1 = 1
-        {% if defined(page_id) %} AND page_id = {{ String(pageId) }} {% end %}
-        {% if defined(plan_version_id) %} AND plan_version_id = {{ String(planVersionId) }} {% end %}
-        {% if defined(plan_slug) %} AND plan_slug = {{ String(planSlug) }} {% end %}
-        {% if defined(plan_version) %} AND plan_version = {{ String(planVersion) }} {% end %}
-        {% if defined(date_from) %}
-            AND date >= {{ Date(date_from, description="Starting day for filtering a date range", required=False) }}
+        {% if defined(sessionId) %} AND session_id = {{ String(sessionId) }} {% end %}
+        {% if defined(pageId) %} AND page_id = {{ String(pageId) }} {% end %}
+        {% if defined(planVersionId) %} AND plan_version_id = {{ String(planVersionId) }} {% end %}
+        {% if defined(intervalDays) %}
+            AND date >= timestampAdd(today(), interval -{{ Int(intervalDays) }} day)
         {% else %} AND date >= timestampAdd(today(), interval -30 day)
         {% end %}
-        {% if defined(date_to) %}
-            AND date <= {{ Date(date_to, description="Finishing day for filtering a date range", required=False) }}
-        {% else %} AND date <= today()
-        {% end %}
-    GROUP BY date, plan_version_id, plan_slug, plan_version, page_id
-    ORDER BY date DESC, total_clicks DESC
+    GROUP BY date, sessionId, planVersionId, planSlug, planVersion, pageId
+    ORDER BY date DESC, totalClicks, uniqueClicks DESC
 
 TYPE endpoint

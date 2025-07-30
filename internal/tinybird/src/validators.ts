@@ -203,6 +203,41 @@ export const analyticsEventSchema = z.discriminatedUnion("action", [
   }),
 ])
 
+export const analyticsEventBaseSchema = z.object({
+  timestamp: z.string().datetime(),
+  session_id: z.string(),
+})
+
+export const pageEventSchema = z.object({
+  ...analyticsEventBaseSchema.shape,
+  page_id: z.string(),
+  plan_ids: z.array(z.string()).nullable(),
+  url: z.string(),
+  country: z.string(),
+  city: z.string(),
+  region: z.string(),
+  latitude: z.string(),
+  longitude: z.string(),
+  device: z.string(),
+  device_model: z.string(),
+  device_vendor: z.string(),
+  browser: z.string(),
+  browser_version: z.string(),
+  os: z.string(),
+  os_version: z.string(),
+  engine: z.string(),
+  engine_version: z.string(),
+  cpu_architecture: z.string(),
+  ua: z.string(),
+  bot: z.boolean(),
+  referrer: z.string(),
+  referrer_url: z.string(),
+  ip: z.string(),
+  continent: z.string(),
+  locale: z.string(),
+})
+
+export type PageAnalyticsEvent = z.infer<typeof pageEventSchema>
 export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>
 export type GetUsageResponse = z.infer<typeof getUsageResponseSchema>
 export type PayloadEventType = z.infer<typeof payloadEventSchema>

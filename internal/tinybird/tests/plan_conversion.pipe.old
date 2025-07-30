@@ -15,17 +15,13 @@ SQL >
     SELECT
         toDate(timestamp) AS date,
         coalesce(session_id, '0') as session_id,
-        arrayJoin(splitByChar(',', JSONExtractString(payload, 'plan_ids'))) as plan_version_id,
+        JSONExtractString(payload, 'plan_ids') as plan_ids,
         1 as views
-    FROM analytics_events
-    WHERE action = 'page_hit'
-        {% if defined(date_from) %}
-            AND toDate(timestamp) >= {{ Date(date_from, description="Starting day for filtering a date range", required=False) }}
-        {% else %} AND toDate(timestamp) >= timestampAdd(today(), interval -30 day)
-        {% end %}
-        {% if defined(date_to) %}
-            AND toDate(timestamp) <= {{ Date(date_to, description="Finishing day for filtering a date range", required=False) }}
-        {% else %} AND toDate(timestamp) <= today()
+    FROM analytics_hits
+    WHERE 1 = 1
+        {% if defined(intervalDays) %}
+            AND date >= timestampAdd(today(), interval -{{ Int(intervalDays) }} day)
+        {% else %} AND date >= timestampAdd(today(), interval -30 day)
         {% end %}
         {% if defined(plan_version_id) %}
             AND has(JSONExtractArrayRaw(payload, 'plan_ids'), concat('"', {{ String(plan_version_id) }}, '"'))
@@ -40,10 +36,11 @@ SQL >
     SELECT
         date,
         plan_version_id,
-        plan_slug,
+        plan_slug,x
         plan_version,
-        countMerge(clicks) as clicks
-    FROM analytics_plan_clicks_mv
+        sumMerge(total_clicks) as total_clicks,
+        sumMerge(unique_clicks) as unique_clicks
+    FROM analytics_plans_mv
     WHERE
         1 = 1
         {% if defined(plan_version_id) %} AND plan_version_id = {{ String(plan_version_id) }} {% end %}
@@ -105,7 +102,7 @@ SQL >
                   AND toDate(timestamp) <= {% if defined(date_to) %}{{ Date(date_to) }}{% else %}today(){% end %}
             )
             UNION DISTINCT
-            SELECT date, plan_version_id FROM analytics_plan_clicks_mv
+            SELECT date, plan_version_id FROM analytics_plans_mv
             WHERE date >= {% if defined(date_from) %}{{ Date(date_from) }}{% else %}timestampAdd(today(), interval -30 day){% end %}
               AND date <= {% if defined(date_to) %}{{ Date(date_to) }}{% else %}today(){% end %}
             UNION DISTINCT
@@ -132,7 +129,8 @@ SQL >
             plan_version_id,
             any(plan_slug) as plan_slug,
             any(plan_version) as plan_version,
-            sum(clicks) as total_clicks
+            sum(total_clicks) as total_clicks,
+            sum(unique_clicks) as unique_clicks
         FROM plan_clicks
         GROUP BY date, plan_version_id
     ),

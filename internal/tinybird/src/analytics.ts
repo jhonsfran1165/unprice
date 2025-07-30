@@ -5,6 +5,7 @@ import {
   auditLogSchemaV1,
   featureUsageSchemaV1,
   featureVerificationSchemaV1,
+  pageEventSchema,
 } from "./validators"
 
 export class Analytics {
@@ -92,20 +93,26 @@ export class Analytics {
     })
   }
 
-  public get clickPlans() {
+  public get ingestPageEvents() {
+    return this.writeClient.buildIngestEndpoint({
+      datasource: "unprice_page_events",
+      event: pageEventSchema,
+    })
+  }
+
+  public get getPlanClicks() {
     return this.readClient.buildPipe({
-      pipe: "click_plans",
+      pipe: "get_plan_clicks",
       parameters: z.object({
         sessionId: z.string(),
+        intervalDays: z.number().optional(),
       }),
       data: z.object({
         planVersionId: z.string(),
         planSlug: z.string(),
         planVersion: z.string(),
         pageId: z.string(),
-        timestamp: z.coerce.date(),
-        action: z.string(),
-        version: z.string(),
+        date: z.coerce.date(),
         sessionId: z.string(),
       }),
       opts: {

@@ -119,8 +119,8 @@ export default async function DomainPage({
           data-proxy={" "}
           data-storage={"cookie"}
           data-token={env.TINYBIRD_TOKEN}
-          data-tb-page_id={page.id}
           data-plan-ids={plans.map((plan) => plan.id).join(",")}
+          data-page-id={page.id}
         />
       ) : null}
       <ApplyTheme

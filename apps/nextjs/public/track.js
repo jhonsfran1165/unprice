@@ -446,6 +446,7 @@
     token = document.currentScript.getAttribute("data-token")
     domain = document.currentScript.getAttribute("data-domain")
     planIds = document.currentScript.getAttribute("data-plan-ids")
+    pageId = document.currentScript.getAttribute("data-page-id")
     DATASOURCE = document.currentScript.getAttribute("data-datasource") || DATASOURCE
     STORAGE_METHOD = document.currentScript.getAttribute("data-storage") || STORAGE_METHOD
     stringifyPayload = document.currentScript.getAttribute("data-stringify-payload") !== "false"
@@ -603,10 +604,18 @@
     let processedPayload
     if (stringifyPayload) {
       processedPayload = _maskSuspiciousAttributes(payload)
-      processedPayload = Object.assign({}, JSON.parse(processedPayload), globalAttributes)
+      processedPayload = Object.assign({}, JSON.parse(processedPayload), {
+        ...globalAttributes,
+        // send page_id always
+        page_id: pageId,
+      })
       processedPayload = JSON.stringify(processedPayload)
     } else {
-      processedPayload = Object.assign({}, payload, globalAttributes)
+      processedPayload = Object.assign({}, payload, {
+        ...globalAttributes,
+        // send page_id always
+        page_id: pageId,
+      })
       const maskedStr = _maskSuspiciousAttributes(processedPayload)
       processedPayload = JSON.parse(maskedStr)
     }
@@ -618,9 +627,9 @@
     request.setRequestHeader("Content-Type", "application/json")
     request.send(
       JSON.stringify({
-        timestamp: new Date().toISOString(),
+        // timestamp: new Date().toISOString(),
         action: name,
-        version: "1",
+        // version: "1",
         session_id,
         payload: processedPayload,
       })
@@ -651,19 +660,19 @@
     // Wait a bit for SPA routers
     setTimeout(() => {
       _sendEvent("page_hit", {
-        "user-agent": window.navigator.userAgent,
+        ua: window.navigator.userAgent,
         locale,
-        location: country,
+        country,
         referrer: document.referrer,
         pathname: window.location.pathname,
-        href: window.location.href,
+        url: window.location.href,
         plan_ids: planIds,
       })
     }, 300)
   }
 
   // Client
-  window.Tinybird = { trackEvent: _sendEvent }
+  window.Unprice = { trackEvent: _sendEvent }
 
   // Event listener
   window.addEventListener("hashchange", _trackPageHit)

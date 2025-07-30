@@ -1,21 +1,26 @@
-NODE analytics_plan_clicks_mv_node
 DESCRIPTION >
-    Materialized view that aggregates plan_click events
+    Parsed `plan_click` events, implementing plan click tracking logic.
+
+TOKEN "web-apps" READ
+
+NODE parsed_signups
+DESCRIPTION >
+    Parse raw signup events and aggregate by plan version id
 
 SQL >
+    %
     SELECT
-        toDate(timestamp) AS date,
+        timestamp,
         action,
         version,
         coalesce(session_id, '0') as session_id,
+        JSONExtractString(payload, 'customer_id') as customer_id,
         JSONExtractString(payload, 'plan_version_id') as plan_version_id,
         JSONExtractString(payload, 'plan_slug') as plan_slug,
         JSONExtractString(payload, 'plan_version') as plan_version,
         JSONExtractString(payload, 'page_id') as page_id,
-        countState() AS clicks
+        JSONExtractString(payload, 'status') as status
     FROM analytics_events
-    WHERE action = 'plan_click'
-    GROUP BY date, action, version, session_id, plan_version_id, plan_slug, plan_version, page_id
+    where action = 'sign_up'
 
-TYPE MATERIALIZED
-DATASOURCE analytics_plan_clicks_mv
+TYPE endpoint

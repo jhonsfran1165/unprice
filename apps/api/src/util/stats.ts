@@ -1,31 +1,7 @@
+import { EU_COUNTRY_CODES, type Stats } from "@unprice/tinybird/utils"
 import type { Context } from "hono"
 import { UAParser } from "ua-parser-js"
 import { isBot } from "ua-parser-js/helpers"
-
-export interface Stats {
-  ip: string
-  continent: string
-  country: string
-  region: string
-  colo: string
-  city: string
-  latitude: string
-  longitude: string
-  device: string
-  device_vendor: string
-  device_model: string
-  browser: string
-  browser_version: string
-  engine: string
-  engine_version: string
-  os: string
-  os_version: string
-  cpu_architecture: string
-  ua: string
-  bot: boolean
-  isEUCountry: boolean
-  source: string
-}
 
 function capitalize(type: string): string {
   return type.charAt(0).toUpperCase() + type.slice(1)
@@ -39,7 +15,8 @@ export const getStats = (c: Context): Stats => {
   const colo = c.req.raw?.cf?.colo as string
   const latitude = c.req.raw?.cf?.latitude as string
   const longitude = c.req.raw?.cf?.longitude as string
-  const isEUCountry = c.req.raw?.cf?.isEUCountry as boolean
+
+  const isEuCountry = (country && EU_COUNTRY_CODES.includes(country)) || false
 
   const ip =
     c.req.header("X-Forwarded-For") ??
@@ -52,7 +29,7 @@ export const getStats = (c: Context): Stats => {
   return {
     ip:
       // only record IP if it's a valid IP and not from a EU country
-      typeof ip === "string" && ip.trim().length > 0 && !isEUCountry ? ip : "Unknown",
+      typeof ip === "string" && ip.trim().length > 0 && !isEuCountry ? ip : "Unknown",
     continent: continent || "Unknown",
     country: country || "Unknown",
     region: region || "Unknown",
@@ -72,7 +49,7 @@ export const getStats = (c: Context): Stats => {
     cpu_architecture: ua.cpu?.architecture || "Unknown",
     ua: ua.ua || "Unknown",
     bot: isBot(ua.ua),
-    isEUCountry,
+    isEUCountry: isEuCountry,
     source: unpriceRequestSource || "Unknown",
   }
 }

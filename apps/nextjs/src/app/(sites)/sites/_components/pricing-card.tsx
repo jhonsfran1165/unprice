@@ -105,7 +105,7 @@ export function PricingCard({ plan, isPopular, className, isOnly, ...props }: Pr
             ctaLink.searchParams.set("sessionId", sessionId ?? "")
 
             // @ts-ignore
-            window.Tinybird.trackEvent("plan_click", {
+            window.Unprice.trackEvent("plan_click", {
               plan_version_id: plan.id,
               plan_slug: plan.name,
               plan_version: plan.version,
@@ -114,6 +114,7 @@ export function PricingCard({ plan, isPopular, className, isOnly, ...props }: Pr
             // if enterprise we need email
             if (plan.isEnterprisePlan) {
               // open mailto: with the email with subject and body
+              // TODO: change the copy to follow customer journey
               const subject = `Enterprise Plan Inquiry for ${plan.name}`
               const body = `I'm interested in the ${plan.name} (enterprise plan). Please contact me.`
               window.open(`mailto:${plan.contactEmail}?subject=${subject}&body=${body}`, "_blank")

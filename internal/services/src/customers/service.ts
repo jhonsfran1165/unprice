@@ -1128,8 +1128,9 @@ export class CustomerService {
     if (sessionId) {
       // if session id is provided, we need to get the plan version from the session
       // get the session from analytics
-      const data = await this.analytics.clickPlans({
+      const data = await this.analytics.getPlanClicks({
         sessionId: sessionId,
+        intervalDays: 1,
       })
 
       const session = data.data.at(0)
@@ -1429,6 +1430,8 @@ export class CustomerService {
           timestamp: new Date().toISOString(),
           payload: {
             customer_id: customerId,
+            plan_slug: planVersion.plan.slug,
+            plan_version: planVersion.version,
             plan_version_id: planVersion.id,
             page_id: pageId,
             status: "payment_provider_signup",
@@ -1540,6 +1543,8 @@ export class CustomerService {
             plan_version_id: planVersion.id,
             page_id: pageId,
             status: "direct_signup",
+            plan_slug: planVersion.plan.slug,
+            plan_version: planVersion.version,
           },
         })
       )

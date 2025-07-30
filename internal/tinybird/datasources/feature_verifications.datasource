@@ -5,6 +5,9 @@ DESCRIPTION >
 
 TAGS "verifications"
 
+# -- TODO: change to use timestamp64(3) for better precision and performance
+# -- TODO: delete createdAt column
+
 SCHEMA >
     `timestamp` Int64 `json:$.timestamp`,
     `createdAt` Int64 `json:$.createdAt`,

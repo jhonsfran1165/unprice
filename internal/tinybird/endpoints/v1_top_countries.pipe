@@ -11,9 +11,12 @@ DESCRIPTION >
 
 SQL >
     %
-    select location, uniqMerge(visits) as visits, countMerge(hits) as hits
-    from analytics_pages_mv
+    select country, uniqMerge(visits) as visits, countMerge(hits) as hits
+    from unprice_analytics_pages_mv
     where
+        {% if defined(page_id) %}
+            page_id = {{ String(page_id, description="Page ID", required=False) }}
+        {% end %}
         {% if defined(date_from) %}
             date
             >=
@@ -26,7 +29,7 @@ SQL >
             {{ Date(date_to, description="Finishing day for filtering a date range", required=False) }}
         {% else %} and date <= today()
         {% end %}
-    group by location
+    group by country
     order by visits desc
     limit {{ Int32(skip, 0) }},{{ Int32(limit, 50) }}
 TYPE endpoint

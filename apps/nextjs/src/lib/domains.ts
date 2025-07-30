@@ -1,6 +1,10 @@
 import type { NextAuthRequest } from "@unprice/auth"
 import { BASE_DOMAIN, RESTRICTED_SUBDOMAINS } from "@unprice/config"
+import { ipAddress } from "@vercel/functions"
 import type { NextRequest } from "next/server"
+import { userAgent } from "next/server"
+import { IP_BOTS, IP_RANGES_BOTS, UA_BOTS } from "./bots-list"
+import { isIpInRange } from "./is-ip-in-range"
 
 // validate the subdomain from the host and return it
 // if the host is a custom domain, return the full domain
@@ -54,18 +58,39 @@ export const parse = (req: NextAuthRequest | NextRequest) => {
 export const detectBot = (req: NextRequest) => {
   const url = req.nextUrl
   if (url.searchParams.get("bot")) return true
-  const ua = req.headers.get("User-Agent")
-  if (ua) {
+
+  // Check ua
+  const ua = userAgent(req)
+
+  if (ua.ua) {
     /* Note:
      * - bot is for most bots & crawlers
      * - facebookexternalhit is for Facebook crawler
      * - MetaInspector is for https://metatags.io/
      */
     return /bot|facebookexternalhit|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex|MetaInspector/i.test(
-      ua
+      ua.ua
     )
   }
-  return false
+
+  if (ua) {
+    return ua.isBot || UA_BOTS.some((bot) => new RegExp(bot, "i").test(ua.ua))
+  }
+
+  // Check ip
+  const ip = ipAddress(req)
+
+  if (!ip) {
+    return false
+  }
+
+  // Check exact IP matches
+  if (IP_BOTS.includes(ip)) {
+    return true
+  }
+
+  // Check CIDR ranges
+  return IP_RANGES_BOTS.some((range) => isIpInRange(ip, range))
 }
 
 // courtesy of ChatGPT: https://sharegpt.com/c/pUYXtRs
@@ -92,4 +117,26 @@ export const getApexDomain = (url: string) => {
   }
   // if it's a normal domain (e.g. dub.sh), we return the domain
   return domain
+}
+
+export const isValidUrl = (url: string) => {
+  try {
+    new URL(url)
+    return true
+  } catch (_e) {
+    return false
+  }
+}
+
+export const getDomainWithoutWWW = (url: string) => {
+  if (isValidUrl(url)) {
+    return new URL(url).hostname.replace(/^www\./, "")
+  }
+  try {
+    if (url.includes(".") && !url.includes(" ")) {
+      return new URL(`https://${url}`).hostname.replace(/^www\./, "")
+    }
+  } catch (_e) {
+    return null
+  }
 }

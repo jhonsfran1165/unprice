@@ -3,7 +3,7 @@ TOKEN "web-apps" READ
 NODE get_current_visitors
 SQL >
     SELECT uniq(session_id) AS visits
-    FROM analytics_hits
+    FROM unprice_page_events
     WHERE timestamp >= (now() - interval 5 minute)
 
 TYPE endpoint

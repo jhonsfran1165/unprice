@@ -1,0 +1,20 @@
+NODE mv
+DESCRIPTION >
+    Aggregate by page_id and calculate session and hits
+
+SQL >
+    SELECT
+        toDate(timestamp) AS date,
+        page_id,
+        browser,
+        country,
+        device,
+        referrer,
+        domainWithoutWWW(url) as domain,
+        uniqState(session_id) AS visits,
+        countState() AS hits
+    FROM unprice_page_events
+    GROUP BY date, page_id, device, browser, country, referrer, domain
+
+TYPE MATERIALIZED
+DATASOURCE unprice_analytics_pages_mv

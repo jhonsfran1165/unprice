@@ -12,8 +12,11 @@ DESCRIPTION >
 SQL >
     %
     select device, uniq(session_id) as visits, countMerge(hits) as hits
-    from analytics_sessions_mv
+    from unprice_analytics_sessions_mv
     where
+        {% if defined(page_id) %}
+            page_id = {{ String(page_id, description="Page ID", required=False) }}
+        {% end %}
         {% if defined(date_from) %}
             date
             >=

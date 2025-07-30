@@ -11,9 +11,12 @@ DESCRIPTION >
 
 SQL >
     %
-    select domainWithoutWWW(referrer) as referrer, uniqMerge(visits) as visits, countMerge(hits) as hits
-    from analytics_sources_mv
+    select referrer, uniqMerge(visits) as visits, countMerge(hits) as hits
+    from unprice_analytics_pages_mv
     where
+        {% if defined(page_id) %}
+            page_id = {{ String(page_id, description="Page ID", required=False) }}
+        {% end %}
         {% if defined(date_from) %}
             date
             >=

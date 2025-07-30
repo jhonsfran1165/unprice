@@ -20,8 +20,9 @@ export default async function NewPage(props: {
   const cookieStore = cookies()
   const sessionId = cookieStore.get(COOKIES_APP.SESSION)?.value
 
-  const data = await analytics.clickPlans({
+  const data = await analytics.getPlanClicks({
     sessionId: sessionId ?? "",
+    intervalDays: 1,
   })
 
   const session = data.data.at(0)
