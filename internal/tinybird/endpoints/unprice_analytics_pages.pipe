@@ -13,7 +13,7 @@ SQL >
         domainWithoutWWW(url) as domain,
         uniqState(session_id) AS visits,
         countState() AS hits
-    FROM unprice_page_events
+    FROM unprice_page_hits
     GROUP BY date, page_id, device, browser, country, referrer, domain
 
 TYPE MATERIALIZED

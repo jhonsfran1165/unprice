@@ -1128,9 +1128,9 @@ export class CustomerService {
     if (sessionId) {
       // if session id is provided, we need to get the plan version from the session
       // get the session from analytics
-      const data = await this.analytics.getPlanClicks({
-        sessionId: sessionId,
-        intervalDays: 1,
+      const data = await this.analytics.getPlanClickBySessionId({
+        session_id: sessionId,
+        action: "plan_click",
       })
 
       const session = data.data.at(0)
@@ -1144,7 +1144,7 @@ export class CustomerService {
         )
       }
 
-      pageId = session.pageId
+      pageId = session.payload.page_id
 
       planVersion = await this.db.query.versions
         .findFirst({
@@ -1153,7 +1153,7 @@ export class CustomerService {
             plan: true,
           },
           where: (version, { eq, and }) =>
-            and(eq(version.id, session.planVersionId), eq(version.projectId, projectId)),
+            and(eq(version.id, session.payload.plan_version_id), eq(version.projectId, projectId)),
         })
         .then((data) => data ?? null)
     } else if (planVersionId) {
@@ -1426,15 +1426,13 @@ export class CustomerService {
         this.analytics.ingestEvents({
           action: "sign_up",
           version: "1",
-          session_id: sessionId ?? "",
+          session_id: sessionId ?? null,
           timestamp: new Date().toISOString(),
           payload: {
             customer_id: customerId,
-            plan_slug: planVersion.plan.slug,
-            plan_version: planVersion.version,
             plan_version_id: planVersion.id,
             page_id: pageId,
-            status: "payment_provider_signup",
+            status: "waiting_payment_provider",
           },
         })
       )
@@ -1536,15 +1534,13 @@ export class CustomerService {
         this.analytics.ingestEvents({
           action: "sign_up",
           version: "1",
-          session_id: sessionId ?? "",
+          session_id: sessionId ?? null,
           timestamp: new Date().toISOString(),
           payload: {
             customer_id: customerId,
             plan_version_id: planVersion.id,
             page_id: pageId,
-            status: "direct_signup",
-            plan_slug: planVersion.plan.slug,
-            plan_version: planVersion.version,
+            status: "signup_success",
           },
         })
       )

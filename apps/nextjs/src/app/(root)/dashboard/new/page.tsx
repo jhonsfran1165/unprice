@@ -13,16 +13,24 @@ import Redirect from "./_components/redirect"
 
 export default async function NewPage(props: {
   searchParams: {
-    customer_id: string
+    customer_id?: string
   }
 }) {
   const { customer_id } = props.searchParams
   const cookieStore = cookies()
   const sessionId = cookieStore.get(COOKIES_APP.SESSION)?.value
 
-  const data = await analytics.getPlanClicks({
-    sessionId: sessionId ?? "",
-    intervalDays: 1,
+  if (!sessionId) {
+    return (
+      <Suspense fallback={<LayoutLoader />}>
+        <Content customerId={customer_id} />
+      </Suspense>
+    )
+  }
+
+  const data = await analytics.getPlanClickBySessionId({
+    session_id: sessionId,
+    action: "plan_click",
   })
 
   const session = data.data.at(0)
@@ -31,7 +39,7 @@ export default async function NewPage(props: {
     <Suspense fallback={<LayoutLoader />}>
       <Content
         customerId={customer_id}
-        planVersionId={session?.planVersionId}
+        planVersionId={session?.payload.plan_version_id}
         sessionId={sessionId}
       />
     </Suspense>
@@ -43,9 +51,9 @@ async function Content({
   planVersionId,
   sessionId,
 }: {
-  customerId: string | undefined
-  planVersionId: string | undefined
-  sessionId: string | undefined
+  customerId?: string
+  planVersionId?: string
+  sessionId?: string
 }) {
   if (!customerId || customerId === "") {
     return (

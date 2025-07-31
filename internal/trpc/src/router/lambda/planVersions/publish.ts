@@ -224,6 +224,26 @@ export const publish = protectedProjectProcedure
       }
     })
 
+    // ingest the plan version to tinybird
+    opts.ctx.waitUntil(
+      opts.ctx.analytics.ingestPlanVersions({
+        id: planVersionDataUpdated.id,
+        project_id: project.id,
+        plan_id: planVersionDataUpdated.planId,
+        plan_slug: planVersionData.plan.slug,
+        plan_version: planVersionDataUpdated.version,
+        currency: planVersionDataUpdated.currency,
+        payment_provider: planVersionDataUpdated.paymentProvider,
+        billing_interval: planVersionDataUpdated.billingConfig.billingInterval,
+        billing_interval_count: planVersionDataUpdated.billingConfig.billingIntervalCount,
+        billing_anchor: planVersionDataUpdated.billingConfig.billingAnchor.toString(),
+        plan_type: planVersionDataUpdated.billingConfig.planType,
+        trial_days: planVersionDataUpdated.trialDays,
+        payment_method_required: planVersionDataUpdated.paymentMethodRequired,
+        timestamp: new Date(planVersionDataUpdated.publishedAt ?? Date.now()).toISOString(),
+      })
+    )
+
     return {
       planVersion: planVersionDataUpdated,
     }

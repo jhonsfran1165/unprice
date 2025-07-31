@@ -428,7 +428,7 @@
     "Asia/Calcutta": "IN",
   }
   const STORAGE_KEY = "session-id"
-  let DATASOURCE = "analytics_events"
+  let DATASOURCE = "unprice_events"
   const storageMethods = {
     cookie: "cookie",
     localStorage: "localStorage",

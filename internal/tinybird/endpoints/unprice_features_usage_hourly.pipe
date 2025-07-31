@@ -1,4 +1,4 @@
-NODE features_verifications_hourly_mv_node
+NODE features_usage_hourly_mv_node
 SQL >
     SELECT
         toStartOfHour(fromUnixTimestamp64Milli(timestamp)) as date,
@@ -7,12 +7,13 @@ SQL >
         featureSlug,
         entitlementId,
         countState() AS count,
-        quantileTDigestState(0.95)(latency) AS p95_latency,
-        maxState(latency) AS max_latency,
-        argMaxState(latency, timestamp) AS latest_latency
-    FROM feature_verifications
+        sumState(usage) AS sum,
+        maxState(usage) AS max,
+        argMaxState(usage, timestamp) AS last_during_period
+    FROM unprice_feature_usage_records
+    WHERE deleted = 0
     GROUP BY date, projectId, customerId, featureSlug, entitlementId
     ORDER BY date DESC
 
 TYPE MATERIALIZED
-DATASOURCE feature_verifications_hourly_mv_data
+DATASOURCE unprice_feature_usage_hourly_mv

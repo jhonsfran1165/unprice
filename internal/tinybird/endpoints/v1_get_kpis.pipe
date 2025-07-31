@@ -1,5 +1,5 @@
 DESCRIPTION >
-    Summary with general KPIs per date, including visits, page views, bounce rate and average session duration.
+    Summary with general KPIs per date and page_id, including visits, page views, bounce rate and average session duration.
     Accepts `date_from` and `date_to` date filter, all historical data if not passed.
     Daily granularity, except when filtering one single day (hourly)
 
@@ -65,25 +65,27 @@ SQL >
 
 NODE hits
 DESCRIPTION >
-    Group by sessions and calculate metrics at that level
+    Group by sessions and page_id, calculate metrics at that level
 
 SQL >
     %
     {% if defined(date_from) and day_diff(date_from, date_to) == 0 %}
         select
             toStartOfHour(timestamp) as date,
+            page_id,
             session_id,
             uniq(session_id) as visits,
             count() as pageviews,
             case when min(timestamp) = max(timestamp) then 1 else 0 end as is_bounce,
             max(timestamp) as latest_hit_aux,
             min(timestamp) as first_hit_aux
-        from unprice_page_events
+        from unprice_page_hits
         where toDate(timestamp) = {{ Date(date_from) }}
-        group by toStartOfHour(timestamp), session_id
+        group by toStartOfHour(timestamp), page_id, session_id
     {% else %}
         select
             date,
+            page_id,
             session_id,
             uniq(session_id) as visits,
             countMerge(hits) as pageviews,
@@ -98,29 +100,30 @@ SQL >
             {% if defined(date_to) %} and date <= {{ Date(date_to) }}
             {% else %} and date <= today()
             {% end %}
-        group by date, session_id
+        group by date, page_id, session_id
     {% end %}
 
 NODE data
 DESCRIPTION >
-    General KPIs per date, works for both summary metrics and trends charts.
+    General KPIs per date and page_id, works for both summary metrics and trends charts.
 
 SQL >
     select
         date,
+        page_id,
         uniq(session_id) as visits,
         sum(pageviews) as pageviews,
         sum(case when latest_hit_aux = first_hit_aux then 1 end) / visits as bounce_rate,
         avg(latest_hit_aux - first_hit_aux) as avg_session_sec
     from hits
-    group by date
+    group by date, page_id
 
 NODE endpoint
 DESCRIPTION >
-    Join and generate timeseries with metrics
+    Join and generate timeseries with metrics per page_id
 
 SQL >
-    select a.date, b.visits, b.pageviews, b.bounce_rate, b.avg_session_sec
+    select a.date, b.page_id, b.visits, b.pageviews, b.bounce_rate, b.avg_session_sec
     from timeseries a
     left join data b using date
 TYPE endpoint

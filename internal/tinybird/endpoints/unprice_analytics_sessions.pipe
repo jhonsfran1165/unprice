@@ -13,7 +13,7 @@ SQL >
         minSimpleState(timestamp) AS first_hit,
         maxSimpleState(timestamp) AS latest_hit,
         countState() AS hits
-    FROM unprice_page_events
+    FROM unprice_page_hits
     GROUP BY date, page_id, session_id
 
 TYPE MATERIALIZED

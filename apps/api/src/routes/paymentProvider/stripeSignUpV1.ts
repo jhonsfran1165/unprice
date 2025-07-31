@@ -58,7 +58,7 @@ export const registerStripeSignUpV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { sessionId, projectId } = c.req.valid("param")
     const key = c.req.header("cf-connecting-ip") ?? c.req.header("x-forwarded-for") ?? projectId
-    const { customer, db, subscription } = c.get("services")
+    const { customer, db, subscription, analytics } = c.get("services")
     const stats = c.get("stats")
 
     // rate limit the request
@@ -220,6 +220,22 @@ export const registerStripeSignUpV1 = (app: App) =>
     if (createPhaseErr) {
       throw createPhaseErr
     }
+
+    // ingest the sign up event
+    c.executionCtx.waitUntil(
+      analytics.ingestEvents({
+        action: "sign_up",
+        version: "1",
+        session_id: customerSession.id,
+        timestamp: new Date().toISOString(),
+        payload: {
+          customer_id: customerUnprice.id,
+          plan_version_id: customerSession.planVersion.id,
+          page_id: null,
+          status: "signup_success",
+        },
+      })
+    )
 
     // in development wrangler do weird things with the url
     if (c.env.NODE_ENV === "development") {

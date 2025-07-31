@@ -17,9 +17,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@unprice/ui/dropdown-menu"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, ExternalLink } from "lucide-react"
 
+import { SITES_BASE_DOMAIN } from "@unprice/config"
 import type { Page } from "@unprice/db/validators"
+import Link from "next/link"
 import { PageForm } from "./page-form"
 import { PagePublish } from "./page-publish"
 
@@ -28,6 +30,11 @@ export function PageActions({
 }: {
   page: Page
 }) {
+  const isHTTPS = process.env.NODE_ENV === "production"
+  const domain = page.customDomain
+    ? `${isHTTPS ? "https" : "http"}://${page.customDomain}`
+    : `${isHTTPS ? "https" : "http"}://${page.subdomain}.${SITES_BASE_DOMAIN}`
+
   const [isOpen, setIsOpen] = useState(false)
   const [isOpenDialog, setIsOpenDialog] = useState(false)
 
@@ -54,6 +61,13 @@ export function PageActions({
               />
             </DropdownMenuItem>
           </DialogTrigger>
+
+          <DropdownMenuItem>
+            <Link href={`${domain}`} target="_blank" className="flex items-center">
+              See page
+              <ExternalLink className="ml-2 h-4 w-4" />
+            </Link>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <DialogContent className="max-h-screen overflow-y-scroll">

@@ -14,7 +14,7 @@ SQL >
         quantileTDigestMerge(0.95)(p95_latency) AS p95_latency,
         maxMerge(max_latency) AS max_latency,
         argMaxMerge(latest_latency) AS latest_latency
-    FROM feature_verifications_hourly_mv_data
+    FROM unprice_feature_verifications_hourly_mv
     WHERE
         1 = 1
         {% if defined(customerId) %} AND customerId = {{ String(customerId) }} {% end %}

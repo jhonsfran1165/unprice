@@ -14,7 +14,7 @@ SQL >
         sum(usage) AS sum,
         max(usage) AS max,
         argMax(usage, timestamp) AS last_during_period
-    FROM feature_usage_records FINAL
+    FROM unprice_feature_usage_records FINAL
     WHERE
         1 = 1 AND deleted = 0
         {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}

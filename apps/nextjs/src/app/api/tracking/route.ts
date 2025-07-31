@@ -1,3 +1,4 @@
+import { schemaPageHit, schemaPlanClick } from "@unprice/tinybird"
 import { analytics } from "@unprice/tinybird/client"
 import { EU_COUNTRY_CODES } from "@unprice/tinybird/utils"
 import { geolocation, ipAddress } from "@vercel/functions"
@@ -11,16 +12,6 @@ import { setCorsHeaders } from "../_enableCors"
 
 export const maxDuration = 10
 export const runtime = "edge"
-
-const schemaPageHit = z.object({
-  session_id: z.string().optional(),
-  page_id: z.string(),
-  plan_ids: z.string().optional(),
-  locale: z.string(),
-  referrer: z.string(),
-  pathname: z.string(),
-  url: z.string(),
-})
 
 /**
  * Post event to Tinybird HFI
@@ -120,7 +111,7 @@ const trackPageHit = async (
 }
 
 const bodySchema = z.object({
-  action: z.literal("page_hit"),
+  action: z.enum(["page_hit", "plan_click"]),
   session_id: z.string(),
   payload: z.string(),
 })
@@ -129,7 +120,7 @@ const bodySchema = z.object({
 export async function POST(req: NextRequest) {
   // don't track HEAD requests to avoid non-user traffic from inflating click count
   if (req.method === "HEAD") {
-    return null
+    return new Response(JSON.stringify({ error: "Invalid method" }), { status: 400 })
   }
 
   const body = await req.json()
@@ -153,6 +144,28 @@ export async function POST(req: NextRequest) {
       setCorsHeaders(response)
       return response
     }
+
+    case "plan_click": {
+      // validate payload
+      const parsedPayload = schemaPlanClick.safeParse(payload)
+
+      if (!parsedPayload.success) {
+        return new Response(JSON.stringify({ error: parsedPayload.error.message }), { status: 400 })
+      }
+
+      const result = await analytics.ingestEvents({
+        action: "plan_click",
+        session_id: parsedBody.data.session_id,
+        payload: parsedPayload.data,
+        version: "1",
+        timestamp: new Date(Date.now()).toISOString(),
+      })
+
+      const response = new Response(JSON.stringify(result))
+      setCorsHeaders(response)
+      return response
+    }
+
     default: {
       const response = new Response(JSON.stringify({ error: "Invalid action" }), { status: 400 })
       setCorsHeaders(response)
