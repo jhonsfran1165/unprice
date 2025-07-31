@@ -17,7 +17,7 @@ export const update = protectedProjectProcedure
     })
   )
   .mutation(async (opts) => {
-    const { id, name, defaultCurrency, timezone, url } = opts.input
+    const { id, name, defaultCurrency, timezone, url, contactEmail } = opts.input
     const workspace = opts.ctx.project.workspace
     const customerId = workspace.unPriceCustomerId
     const featureSlug = FEATURE_SLUGS.PROJECTS
@@ -60,6 +60,7 @@ export const update = protectedProjectProcedure
         defaultCurrency,
         timezone,
         url,
+        contactEmail,
       })
       .where(eq(schema.projects.id, id))
       .returning()

@@ -1,6 +1,7 @@
 "use client"
 
 import { nFormatter } from "@unprice/db/utils"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
 import {
   type ChartConfig,
@@ -11,7 +12,6 @@ import {
 import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import type { RouterOutputs } from "#index"
 import { CodeApiSheet } from "../forms/code-api-sheet"
 
 const chartConfig = {

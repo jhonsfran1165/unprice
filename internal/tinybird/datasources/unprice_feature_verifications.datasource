@@ -5,6 +5,9 @@ DESCRIPTION >
 
 TAGS "verifications"
 
+# -- TODO: change to use timestamp64(3) for better precision and performance
+# -- TODO: delete createdAt column
+
 SCHEMA >
     `timestamp` Int64 `json:$.timestamp`,
     `createdAt` Int64 `json:$.createdAt`,
@@ -25,6 +28,3 @@ ENGINE MergeTree
 ENGINE_PARTITION_KEY toYYYYMM(fromUnixTimestamp64Milli(timestamp))
 ENGINE_SORTING_KEY (timestamp, projectId, customerId, entitlementId, featureSlug)
 ENGINE_TTL toDate(fromUnixTimestamp64Milli(timestamp)) + INTERVAL 6 MONTH
-
-FORWARD_QUERY >
-    SELECT timestamp, createdAt, featureSlug, customerId, latency, featurePlanVersionId, requestId, projectId, entitlementId, subscriptionId, subscriptionItemId, subscriptionPhaseId, deniedReason, CAST([] AS Map(String, String)) AS metadata

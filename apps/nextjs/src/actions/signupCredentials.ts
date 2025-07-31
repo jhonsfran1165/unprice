@@ -8,7 +8,12 @@ export async function signUpWithCredentials({
   password,
   confirmPassword,
   name,
-}: { email: string; password: string; confirmPassword: string; name: string }) {
+}: {
+  email: string
+  password: string
+  confirmPassword: string
+  name: string
+}) {
   try {
     const { err } = await createUser({
       email,

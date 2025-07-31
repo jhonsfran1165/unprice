@@ -8,7 +8,7 @@ import { createTRPCReact } from "@trpc/react-query"
 import { use, useState } from "react"
 
 import { newId } from "@unprice/db/utils"
-import type { AppRouter } from "@unprice/trpc"
+import type { AppRouter } from "@unprice/trpc/routes"
 import { transformer } from "@unprice/trpc/transformer"
 import { useSSROnlySecret } from "ssr-only-secrets"
 import { createQueryClient, getBaseUrl } from "./shared"

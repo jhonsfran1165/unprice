@@ -5,7 +5,7 @@ import { use } from "react"
 
 import type { RenameProject } from "@unprice/db/validators"
 import { renameProjectSchema } from "@unprice/db/validators"
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"

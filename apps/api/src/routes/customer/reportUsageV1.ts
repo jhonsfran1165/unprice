@@ -75,7 +75,7 @@ export const registerReportUsageV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { customerId, featureSlug, usage, idempotenceKey, metadata } = c.req.valid("json")
     const { entitlement, customer, logger } = c.get("services")
-    const analytics = c.get("analytics")
+    const stats = c.get("stats")
     const requestId = c.get("requestId")
 
     // validate the request
@@ -95,7 +95,7 @@ export const registerReportUsageV1 = (app: App) =>
       requestId,
       metadata: {
         ...metadata,
-        ...analytics,
+        ...stats,
       },
     })
 
@@ -138,7 +138,7 @@ export const registerReportUsageV1 = (app: App) =>
               timestamp: Date.now(),
               metadata: {
                 action: "reportUsage",
-                ...analytics,
+                ...stats,
               },
             })
             .catch((err) => {

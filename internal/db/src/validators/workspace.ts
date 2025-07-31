@@ -8,6 +8,7 @@ import { subscriptionItemsConfigSchema } from "./subscriptions/items"
 export const invitesSelectBase = createSelectSchema(schema.invites)
 export const inviteInsertBase = createInsertSchema(schema.invites, {
   email: z.string().min(3, "Email must be at least 3 characters").email(),
+  name: z.string().min(3, "Name must be at least 3 characters"),
 })
 
 export const membersSelectBase = createSelectSchema(schema.members)
@@ -33,6 +34,7 @@ export const workspaceSignupSchema = workspaceInsertBase
     config: subscriptionItemsConfigSchema.optional(),
     successUrl: z.string().url(),
     cancelUrl: z.string().url(),
+    sessionId: z.string().optional(),
   })
 
 export const listMembersSchema = membersSelectBase.extend({
@@ -43,6 +45,7 @@ export const listMembersSchema = membersSelectBase.extend({
 export const inviteMembersSchema = inviteInsertBase.pick({
   email: true,
   role: true,
+  name: true,
 })
 
 export const workspacesJWTPayload = workspaceSelectBase

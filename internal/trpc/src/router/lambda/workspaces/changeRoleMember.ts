@@ -25,7 +25,7 @@ export const changeRoleMember = protectedWorkspaceProcedure
     if (!member) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Error updating workspace",
+        message: "Error updating role for member",
       })
     }
 

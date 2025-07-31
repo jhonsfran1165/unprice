@@ -1,6 +1,14 @@
 import { NoopTinybird, Tinybird } from "@chronark/zod-bird"
 import { z } from "zod"
-import { auditLogSchemaV1, featureUsageSchemaV1, featureVerificationSchemaV1 } from "./validators"
+import {
+  analyticsEventSchema,
+  auditLogSchemaV1,
+  featureUsageSchemaV1,
+  featureVerificationSchemaV1,
+  pageEventSchema,
+  schemaPlanClick,
+  schemaPlanVersion,
+} from "./validators"
 
 export class Analytics {
   public readonly readClient: Tinybird | NoopTinybird
@@ -62,7 +70,7 @@ export class Analytics {
 
   public get ingestFeaturesVerification() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "feature_verifications",
+      datasource: "unprice_feature_verifications",
       event: featureVerificationSchemaV1,
       // we need to wait for the ingestion to be done before returning
       wait: true,
@@ -71,16 +79,61 @@ export class Analytics {
 
   public get ingestFeaturesUsage() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "feature_usage_records",
+      datasource: "unprice_feature_usage_records",
       event: featureUsageSchemaV1,
       // we need to wait for the ingestion to be done before returning
       wait: true,
     })
   }
 
+  public get ingestEvents() {
+    return this.writeClient.buildIngestEndpoint({
+      datasource: "unprice_events",
+      event: analyticsEventSchema,
+      // we need to wait for the ingestion to be done before returning
+      wait: true,
+    })
+  }
+
+  public get ingestPageEvents() {
+    return this.writeClient.buildIngestEndpoint({
+      datasource: "unprice_page_hits",
+      event: pageEventSchema,
+    })
+  }
+
+  public get ingestPlanVersions() {
+    return this.writeClient.buildIngestEndpoint({
+      datasource: "unprice_plan_versions",
+      event: schemaPlanVersion,
+    })
+  }
+
+  public get getPlanClickBySessionId() {
+    return this.readClient.buildPipe({
+      pipe: "v1_get_session_event",
+      parameters: z.object({
+        session_id: z.string(),
+        action: z.literal("plan_click"),
+        interval_days: z.number().optional(),
+      }),
+      data: z.object({
+        timestamp: z.coerce.date(),
+        session_id: z.string(),
+        payload: z.string().transform((payload) => schemaPlanClick.parse(JSON.parse(payload))),
+      }),
+      opts: {
+        // this doesn't change once the event is ingested, so we can cache it
+        next: {
+          revalidate: 60 * 60 * 24, // 1 day
+        },
+      },
+    })
+  }
+
   public get getFeaturesVerifications() {
     return this.readClient.buildPipe({
-      pipe: "get_feature_verifications",
+      pipe: "v1_get_feature_verifications",
       parameters: z.object({
         projectId: z.string().optional(),
         customerId: z.string().optional(),
@@ -107,7 +160,7 @@ export class Analytics {
 
   public get getFeaturesUsagePeriod() {
     return this.readClient.buildPipe({
-      pipe: "get_feature_usage_period",
+      pipe: "v1_get_feature_usage_period",
       parameters: z.object({
         projectId: z.string().optional(),
         customerId: z.string().optional(),
@@ -138,7 +191,7 @@ export class Analytics {
 
   public get getFeaturesUsageTotal() {
     return this.readClient.buildPipe({
-      pipe: "get_feature_usage_total",
+      pipe: "v1_get_feature_usage_total",
       parameters: z.object({
         projectId: z.string(),
         customerId: z.string(),
@@ -167,7 +220,7 @@ export class Analytics {
 
   public get getBillingUsage() {
     return this.readClient.buildPipe({
-      pipe: "get_feature_usage_no_duplicates",
+      pipe: "v1_get_feature_usage_no_duplicates",
       parameters: z.object({
         subscriptionItemId: z.string(),
         customerId: z.string(),

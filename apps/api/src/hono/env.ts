@@ -5,11 +5,11 @@ import type { CustomerService } from "@unprice/services/customers"
 import type { Metrics } from "@unprice/services/metrics"
 import type { SubscriptionService } from "@unprice/services/subscriptions"
 import type { Analytics } from "@unprice/tinybird"
+import type { Stats } from "@unprice/tinybird/utils"
 import type { ApiKeysService } from "~/apikey/service"
 import type { EntitlementService } from "~/entitlement"
 import type { Env } from "~/env"
 import type { ApiProjectService } from "~/project"
-import type { Analytics as AnalyticsType } from "~/util/analytics"
 
 export type ServiceContext = {
   version: string
@@ -37,6 +37,6 @@ export type HonoEnv = {
     workspaceId?: string
     projectId?: string
     services: ServiceContext
-    analytics: AnalyticsType
+    stats: Stats
   }
 }

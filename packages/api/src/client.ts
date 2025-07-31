@@ -419,6 +419,21 @@ export class Unprice {
         })
       },
 
+      track: async (
+        action: string,
+        req: paths["/v1/analytics/track/{action}"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/v1/analytics/track/{action}"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["v1", "analytics", action],
+          method: "POST",
+          body: req,
+        })
+      },
+
       getVerifications: async (
         req: paths["/v1/analytics/verifications"]["post"]["requestBody"]["content"]["application/json"]
       ): Promise<

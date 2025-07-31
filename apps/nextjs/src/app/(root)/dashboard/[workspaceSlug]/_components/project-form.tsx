@@ -129,6 +129,21 @@ export function ProjectForm(props: {
 
           <FormField
             control={form.control}
+            name="contactEmail"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contact Email</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="contact@unprice.dev" />
+                </FormControl>
+                <FormDescription>The email to contact for enterprise plans</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="defaultCurrency"
             render={({ field }) => (
               <FormItem className="flex flex-col justify-end">

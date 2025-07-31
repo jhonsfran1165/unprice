@@ -27,7 +27,7 @@ import {
 import { Err, Ok, type Result, type SchemaError } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
-import { getDay } from "date-fns"
+import { getDate } from "date-fns"
 import type { Cache } from "../cache"
 import { CustomerService } from "../customers/service"
 import type { Metrics } from "../metrics"
@@ -386,7 +386,7 @@ export class SubscriptionService {
 
     // calculate the day of creation of the subscription
     if (billingAnchorToUse === "dayOfCreation") {
-      billingAnchorToUse = getDay(startAtToUse)
+      billingAnchorToUse = getDate(startAtToUse)
     }
 
     // validate payment method is required and if not provided

@@ -31,10 +31,10 @@ const domainSchema = z.coerce.string().refine((customDomain) => {
     return true
   }
 
-  // custom domain regex
+  // custom domain regex (e.g. builder.ai) numbers and lowercase letters only
   const parsed = z
     .string()
-    .regex(/^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/)
+    .regex(/^[a-z0-9-]+(\.[a-z0-9-]+)+$/)
     .safeParse(customDomain)
 
   return parsed.success
@@ -64,6 +64,7 @@ export const pageSelectBaseSchema = createSelectSchema(pages, {
 export const pageInsertBaseSchema = createInsertSchema(pages, {
   customDomain: domainSchema.optional(),
   subdomain: subdomainSchema,
+  name: z.string().min(3).max(50),
   title: z.string().min(3).max(50),
   colorPalette: colorPaletteSchema,
   faqs: faqSchema.array(),
@@ -78,6 +79,7 @@ export const pageInsertBaseSchema = createInsertSchema(pages, {
   })
   .partial({
     copy: true,
+    title: true,
     selectedPlans: true,
     faqs: true,
     colorPalette: true,
