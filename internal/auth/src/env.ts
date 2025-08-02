@@ -1,6 +1,6 @@
 import { createEnv } from "@t3-oss/env-core"
+import { env as tinybirdEnv } from "@unprice/analytics/env"
 import { env as dbEnv } from "@unprice/db/env"
-import { env as tinybirdEnv } from "@unprice/tinybird/env"
 import { z } from "zod"
 
 export const env = createEnv({

@@ -4,7 +4,7 @@ import { type DrizzleSqliteDODatabase, drizzle } from "drizzle-orm/durable-sqlit
 import { migrate } from "drizzle-orm/durable-sqlite/migrator"
 import migrations from "../../drizzle/migrations"
 
-import { Analytics } from "@unprice/tinybird"
+import { Analytics } from "@unprice/analytics"
 import { count, eq, inArray, lte, sql } from "drizzle-orm"
 import { entitlements, usageRecords, verifications } from "~/db/schema"
 import type { Entitlement, NewEntitlement, schema } from "~/db/types"

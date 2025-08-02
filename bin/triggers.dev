@@ -58,7 +58,7 @@ if [ "$MODE_ID" = "dev" ]; then
   TB_RESTARTED=$RESTART_TINYBIRD
 
   # loging to tb
-  cd internal/tinybird
+  cd internal/analytics
 
   # check if tinybird is running
   if [ "$RESTART_TINYBIRD" = "true" ]; then

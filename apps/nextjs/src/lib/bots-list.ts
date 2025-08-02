@@ -100,7 +100,7 @@ export const UA_BOTS = [
   "powermapper", // PowerMapper
   "siteimprove", // Siteimprove
   "monsido", // Monsido
-];
+]
 
 export const IP_BOTS = [
   "127.0.0.1", // localhost
@@ -146,7 +146,7 @@ export const IP_BOTS = [
   "154.28.229.7", // Ashburn
 
   "207.46.13.111", // microsoft IP
-];
+]
 
 export const IP_RANGES_BOTS = [
   // weird bot activity from Miami
@@ -159,4 +159,4 @@ export const IP_RANGES_BOTS = [
   // odd traffic from Hong Kong (Aliexpress)
   "47.238.13.0/24",
   "47.238.14.0/24",
-];
+]

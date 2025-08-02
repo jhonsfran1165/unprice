@@ -1,4 +1,4 @@
-import { EU_COUNTRY_CODES, type Stats } from "@unprice/tinybird/utils"
+import { EU_COUNTRY_CODES, type Stats } from "@unprice/analytics/utils"
 import type { Context } from "hono"
 import { UAParser } from "ua-parser-js"
 import { isBot } from "ua-parser-js/helpers"

@@ -4,4131 +4,4252 @@
  */
 
 export interface paths {
-    "/v1/customer/reportUsage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * report usage
-         * @description Report usage for a customer
-         */
-        post: operations["customer.reportUsage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/{customerId}/getEntitlements": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * get entitlements
-         * @description Get entitlements for a customer
-         */
-        get: operations["customer.getEntitlements"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/can": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * can feature
-         * @description Check if a customer can use a feature
-         */
-        post: operations["customer.can"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/reset-entitlements": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * reset entitlements
-         * @description Reset entitlements for a customer
-         */
-        post: operations["customer.resetEntitlements"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/{customerId}/getSubscription": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * get subscription
-         * @description Get subscription with the active phase for a customer
-         */
-        get: operations["customer.getSubscription"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/{customerId}/getActivePhase": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * get active phase
-         * @description Get active phase for a customer
-         */
-        get: operations["customer.getActivePhase"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/{customerId}/getUsage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * get usage
-         * @description Get usage for a customer
-         */
-        get: operations["customer.getUsage"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/getPaymentMethods": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * get payment methods
-         * @description Get payment methods for a customer
-         */
-        post: operations["customer.getPaymentMethods"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/signUp": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * sign up
-         * @description Sign up a customer for a project
-         */
-        post: operations["customer.signUp"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/createPaymentMethod": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * create payment method
-         * @description Create a payment method for a customer
-         */
-        post: operations["customer.createPaymentMethod"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/project/getFeatures": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * get features
-         * @description Get features for a project
-         */
-        get: operations["project.getFeatures"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/plans/getPlanVersion/{planVersionId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * get plan version
-         * @description Get a plan version by id
-         */
-        get: operations["plans.getPlanVersion"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/plans/listPlanVersions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * list all plan versions
-         * @description List all plan versions for a project
-         */
-        post: operations["plans.listPlanVersions"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/paymentProvider/stripe/signUp/{sessionId}/{projectId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * stripe sign up
-         * @description This endpoint is called by stripe after the customer has signed up. No webhook is needed.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    projectId: string;
-                    sessionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Redirect */
-                302: {
-                    headers: {
-                        /** @description URL to redirect to */
-                        Location?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrBadRequest"];
-                    };
-                };
-                /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrUnauthorized"];
-                    };
-                };
-                /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrForbidden"];
-                    };
-                };
-                /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrNotFound"];
-                    };
-                };
-                /** @description This response is sent when a request conflicts with the current state of the server. */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrConflict"];
-                    };
-                };
-                /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-                412: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrPreconditionFailed"];
-                    };
-                };
-                /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrTooManyRequests"];
-                    };
-                };
-                /** @description The server has encountered a situation it does not know how to handle. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrInternalServerError"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/paymentProvider/stripe/setup/{sessionId}/{projectId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * stripe setup
-         * @description This endpoint is called by stripe after the customer setup a payment method. No webhook is needed.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    projectId: string;
-                    sessionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Redirect */
-                302: {
-                    headers: {
-                        /** @description URL to redirect to */
-                        Location?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrBadRequest"];
-                    };
-                };
-                /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrUnauthorized"];
-                    };
-                };
-                /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrForbidden"];
-                    };
-                };
-                /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrNotFound"];
-                    };
-                };
-                /** @description This response is sent when a request conflicts with the current state of the server. */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrConflict"];
-                    };
-                };
-                /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-                412: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrPreconditionFailed"];
-                    };
-                };
-                /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrTooManyRequests"];
-                    };
-                };
-                /** @description The server has encountered a situation it does not know how to handle. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrInternalServerError"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/analytics/usage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * get usage
-         * @description Get usage for a customer in a given range
-         */
-        post: operations["analytics.getUsage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/analytics/verifications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * get verifications
-         * @description Get verifications for a customer in a given range
-         */
-        post: operations["analytics.getVerifications"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/analytics/track/{action}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * track
-         * @description Track an event
-         */
-        post: operations["analytics.track"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
+  "/v1/customer/reportUsage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * report usage
+     * @description Report usage for a customer
+     */
+    post: operations["customer.reportUsage"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/customer/{customerId}/getEntitlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * get entitlements
+     * @description Get entitlements for a customer
+     */
+    get: operations["customer.getEntitlements"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/customer/can": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * can feature
+     * @description Check if a customer can use a feature
+     */
+    post: operations["customer.can"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/customer/reset-entitlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * reset entitlements
+     * @description Reset entitlements for a customer
+     */
+    post: operations["customer.resetEntitlements"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/customer/{customerId}/getSubscription": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * get subscription
+     * @description Get subscription with the active phase for a customer
+     */
+    get: operations["customer.getSubscription"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/customer/{customerId}/getActivePhase": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * get active phase
+     * @description Get active phase for a customer
+     */
+    get: operations["customer.getActivePhase"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/customer/{customerId}/getUsage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * get usage
+     * @description Get usage for a customer
+     */
+    get: operations["customer.getUsage"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/customer/getPaymentMethods": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * get payment methods
+     * @description Get payment methods for a customer
+     */
+    post: operations["customer.getPaymentMethods"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/customer/signUp": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * sign up
+     * @description Sign up a customer for a project
+     */
+    post: operations["customer.signUp"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/customer/createPaymentMethod": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * create payment method
+     * @description Create a payment method for a customer
+     */
+    post: operations["customer.createPaymentMethod"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/project/getFeatures": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * get features
+     * @description Get features for a project
+     */
+    get: operations["project.getFeatures"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/plans/getPlanVersion/{planVersionId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * get plan version
+     * @description Get a plan version by id
+     */
+    get: operations["plans.getPlanVersion"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/plans/listPlanVersions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * list all plan versions
+     * @description List all plan versions for a project
+     */
+    post: operations["plans.listPlanVersions"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/paymentProvider/stripe/signUp/{sessionId}/{projectId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * stripe sign up
+     * @description This endpoint is called by stripe after the customer has signed up. No webhook is needed.
+     */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          projectId: string
+          sessionId: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Redirect */
+        302: {
+          headers: {
+            /** @description URL to redirect to */
+            Location?: string
+            [name: string]: unknown
+          }
+          content?: never
+        }
+        /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+        400: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrBadRequest"]
+          }
+        }
+        /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+        401: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrUnauthorized"]
+          }
+        }
+        /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+        403: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrForbidden"]
+          }
+        }
+        /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+        404: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrNotFound"]
+          }
+        }
+        /** @description This response is sent when a request conflicts with the current state of the server. */
+        409: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrConflict"]
+          }
+        }
+        /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+        412: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrPreconditionFailed"]
+          }
+        }
+        /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+        429: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrTooManyRequests"]
+          }
+        }
+        /** @description The server has encountered a situation it does not know how to handle. */
+        500: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrInternalServerError"]
+          }
+        }
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/paymentProvider/stripe/setup/{sessionId}/{projectId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * stripe setup
+     * @description This endpoint is called by stripe after the customer setup a payment method. No webhook is needed.
+     */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          projectId: string
+          sessionId: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Redirect */
+        302: {
+          headers: {
+            /** @description URL to redirect to */
+            Location?: string
+            [name: string]: unknown
+          }
+          content?: never
+        }
+        /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+        400: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrBadRequest"]
+          }
+        }
+        /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+        401: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrUnauthorized"]
+          }
+        }
+        /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+        403: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrForbidden"]
+          }
+        }
+        /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+        404: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrNotFound"]
+          }
+        }
+        /** @description This response is sent when a request conflicts with the current state of the server. */
+        409: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrConflict"]
+          }
+        }
+        /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+        412: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrPreconditionFailed"]
+          }
+        }
+        /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+        429: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrTooManyRequests"]
+          }
+        }
+        /** @description The server has encountered a situation it does not know how to handle. */
+        500: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["ErrInternalServerError"]
+          }
+        }
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/analytics/usage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * get usage
+     * @description Get usage for a customer in a given range
+     */
+    post: operations["analytics.getUsage"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/analytics/verifications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * get verifications
+     * @description Get verifications for a customer in a given range
+     */
+    post: operations["analytics.getVerifications"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/analytics/track/{action}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * track
+     * @description Track an event
+     */
+    post: operations["analytics.track"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
-export type webhooks = Record<string, never>;
+export type webhooks = Record<string, never>
 export interface components {
-    schemas: {
-        ErrBadRequest: {
-            error: {
-                /**
-                 * @description A machine readable error code.
-                 * @example BAD_REQUEST
-                 * @enum {string}
-                 */
-                code: "BAD_REQUEST";
-                /**
-                 * @description A link to our documentation with more details about this error code
-                 * @example https://docs.unprice.dev/api-reference/errors/code/BAD_REQUEST
-                 */
-                docs: string;
-                /** @description A human readable explanation of what went wrong */
-                message: string;
-                /**
-                 * @description Please always include the requestId in your error report
-                 * @example req_1234
-                 */
-                requestId: string;
-            };
-        };
-        ErrUnauthorized: {
-            error: {
-                /**
-                 * @description A machine readable error code.
-                 * @example UNAUTHORIZED
-                 * @enum {string}
-                 */
-                code: "UNAUTHORIZED";
-                /**
-                 * @description A link to our documentation with more details about this error code
-                 * @example https://docs.unprice.dev/api-reference/errors/code/UNAUTHORIZED
-                 */
-                docs: string;
-                /** @description A human readable explanation of what went wrong */
-                message: string;
-                /**
-                 * @description Please always include the requestId in your error report
-                 * @example req_1234
-                 */
-                requestId: string;
-            };
-        };
-        ErrForbidden: {
-            error: {
-                /**
-                 * @description A machine readable error code.
-                 * @example FORBIDDEN
-                 * @enum {string}
-                 */
-                code: "FORBIDDEN";
-                /**
-                 * @description A link to our documentation with more details about this error code
-                 * @example https://docs.unprice.dev/api-reference/errors/code/FORBIDDEN
-                 */
-                docs: string;
-                /** @description A human readable explanation of what went wrong */
-                message: string;
-                /**
-                 * @description Please always include the requestId in your error report
-                 * @example req_1234
-                 */
-                requestId: string;
-            };
-        };
-        ErrNotFound: {
-            error: {
-                /**
-                 * @description A machine readable error code.
-                 * @example NOT_FOUND
-                 * @enum {string}
-                 */
-                code: "NOT_FOUND";
-                /**
-                 * @description A link to our documentation with more details about this error code
-                 * @example https://docs.unprice.dev/api-reference/errors/code/NOT_FOUND
-                 */
-                docs: string;
-                /** @description A human readable explanation of what went wrong */
-                message: string;
-                /**
-                 * @description Please always include the requestId in your error report
-                 * @example req_1234
-                 */
-                requestId: string;
-            };
-        };
-        ErrConflict: {
-            error: {
-                /**
-                 * @description A machine readable error code.
-                 * @example CONFLICT
-                 * @enum {string}
-                 */
-                code: "CONFLICT";
-                /**
-                 * @description A link to our documentation with more details about this error code
-                 * @example https://docs.unprice.dev/api-reference/errors/code/CONFLICT
-                 */
-                docs: string;
-                /** @description A human readable explanation of what went wrong */
-                message: string;
-                /**
-                 * @description Please always include the requestId in your error report
-                 * @example req_1234
-                 */
-                requestId: string;
-            };
-        };
-        ErrPreconditionFailed: {
-            error: {
-                /**
-                 * @description A machine readable error code.
-                 * @example PRECONDITION_FAILED
-                 * @enum {string}
-                 */
-                code: "PRECONDITION_FAILED";
-                /**
-                 * @description A link to our documentation with more details about this error code
-                 * @example https://docs.unprice.dev/api-reference/errors/code/PRECONDITION_FAILED
-                 */
-                docs: string;
-                /** @description A human readable explanation of what went wrong */
-                message: string;
-                /**
-                 * @description Please always include the requestId in your error report
-                 * @example req_1234
-                 */
-                requestId: string;
-            };
-        };
-        ErrTooManyRequests: {
-            error: {
-                /**
-                 * @description A machine readable error code.
-                 * @example TOO_MANY_REQUESTS
-                 * @enum {string}
-                 */
-                code: "TOO_MANY_REQUESTS";
-                /**
-                 * @description A link to our documentation with more details about this error code
-                 * @example https://docs.unprice.dev/api-reference/errors/code/TOO_MANY_REQUESTS
-                 */
-                docs: string;
-                /** @description A human readable explanation of what went wrong */
-                message: string;
-                /**
-                 * @description Please always include the requestId in your error report
-                 * @example req_1234
-                 */
-                requestId: string;
-            };
-        };
-        ErrInternalServerError: {
-            error: {
-                /**
-                 * @description A machine readable error code.
-                 * @example INTERNAL_SERVER_ERROR
-                 * @enum {string}
-                 */
-                code: "INTERNAL_SERVER_ERROR";
-                /**
-                 * @description A link to our documentation with more details about this error code
-                 * @example https://docs.unprice.dev/api-reference/errors/code/INTERNAL_SERVER_ERROR
-                 */
-                docs: string;
-                /** @description A human readable explanation of what went wrong */
-                message: string;
-                /**
-                 * @description Please always include the requestId in your error report
-                 * @example req_1234
-                 */
-                requestId: string;
-            };
-        };
-    };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+  schemas: {
+    ErrBadRequest: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example BAD_REQUEST
+         * @enum {string}
+         */
+        code: "BAD_REQUEST"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://docs.unprice.dev/api-reference/errors/code/BAD_REQUEST
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrUnauthorized: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example UNAUTHORIZED
+         * @enum {string}
+         */
+        code: "UNAUTHORIZED"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://docs.unprice.dev/api-reference/errors/code/UNAUTHORIZED
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrForbidden: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example FORBIDDEN
+         * @enum {string}
+         */
+        code: "FORBIDDEN"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://docs.unprice.dev/api-reference/errors/code/FORBIDDEN
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrNotFound: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example NOT_FOUND
+         * @enum {string}
+         */
+        code: "NOT_FOUND"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://docs.unprice.dev/api-reference/errors/code/NOT_FOUND
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrConflict: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example CONFLICT
+         * @enum {string}
+         */
+        code: "CONFLICT"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://docs.unprice.dev/api-reference/errors/code/CONFLICT
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrPreconditionFailed: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example PRECONDITION_FAILED
+         * @enum {string}
+         */
+        code: "PRECONDITION_FAILED"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://docs.unprice.dev/api-reference/errors/code/PRECONDITION_FAILED
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrTooManyRequests: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example TOO_MANY_REQUESTS
+         * @enum {string}
+         */
+        code: "TOO_MANY_REQUESTS"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://docs.unprice.dev/api-reference/errors/code/TOO_MANY_REQUESTS
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrInternalServerError: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example INTERNAL_SERVER_ERROR
+         * @enum {string}
+         */
+        code: "INTERNAL_SERVER_ERROR"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://docs.unprice.dev/api-reference/errors/code/INTERNAL_SERVER_ERROR
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+  }
+  responses: never
+  parameters: never
+  requestBodies: never
+  headers: never
+  pathItems: never
 }
-export type $defs = Record<string, never>;
+export type $defs = Record<string, never>
 export interface operations {
-    "customer.reportUsage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description The usage to report */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description The customer ID
-                     * @example cus_1H7KQFLr7RepUyQBKdnvY
-                     */
-                    customerId: string;
-                    /**
-                     * @description The feature slug
-                     * @example tokens
-                     */
-                    featureSlug: string;
-                    /**
-                     * @description The usage
-                     * @example 30
-                     */
-                    usage: number;
-                    /**
-                     * Format: uuid
-                     * @description The idempotence key
-                     * @example 123e4567-e89b-12d3-a456-426614174000
-                     */
-                    idempotenceKey: string;
-                    /**
-                     * @description The metadata
-                     * @example {
-                     *       "action": "create",
-                     *       "country": "US"
-                     *     }
-                     */
-                    metadata?: {
-                        [key: string]: string | undefined;
-                    };
-                };
-            };
-        };
-        responses: {
-            /** @description The result of the report usage */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        success: boolean;
-                        message?: string;
-                        cacheHit?: boolean;
-                        remaining?: number;
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "customer.getEntitlements": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The result of the delete customer */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        entitlements: {
-                            featureSlug: string;
-                            validFrom: number;
-                            validTo: number | null;
-                            /** @enum {string} */
-                            featureType: "flat" | "tier" | "package" | "usage";
-                            usage: string;
-                            limit: number | null;
-                            featurePlanVersionId: string;
-                            /** @enum {string} */
-                            aggregationMethod: "sum" | "sum_all" | "last_during_period" | "count" | "count_all" | "max" | "max_all";
-                            units: number | null;
-                            id: string;
-                        }[];
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "customer.can": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Body of the request */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description The customer ID
-                     * @example cus_1H7KQFLr7RepUyQBKdnvY
-                     */
-                    customerId: string;
-                    /**
-                     * @description The feature slug
-                     * @example tokens
-                     */
-                    featureSlug: string;
-                    /**
-                     * @description The metadata
-                     * @example {
-                     *       "action": "create",
-                     *       "country": "US"
-                     *     }
-                     */
-                    metadata?: {
-                        [key: string]: string | undefined;
-                    };
-                };
-            };
-        };
-        responses: {
-            /** @description The result of the can check */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        success: boolean;
-                        message?: string;
-                        /** @enum {string} */
-                        deniedReason?: "RATE_LIMITED" | "CUSTOMER_SUBSCRIPTION_NOT_FOUND" | "ENTITLEMENT_NOT_FOUND" | "LIMIT_EXCEEDED" | "ENTITLEMENT_EXPIRED" | "ENTITLEMENT_NOT_ACTIVE";
-                        cacheHit?: boolean;
-                        remaining?: number;
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "customer.resetEntitlements": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description The customer ID */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description The customer ID
-                     * @example cus_1H7KQFLr7RepUyQBKdnvY
-                     */
-                    customerId: string;
-                };
-            };
-        };
-        responses: {
-            /** @description The result of the reset entitlements */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        success: boolean;
-                        message?: string;
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "customer.getSubscription": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The result of the get subscription */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        id: string;
-                        projectId: string;
-                        createdAtM: number;
-                        updatedAtM: number;
-                        customerId: string;
-                        /** @enum {string} */
-                        status: "idle" | "renewing" | "changing" | "canceling" | "expiring" | "invoicing" | "invoiced" | "ending_trial" | "active" | "trialing" | "canceled" | "expired" | "past_due";
-                        active: boolean;
-                        planSlug: string;
-                        timezone: string;
-                        locked: boolean;
-                        lockedAt: number | null;
-                        currentCycleStartAt: number;
-                        currentCycleEndAt: number;
-                        previousCycleStartAt: number | null;
-                        previousCycleEndAt: number | null;
-                        invoiceAt: number;
-                        renewAt: number;
-                        endAt: number | null;
-                        lastRenewAt: number;
-                        lastInvoiceAt: number;
-                        metadata: {
-                            /**
-                             * @description Reason for the subscription status
-                             * @enum {string}
-                             */
-                            reason?: "payment_failed" | "invoice_voided" | "payment_pending" | "payment_method_not_found" | "policy_violation" | "pending_cancellation" | "invoice_failed" | "invoice_pending" | "payment_received" | "pending_change" | "pending_expiration" | "trial_ended" | "user_requested" | "admin_requested" | "ending" | "renewed" | "cancelled" | "auto_renew_disabled" | "customer_signout";
-                            /** @description Note about status in the subscription */
-                            note?: string;
-                            /** @description Important dates for the subscription */
-                            dates?: {
-                                /** @description Date of the last change */
-                                lastChangeAt?: number;
-                                /** @description Date of the cancellation */
-                                cancelAt?: number;
-                            };
-                        } | null;
-                        project: {
-                            enabled: boolean;
-                        };
-                        customer: {
-                            active: boolean;
-                        };
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "customer.getActivePhase": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The result of the get active phase */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        id: string;
-                        projectId: string;
-                        createdAtM?: number;
-                        updatedAtM?: number;
-                        subscriptionId: string;
-                        planVersionId: string;
-                        paymentMethodId: string | null;
-                        /** @default 0 */
-                        trialDays: number | null;
-                        billingAnchor: number;
-                        trialEndsAt: number | null;
-                        startAt: number;
-                        endAt: number | null;
-                        metadata?: {
-                            /** @description Note about the subscription phase */
-                            note?: string;
-                            /**
-                             * @description Reason for the subscription phase
-                             * @enum {string}
-                             */
-                            reason?: "payment_failed" | "invoice_voided" | "payment_pending" | "payment_method_not_found" | "policy_violation" | "pending_cancellation" | "invoice_failed" | "invoice_pending" | "payment_received" | "pending_change" | "pending_expiration" | "trial_ended" | "user_requested" | "admin_requested" | "ending" | "renewed" | "cancelled" | "auto_renew_disabled" | "customer_signout";
-                        } | null;
-                        items?: {
-                            id: string;
-                            projectId: string;
-                            createdAtM: number;
-                            updatedAtM: number;
-                            units: number | null;
-                            featurePlanVersionId: string;
-                            subscriptionPhaseId: string;
-                            subscriptionId: string;
-                        }[];
-                        planVersion: {
-                            id: string;
-                            projectId: string;
-                            createdAtM: number;
-                            updatedAtM: number;
-                            planId: string;
-                            description: string;
-                            latest: boolean | null;
-                            title: string;
-                            tags: string[] | null;
-                            active: boolean | null;
-                            /** @enum {string|null} */
-                            status: "draft" | "published";
-                            publishedAt: number | null;
-                            publishedBy: string | null;
-                            archived: boolean | null;
-                            archivedAt: number | null;
-                            archivedBy: string | null;
-                            /** @enum {string} */
-                            paymentProvider: "stripe" | "square";
-                            /** @enum {string} */
-                            dueBehaviour: "cancel" | "downgrade";
-                            /** @enum {string} */
-                            currency: "USD" | "EUR";
-                            /** @description The billing configuration for the plan version */
-                            billingConfig: {
-                                name: string;
-                                /** @enum {string} */
-                                billingInterval: "month" | "year" | "day" | "minute" | "onetime";
-                                billingIntervalCount: number;
-                                /** @default dayOfCreation */
-                                billingAnchor: number | "dayOfCreation";
-                                /** @enum {string} */
-                                planType: "recurring" | "onetime";
-                            };
-                            /** @enum {string} */
-                            whenToBill: "pay_in_advance" | "pay_in_arrear";
-                            gracePeriod: number;
-                            /** @enum {string} */
-                            collectionMethod: "charge_automatically" | "send_invoice";
-                            trialDays: number;
-                            autoRenew: boolean;
-                            metadata: {
-                                externalId?: string;
-                            } | null;
-                            paymentMethodRequired: boolean;
-                            version: number;
-                        };
-                        customerEntitlements: {
-                            id: string;
-                            projectId: string;
-                            createdAtM: number;
-                            updatedAtM: number;
-                            customerId: string;
-                            subscriptionId: string;
-                            featurePlanVersionId: string;
-                            subscriptionItemId: string | null;
-                            subscriptionPhaseId: string | null;
-                            limit: number | null;
-                            units: number | null;
-                            usage: string;
-                            accumulatedUsage: string;
-                            realtime: boolean;
-                            /** @enum {string} */
-                            type: "feature" | "addon";
-                            validFrom: number;
-                            validTo: number | null;
-                            bufferPeriodDays: number;
-                            resetedAt: number;
-                            active: boolean;
-                            isCustom: boolean;
-                            lastUsageUpdateAt: number;
-                            metadata: {
-                                [key: string]: (string | number | boolean | unknown | unknown) | undefined;
-                            } | null;
-                            featurePlanVersion: {
-                                id: string;
-                                projectId: string;
-                                createdAtM: number;
-                                updatedAtM: number;
-                                planVersionId: string;
-                                featureId: string;
-                                /** @enum {string} */
-                                featureType: "flat" | "tier" | "package" | "usage";
-                                config: {
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    price: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    units?: number;
-                                } | {
-                                    price?: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    tierMode: "volume" | "graduated";
-                                    tiers: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    units?: number;
-                                } | {
-                                    price?: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    units?: number;
-                                } | {
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    price: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    /** @description Units for the package */
-                                    units: number;
-                                };
-                                metadata: {
-                                    stripeProductId?: string;
-                                    realtime?: boolean;
-                                } | null;
-                                /** @enum {string} */
-                                aggregationMethod: "sum" | "sum_all" | "last_during_period" | "count" | "count_all" | "max" | "max_all";
-                                order: number;
-                                /** @default 1 */
-                                defaultQuantity: number | null;
-                                limit?: number | null;
-                                hidden: boolean;
-                                feature: {
-                                    id: string;
-                                    projectId: string;
-                                    createdAtM: number;
-                                    updatedAtM: number;
-                                    slug: string;
-                                    code: number;
-                                    title: string;
-                                    description: string | null;
-                                };
-                            };
-                        }[];
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "customer.getUsage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The result of the get usage */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        planVersion: {
-                            description: string;
-                            flatPrice: string;
-                            currentTotalPrice: string;
-                            billingConfig: {
-                                name: string;
-                                /** @enum {string} */
-                                billingInterval: "month" | "year" | "day" | "minute" | "onetime";
-                                billingIntervalCount: number;
-                                /** @default dayOfCreation */
-                                billingAnchor: number | "dayOfCreation";
-                                /** @enum {string} */
-                                planType: "recurring" | "onetime";
-                            };
-                        };
-                        subscription: {
-                            planSlug: string;
-                            /** @enum {string} */
-                            status: "idle" | "renewing" | "changing" | "canceling" | "expiring" | "invoicing" | "invoiced" | "ending_trial" | "active" | "trialing" | "canceled" | "expired" | "past_due";
-                            currentCycleEndAt: number;
-                            timezone: string;
-                            currentCycleStartAt: number;
-                            prorationFactor: number;
-                            prorated: boolean;
-                        };
-                        phase: {
-                            trialEndsAt: number | null;
-                            endAt: number | null;
-                            trialDays: number;
-                            isTrial: boolean;
-                        };
-                        entitlement: {
-                            featureSlug: string;
-                            /** @enum {string} */
-                            featureType: "flat" | "tier" | "package" | "usage";
-                            isCustom: boolean;
-                            limit: number | null;
-                            usage: number;
-                            freeUnits: number;
-                            max: number | null;
-                            units: number | null;
-                            included: number;
-                            featureVersion: {
-                                id: string;
-                                projectId: string;
-                                createdAtM: number;
-                                updatedAtM: number;
-                                planVersionId: string;
-                                featureId: string;
-                                /** @enum {string} */
-                                featureType: "flat" | "tier" | "package" | "usage";
-                                config: {
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    price: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    units?: number;
-                                } | {
-                                    price?: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    tierMode: "volume" | "graduated";
-                                    tiers: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    units?: number;
-                                } | {
-                                    price?: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    units?: number;
-                                } | {
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    price: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    /** @description Units for the package */
-                                    units: number;
-                                };
-                                metadata: {
-                                    stripeProductId?: string;
-                                    realtime?: boolean;
-                                } | null;
-                                /** @enum {string} */
-                                aggregationMethod: "sum" | "sum_all" | "last_during_period" | "count" | "count_all" | "max" | "max_all";
-                                order: number;
-                                /** @default 1 */
-                                defaultQuantity: number | null;
-                                limit?: number | null;
-                                hidden: boolean;
-                                feature: {
-                                    id: string;
-                                    projectId: string;
-                                    createdAtM: number;
-                                    updatedAtM: number;
-                                    slug: string;
-                                    code: number;
-                                    title: string;
-                                    description: string | null;
-                                };
-                            };
-                            price: string | null;
-                        }[];
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "customer.getPaymentMethods": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Body of the request */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description The customer ID
-                     * @example cus_1H7KQFLr7RepUyQBKdnvY
-                     */
-                    customerId: string;
-                    /**
-                     * @description The payment provider
-                     * @example stripe
-                     * @enum {string}
-                     */
-                    provider: "stripe" | "square";
-                };
-            };
-        };
-        responses: {
-            /** @description The result of the get payment methods */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        id: string;
-                        name: string | null;
-                        last4?: string;
-                        expMonth?: number;
-                        expYear?: number;
-                        brand?: string;
-                    }[];
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "customer.signUp": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Body of the request */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description The name of the customer
-                     * @example John Doe
-                     */
-                    name: string;
-                    /**
-                     * @description The timezone of the customer, if passed null the system will use the project timezone
-                     * @example UTC
-                     */
-                    timezone?: string;
-                    /**
-                     * @description The default currency of the customer, if passed null the system will use the project currency
-                     * @example USD
-                     * @enum {string}
-                     */
-                    defaultCurrency?: "USD" | "EUR";
-                    /**
-                     * Format: email
-                     * @description The email of the customer
-                     * @example test@example.com
-                     */
-                    email: string;
-                    /**
-                     * @description The billing interval of the customer to be used for the subscription. If plan version is provided, the billing interval will be the same as the plan version. If plan slug is provided, the billing interval will be the default billing interval of the plan.
-                     * @example month
-                     * @enum {string}
-                     */
-                    billingInterval?: "month" | "year" | "day" | "minute" | "onetime";
-                    /**
-                     * @description If the plan id is not provided, you can pass a plan slug and the system will intelligently pick the lastest plan for that slug and sign up the customer for it
-                     * @example PRO
-                     */
-                    planSlug?: string;
-                    /**
-                     * @description The session id of the customer. This is used to track conversion from pricing pages
-                     * @example sess_1234567890
-                     */
-                    sessionId?: string;
-                    /**
-                     * @description The plan version the customer is signing up for
-                     * @example pv_1234567890
-                     */
-                    planVersionId?: string;
-                    /**
-                     * @description The configuration of the subscription items. This is required if your features are quantity based when the customer needs to set them. Pass as empty if you want the system to automatically set the units from the plan defaults.
-                     * @example [
-                     *       {
-                     *         "featurePlanId": "feature_plan_123",
-                     *         "featureSlug": "feature_slug_123",
-                     *         "isUsage": true,
-                     *         "units": 100
-                     *       }
-                     *     ]
-                     */
-                    config?: {
-                        /**
-                         * @description The feature plan id of the item
-                         * @example feature_plan_123
-                         */
-                        featurePlanId: string;
-                        /**
-                         * @description The feature slug of the item
-                         * @example feature_slug_123
-                         */
-                        featureSlug: string;
-                        /**
-                         * @description if the item is a usage item
-                         * @example true
-                         */
-                        isUsage?: boolean;
-                        /**
-                         * @description units of the feature the user is subscribed to
-                         * @example 100
-                         */
-                        units?: number;
-                        /**
-                         * @description minimum units of the feature the user is subscribed to
-                         * @example 100
-                         */
-                        min?: number | null;
-                        /**
-                         * @description limit of the feature the user is subscribed to
-                         * @example 100
-                         */
-                        limit?: number | null;
-                    }[];
-                    /**
-                     * @description The external id you want to associate with the customer. Could be the id of the user in your database
-                     * @example 1234567890
-                     */
-                    externalId?: string;
-                    /**
-                     * Format: uri
-                     * @description The success url if the customer signs up. This is the url after the signup process, normally your dashboard
-                     * @example https://example.com/dashboard
-                     */
-                    successUrl: string;
-                    /**
-                     * Format: uri
-                     * @description The cancel url if the customer cancels the signup. This is the url after the signup process, normally your login page
-                     * @example https://example.com/login
-                     */
-                    cancelUrl: string;
-                    /**
-                     * @description The metadata of the customer
-                     * @example {
-                     *       "externalId": "1234567890"
-                     *     }
-                     */
-                    metadata?: {
-                        externalId?: string;
-                        stripeSubscriptionId?: string;
-                        stripeDefaultPaymentMethodId?: string;
-                        continent?: string;
-                        country?: string;
-                        region?: string;
-                        colo?: string;
-                        city?: string;
-                        isEUCountry?: boolean | null;
-                    };
-                };
-            };
-        };
-        responses: {
-            /** @description The result of the customer sign up */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * @description Whether the signup was successful
-                         * @example true
-                         */
-                        success: boolean;
-                        /**
-                         * Format: uri
-                         * @description The url to redirect the customer to, either to the success or cancel url
-                         * @example https://example.com/dashboard
-                         */
-                        url: string;
-                        /**
-                         * @description The unprice customer id generated by the system for this customer
-                         * @example cus_1234567890
-                         */
-                        customerId: string;
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "customer.createPaymentMethod": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Body of the request */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description The payment provider code to use
-                     * @example stripe
-                     * @enum {string}
-                     */
-                    paymentProvider: "stripe" | "square";
-                    /**
-                     * @description The unprice customer id generated by the system for this customer
-                     * @example cus_1234567890
-                     */
-                    customerId: string;
-                    /**
-                     * Format: uri
-                     * @description The success url if the customer signs up
-                     * @example https://example.com/dashboard
-                     */
-                    successUrl: string;
-                    /**
-                     * Format: uri
-                     * @description The cancel url if the customer cancels the signup
-                     * @example https://example.com/login
-                     */
-                    cancelUrl: string;
-                };
-            };
-        };
-        responses: {
-            /** @description The result of the customer create payment method */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * @description Whether the signup was successful
-                         * @example true
-                         */
-                        success: boolean;
-                        /**
-                         * Format: uri
-                         * @description The url to redirect the customer to, either to the success or cancel url
-                         * @example https://example.com/dashboard
-                         */
-                        url: string;
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "project.getFeatures": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The result of the get features */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        features: {
-                            id: string;
-                            projectId: string;
-                            slug: string;
-                            code: number;
-                            title: string;
-                            description: string | null;
-                        }[];
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "plans.getPlanVersion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                planVersionId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The result of the get plan version */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        planVersion: {
-                            id: string;
-                            projectId: string;
-                            createdAtM: number;
-                            updatedAtM: number;
-                            planId: string;
-                            description: string;
-                            latest: boolean | null;
-                            title: string;
-                            tags: string[] | null;
-                            active: boolean | null;
-                            /** @enum {string|null} */
-                            status: "draft" | "published";
-                            publishedAt: number | null;
-                            publishedBy: string | null;
-                            archived: boolean | null;
-                            archivedAt: number | null;
-                            archivedBy: string | null;
-                            /** @enum {string} */
-                            paymentProvider: "stripe" | "square";
-                            /** @enum {string} */
-                            dueBehaviour: "cancel" | "downgrade";
-                            /** @enum {string} */
-                            currency: "USD" | "EUR";
-                            /** @description The billing configuration for the plan version */
-                            billingConfig: {
-                                name: string;
-                                /** @enum {string} */
-                                billingInterval: "month" | "year" | "day" | "minute" | "onetime";
-                                billingIntervalCount: number;
-                                /** @default dayOfCreation */
-                                billingAnchor: number | "dayOfCreation";
-                                /** @enum {string} */
-                                planType: "recurring" | "onetime";
-                            };
-                            /** @enum {string} */
-                            whenToBill: "pay_in_advance" | "pay_in_arrear";
-                            gracePeriod: number;
-                            /** @enum {string} */
-                            collectionMethod: "charge_automatically" | "send_invoice";
-                            trialDays: number;
-                            autoRenew: boolean;
-                            metadata: {
-                                externalId?: string;
-                            } | null;
-                            paymentMethodRequired: boolean;
-                            version: number;
-                            /** @description The plan information */
-                            plan: {
-                                id: string;
-                                projectId: string;
-                                createdAtM: number;
-                                updatedAtM: number;
-                                slug: string;
-                                active: boolean | null;
-                                description: string;
-                                metadata: {
-                                    externalId?: string;
-                                } | null;
-                                defaultPlan: boolean | null;
-                                enterprisePlan: boolean | null;
-                            };
-                            planFeatures: {
-                                id: string;
-                                projectId: string;
-                                createdAtM: number;
-                                updatedAtM: number;
-                                planVersionId: string;
-                                featureId: string;
-                                /** @enum {string} */
-                                featureType: "flat" | "tier" | "package" | "usage";
-                                config: {
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    price: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    units?: number;
-                                } | {
-                                    price?: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    tierMode: "volume" | "graduated";
-                                    tiers: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    units?: number;
-                                } | {
-                                    price?: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    units?: number;
-                                } | {
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    price: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    /** @description Units for the package */
-                                    units: number;
-                                };
-                                metadata: {
-                                    stripeProductId?: string;
-                                    realtime?: boolean;
-                                } | null;
-                                /** @enum {string} */
-                                aggregationMethod: "sum" | "sum_all" | "last_during_period" | "count" | "count_all" | "max" | "max_all";
-                                order: number;
-                                /** @default 1 */
-                                defaultQuantity: number | null;
-                                limit?: number | null;
-                                hidden: boolean;
-                                /** @description The text you can use to show the clients */
-                                displayFeatureText: string;
-                                /** @description The feature information */
-                                feature: {
-                                    id: string;
-                                    projectId: string;
-                                    createdAtM: number;
-                                    updatedAtM: number;
-                                    slug: string;
-                                    code: number;
-                                    title: string;
-                                    description: string | null;
-                                };
-                            }[];
-                            /** @description Flat price of the plan */
-                            flatPrice: string;
-                        };
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "plans.listPlanVersions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Body of the request */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Whether to include published plan versions
-                     * @example true
-                     */
-                    onlyPublished?: boolean;
-                    /**
-                     * @description Whether to include enterprise plan versions
-                     * @example false
-                     */
-                    onlyEnterprisePlan?: boolean;
-                    /**
-                     * @description Whether to include the latest plan version
-                     * @example true
-                     */
-                    onlyLatest?: boolean;
-                    /**
-                     * @description The billing interval to filter the plan versions
-                     * @example month
-                     * @enum {string}
-                     */
-                    billingInterval?: "month" | "year" | "day" | "minute" | "onetime";
-                    /**
-                     * @description The currency to filter the plan versions
-                     * @example USD
-                     * @enum {string}
-                     */
-                    currency?: "USD" | "EUR";
-                };
-            };
-        };
-        responses: {
-            /** @description The result of the list plan versions */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        planVersions: {
-                            id: string;
-                            projectId: string;
-                            createdAtM: number;
-                            updatedAtM: number;
-                            planId: string;
-                            description: string;
-                            latest: boolean | null;
-                            title: string;
-                            tags: string[] | null;
-                            active: boolean | null;
-                            /** @enum {string|null} */
-                            status: "draft" | "published";
-                            publishedAt: number | null;
-                            publishedBy: string | null;
-                            archived: boolean | null;
-                            archivedAt: number | null;
-                            archivedBy: string | null;
-                            /** @enum {string} */
-                            paymentProvider: "stripe" | "square";
-                            /** @enum {string} */
-                            dueBehaviour: "cancel" | "downgrade";
-                            /** @enum {string} */
-                            currency: "USD" | "EUR";
-                            /** @description The billing configuration for the plan version */
-                            billingConfig: {
-                                name: string;
-                                /** @enum {string} */
-                                billingInterval: "month" | "year" | "day" | "minute" | "onetime";
-                                billingIntervalCount: number;
-                                /** @default dayOfCreation */
-                                billingAnchor: number | "dayOfCreation";
-                                /** @enum {string} */
-                                planType: "recurring" | "onetime";
-                            };
-                            /** @enum {string} */
-                            whenToBill: "pay_in_advance" | "pay_in_arrear";
-                            gracePeriod: number;
-                            /** @enum {string} */
-                            collectionMethod: "charge_automatically" | "send_invoice";
-                            trialDays: number;
-                            autoRenew: boolean;
-                            metadata: {
-                                externalId?: string;
-                            } | null;
-                            paymentMethodRequired: boolean;
-                            version: number;
-                            /** @description The plan information */
-                            plan: {
-                                id: string;
-                                projectId: string;
-                                createdAtM: number;
-                                updatedAtM: number;
-                                slug: string;
-                                active: boolean | null;
-                                description: string;
-                                metadata: {
-                                    externalId?: string;
-                                } | null;
-                                defaultPlan: boolean | null;
-                                enterprisePlan: boolean | null;
-                            };
-                            planFeatures: {
-                                id: string;
-                                projectId: string;
-                                createdAtM: number;
-                                updatedAtM: number;
-                                planVersionId: string;
-                                featureId: string;
-                                /** @enum {string} */
-                                featureType: "flat" | "tier" | "package" | "usage";
-                                config: {
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    price: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    units?: number;
-                                } | {
-                                    price?: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    tierMode: "volume" | "graduated";
-                                    tiers: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    units?: number;
-                                } | {
-                                    price?: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    units?: number;
-                                } | {
-                                    tiers?: {
-                                        unitPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        flatPrice: {
-                                            dinero: {
-                                                /** @description The amount of the dinero object */
-                                                amount: number;
-                                                currency: {
-                                                    /** @description The currency code of the dinero object */
-                                                    code: string;
-                                                    /** @description The base of the dinero object */
-                                                    base: number | number[];
-                                                    /** @description The exponent of the dinero object */
-                                                    exponent: number;
-                                                };
-                                                /** @description The scale of the dinero object */
-                                                scale: number;
-                                            };
-                                            displayAmount: string;
-                                        };
-                                        firstUnit: number;
-                                        lastUnit: number | null;
-                                    }[];
-                                    price: {
-                                        dinero: {
-                                            /** @description The amount of the dinero object */
-                                            amount: number;
-                                            currency: {
-                                                /** @description The currency code of the dinero object */
-                                                code: string;
-                                                /** @description The base of the dinero object */
-                                                base: number | number[];
-                                                /** @description The exponent of the dinero object */
-                                                exponent: number;
-                                            };
-                                            /** @description The scale of the dinero object */
-                                            scale: number;
-                                        };
-                                        displayAmount: string;
-                                    };
-                                    /** @enum {string} */
-                                    usageMode?: "tier" | "package" | "unit";
-                                    /** @enum {string} */
-                                    tierMode?: "volume" | "graduated";
-                                    /** @description Units for the package */
-                                    units: number;
-                                };
-                                metadata: {
-                                    stripeProductId?: string;
-                                    realtime?: boolean;
-                                } | null;
-                                /** @enum {string} */
-                                aggregationMethod: "sum" | "sum_all" | "last_during_period" | "count" | "count_all" | "max" | "max_all";
-                                order: number;
-                                /** @default 1 */
-                                defaultQuantity: number | null;
-                                limit?: number | null;
-                                hidden: boolean;
-                                /** @description The text you can use to show the clients */
-                                displayFeatureText: string;
-                                /** @description The feature information */
-                                feature: {
-                                    id: string;
-                                    projectId: string;
-                                    createdAtM: number;
-                                    updatedAtM: number;
-                                    slug: string;
-                                    code: number;
-                                    title: string;
-                                    description: string | null;
-                                };
-                            }[];
-                            /** @description Flat price of the plan */
-                            flatPrice: string;
-                        }[];
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "analytics.getUsage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Body of the request for the get usage */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description The customer ID if you want to get the usage for a specific customer
-                     * @example cus_1H7KQFLr7RepUyQBKdnvY
-                     */
-                    customerId?: string;
-                    /**
-                     * @description The project ID (optional, if not provided, the project ID will be the one of the key)
-                     * @example project_1H7KQFLr7RepUyQBKdnvY
-                     */
-                    projectId: string;
-                    /**
-                     * @description The range of the usage, last hour, day, week or month
-                     * @example 24h
-                     * @enum {string}
-                     */
-                    range: "24h" | "7d" | "30d";
-                };
-            };
-        };
-        responses: {
-            /** @description The result of the get usage */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        usage: {
-                            projectId: string;
-                            customerId?: string;
-                            entitlementId?: string;
-                            featureSlug: string;
-                            count: number;
-                            sum: number;
-                            max: number;
-                            last_during_period: number;
-                        }[];
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "analytics.getVerifications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Body of the request for the get verifications */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description The customer ID if you want to get the verifications for a specific customer
-                     * @example cus_1H7KQFLr7RepUyQBKdnvY
-                     */
-                    customerId?: string;
-                    /**
-                     * @description The project ID (optional, if not provided, the project ID will be the one of the key)
-                     * @example project_1H7KQFLr7RepUyQBKdnvY
-                     */
-                    projectId: string;
-                    /**
-                     * @description The range of the verifications, last hour, day, week or month
-                     * @example 24h
-                     * @enum {string}
-                     */
-                    range: "24h" | "7d" | "30d";
-                };
-            };
-        };
-        responses: {
-            /** @description The result of the get verifications */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        verifications: {
-                            projectId: string;
-                            customerId?: string;
-                            entitlementId?: string;
-                            featureSlug: string;
-                            count: number;
-                            p95_latency: number;
-                            max_latency: number;
-                            latest_latency: number;
-                        }[];
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
-    "analytics.track": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                action: unknown;
-            };
-            cookie?: never;
-        };
-        /** @description Body of the request for the track */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @enum {string} */
-                    action: "page_hit";
-                    payload: {
-                        event_version?: string;
-                        /** Format: date-time */
-                        timestamp?: string;
-                        session_id: string | null;
-                        page_id: string;
-                        plan_ids: string[] | null;
-                        url: string;
-                        country: string;
-                        city: string;
-                        region: string;
-                        latitude: string;
-                        longitude: string;
-                        device: string;
-                        device_model: string;
-                        device_vendor: string;
-                        browser: string;
-                        browser_version: string;
-                        os: string;
-                        os_version: string;
-                        engine: string;
-                        engine_version: string;
-                        cpu_architecture: string;
-                        ua: string;
-                        bot: boolean;
-                        referrer: string;
-                        referrer_url: string;
-                        ip: string;
-                        continent: string;
-                        locale: string;
-                    };
-                };
-            };
-        };
-        responses: {
-            /** @description The result of the track */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        successful_rows: number;
-                        quarantined_rows: number;
-                    };
-                };
-            };
-            /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrBadRequest"];
-                };
-            };
-            /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrUnauthorized"];
-                };
-            };
-            /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrForbidden"];
-                };
-            };
-            /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrNotFound"];
-                };
-            };
-            /** @description This response is sent when a request conflicts with the current state of the server. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrConflict"];
-                };
-            };
-            /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
-            412: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrPreconditionFailed"];
-                };
-            };
-            /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrTooManyRequests"];
-                };
-            };
-            /** @description The server has encountered a situation it does not know how to handle. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrInternalServerError"];
-                };
-            };
-        };
-    };
+  "customer.reportUsage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description The usage to report */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The customer ID
+           * @example cus_1H7KQFLr7RepUyQBKdnvY
+           */
+          customerId: string
+          /**
+           * @description The feature slug
+           * @example tokens
+           */
+          featureSlug: string
+          /**
+           * @description The usage
+           * @example 30
+           */
+          usage: number
+          /**
+           * Format: uuid
+           * @description The idempotence key
+           * @example 123e4567-e89b-12d3-a456-426614174000
+           */
+          idempotenceKey: string
+          /**
+           * @description The metadata
+           * @example {
+           *       "action": "create",
+           *       "country": "US"
+           *     }
+           */
+          metadata?: {
+            [key: string]: string | undefined
+          }
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the report usage */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            success: boolean
+            message?: string
+            cacheHit?: boolean
+            remaining?: number
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.getEntitlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        customerId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The result of the delete customer */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            entitlements: {
+              featureSlug: string
+              validFrom: number
+              validTo: number | null
+              /** @enum {string} */
+              featureType: "flat" | "tier" | "package" | "usage"
+              usage: string
+              limit: number | null
+              featurePlanVersionId: string
+              /** @enum {string} */
+              aggregationMethod:
+                | "sum"
+                | "sum_all"
+                | "last_during_period"
+                | "count"
+                | "count_all"
+                | "max"
+                | "max_all"
+              units: number | null
+              id: string
+            }[]
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.can": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The customer ID
+           * @example cus_1H7KQFLr7RepUyQBKdnvY
+           */
+          customerId: string
+          /**
+           * @description The feature slug
+           * @example tokens
+           */
+          featureSlug: string
+          /**
+           * @description The metadata
+           * @example {
+           *       "action": "create",
+           *       "country": "US"
+           *     }
+           */
+          metadata?: {
+            [key: string]: string | undefined
+          }
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the can check */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            success: boolean
+            message?: string
+            /** @enum {string} */
+            deniedReason?:
+              | "RATE_LIMITED"
+              | "CUSTOMER_SUBSCRIPTION_NOT_FOUND"
+              | "ENTITLEMENT_NOT_FOUND"
+              | "LIMIT_EXCEEDED"
+              | "ENTITLEMENT_EXPIRED"
+              | "ENTITLEMENT_NOT_ACTIVE"
+            cacheHit?: boolean
+            remaining?: number
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.resetEntitlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description The customer ID */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The customer ID
+           * @example cus_1H7KQFLr7RepUyQBKdnvY
+           */
+          customerId: string
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the reset entitlements */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            success: boolean
+            message?: string
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.getSubscription": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        customerId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The result of the get subscription */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            id: string
+            projectId: string
+            createdAtM: number
+            updatedAtM: number
+            customerId: string
+            /** @enum {string} */
+            status:
+              | "idle"
+              | "renewing"
+              | "changing"
+              | "canceling"
+              | "expiring"
+              | "invoicing"
+              | "invoiced"
+              | "ending_trial"
+              | "active"
+              | "trialing"
+              | "canceled"
+              | "expired"
+              | "past_due"
+            active: boolean
+            planSlug: string
+            timezone: string
+            locked: boolean
+            lockedAt: number | null
+            currentCycleStartAt: number
+            currentCycleEndAt: number
+            previousCycleStartAt: number | null
+            previousCycleEndAt: number | null
+            invoiceAt: number
+            renewAt: number
+            endAt: number | null
+            lastRenewAt: number
+            lastInvoiceAt: number
+            metadata: {
+              /**
+               * @description Reason for the subscription status
+               * @enum {string}
+               */
+              reason?:
+                | "payment_failed"
+                | "invoice_voided"
+                | "payment_pending"
+                | "payment_method_not_found"
+                | "policy_violation"
+                | "pending_cancellation"
+                | "invoice_failed"
+                | "invoice_pending"
+                | "payment_received"
+                | "pending_change"
+                | "pending_expiration"
+                | "trial_ended"
+                | "user_requested"
+                | "admin_requested"
+                | "ending"
+                | "renewed"
+                | "cancelled"
+                | "auto_renew_disabled"
+                | "customer_signout"
+              /** @description Note about status in the subscription */
+              note?: string
+              /** @description Important dates for the subscription */
+              dates?: {
+                /** @description Date of the last change */
+                lastChangeAt?: number
+                /** @description Date of the cancellation */
+                cancelAt?: number
+              }
+            } | null
+            project: {
+              enabled: boolean
+            }
+            customer: {
+              active: boolean
+            }
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.getActivePhase": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        customerId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The result of the get active phase */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            id: string
+            projectId: string
+            createdAtM?: number
+            updatedAtM?: number
+            subscriptionId: string
+            planVersionId: string
+            paymentMethodId: string | null
+            /** @default 0 */
+            trialDays: number | null
+            billingAnchor: number
+            trialEndsAt: number | null
+            startAt: number
+            endAt: number | null
+            metadata?: {
+              /** @description Note about the subscription phase */
+              note?: string
+              /**
+               * @description Reason for the subscription phase
+               * @enum {string}
+               */
+              reason?:
+                | "payment_failed"
+                | "invoice_voided"
+                | "payment_pending"
+                | "payment_method_not_found"
+                | "policy_violation"
+                | "pending_cancellation"
+                | "invoice_failed"
+                | "invoice_pending"
+                | "payment_received"
+                | "pending_change"
+                | "pending_expiration"
+                | "trial_ended"
+                | "user_requested"
+                | "admin_requested"
+                | "ending"
+                | "renewed"
+                | "cancelled"
+                | "auto_renew_disabled"
+                | "customer_signout"
+            } | null
+            items?: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              units: number | null
+              featurePlanVersionId: string
+              subscriptionPhaseId: string
+              subscriptionId: string
+            }[]
+            planVersion: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              planId: string
+              description: string
+              latest: boolean | null
+              title: string
+              tags: string[] | null
+              active: boolean | null
+              /** @enum {string|null} */
+              status: "draft" | "published"
+              publishedAt: number | null
+              publishedBy: string | null
+              archived: boolean | null
+              archivedAt: number | null
+              archivedBy: string | null
+              /** @enum {string} */
+              paymentProvider: "stripe" | "square"
+              /** @enum {string} */
+              dueBehaviour: "cancel" | "downgrade"
+              /** @enum {string} */
+              currency: "USD" | "EUR"
+              /** @description The billing configuration for the plan version */
+              billingConfig: {
+                name: string
+                /** @enum {string} */
+                billingInterval: "month" | "year" | "day" | "minute" | "onetime"
+                billingIntervalCount: number
+                /** @default dayOfCreation */
+                billingAnchor: number | "dayOfCreation"
+                /** @enum {string} */
+                planType: "recurring" | "onetime"
+              }
+              /** @enum {string} */
+              whenToBill: "pay_in_advance" | "pay_in_arrear"
+              gracePeriod: number
+              /** @enum {string} */
+              collectionMethod: "charge_automatically" | "send_invoice"
+              trialDays: number
+              autoRenew: boolean
+              metadata: {
+                externalId?: string
+              } | null
+              paymentMethodRequired: boolean
+              version: number
+            }
+            customerEntitlements: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              customerId: string
+              subscriptionId: string
+              featurePlanVersionId: string
+              subscriptionItemId: string | null
+              subscriptionPhaseId: string | null
+              limit: number | null
+              units: number | null
+              usage: string
+              accumulatedUsage: string
+              realtime: boolean
+              /** @enum {string} */
+              type: "feature" | "addon"
+              validFrom: number
+              validTo: number | null
+              bufferPeriodDays: number
+              resetedAt: number
+              active: boolean
+              isCustom: boolean
+              lastUsageUpdateAt: number
+              metadata: {
+                [key: string]: (string | number | boolean | unknown | unknown) | undefined
+              } | null
+              featurePlanVersion: {
+                id: string
+                projectId: string
+                createdAtM: number
+                updatedAtM: number
+                planVersionId: string
+                featureId: string
+                /** @enum {string} */
+                featureType: "flat" | "tier" | "package" | "usage"
+                config:
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      tierMode: "volume" | "graduated"
+                      tiers: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      units?: number
+                    }
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      /** @description Units for the package */
+                      units: number
+                    }
+                metadata: {
+                  stripeProductId?: string
+                  realtime?: boolean
+                } | null
+                /** @enum {string} */
+                aggregationMethod:
+                  | "sum"
+                  | "sum_all"
+                  | "last_during_period"
+                  | "count"
+                  | "count_all"
+                  | "max"
+                  | "max_all"
+                order: number
+                /** @default 1 */
+                defaultQuantity: number | null
+                limit?: number | null
+                hidden: boolean
+                feature: {
+                  id: string
+                  projectId: string
+                  createdAtM: number
+                  updatedAtM: number
+                  slug: string
+                  code: number
+                  title: string
+                  description: string | null
+                }
+              }
+            }[]
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.getUsage": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        customerId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The result of the get usage */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            planVersion: {
+              description: string
+              flatPrice: string
+              currentTotalPrice: string
+              billingConfig: {
+                name: string
+                /** @enum {string} */
+                billingInterval: "month" | "year" | "day" | "minute" | "onetime"
+                billingIntervalCount: number
+                /** @default dayOfCreation */
+                billingAnchor: number | "dayOfCreation"
+                /** @enum {string} */
+                planType: "recurring" | "onetime"
+              }
+            }
+            subscription: {
+              planSlug: string
+              /** @enum {string} */
+              status:
+                | "idle"
+                | "renewing"
+                | "changing"
+                | "canceling"
+                | "expiring"
+                | "invoicing"
+                | "invoiced"
+                | "ending_trial"
+                | "active"
+                | "trialing"
+                | "canceled"
+                | "expired"
+                | "past_due"
+              currentCycleEndAt: number
+              timezone: string
+              currentCycleStartAt: number
+              prorationFactor: number
+              prorated: boolean
+            }
+            phase: {
+              trialEndsAt: number | null
+              endAt: number | null
+              trialDays: number
+              isTrial: boolean
+            }
+            entitlement: {
+              featureSlug: string
+              /** @enum {string} */
+              featureType: "flat" | "tier" | "package" | "usage"
+              isCustom: boolean
+              limit: number | null
+              usage: number
+              freeUnits: number
+              max: number | null
+              units: number | null
+              included: number
+              featureVersion: {
+                id: string
+                projectId: string
+                createdAtM: number
+                updatedAtM: number
+                planVersionId: string
+                featureId: string
+                /** @enum {string} */
+                featureType: "flat" | "tier" | "package" | "usage"
+                config:
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      tierMode: "volume" | "graduated"
+                      tiers: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      units?: number
+                    }
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      /** @description Units for the package */
+                      units: number
+                    }
+                metadata: {
+                  stripeProductId?: string
+                  realtime?: boolean
+                } | null
+                /** @enum {string} */
+                aggregationMethod:
+                  | "sum"
+                  | "sum_all"
+                  | "last_during_period"
+                  | "count"
+                  | "count_all"
+                  | "max"
+                  | "max_all"
+                order: number
+                /** @default 1 */
+                defaultQuantity: number | null
+                limit?: number | null
+                hidden: boolean
+                feature: {
+                  id: string
+                  projectId: string
+                  createdAtM: number
+                  updatedAtM: number
+                  slug: string
+                  code: number
+                  title: string
+                  description: string | null
+                }
+              }
+              price: string | null
+            }[]
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.getPaymentMethods": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The customer ID
+           * @example cus_1H7KQFLr7RepUyQBKdnvY
+           */
+          customerId: string
+          /**
+           * @description The payment provider
+           * @example stripe
+           * @enum {string}
+           */
+          provider: "stripe" | "square"
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the get payment methods */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            id: string
+            name: string | null
+            last4?: string
+            expMonth?: number
+            expYear?: number
+            brand?: string
+          }[]
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.signUp": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The name of the customer
+           * @example John Doe
+           */
+          name: string
+          /**
+           * @description The timezone of the customer, if passed null the system will use the project timezone
+           * @example UTC
+           */
+          timezone?: string
+          /**
+           * @description The default currency of the customer, if passed null the system will use the project currency
+           * @example USD
+           * @enum {string}
+           */
+          defaultCurrency?: "USD" | "EUR"
+          /**
+           * Format: email
+           * @description The email of the customer
+           * @example test@example.com
+           */
+          email: string
+          /**
+           * @description The billing interval of the customer to be used for the subscription. If plan version is provided, the billing interval will be the same as the plan version. If plan slug is provided, the billing interval will be the default billing interval of the plan.
+           * @example month
+           * @enum {string}
+           */
+          billingInterval?: "month" | "year" | "day" | "minute" | "onetime"
+          /**
+           * @description If the plan id is not provided, you can pass a plan slug and the system will intelligently pick the lastest plan for that slug and sign up the customer for it
+           * @example PRO
+           */
+          planSlug?: string
+          /**
+           * @description The session id of the customer. This is used to track conversion from pricing pages
+           * @example sess_1234567890
+           */
+          sessionId?: string
+          /**
+           * @description The plan version the customer is signing up for
+           * @example pv_1234567890
+           */
+          planVersionId?: string
+          /**
+           * @description The configuration of the subscription items. This is required if your features are quantity based when the customer needs to set them. Pass as empty if you want the system to automatically set the units from the plan defaults.
+           * @example [
+           *       {
+           *         "featurePlanId": "feature_plan_123",
+           *         "featureSlug": "feature_slug_123",
+           *         "isUsage": true,
+           *         "units": 100
+           *       }
+           *     ]
+           */
+          config?: {
+            /**
+             * @description The feature plan id of the item
+             * @example feature_plan_123
+             */
+            featurePlanId: string
+            /**
+             * @description The feature slug of the item
+             * @example feature_slug_123
+             */
+            featureSlug: string
+            /**
+             * @description if the item is a usage item
+             * @example true
+             */
+            isUsage?: boolean
+            /**
+             * @description units of the feature the user is subscribed to
+             * @example 100
+             */
+            units?: number
+            /**
+             * @description minimum units of the feature the user is subscribed to
+             * @example 100
+             */
+            min?: number | null
+            /**
+             * @description limit of the feature the user is subscribed to
+             * @example 100
+             */
+            limit?: number | null
+          }[]
+          /**
+           * @description The external id you want to associate with the customer. Could be the id of the user in your database
+           * @example 1234567890
+           */
+          externalId?: string
+          /**
+           * Format: uri
+           * @description The success url if the customer signs up. This is the url after the signup process, normally your dashboard
+           * @example https://example.com/dashboard
+           */
+          successUrl: string
+          /**
+           * Format: uri
+           * @description The cancel url if the customer cancels the signup. This is the url after the signup process, normally your login page
+           * @example https://example.com/login
+           */
+          cancelUrl: string
+          /**
+           * @description The metadata of the customer
+           * @example {
+           *       "externalId": "1234567890"
+           *     }
+           */
+          metadata?: {
+            externalId?: string
+            stripeSubscriptionId?: string
+            stripeDefaultPaymentMethodId?: string
+            continent?: string
+            country?: string
+            region?: string
+            colo?: string
+            city?: string
+            isEUCountry?: boolean | null
+          }
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the customer sign up */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /**
+             * @description Whether the signup was successful
+             * @example true
+             */
+            success: boolean
+            /**
+             * Format: uri
+             * @description The url to redirect the customer to, either to the success or cancel url
+             * @example https://example.com/dashboard
+             */
+            url: string
+            /**
+             * @description The unprice customer id generated by the system for this customer
+             * @example cus_1234567890
+             */
+            customerId: string
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "customer.createPaymentMethod": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The payment provider code to use
+           * @example stripe
+           * @enum {string}
+           */
+          paymentProvider: "stripe" | "square"
+          /**
+           * @description The unprice customer id generated by the system for this customer
+           * @example cus_1234567890
+           */
+          customerId: string
+          /**
+           * Format: uri
+           * @description The success url if the customer signs up
+           * @example https://example.com/dashboard
+           */
+          successUrl: string
+          /**
+           * Format: uri
+           * @description The cancel url if the customer cancels the signup
+           * @example https://example.com/login
+           */
+          cancelUrl: string
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the customer create payment method */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /**
+             * @description Whether the signup was successful
+             * @example true
+             */
+            success: boolean
+            /**
+             * Format: uri
+             * @description The url to redirect the customer to, either to the success or cancel url
+             * @example https://example.com/dashboard
+             */
+            url: string
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "project.getFeatures": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The result of the get features */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            features: {
+              id: string
+              projectId: string
+              slug: string
+              code: number
+              title: string
+              description: string | null
+            }[]
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "plans.getPlanVersion": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        planVersionId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The result of the get plan version */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            planVersion: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              planId: string
+              description: string
+              latest: boolean | null
+              title: string
+              tags: string[] | null
+              active: boolean | null
+              /** @enum {string|null} */
+              status: "draft" | "published"
+              publishedAt: number | null
+              publishedBy: string | null
+              archived: boolean | null
+              archivedAt: number | null
+              archivedBy: string | null
+              /** @enum {string} */
+              paymentProvider: "stripe" | "square"
+              /** @enum {string} */
+              dueBehaviour: "cancel" | "downgrade"
+              /** @enum {string} */
+              currency: "USD" | "EUR"
+              /** @description The billing configuration for the plan version */
+              billingConfig: {
+                name: string
+                /** @enum {string} */
+                billingInterval: "month" | "year" | "day" | "minute" | "onetime"
+                billingIntervalCount: number
+                /** @default dayOfCreation */
+                billingAnchor: number | "dayOfCreation"
+                /** @enum {string} */
+                planType: "recurring" | "onetime"
+              }
+              /** @enum {string} */
+              whenToBill: "pay_in_advance" | "pay_in_arrear"
+              gracePeriod: number
+              /** @enum {string} */
+              collectionMethod: "charge_automatically" | "send_invoice"
+              trialDays: number
+              autoRenew: boolean
+              metadata: {
+                externalId?: string
+              } | null
+              paymentMethodRequired: boolean
+              version: number
+              /** @description The plan information */
+              plan: {
+                id: string
+                projectId: string
+                createdAtM: number
+                updatedAtM: number
+                slug: string
+                active: boolean | null
+                description: string
+                metadata: {
+                  externalId?: string
+                } | null
+                defaultPlan: boolean | null
+                enterprisePlan: boolean | null
+              }
+              planFeatures: {
+                id: string
+                projectId: string
+                createdAtM: number
+                updatedAtM: number
+                planVersionId: string
+                featureId: string
+                /** @enum {string} */
+                featureType: "flat" | "tier" | "package" | "usage"
+                config:
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      tierMode: "volume" | "graduated"
+                      tiers: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      units?: number
+                    }
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      /** @description Units for the package */
+                      units: number
+                    }
+                metadata: {
+                  stripeProductId?: string
+                  realtime?: boolean
+                } | null
+                /** @enum {string} */
+                aggregationMethod:
+                  | "sum"
+                  | "sum_all"
+                  | "last_during_period"
+                  | "count"
+                  | "count_all"
+                  | "max"
+                  | "max_all"
+                order: number
+                /** @default 1 */
+                defaultQuantity: number | null
+                limit?: number | null
+                hidden: boolean
+                /** @description The text you can use to show the clients */
+                displayFeatureText: string
+                /** @description The feature information */
+                feature: {
+                  id: string
+                  projectId: string
+                  createdAtM: number
+                  updatedAtM: number
+                  slug: string
+                  code: number
+                  title: string
+                  description: string | null
+                }
+              }[]
+              /** @description Flat price of the plan */
+              flatPrice: string
+            }
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "plans.listPlanVersions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description Whether to include published plan versions
+           * @example true
+           */
+          onlyPublished?: boolean
+          /**
+           * @description Whether to include enterprise plan versions
+           * @example false
+           */
+          onlyEnterprisePlan?: boolean
+          /**
+           * @description Whether to include the latest plan version
+           * @example true
+           */
+          onlyLatest?: boolean
+          /**
+           * @description The billing interval to filter the plan versions
+           * @example month
+           * @enum {string}
+           */
+          billingInterval?: "month" | "year" | "day" | "minute" | "onetime"
+          /**
+           * @description The currency to filter the plan versions
+           * @example USD
+           * @enum {string}
+           */
+          currency?: "USD" | "EUR"
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the list plan versions */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            planVersions: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              planId: string
+              description: string
+              latest: boolean | null
+              title: string
+              tags: string[] | null
+              active: boolean | null
+              /** @enum {string|null} */
+              status: "draft" | "published"
+              publishedAt: number | null
+              publishedBy: string | null
+              archived: boolean | null
+              archivedAt: number | null
+              archivedBy: string | null
+              /** @enum {string} */
+              paymentProvider: "stripe" | "square"
+              /** @enum {string} */
+              dueBehaviour: "cancel" | "downgrade"
+              /** @enum {string} */
+              currency: "USD" | "EUR"
+              /** @description The billing configuration for the plan version */
+              billingConfig: {
+                name: string
+                /** @enum {string} */
+                billingInterval: "month" | "year" | "day" | "minute" | "onetime"
+                billingIntervalCount: number
+                /** @default dayOfCreation */
+                billingAnchor: number | "dayOfCreation"
+                /** @enum {string} */
+                planType: "recurring" | "onetime"
+              }
+              /** @enum {string} */
+              whenToBill: "pay_in_advance" | "pay_in_arrear"
+              gracePeriod: number
+              /** @enum {string} */
+              collectionMethod: "charge_automatically" | "send_invoice"
+              trialDays: number
+              autoRenew: boolean
+              metadata: {
+                externalId?: string
+              } | null
+              paymentMethodRequired: boolean
+              version: number
+              /** @description The plan information */
+              plan: {
+                id: string
+                projectId: string
+                createdAtM: number
+                updatedAtM: number
+                slug: string
+                active: boolean | null
+                description: string
+                metadata: {
+                  externalId?: string
+                } | null
+                defaultPlan: boolean | null
+                enterprisePlan: boolean | null
+              }
+              planFeatures: {
+                id: string
+                projectId: string
+                createdAtM: number
+                updatedAtM: number
+                planVersionId: string
+                featureId: string
+                /** @enum {string} */
+                featureType: "flat" | "tier" | "package" | "usage"
+                config:
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      tierMode: "volume" | "graduated"
+                      tiers: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      units?: number
+                    }
+                  | {
+                      price?: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      units?: number
+                    }
+                  | {
+                      tiers?: {
+                        unitPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        flatPrice: {
+                          dinero: {
+                            /** @description The amount of the dinero object */
+                            amount: number
+                            currency: {
+                              /** @description The currency code of the dinero object */
+                              code: string
+                              /** @description The base of the dinero object */
+                              base: number | number[]
+                              /** @description The exponent of the dinero object */
+                              exponent: number
+                            }
+                            /** @description The scale of the dinero object */
+                            scale: number
+                          }
+                          displayAmount: string
+                        }
+                        firstUnit: number
+                        lastUnit: number | null
+                      }[]
+                      price: {
+                        dinero: {
+                          /** @description The amount of the dinero object */
+                          amount: number
+                          currency: {
+                            /** @description The currency code of the dinero object */
+                            code: string
+                            /** @description The base of the dinero object */
+                            base: number | number[]
+                            /** @description The exponent of the dinero object */
+                            exponent: number
+                          }
+                          /** @description The scale of the dinero object */
+                          scale: number
+                        }
+                        displayAmount: string
+                      }
+                      /** @enum {string} */
+                      usageMode?: "tier" | "package" | "unit"
+                      /** @enum {string} */
+                      tierMode?: "volume" | "graduated"
+                      /** @description Units for the package */
+                      units: number
+                    }
+                metadata: {
+                  stripeProductId?: string
+                  realtime?: boolean
+                } | null
+                /** @enum {string} */
+                aggregationMethod:
+                  | "sum"
+                  | "sum_all"
+                  | "last_during_period"
+                  | "count"
+                  | "count_all"
+                  | "max"
+                  | "max_all"
+                order: number
+                /** @default 1 */
+                defaultQuantity: number | null
+                limit?: number | null
+                hidden: boolean
+                /** @description The text you can use to show the clients */
+                displayFeatureText: string
+                /** @description The feature information */
+                feature: {
+                  id: string
+                  projectId: string
+                  createdAtM: number
+                  updatedAtM: number
+                  slug: string
+                  code: number
+                  title: string
+                  description: string | null
+                }
+              }[]
+              /** @description Flat price of the plan */
+              flatPrice: string
+            }[]
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "analytics.getUsage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request for the get usage */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The customer ID if you want to get the usage for a specific customer
+           * @example cus_1H7KQFLr7RepUyQBKdnvY
+           */
+          customerId?: string
+          /**
+           * @description The project ID (optional, if not provided, the project ID will be the one of the key)
+           * @example project_1H7KQFLr7RepUyQBKdnvY
+           */
+          projectId: string
+          /**
+           * @description The range of the usage, last hour, day, week or month
+           * @example 24h
+           * @enum {string}
+           */
+          range: "24h" | "7d" | "30d"
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the get usage */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            usage: {
+              projectId: string
+              customerId?: string
+              entitlementId?: string
+              featureSlug: string
+              count: number
+              sum: number
+              max: number
+              last_during_period: number
+            }[]
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "analytics.getVerifications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Body of the request for the get verifications */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The customer ID if you want to get the verifications for a specific customer
+           * @example cus_1H7KQFLr7RepUyQBKdnvY
+           */
+          customerId?: string
+          /**
+           * @description The project ID (optional, if not provided, the project ID will be the one of the key)
+           * @example project_1H7KQFLr7RepUyQBKdnvY
+           */
+          projectId: string
+          /**
+           * @description The range of the verifications, last hour, day, week or month
+           * @example 24h
+           * @enum {string}
+           */
+          range: "24h" | "7d" | "30d"
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the get verifications */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            verifications: {
+              projectId: string
+              customerId?: string
+              entitlementId?: string
+              featureSlug: string
+              count: number
+              p95_latency: number
+              max_latency: number
+              latest_latency: number
+            }[]
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
+  "analytics.track": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        action: unknown
+      }
+      cookie?: never
+    }
+    /** @description Body of the request for the track */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          action: "page_hit"
+          payload: {
+            event_version?: string
+            /** Format: date-time */
+            timestamp?: string
+            session_id: string | null
+            page_id: string
+            plan_ids: string[] | null
+            url: string
+            country: string
+            city: string
+            region: string
+            latitude: string
+            longitude: string
+            device: string
+            device_model: string
+            device_vendor: string
+            browser: string
+            browser_version: string
+            os: string
+            os_version: string
+            engine: string
+            engine_version: string
+            cpu_architecture: string
+            ua: string
+            bot: boolean
+            referrer: string
+            referrer_url: string
+            ip: string
+            continent: string
+            locale: string
+          }
+        }
+      }
+    }
+    responses: {
+      /** @description The result of the track */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            successful_rows: number
+            quarantined_rows: number
+          }
+        }
+      }
+      /** @description The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrBadRequest"]
+        }
+      }
+      /** @description Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrUnauthorized"]
+        }
+      }
+      /** @description The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrForbidden"]
+        }
+      }
+      /** @description The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrNotFound"]
+        }
+      }
+      /** @description This response is sent when a request conflicts with the current state of the server. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrConflict"]
+        }
+      }
+      /** @description The requested operation cannot be completed because certain conditions were not met. This typically occurs when a required resource state or version check fails. */
+      412: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrPreconditionFailed"]
+        }
+      }
+      /** @description The user has sent too many requests in a given amount of time ("rate limiting") */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrTooManyRequests"]
+        }
+      }
+      /** @description The server has encountered a situation it does not know how to handle. */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrInternalServerError"]
+        }
+      }
+    }
+  }
 }

@@ -107,8 +107,6 @@ export function PricingCard({ plan, isPopular, className, isOnly, ...props }: Pr
             // @ts-ignore
             window.Unprice.trackEvent("plan_click", {
               plan_version_id: plan.id,
-              plan_slug: plan.name,
-              plan_version: plan.version,
             })
 
             // if enterprise we need email

@@ -1,0 +1,15 @@
+SCHEMA >
+    `date` Date,
+    `page_id` String,
+    `browser` LowCardinality(String),
+    `country` String,
+    `device` LowCardinality(String),
+    `referrer` String,
+    `domain` String,
+    `visits` AggregateFunction(uniq, String),
+    `hits` AggregateFunction(count)
+
+ENGINE AggregatingMergeTree
+ENGINE_PARTITION_KEY toYYYYMM(date)
+ENGINE_SORTING_KEY date, page_id, domain
+ENGINE_TTL date + INTERVAL 6 MONTH

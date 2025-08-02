@@ -218,6 +218,11 @@ export const stripePlanVersionSchema = z.object({
   paymentMethodRequired: z.boolean(),
 })
 
+export const customerSessionMetadataSchema = z.object({
+  sessionId: z.string().optional(),
+  pageId: z.string().optional(),
+})
+
 export const customerEntitlementMetadataSchema = z.record(
   z.string(),
   z.union([z.string(), z.number(), z.boolean(), z.null()])

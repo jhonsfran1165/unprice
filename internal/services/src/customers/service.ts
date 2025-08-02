@@ -1,5 +1,6 @@
 import { type Database, type TransactionDatabase, and, eq, gte, isNull, lte, or } from "@unprice/db"
 
+import type { Analytics } from "@unprice/analytics"
 import {
   customerEntitlements,
   customerSessions,
@@ -21,7 +22,6 @@ import type {
 } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import type { Analytics } from "@unprice/tinybird"
 import { env } from "../../env"
 import type {
   CustomerCache,
@@ -1357,11 +1357,11 @@ export class CustomerService {
 
       // create a session with the data of the customer, the plan version and the success and cancel urls
       // pass the session id to stripe metadata and then once the customer adds a payment method, we call our api to create the subscription
-      const sessionId = newId("customer_session")
+      const customerSessionId = newId("customer_session")
       const customerSession = await this.db
         .insert(customerSessions)
         .values({
-          id: sessionId,
+          id: customerSessionId,
           customer: {
             id: customerId,
             name: name,
@@ -1377,6 +1377,10 @@ export class CustomerService {
             projectId: projectId,
             config: config,
             paymentMethodRequired: paymentRequired,
+          },
+          metadata: {
+            sessionId: sessionId ?? undefined,
+            pageId: pageId ?? undefined,
           },
         })
         .returning()
@@ -1424,7 +1428,7 @@ export class CustomerService {
       // send event to analytics for tracking conversions
       this.waitUntil(
         this.analytics.ingestEvents({
-          action: "sign_up",
+          action: "signup",
           version: "1",
           session_id: sessionId ?? null,
           timestamp: new Date().toISOString(),
@@ -1432,7 +1436,7 @@ export class CustomerService {
             customer_id: customerId,
             plan_version_id: planVersion.id,
             page_id: pageId,
-            status: "waiting_payment_provider",
+            status: "waiting_payment_provider_setup",
           },
         })
       )
@@ -1532,7 +1536,7 @@ export class CustomerService {
       // send event to analytics for tracking conversions
       this.waitUntil(
         this.analytics.ingestEvents({
-          action: "sign_up",
+          action: "signup",
           version: "1",
           session_id: sessionId ?? null,
           timestamp: new Date().toISOString(),

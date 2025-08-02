@@ -1,9 +1,9 @@
+import type { Analytics } from "@unprice/analytics"
 import type { Database } from "@unprice/db"
 import type { Logger } from "@unprice/logging"
 import type { Cache } from "@unprice/services/cache"
 import type { Metrics } from "@unprice/services/metrics"
 import { ProjectService } from "@unprice/services/projects"
-import type { Analytics } from "@unprice/tinybird"
 import type { GetProjectFeaturesRequest, GetProjectFeaturesResponse } from "./interface"
 
 export class ApiProjectService {

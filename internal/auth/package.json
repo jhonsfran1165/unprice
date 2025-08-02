@@ -28,7 +28,7 @@
     "@unprice/config": "workspace:^",
     "@unprice/db": "^0.1.0",
     "@unprice/error": "workspace:^",
-    "@unprice/tinybird": "workspace:^",
+    "@unprice/analytics": "workspace:^",
     "bcryptjs": "^3.0.2",
     "encoding": "^0.1.13",
     "next": "14.3.0-canary.44",

@@ -1,4 +1,4 @@
-import { DEFAULT_INTERVAL, INTERVAL_KEYS } from "@unprice/tinybird"
+import { DEFAULT_INTERVAL, INTERVAL_KEYS } from "@unprice/analytics"
 import {
   createSearchParamsCache,
   parseAsInteger,

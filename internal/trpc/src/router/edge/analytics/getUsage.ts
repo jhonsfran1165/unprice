@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 import { TRPCError } from "@trpc/server"
-import { analyticsIntervalSchema, getUsageResponseSchema } from "@unprice/tinybird"
+import { analyticsIntervalSchema, getUsageResponseSchema } from "@unprice/analytics"
 import { protectedProjectProcedure } from "#trpc"
 import { unprice } from "#utils/unprice"
 

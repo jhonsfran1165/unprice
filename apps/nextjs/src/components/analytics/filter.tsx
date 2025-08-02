@@ -5,7 +5,7 @@ import {
   DEFAULT_INTERVALS,
   INTERVAL_KEYS,
   type Interval,
-} from "@unprice/tinybird"
+} from "@unprice/analytics"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { useFilter } from "~/hooks/use-filter"
 

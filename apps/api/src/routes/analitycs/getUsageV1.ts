@@ -1,6 +1,6 @@
 import { createRoute } from "@hono/zod-openapi"
+import { analyticsIntervalSchema, getUsageResponseSchema } from "@unprice/analytics"
 import { FEATURE_SLUGS } from "@unprice/config"
-import { analyticsIntervalSchema, getUsageResponseSchema } from "@unprice/tinybird"
 import { endTime, startTime } from "hono/timing"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"

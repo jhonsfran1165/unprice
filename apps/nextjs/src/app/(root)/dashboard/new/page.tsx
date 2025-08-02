@@ -1,5 +1,5 @@
+import { analytics } from "@unprice/analytics/client"
 import { COOKIES_APP } from "@unprice/config"
-import { analytics } from "@unprice/tinybird/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import { UserIcon } from "lucide-react"
 import { cookies } from "next/headers"

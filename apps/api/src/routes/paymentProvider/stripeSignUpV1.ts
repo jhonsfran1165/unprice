@@ -224,14 +224,14 @@ export const registerStripeSignUpV1 = (app: App) =>
     // ingest the sign up event
     c.executionCtx.waitUntil(
       analytics.ingestEvents({
-        action: "sign_up",
+        action: "signup",
         version: "1",
-        session_id: customerSession.id,
+        session_id: customerSession.metadata?.sessionId ?? null,
         timestamp: new Date().toISOString(),
         payload: {
           customer_id: customerUnprice.id,
           plan_version_id: customerSession.planVersion.id,
-          page_id: null,
+          page_id: customerSession.metadata?.pageId ?? "",
           status: "signup_success",
         },
       })

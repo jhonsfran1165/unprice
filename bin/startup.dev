@@ -73,7 +73,7 @@ if [ "$MODE_ID" = "dev" ]; then
   EMIT_ANALYTICS="true"
 
   # loging to tb
-  cd internal/tinybird
+  cd internal/analytics
 
   # check if tinybird is running
   if [ "$RESTART_TINYBIRD" = "true" ]; then
@@ -141,7 +141,7 @@ elif [ "$MODE_ID" = "preview" ]; then
   VERCEL_ENV="preview"
 
   # curl -X GET -H "Authorization: Bearer $TB_TOKEN" "http://localhost:7181/v0/pipes"
-  cd internal/tinybird
+  cd internal/analytics
 
   # auth tb with the admin token
   tb login --token $TB_ADMIN_TOKEN --host $TB_HOST

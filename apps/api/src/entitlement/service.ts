@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers"
+import type { Analytics } from "@unprice/analytics"
 import type { Database } from "@unprice/db"
 import {
   calculateFlatPricePlan,
@@ -13,7 +14,6 @@ import type { Cache, CustomerEntitlementCache, SubcriptionCache } from "@unprice
 import type { CustomerService, DenyReason } from "@unprice/services/customers"
 import { UnPriceCustomerError } from "@unprice/services/customers"
 import type { Metrics } from "@unprice/services/metrics"
-import type { Analytics } from "@unprice/tinybird"
 import type { DurableObjectProject } from "~/project/do"
 import type { DurableObjectUsagelimiter } from "./do"
 import type {
