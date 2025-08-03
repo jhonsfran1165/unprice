@@ -5,7 +5,6 @@
   "scripts": {
     "cookie": "tsx cookie.ts",
     "main": "tsx main.ts",
-    "mock": "tsx mock.ts",
     "clean": "git clean -xdf .next .turbo node_modules",
     "with-env": "infisical run --env=preview --path=/app --"
   },

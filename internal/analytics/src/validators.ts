@@ -252,6 +252,29 @@ export const schemaPlanVersion = z.object({
   timestamp: z.string().datetime(),
 })
 
+export const schemaFeature = z.object({
+  id: z.string(),
+  project_id: z.string(),
+  slug: z.string(),
+  code: z.number(),
+  timestamp: z.string().datetime(),
+})
+
+export const schemaPlanVersionFeature = z.object({
+  id: z.string(),
+  project_id: z.string(),
+  plan_version_id: z.string(),
+  feature_id: z.string(),
+  feature_type: z.string(),
+  config: z.string(),
+  metadata: z.string(),
+  aggregation_method: z.string(),
+  default_quantity: z.number().nullable(),
+  limit: z.number().nullable(),
+  hidden: z.boolean(),
+  timestamp: z.string().datetime(),
+})
+
 export type PageAnalyticsEvent = z.infer<typeof pageEventSchema>
 export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>
 export type GetUsageResponse = z.infer<typeof getUsageResponseSchema>

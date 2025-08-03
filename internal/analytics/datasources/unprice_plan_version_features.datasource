@@ -1,0 +1,25 @@
+TOKEN "web-apps" APPEND
+
+DESCRIPTION >
+    Once a plan version is published, we store it here.
+    This is used to get the plan version features details.
+
+TAGS "plan_versions, features"
+
+SCHEMA >
+    `id` String `json:$.id`,
+    `project_id` String `json:$.project_id`,
+    `plan_version_id` String `json:$.plan_version_id`,
+    `feature_id` String `json:$.feature_id`,
+    `feature_type` LowCardinality(String) `json:$.feature_type`,
+    `config` String `json:$.config`,
+    `metadata` String `json:$.metadata`,
+    `aggregation_method` LowCardinality(String) `json:$.aggregation_method`,
+    `default_quantity` Nullable(Int16) `json:$.default_quantity`,
+    `limit` Nullable(Int16) `json:$.limit`,
+    `hidden` UInt8 `json:$.hidden`,
+    `timestamp` DateTime64(3) `json:$.timestamp`,
+
+ENGINE MergeTree
+ENGINE_PARTITION_KEY toYYYYMM(timestamp)
+ENGINE_SORTING_KEY project_id, plan_version_id, feature_id

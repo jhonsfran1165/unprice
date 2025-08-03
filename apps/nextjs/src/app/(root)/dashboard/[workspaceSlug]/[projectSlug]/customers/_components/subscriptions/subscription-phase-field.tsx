@@ -61,7 +61,7 @@ export default function SubscriptionPhaseFormField({
   const { data: planVersions, isLoading: isPlanVersionsLoading } =
     api.planVersions.listByActiveProject.useQuery({
       onlyPublished: true,
-      onlyLatest: true,
+      onlyLatest: false,
     })
 
   const removePhase = api.subscriptions.removePhase.useMutation()
@@ -214,6 +214,8 @@ export default function SubscriptionPhaseFormField({
                                 customerId: selectedCustomer,
                                 paymentMethodRequired:
                                   selectedPlanVersion.paymentMethodRequired ?? false,
+                                planVersionId: selectedPlanVersion.id,
+                                trialDays: selectedPlanVersion.trialDays,
                               })
                               setDialogOpen(true)
                             }}

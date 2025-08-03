@@ -105,68 +105,68 @@ export const publish = protectedProjectProcedure
       ciphertext: config.key,
     })
 
-    // we need to create each product on the payment provider
-    const planVersionDataUpdated = await opts.ctx.db.transaction(async (tx) => {
-      try {
-        const paymentProviderService = new PaymentProviderService({
-          logger: opts.ctx.logger,
-          paymentProvider: planVersionData.paymentProvider,
-          token: decryptedKey,
-        })
+    const paymentProviderService = new PaymentProviderService({
+      logger: opts.ctx.logger,
+      paymentProvider: planVersionData.paymentProvider,
+      token: decryptedKey,
+    })
 
-        // create the products
-        await Promise.all(
-          planVersionData.planFeatures.map(async (planFeature) => {
-            const productName = `${planVersionData.project.name} - ${planFeature.feature.slug} from ${APP_NAME}`
+    // create the products
+    await Promise.all(
+      planVersionData.planFeatures.map(async (planFeature) => {
+        const productName = `${planVersionData.project.name} - ${planFeature.feature.slug} from ${APP_NAME}`
 
-            const { err } = await paymentProviderService.upsertProduct({
-              id: planFeature.featureId,
-              name: productName,
-              type: "service",
-              // only pass the description if it is not empty
-              ...(planFeature.feature.description
-                ? {
-                    description: planFeature.feature.description,
-                  }
-                : {}),
-            })
-
-            if (err) {
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Error syncs product with stripe",
-              })
-            }
-          })
-        )
-
-        // verify if the payment method is required
-        const { err, val: totalPricePlan } = calculateFlatPricePlan({
-          planVersion: planVersionData,
+        const { err } = await paymentProviderService.upsertProduct({
+          id: planFeature.featureId,
+          name: productName,
+          type: "service",
+          // only pass the description if it is not empty
+          ...(planFeature.feature.description
+            ? {
+                description: planFeature.feature.description,
+              }
+            : {}),
         })
 
         if (err) {
-          opts.ctx.logger.error("Error calculating price plan", {
-            error: err,
-            planVersionId: planVersionData.id,
-          })
-
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Error calculating price plan",
+            message: "Error syncs product with stripe",
           })
         }
+      })
+    )
 
-        // if the flat price is not zero, then the payment method is required
-        if (!isZero(totalPricePlan.dinero) && !planVersionData.paymentMethodRequired) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Payment method required for this plan version",
-          })
-        }
+    // verify if the payment method is required
+    const { err, val: totalPricePlan } = calculateFlatPricePlan({
+      planVersion: planVersionData,
+    })
 
-        const paymentMethodRequired = !isZero(totalPricePlan.dinero)
+    if (err) {
+      opts.ctx.logger.error("Error calculating price plan", {
+        error: err,
+        planVersionId: planVersionData.id,
+      })
 
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Error calculating price plan",
+      })
+    }
+
+    // if the flat price is not zero, then the payment method is required
+    if (!isZero(totalPricePlan.dinero) && !planVersionData.paymentMethodRequired) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Plan total price is not zero, but payment method is not required",
+      })
+    }
+
+    const paymentMethodRequired = !isZero(totalPricePlan.dinero)
+
+    // we need to create each product on the payment provider
+    const planVersionDataUpdated = await opts.ctx.db.transaction(async (tx) => {
+      try {
         // set the latest version to false if there is a latest version for this plan
         await tx
           .update(schema.versions)
@@ -226,22 +226,42 @@ export const publish = protectedProjectProcedure
 
     // ingest the plan version to tinybird
     opts.ctx.waitUntil(
-      opts.ctx.analytics.ingestPlanVersions({
-        id: planVersionDataUpdated.id,
-        project_id: project.id,
-        plan_id: planVersionDataUpdated.planId,
-        plan_slug: planVersionData.plan.slug,
-        plan_version: planVersionDataUpdated.version,
-        currency: planVersionDataUpdated.currency,
-        payment_provider: planVersionDataUpdated.paymentProvider,
-        billing_interval: planVersionDataUpdated.billingConfig.billingInterval,
-        billing_interval_count: planVersionDataUpdated.billingConfig.billingIntervalCount,
-        billing_anchor: planVersionDataUpdated.billingConfig.billingAnchor.toString(),
-        plan_type: planVersionDataUpdated.billingConfig.planType,
-        trial_days: planVersionDataUpdated.trialDays,
-        payment_method_required: planVersionDataUpdated.paymentMethodRequired,
-        timestamp: new Date(planVersionDataUpdated.publishedAt ?? Date.now()).toISOString(),
-      })
+      Promise.all([
+        opts.ctx.analytics.ingestPlanVersions({
+          id: planVersionDataUpdated.id,
+          project_id: planVersionDataUpdated.projectId,
+          plan_id: planVersionDataUpdated.planId,
+          plan_slug: planVersionData.plan.slug,
+          plan_version: planVersionDataUpdated.version,
+          currency: planVersionDataUpdated.currency,
+          payment_provider: planVersionDataUpdated.paymentProvider,
+          billing_interval: planVersionDataUpdated.billingConfig.billingInterval,
+          billing_interval_count: planVersionDataUpdated.billingConfig.billingIntervalCount,
+          billing_anchor: planVersionDataUpdated.billingConfig.billingAnchor.toString(),
+          plan_type: planVersionDataUpdated.billingConfig.planType,
+          trial_days: planVersionDataUpdated.trialDays,
+          payment_method_required: planVersionDataUpdated.paymentMethodRequired,
+          timestamp: new Date(planVersionDataUpdated.publishedAt ?? Date.now()).toISOString(),
+        }),
+
+        // ingest the plan version features
+        opts.ctx.analytics.ingestPlanVersionFeatures(
+          planVersionData.planFeatures.map((feature) => ({
+            id: feature.id,
+            project_id: feature.projectId,
+            plan_version_id: feature.planVersionId,
+            feature_id: feature.id,
+            feature_type: feature.featureType,
+            config: JSON.stringify(feature.config),
+            metadata: JSON.stringify(feature.metadata),
+            aggregation_method: feature.aggregationMethod,
+            default_quantity: feature.defaultQuantity,
+            limit: feature.limit,
+            hidden: feature.hidden,
+            timestamp: new Date(feature.createdAtM).toISOString(),
+          }))
+        ),
+      ])
     )
 
     return {

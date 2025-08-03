@@ -65,6 +65,13 @@ SQL >
         page_id,
         argMaxMerge(final_status) AS final_status
     FROM unprice_signups_mv
+    WHERE
+        1 = 1
+        {% if defined(start_date) and defined(end_date) %}
+        AND date BETWEEN {{ Date(start_date) }} AND {{ Date(end_date) }}
+        {% else %}
+        AND date >= today() - 7
+        {% end %}
     GROUP BY date, plan_version_id, page_id
 
 NODE plan_signups

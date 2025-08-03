@@ -34,29 +34,68 @@ const unprice = new Unprice({
   baseUrl: "http://localhost:8787",
 })
 
-async function main() {
+async function generateData(customerId: string) {
   const now = performance.now()
-  const customerId = "cus_1H7KQFLr7RepUyQBKdnvY"
 
-  // get the usage
-  const entitlements = await unprice.customers.reportUsage({
-    customerId,
-    featureSlug: "tokens",
-    usage: 100,
-    idempotenceKey: randomUUID(),
-  })
+  const { result: data } = await unprice.customers.getEntitlements(customerId)
 
-  const can = await unprice.customers.can({
-    customerId,
-    featureSlug: "tokens",
-    metadata: {
-      usage: "100",
-    },
-  })
+  const entitlements = data?.entitlements
 
-  console.info(can)
-  console.info(entitlements)
+  if (!entitlements) {
+    console.error("No entitlements found")
+    return
+  }
+
+  const usageEntitlements = entitlements.filter(
+    (entitlement) => entitlement.featureType === "usage"
+  )!
+
+  for (let i = 0; i < 100; i++) {
+    // ramdom usage between 1 and 100
+    const usage = Math.floor(Math.random() * 100) + 1
+    // pick a random feature slug
+    const featureSlug =
+      usageEntitlements[Math.floor(Math.random() * usageEntitlements.length)]?.featureSlug!
+
+    if (featureSlug) {
+      await unprice.customers.reportUsage({
+        customerId,
+        featureSlug,
+        usage,
+        idempotenceKey: randomUUID(),
+      })
+
+      console.info(`Usage ${usage} reported for ${featureSlug}`)
+    }
+
+    // wait 200ms
+    await new Promise((resolve) => setTimeout(resolve, 200))
+
+    // pick a random feature slug
+    const randomFeatureSlug =
+      entitlements[Math.floor(Math.random() * entitlements.length)]?.featureSlug!
+
+    if (randomFeatureSlug) {
+      // verify the usage
+      await unprice.customers.can({
+        customerId,
+        featureSlug: randomFeatureSlug,
+      })
+
+      console.info(`Usage ${usage} verified for ${randomFeatureSlug}`)
+    }
+  }
+
   console.info(`Time taken: ${performance.now() - now}ms`)
+}
+
+async function main() {
+  // FREE plan
+  await generateData("cus_1MRwznYezUUEvhTidD9L5")
+  // PRO plan
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU")
+  // ENTERPRISE plan
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ")
 }
 
 main()

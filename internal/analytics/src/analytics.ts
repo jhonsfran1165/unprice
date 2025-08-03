@@ -6,8 +6,10 @@ import {
   featureUsageSchemaV1,
   featureVerificationSchemaV1,
   pageEventSchema,
+  schemaFeature,
   schemaPlanClick,
   schemaPlanVersion,
+  schemaPlanVersionFeature,
 } from "./validators"
 
 export class Analytics {
@@ -92,6 +94,20 @@ export class Analytics {
       event: analyticsEventSchema,
       // we need to wait for the ingestion to be done before returning
       wait: true,
+    })
+  }
+
+  public get ingestFeatures() {
+    return this.writeClient.buildIngestEndpoint({
+      datasource: "unprice_features",
+      event: schemaFeature,
+    })
+  }
+
+  public get ingestPlanVersionFeatures() {
+    return this.writeClient.buildIngestEndpoint({
+      datasource: "unprice_plan_version_features",
+      event: schemaPlanVersionFeature,
     })
   }
 
