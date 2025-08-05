@@ -10,6 +10,7 @@ import { Button } from "@unprice/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
+import { startTransition } from "react"
 
 import {
   Card,
@@ -19,7 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@unprice/ui/card"
-import { toastAction } from "~/lib/toast"
+import { toast, toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -40,6 +41,21 @@ export function RenameProjectForm(props: {
       toastAction("success")
     },
   })
+
+  const migrateProject = api.analytics.migrate.useMutation({
+    onSuccess: () => {
+      router.refresh()
+    },
+  })
+
+  function onMigrateProject() {
+    startTransition(() => {
+      toast.promise(migrateProject.mutateAsync(), {
+        loading: "Publishing...",
+        success: "Version published",
+      })
+    })
+  }
 
   const form = useZodForm({
     schema: renameProjectSchema,
@@ -78,10 +94,14 @@ export function RenameProjectForm(props: {
             />
           </CardContent>
 
-          <CardFooter className="border-t px-6 py-4">
+          <CardFooter className="flex justify-between gap-2 border-t px-6 py-4">
             <Button type="submit">
               Save
               {form.formState.isSubmitting && <LoadingAnimation className="ml-2" />}
+            </Button>
+            <Button type="button" variant="ghost" onClick={onMigrateProject}>
+              Migrate analytics data
+              {migrateProject.isPending && <LoadingAnimation className="ml-2" />}
             </Button>
           </CardFooter>
         </Card>

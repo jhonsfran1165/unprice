@@ -1,10 +1,10 @@
+import type { Analytics } from "@unprice/analytics"
 import { hashStringSHA256 } from "@unprice/db/utils"
 import type { ApiKeyExtended } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result, type SchemaError, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Cache } from "@unprice/services/cache"
 import type { Metrics } from "@unprice/services/metrics"
-import type { Analytics } from "@unprice/tinybird"
 
 import type { Database } from "@unprice/db"
 import { and, eq } from "@unprice/db"

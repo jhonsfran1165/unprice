@@ -11,8 +11,8 @@ import {
 } from "@unprice/ui/chart"
 import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
+import { CodeApiSheet } from "~/components/code-api-sheet"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import { CodeApiSheet } from "../forms/code-api-sheet"
 
 const chartConfig = {
   usage: {

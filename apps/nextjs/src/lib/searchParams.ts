@@ -18,5 +18,10 @@ export const intervalParser = {
   interval: parseAsStringEnum(INTERVAL_KEYS).withDefault(DEFAULT_INTERVAL),
 }
 
+export const intervalDaysParser = {
+  intervalDays: parseAsInteger.withDefault(7),
+}
+
 export const intervalParserCache = createSearchParamsCache(intervalParser)
 export const filtersDataTableCache = createSearchParamsCache(filtersDataTableParsers)
+export const intervalDaysParserCache = createSearchParamsCache(intervalDaysParser)

@@ -15,7 +15,7 @@ import {
 } from "@unprice/ui/sheet"
 import { Code } from "lucide-react"
 import Link from "next/link"
-import { SDKDemo, type method } from "../landing/sdk-examples"
+import { SDKDemo, type method } from "~/components/landing/sdk-examples"
 
 export function CodeApiSheet({
   children,

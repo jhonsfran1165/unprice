@@ -67,7 +67,7 @@ if [ "$MODE_ID" = "dev" ]; then
   TB_RESTARTED=$RESTART_TINYBIRD
   UNPRICE_API_URL="http://localhost:8787"
   # INFO: Replace with local key
-  UNPRICE_API_KEY="unprice_live_1JANeFH6hfpc2W7979WB2"
+  UNPRICE_API_KEY="unprice_dev_1234567890"
   DRIZZLE_LOG="false"
   EMIT_METRICS_LOGS="false"
   EMIT_ANALYTICS="true"
@@ -121,6 +121,9 @@ if [ "$MODE_ID" = "dev" ]; then
   fi
 
   cd ../../
+
+  echo "Applying migrations"
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN=$TB_TOKEN TINYBIRD_URL=$TB_HOST AUTH_REDIRECT_PROXY_URL=$AUTH_REDIRECT_PROXY_URL UNPRICE_API_URL=$UNPRICE_API_URL UNPRICE_API_KEY=$UNPRICE_API_KEY DRIZZLE_LOG=$DRIZZLE_LOG EMIT_METRICS_LOGS=$EMIT_METRICS_LOGS EMIT_ANALYTICS=$EMIT_ANALYTICS pnpm --filter db migrate:custom
 
   echo "Starting the application"
   infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN=$TB_TOKEN TINYBIRD_URL=$TB_HOST AUTH_REDIRECT_PROXY_URL=$AUTH_REDIRECT_PROXY_URL UNPRICE_API_URL=$UNPRICE_API_URL UNPRICE_API_KEY=$UNPRICE_API_KEY DRIZZLE_LOG=$DRIZZLE_LOG EMIT_METRICS_LOGS=$EMIT_METRICS_LOGS EMIT_ANALYTICS=$EMIT_ANALYTICS pnpm run dev

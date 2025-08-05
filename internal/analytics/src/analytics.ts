@@ -151,8 +151,10 @@ export class Analytics {
     return this.readClient.buildPipe({
       pipe: "v1_get_plans_conversion",
       parameters: z.object({
-        start_date: z.string().optional(),
-        end_date: z.string().optional(),
+        start_date: z.string().datetime().optional(),
+        end_date: z.string().datetime().optional(),
+        limit: z.number().optional(),
+        offset: z.number().optional(),
       }),
       data: z.object({
         date: z.coerce.date(),
@@ -278,6 +280,30 @@ export class Analytics {
         max: z.number(),
         count: z.number(),
         last_during_period: z.number(),
+      }),
+      opts: {
+        cache: "no-store",
+      },
+    })
+  }
+
+  public get getFeatureHeatmap() {
+    return this.readClient.buildPipe({
+      pipe: "v1_get_feature_heatmap",
+      parameters: z.object({
+        projectId: z.string().optional(),
+        start: z.number().optional(),
+        end: z.number().optional(),
+        intervalDays: z.number().default(7).optional(),
+      }),
+      data: z.object({
+        plan_slug: z.string(),
+        feature_slug: z.string(),
+        project_id: z.string(),
+        usage_count: z.number(),
+        usage_sum: z.number(),
+        verification_count: z.number(),
+        activity_score: z.number(),
       }),
       opts: {
         cache: "no-store",

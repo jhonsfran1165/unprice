@@ -22,7 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@unprice/ui/dropdown-menu"
-import { CustomerForm } from "../../../customers/_components/customers/customer-form"
+import { CustomerForm } from "../../../../customers/_components/customers/customer-form"
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>

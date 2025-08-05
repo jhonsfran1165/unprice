@@ -87,7 +87,16 @@ export const registerCanV1 = (app: App) =>
       now: Date.now(),
       metadata: {
         ...metadata,
-        ...stats,
+        ip: stats.ip,
+        country: stats.country,
+        region: stats.region,
+        colo: stats.colo,
+        city: stats.city,
+        latitude: stats.latitude,
+        longitude: stats.longitude,
+        ua: stats.ua,
+        continent: stats.continent,
+        source: stats.source,
       },
     })
 
@@ -128,7 +137,16 @@ export const registerCanV1 = (app: App) =>
               timestamp: Date.now(),
               metadata: {
                 action: "can",
-                ...stats,
+                ip: stats.ip,
+                country: stats.country,
+                region: stats.region,
+                colo: stats.colo,
+                city: stats.city,
+                latitude: stats.latitude,
+                longitude: stats.longitude,
+                ua: stats.ua,
+                continent: stats.continent,
+                source: stats.source,
               },
             })
             .catch((err) => {

@@ -1,15 +1,14 @@
 import { analytics } from "@unprice/analytics/client"
-import { TabNavigationLink } from "@unprice/ui/tabs-navigation"
-import { TabNavigation } from "@unprice/ui/tabs-navigation"
+import { Users } from "lucide-react"
 import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
 import { DataTable } from "~/components/data-table/data-table"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
-import { SuperLink } from "~/components/super-link"
 import { filtersDataTableCache } from "~/lib/searchParams"
 import Stats from "../_components/stats"
-import { columns } from "../_components/table/columns"
+import TabsDashboard from "../_components/tabs-dashboard"
+import { columns } from "./_components/table/columns"
 
 export const dynamic = "force-dynamic"
 
@@ -23,33 +22,24 @@ export default async function DashboardPage(props: {
   const filter = filtersDataTableCache.parse(props.searchParams)
 
   const plansConversion = await analytics.getPlansConversion({
-    start_date: filter.from ? new Date(filter.from).toISOString().split("T")[0] : undefined,
-    end_date: filter.to ? new Date(filter.to).toISOString().split("T")[0] : undefined,
+    start_date: filter.from ? new Date(filter.from).toISOString() : undefined,
+    end_date: filter.to ? new Date(filter.to).toISOString() : undefined,
+    limit: filter.page_size,
+    offset: filter.page * filter.page_size,
   })
 
   return (
     <DashboardShell>
-      <TabNavigation variant="solid">
-        <div className="flex items-center">
-          <TabNavigationLink asChild>
-            <SuperLink href={`${baseUrl}/dashboard`}>Overview</SuperLink>
-          </TabNavigationLink>
-          <TabNavigationLink active asChild>
-            <SuperLink href={`${baseUrl}/dashboard/plans`}>Plans & Features</SuperLink>
-          </TabNavigationLink>
-          <TabNavigationLink asChild>
-            <SuperLink href={`${baseUrl}/dashboard/pages`}>Pages</SuperLink>
-          </TabNavigationLink>
-        </div>
-      </TabNavigation>
-
+      <TabsDashboard baseUrl={baseUrl} activeTab="plans" />
       <Stats
-        stats={{
-          totalRevenue: "0",
-          newSignups: 0,
-          newSubscriptions: 0,
-          newCustomers: 0,
-        }}
+        stats={[
+          {
+            total: plansConversion.data.length,
+            icon: <Users />,
+            title: "Total Plans",
+            description: "Total number of plans",
+          },
+        ]}
       />
       <Suspense
         fallback={
@@ -64,7 +54,6 @@ export default async function DashboardPage(props: {
         }
       >
         <DataTable
-          pageCount={plansConversion.data.length}
           columns={columns}
           data={plansConversion.data}
           filterOptions={{

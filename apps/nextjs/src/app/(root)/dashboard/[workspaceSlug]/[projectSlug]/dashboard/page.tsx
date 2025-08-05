@@ -1,7 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
-import { BarChart2 } from "@unprice/ui/icons"
-import { TabNavigationLink } from "@unprice/ui/tabs-navigation"
-import { TabNavigation } from "@unprice/ui/tabs-navigation"
+import { BarChart2, Users } from "@unprice/ui/icons"
 import { cn } from "@unprice/ui/utils"
 import { cookies } from "next/headers"
 import type { SearchParams } from "nuqs/server"
@@ -10,12 +8,12 @@ import { AnalyticsCard } from "~/components/analytics/analytics-card"
 import { UsageChart } from "~/components/analytics/usage-chart"
 import { VerificationsChart } from "~/components/analytics/verifications-chart"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
-import { SuperLink } from "~/components/super-link"
 import { env } from "~/env"
 import { intervalParserCache } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
 import { Events } from "./_components/events"
 import Stats from "./_components/stats"
+import TabsDashboard from "./_components/tabs-dashboard"
 
 export const dynamic = "force-dynamic"
 
@@ -40,20 +38,16 @@ export default async function DashboardPage(props: {
 
   return (
     <DashboardShell>
-      <TabNavigation variant="solid">
-        <div className="flex items-center">
-          <TabNavigationLink active asChild>
-            <SuperLink href={`${baseUrl}/dashboard`}>Overview</SuperLink>
-          </TabNavigationLink>
-          <TabNavigationLink asChild>
-            <SuperLink href={`${baseUrl}/dashboard/plans`}>Plans & Features</SuperLink>
-          </TabNavigationLink>
-          <TabNavigationLink asChild>
-            <SuperLink href={`${baseUrl}/dashboard/pages`}>Pages</SuperLink>
-          </TabNavigationLink>
-        </div>
-      </TabNavigation>
-      <Stats stats={stats.stats} />
+      <TabsDashboard baseUrl={baseUrl} activeTab="overview" />
+      {/* TODO: add icons */}
+      <Stats
+        stats={Object.entries(stats.stats).map(([key, value]) => ({
+          total: Number(value),
+          icon: <Users />,
+          title: key,
+          description: key,
+        }))}
+      />
       <div className="mt-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
         <AnalyticsCard
           className="w-full md:w-2/3"

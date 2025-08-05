@@ -95,7 +95,16 @@ export const registerReportUsageV1 = (app: App) =>
       requestId,
       metadata: {
         ...metadata,
-        ...stats,
+        ip: stats.ip,
+        country: stats.country,
+        region: stats.region,
+        colo: stats.colo,
+        city: stats.city,
+        latitude: stats.latitude,
+        longitude: stats.longitude,
+        ua: stats.ua,
+        continent: stats.continent,
+        source: stats.source,
       },
     })
 
@@ -138,7 +147,16 @@ export const registerReportUsageV1 = (app: App) =>
               timestamp: Date.now(),
               metadata: {
                 action: "reportUsage",
-                ...stats,
+                ip: stats.ip,
+                country: stats.country,
+                region: stats.region,
+                colo: stats.colo,
+                city: stats.city,
+                latitude: stats.latitude,
+                longitude: stats.longitude,
+                ua: stats.ua,
+                continent: stats.continent,
+                source: stats.source,
               },
             })
             .catch((err) => {
