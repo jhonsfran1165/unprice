@@ -34,6 +34,7 @@ import {
   DialogTitle,
 } from "@unprice/ui/dialog"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 
 import { ROLES_APP } from "@unprice/db/utils"
@@ -41,7 +42,7 @@ import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
 import type { WorkspaceRole } from "@unprice/db/validators"
 import { toastAction } from "~/lib/toast"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
@@ -54,42 +55,55 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const [open, setIsOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
   const [selectedRole, setSelectedRole] = React.useState<WorkspaceRole>(invite.role)
-  const apiUtils = api.useUtils()
+  const trpc = useTRPC()
   const router = useRouter()
+  const queryClient = useQueryClient()
 
-  const changeRoleInvite = api.workspaces.changeRoleInvite.useMutation({
-    onSettled: async () => {
-      await apiUtils.workspaces.listInvitesByActiveWorkspace.invalidate()
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("success", "Role changed")
-      setIsOpen(false)
-    },
-  })
+  const changeRoleInvite = useMutation(
+    trpc.workspaces.changeRoleInvite.mutationOptions({
+      onSettled: async () => {
+        await queryClient.invalidateQueries(
+          trpc.workspaces.listInvitesByActiveWorkspace.queryOptions()
+        )
+        router.refresh()
+      },
+      onSuccess: () => {
+        toastAction("success", "Role changed")
+        setIsOpen(false)
+      },
+    })
+  )
 
-  const deleteInvite = api.workspaces.deleteInvite.useMutation({
-    onSettled: async () => {
-      await apiUtils.workspaces.listInvitesByActiveWorkspace.invalidate()
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("deleted")
-      setAlertOpen(false)
-    },
-  })
+  const deleteInvite = useMutation(
+    trpc.workspaces.deleteInvite.mutationOptions({
+      onSettled: async () => {
+        await queryClient.invalidateQueries(
+          trpc.workspaces.listInvitesByActiveWorkspace.queryOptions()
+        )
+        router.refresh()
+      },
+      onSuccess: () => {
+        toastAction("deleted")
+        setAlertOpen(false)
+      },
+    })
+  )
 
-  const resendInvite = api.workspaces.resendInvite.useMutation({
-    onSettled: async () => {
-      await apiUtils.workspaces.listInvitesByActiveWorkspace.invalidate()
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("success", "Invite resent")
-      setIsOpen(false)
-      setAlertOpen(false)
-    },
-  })
+  const resendInvite = useMutation(
+    trpc.workspaces.resendInvite.mutationOptions({
+      onSettled: async () => {
+        await queryClient.invalidateQueries(
+          trpc.workspaces.listInvitesByActiveWorkspace.queryOptions()
+        )
+        router.refresh()
+      },
+      onSuccess: () => {
+        toastAction("success", "Invite resent")
+        setIsOpen(false)
+        setAlertOpen(false)
+      },
+    })
+  )
 
   function onDelete() {
     startTransition(async () => {

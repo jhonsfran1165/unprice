@@ -1,5 +1,6 @@
 "use client"
 
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { PAYMENT_PROVIDERS } from "@unprice/db/utils"
 import type { PaymentProvider } from "@unprice/db/validators"
 import { Card, CardContent, CardFooter } from "@unprice/ui/card"
@@ -8,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react"
 import { UserPaymentMethod } from "~/components/forms/payment-method"
 import { SubmitButton } from "~/components/submit-button"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function PaymentMethodForm({
   customerId,
@@ -26,22 +27,27 @@ export function PaymentMethodForm({
   // TODO: set with the default payment provider for the project
   const [provider, setProvider] = useState<PaymentProvider>("stripe")
 
-  const { data, isLoading, error } = api.customers.listPaymentMethods.useQuery(
-    {
-      customerId,
-      provider: provider,
-    },
-    {
-      enabled: !loading,
-      retry: false,
-    }
+  const trpc = useTRPC()
+  const { data, isLoading, error } = useQuery(
+    trpc.customers.listPaymentMethods.queryOptions(
+      {
+        customerId,
+        provider: provider,
+      },
+      {
+        enabled: !loading,
+        retry: false,
+      }
+    )
   )
 
-  const createSession = api.customers.createPaymentMethod.useMutation({
-    onSuccess: (data) => {
-      if (data?.url) window.location.href = data?.url
-    },
-  })
+  const createSession = useMutation(
+    trpc.customers.createPaymentMethod.mutationOptions({
+      onSuccess: (data) => {
+        if (data?.url) window.location.href = data?.url
+      },
+    })
+  )
 
   const defaultPaymentMethod = data?.paymentMethods.at(0)
 

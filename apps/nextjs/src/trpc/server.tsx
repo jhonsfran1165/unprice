@@ -1,14 +1,16 @@
 import "server-only"
 
-import { cookies, headers } from "next/headers"
-import { cache } from "react"
-
-import { createHydrationHelpers } from "@trpc/react-query/rsc"
+import { dehydrate } from "@tanstack/react-query"
+import { HydrationBoundary } from "@tanstack/react-query"
+import type { TRPCQueryOptions } from "@trpc/tanstack-react-query"
+import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query"
 import { getSession } from "@unprice/auth/server-rsc"
 import { COOKIES_APP } from "@unprice/config"
 import { newId } from "@unprice/db/utils"
 import { createCallerFactory, createTRPCContext } from "@unprice/trpc"
 import { appRouter } from "@unprice/trpc/routes"
+import { cookies, headers } from "next/headers"
+import { cache } from "react"
 import { createQueryClient } from "./shared"
 
 /**
@@ -39,4 +41,25 @@ const getQueryClient = cache(createQueryClient)
 
 export const api = createCallerFactory(appRouter)(createContext)
 
-export const { trpc, HydrateClient } = createHydrationHelpers<typeof appRouter>(api, getQueryClient)
+export const trpc = createTRPCOptionsProxy({
+  router: appRouter,
+  queryClient: getQueryClient,
+  ctx: createContext,
+})
+
+export function HydrateClient(props: { children: React.ReactNode }) {
+  const dehydratedState = dehydrate(getQueryClient())
+
+  return <HydrationBoundary state={dehydratedState}>{props.children}</HydrationBoundary>
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(queryOptions: T) {
+  const queryClient = getQueryClient()
+  if (queryOptions.queryKey[1]?.type === "infinite") {
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    void queryClient.prefetchInfiniteQuery(queryOptions as any)
+  } else {
+    void queryClient.prefetchQuery(queryOptions)
+  }
+}

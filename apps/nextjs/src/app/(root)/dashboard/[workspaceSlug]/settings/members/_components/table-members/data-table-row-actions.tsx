@@ -37,8 +37,9 @@ import {
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toastAction } from "~/lib/toast"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
@@ -51,29 +52,38 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const [alertOpen, setAlertOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
 
-  const apiUtils = api.useUtils()
+  const trpc = useTRPC()
   const router = useRouter()
+  const queryClient = useQueryClient()
 
-  const deleteMember = api.workspaces.deleteMember.useMutation({
-    onSettled: async () => {
-      await apiUtils.workspaces.listMembersByActiveWorkspace.invalidate()
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("deleted")
-    },
-  })
+  const deleteMember = useMutation(
+    trpc.workspaces.deleteMember.mutationOptions({
+      onSettled: async () => {
+        await queryClient.invalidateQueries(
+          trpc.workspaces.listMembersByActiveWorkspace.queryOptions()
+        )
+        router.refresh()
+      },
+      onSuccess: () => {
+        toastAction("deleted")
+      },
+    })
+  )
 
-  const changeRoleMember = api.workspaces.changeRoleMember.useMutation({
-    onSettled: async () => {
-      await apiUtils.workspaces.listMembersByActiveWorkspace.invalidate()
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("success")
-      setIsOpen(false)
-    },
-  })
+  const changeRoleMember = useMutation(
+    trpc.workspaces.changeRoleMember.mutationOptions({
+      onSettled: async () => {
+        await queryClient.invalidateQueries(
+          trpc.workspaces.listMembersByActiveWorkspace.queryOptions()
+        )
+        router.refresh()
+      },
+      onSuccess: () => {
+        toastAction("success")
+        setIsOpen(false)
+      },
+    })
+  )
 
   function onChangeRole() {
     startTransition(async () => {

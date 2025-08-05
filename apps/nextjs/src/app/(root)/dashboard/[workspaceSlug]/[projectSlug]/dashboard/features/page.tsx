@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import type { SearchParams } from "nuqs/server"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { intervalDaysParserCache } from "~/lib/searchParams"
-import { HydrateClient, api, trpc } from "~/trpc/server"
+import { HydrateClient, api, prefetch, trpc } from "~/trpc/server"
 import Stats from "../_components/stats"
 import TabsDashboard from "../_components/tabs-dashboard"
 import FeatureUsageHeatmap from "./_components/features-heat-map"
@@ -25,9 +25,16 @@ export default async function DashboardFeatures(props: {
   }
 
   // prefetch
-  void trpc.analytics.getFeatureHeatmap.prefetch({
-    intervalDays: filter.intervalDays,
-  })
+  prefetch(
+    trpc.analytics.getFeatureHeatmap.queryOptions(
+      {
+        intervalDays: filter.intervalDays,
+      },
+      {
+        staleTime: 1000 * 60, // 1 minute
+      }
+    )
+  )
 
   return (
     <DashboardShell>
@@ -36,7 +43,7 @@ export default async function DashboardFeatures(props: {
       <Stats
         stats={[
           {
-            total: 10,
+            total: "10",
             icon: <Users />,
             title: "Total Features",
             description: "Total number of features",

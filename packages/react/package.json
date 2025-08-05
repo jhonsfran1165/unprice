@@ -26,7 +26,7 @@
     "dev": "tsup --watch"
   },
   "dependencies": {
-    "@tanstack/react-query": "5.66.0",
+    "@tanstack/react-query": "5.80.3",
     "@unprice/api": "workspace:*"
   },
   "peerDependencies": {

@@ -42,7 +42,7 @@ export default async function DashboardPage(props: {
       {/* TODO: add icons */}
       <Stats
         stats={Object.entries(stats.stats).map(([key, value]) => ({
-          total: Number(value),
+          total: value.toString(),
           icon: <Users />,
           title: key,
           description: key,

@@ -12,6 +12,7 @@ import { Input } from "@unprice/ui/input"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { startTransition } from "react"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   Card,
   CardContent,
@@ -22,31 +23,43 @@ import {
 } from "@unprice/ui/card"
 import { toast, toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function RenameProjectForm(props: {
   projectPromise: Promise<RouterOutputs["projects"]["getBySlug"]>
 }) {
   const { project } = use(props.projectPromise)
-  const apiUtils = api.useUtils()
   const router = useRouter()
 
-  const renameProject = api.projects.rename.useMutation({
-    onSettled: async () => {
-      await apiUtils.projects.listByWorkspace.invalidate()
-      await apiUtils.projects.getBySlug.invalidate({ slug: project.slug })
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("success")
-    },
-  })
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
 
-  const migrateProject = api.analytics.migrate.useMutation({
-    onSuccess: () => {
-      router.refresh()
-    },
-  })
+  const renameProject = useMutation(
+    trpc.projects.rename.mutationOptions({
+      onSettled: async () => {
+        await queryClient.invalidateQueries(
+          trpc.projects.listByWorkspace.queryOptions({
+            workspaceSlug: project.workspace.slug,
+          })
+        )
+        await queryClient.invalidateQueries(
+          trpc.projects.getBySlug.queryOptions({ slug: project.slug })
+        )
+        router.refresh()
+      },
+      onSuccess: () => {
+        toastAction("success")
+      },
+    })
+  )
+
+  const migrateProject = useMutation(
+    trpc.analytics.migrate.mutationOptions({
+      onSuccess: () => {
+        router.refresh()
+      },
+    })
+  )
 
   function onMigrateProject() {
     startTransition(() => {

@@ -3,8 +3,8 @@
 import { type QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import type { TRPCLink } from "@trpc/client"
-import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client"
-import { createTRPCReact } from "@trpc/react-query"
+import { createTRPCClient, httpBatchStreamLink, loggerLink } from "@trpc/client"
+import { createTRPCContext } from "@trpc/tanstack-react-query"
 import { use, useState } from "react"
 
 import { newId } from "@unprice/db/utils"
@@ -13,7 +13,7 @@ import { transformer } from "@unprice/trpc/transformer"
 import { useSSROnlySecret } from "ssr-only-secrets"
 import { createQueryClient, getBaseUrl } from "./shared"
 
-export const api = createTRPCReact<AppRouter>()
+export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>()
 
 export const endingLinkClient = (opts?: {
   allEndpointsProcedures: {
@@ -30,13 +30,13 @@ export const endingLinkClient = (opts?: {
       ...(opts?.cookies ? { cookie: opts.cookies } : {}),
     }
 
-    const edgeLink = unstable_httpBatchStreamLink({
+    const edgeLink = httpBatchStreamLink({
       headers,
       transformer: transformer,
       url: `${getBaseUrl()}/api/trpc/edge`,
     })(runtime)
 
-    const lambdaLink = unstable_httpBatchStreamLink({
+    const lambdaLink = httpBatchStreamLink({
       headers,
       transformer: transformer,
       url: `${getBaseUrl()}/api/trpc/lambda`,
@@ -64,10 +64,9 @@ const getQueryClient = () => {
     // Server: always make a new query client
     return createQueryClient()
   }
-
   // Browser: use singleton pattern to keep the same query client
-  clientQueryClientSingleton ??= createQueryClient()
-  return clientQueryClientSingleton
+  // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+  return (clientQueryClientSingleton ??= createQueryClient())
 }
 
 export function TRPCReactProvider(props: {
@@ -82,7 +81,7 @@ export function TRPCReactProvider(props: {
   const cookies = useSSROnlySecret(use(props.cookiePromise), "COOKIE_ENCRYPTION_KEY")
 
   const [trpcClient] = useState(() =>
-    api.createClient({
+    createTRPCClient<AppRouter>({
       links: [
         loggerLink({
           enabled: (opts) =>
@@ -98,11 +97,11 @@ export function TRPCReactProvider(props: {
   )
 
   return (
-    <api.Provider client={trpcClient} queryClient={queryClient}>
+    <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         {props.children}
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
-    </api.Provider>
+    </TRPCProvider>
   )
 }

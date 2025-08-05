@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
+import { useMutation } from "@tanstack/react-query"
 import {
   FEATURE_TYPES,
   FEATURE_TYPES_MAPS,
@@ -35,7 +36,7 @@ import { SubmitButton } from "~/components/submit-button"
 import { usePlanFeaturesList } from "~/hooks/use-features"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 import { BannerPublishedVersion } from "../[planVersionId]/_components/banner"
 import { FlatFormFields } from "./flat-form-fields"
 import { PackageFormFields } from "./package-form-fields"
@@ -55,6 +56,7 @@ export function FeatureConfigForm({
 }) {
   const router = useRouter()
   const [_planFeatureList, setPlanFeatureList] = usePlanFeaturesList()
+  const trpc = useTRPC()
 
   const editMode = !!defaultValues.id
   const isPublished = planVersion?.status === "published"
@@ -109,25 +111,27 @@ export function FeatureConfigForm({
     defaultValues: controlledDefaultValues,
   })
 
-  const updatePlanVersionFeatures = api.planVersionFeatures.update.useMutation({
-    onSuccess: ({ planVersionFeature }) => {
-      // update the feature list
-      setPlanFeatureList((features) => {
-        const index = features.findIndex(
-          (feature) => feature.featureId === planVersionFeature.featureId
-        )
+  const updatePlanVersionFeatures = useMutation(
+    trpc.planVersionFeatures.update.mutationOptions({
+      onSuccess: ({ planVersionFeature }) => {
+        // update the feature list
+        setPlanFeatureList((features) => {
+          const index = features.findIndex(
+            (feature) => feature.featureId === planVersionFeature.featureId
+          )
 
-        features[index] = planVersionFeature
+          features[index] = planVersionFeature
 
-        return features
-      })
+          return features
+        })
 
-      form.reset(planVersionFeature)
-      toastAction("saved")
-      setDialogOpen?.(false)
-      router.refresh()
-    },
-  })
+        form.reset(planVersionFeature)
+        toastAction("saved")
+        setDialogOpen?.(false)
+        router.refresh()
+      },
+    })
+  )
 
   // reset form values when feature changes
   useEffect(() => {

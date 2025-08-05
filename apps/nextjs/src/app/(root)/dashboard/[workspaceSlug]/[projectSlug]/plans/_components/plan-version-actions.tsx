@@ -8,10 +8,11 @@ import { Button } from "@unprice/ui/button"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { toast } from "@unprice/ui/sonner"
 
+import { useMutation } from "@tanstack/react-query"
 import { ConfirmAction } from "~/components/confirm-action"
 import { usePlanFeaturesList } from "~/hooks/use-features"
 import { toastAction } from "~/lib/toast"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export interface PlanVersionPublishProps extends React.ComponentPropsWithoutRef<"button"> {
   planVersionId: string
@@ -25,15 +26,18 @@ const PlanVersionPublish = forwardRef<ElementRef<"button">, PlanVersionPublishPr
     const { planVersionId, onConfirmAction, classNames, variant = "primary" } = props
     const router = useRouter()
     const [planFeatures] = usePlanFeaturesList()
+    const trpc = useTRPC()
 
     // is valid when all features have config
     const isValidConfig = Object.values(planFeatures).every((f) => f.id !== undefined)
 
-    const publishVersion = api.planVersions.publish.useMutation({
-      onSuccess: () => {
-        router.refresh()
-      },
-    })
+    const publishVersion = useMutation(
+      trpc.planVersions.publish.mutationOptions({
+        onSuccess: () => {
+          router.refresh()
+        },
+      })
+    )
 
     function onPublishVersion() {
       startTransition(() => {
@@ -88,14 +92,16 @@ export interface PlanVersionDuplicateProps extends React.ComponentPropsWithoutRe
 const PlanVersionDuplicate = forwardRef<ElementRef<"button">, PlanVersionDuplicateProps>(
   (props, ref) => {
     const { planVersionId, classNames, onConfirmAction } = props
-
     const router = useRouter()
+    const trpc = useTRPC()
 
-    const duplicateVersion = api.planVersions.duplicate.useMutation({
-      onSuccess: () => {
-        router.refresh()
-      },
-    })
+    const duplicateVersion = useMutation(
+      trpc.planVersions.duplicate.mutationOptions({
+        onSuccess: () => {
+          router.refresh()
+        },
+      })
+    )
 
     function onDuplicateVersion() {
       startTransition(() => {
@@ -138,14 +144,16 @@ PlanVersionDuplicate.displayName = "PlanVersionDuplicate"
 const PlanVersionDeactivate = forwardRef<ElementRef<"button">, PlanVersionDuplicateProps>(
   (props, ref) => {
     const { planVersionId, classNames, onConfirmAction } = props
-
     const router = useRouter()
+    const trpc = useTRPC()
 
-    const duplicateVersion = api.planVersions.deactivate.useMutation({
-      onSuccess: () => {
-        router.refresh()
-      },
-    })
+    const duplicateVersion = useMutation(
+      trpc.planVersions.deactivate.mutationOptions({
+        onSuccess: () => {
+          router.refresh()
+        },
+      })
+    )
 
     function onDeactivateVersion() {
       startTransition(() => {

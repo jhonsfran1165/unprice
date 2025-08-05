@@ -16,9 +16,10 @@ import { type FieldErrors, type UseFormReturn, useFieldArray } from "react-hook-
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { formatDate } from "~/lib/dates"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 import { SubscriptionPhaseForm } from "./subscription-phase-form"
 
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { Skeleton } from "@unprice/ui/skeleton"
 import { startTransition } from "react"
 
@@ -31,6 +32,7 @@ export default function SubscriptionPhaseFormField({
   subscriptionId: string
   timezone: string
 }) {
+  const trpc = useTRPC()
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
     name: "phases",
@@ -58,13 +60,14 @@ export default function SubscriptionPhaseFormField({
   const { errors } = form.formState
 
   // this query is deduplicated from the parent component
-  const { data: planVersions, isLoading: isPlanVersionsLoading } =
-    api.planVersions.listByActiveProject.useQuery({
+  const { data: planVersions, isLoading: isPlanVersionsLoading } = useQuery(
+    trpc.planVersions.listByActiveProject.queryOptions({
       onlyPublished: true,
       onlyLatest: false,
     })
+  )
 
-  const removePhase = api.subscriptions.removePhase.useMutation()
+  const removePhase = useMutation(trpc.subscriptions.removePhase.mutationOptions())
 
   const [isDelete, setConfirmDelete] = useState<Map<string, boolean>>(
     new Map<string, boolean>(fields.map((item) => [item.id, false] as [string, boolean]))

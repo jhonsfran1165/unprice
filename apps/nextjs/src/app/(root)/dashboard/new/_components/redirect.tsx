@@ -1,19 +1,21 @@
 "use client"
 
+import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { updateSession } from "~/actions/update-session"
 import LayoutLoader from "~/components/layout/layout-loader"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export default function Redirect({ url }: { url: string }) {
   const router = useRouter()
-  const apiUtils = api.useUtils()
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const validate = async () => {
       // // invalidate the workspaces list to refresh the workspaces
-      await apiUtils.workspaces.listWorkspacesByActiveUser.invalidate()
+      await queryClient.invalidateQueries(trpc.workspaces.listWorkspacesByActiveUser.queryOptions())
 
       // // trigger the session update
       await updateSession()

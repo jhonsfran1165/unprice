@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@unprice/ui/card"
 
 type StatsProps = {
-  total: number
+  total: string
   icon: React.ReactNode
   title: string
   description: string

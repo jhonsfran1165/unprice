@@ -34,7 +34,7 @@ export default async function DashboardPage(props: {
       <Stats
         stats={[
           {
-            total: plansConversion.data.length,
+            total: plansConversion.data.length.toString(),
             icon: <Users />,
             title: "Total Plans",
             description: "Total number of plans",

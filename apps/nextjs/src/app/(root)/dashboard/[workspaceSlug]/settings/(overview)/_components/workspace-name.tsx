@@ -1,5 +1,6 @@
 "use client"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { Workspace } from "@unprice/db/validators"
 import {
   Card,
@@ -17,13 +18,15 @@ import { z } from "zod"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function WorkspaceName(props: {
   workspace: Workspace
 }) {
   const router = useRouter()
-  const apiUtils = api.useUtils()
+
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
 
   const form = useZodForm({
     schema: z.object({
@@ -34,15 +37,19 @@ export function WorkspaceName(props: {
     },
   })
 
-  const renamedWorkspace = api.workspaces.rename.useMutation({
-    onSettled: async () => {
-      await apiUtils.workspaces.listWorkspacesByActiveUser.invalidate()
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("success")
-    },
-  })
+  const renamedWorkspace = useMutation(
+    trpc.workspaces.rename.mutationOptions({
+      onSettled: async () => {
+        await queryClient.invalidateQueries(
+          trpc.workspaces.listWorkspacesByActiveUser.queryOptions()
+        )
+        router.refresh()
+      },
+      onSuccess: () => {
+        toastAction("success")
+      },
+    })
+  )
 
   async function onSubmit(data: { name: string }) {
     await renamedWorkspace.mutateAsync(data)

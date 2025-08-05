@@ -8,8 +8,9 @@ import { Button } from "@unprice/ui/button"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { toast } from "@unprice/ui/sonner"
 
+import { useMutation } from "@tanstack/react-query"
 import { ConfirmAction } from "~/components/confirm-action"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export interface PagePublishProps extends React.ComponentPropsWithoutRef<"button"> {
   pageId: string
@@ -21,12 +22,15 @@ export interface PagePublishProps extends React.ComponentPropsWithoutRef<"button
 const PagePublish = forwardRef<ElementRef<"button">, PagePublishProps>((props, ref) => {
   const { pageId, onConfirmAction, classNames, variant = "primary" } = props
   const router = useRouter()
+  const trpc = useTRPC()
 
-  const publishPage = api.pages.publish.useMutation({
-    onSuccess: () => {
-      router.refresh()
-    },
-  })
+  const publishPage = useMutation(
+    trpc.pages.publish.mutationOptions({
+      onSuccess: () => {
+        router.refresh()
+      },
+    })
+  )
 
   function onPublishVersion() {
     startTransition(() => {

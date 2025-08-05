@@ -9,11 +9,12 @@ import { Button } from "@unprice/ui/button"
 import { Input } from "@unprice/ui/input"
 import { ScrollArea } from "@unprice/ui/scroll-area"
 
+import { useQuery } from "@tanstack/react-query"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useDebounce } from "~/hooks/use-debounce"
 import { usePlanFeaturesList } from "~/hooks/use-features"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 import { FeatureDialog } from "../../_components/feature-dialog"
 import { SortableFeature } from "../../_components/sortable-feature"
 
@@ -26,19 +27,21 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
   const initialFeatures = use(featuresPromise)
   const [filter, setFilter] = useState("")
   const filterDebounce = useDebounce(filter, 500)
-
+  const trpc = useTRPC()
   const [planVersionFeatureList] = usePlanFeaturesList()
 
-  const { data, isFetching } = api.features.searchBy.useQuery(
-    {
-      search: filterDebounce,
-    },
-    {
-      staleTime: 0,
-      initialData: initialFeatures,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-    }
+  const { data, isFetching } = useQuery(
+    trpc.features.searchBy.queryOptions(
+      {
+        search: filterDebounce,
+      },
+      {
+        staleTime: 0,
+        initialData: initialFeatures,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+      }
+    )
   )
 
   if (!planVersion) return null

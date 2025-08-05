@@ -1,5 +1,6 @@
 "use client"
 
+import { useSuspenseQuery } from "@tanstack/react-query"
 import type { Analytics } from "@unprice/analytics"
 import { nFormatter } from "@unprice/db/utils"
 import { Badge } from "@unprice/ui/badge"
@@ -9,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@unpri
 import { BarChart, HelpCircle, Loader2 } from "lucide-react"
 import { CodeApiSheet } from "~/components/code-api-sheet"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 type FeatureUsageEvent = Awaited<ReturnType<Analytics["getFeatureHeatmap"]>>["data"][number]
 
@@ -53,9 +54,12 @@ const FeatureUsageHeatmapEmptyState = ({ isLoading }: { isLoading?: boolean }) =
 }
 
 export default function FeatureUsageHeatmap() {
-  const [featureUsageEvents] = api.analytics.getFeatureHeatmap.useSuspenseQuery({
-    intervalDays: 7,
-  })
+  const trpc = useTRPC()
+  const { data: featureUsageEvents, isLoading } = useSuspenseQuery(
+    trpc.analytics.getFeatureHeatmap.queryOptions({
+      intervalDays: 7,
+    })
+  )
 
   // Get unique plans and features
   const plans = [...new Set(featureUsageEvents?.data.map((event) => event.plan_slug))]
@@ -82,7 +86,7 @@ export default function FeatureUsageHeatmap() {
       </CardHeader>
       <CardContent>
         {featureUsageEvents?.data.length === 0 ? (
-          <FeatureUsageHeatmapEmptyState />
+          <FeatureUsageHeatmapEmptyState isLoading={isLoading} />
         ) : (
           <TooltipProvider>
             <div className="overflow-x-auto">

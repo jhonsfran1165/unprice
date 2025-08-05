@@ -19,6 +19,7 @@ import {
 } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { CURRENCIES } from "@unprice/db/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { CopyButton } from "~/components/copy-button"
@@ -26,7 +27,7 @@ import TimeZoneFormField from "~/components/forms/timezone-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function ProjectForm(props: {
   onSuccess?: (project: Project) => void
@@ -34,7 +35,8 @@ export function ProjectForm(props: {
 }) {
   const router = useRouter()
   const workspaceSlug = useParams().workspaceSlug as string
-  const apiUtils = api.useUtils()
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
 
   const editMode = !!props.defaultValues.id
   const formSchema = editMode ? projectSelectBaseSchema : projectInsertBaseSchema
@@ -44,37 +46,41 @@ export function ProjectForm(props: {
     defaultValues: props.defaultValues,
   })
 
-  const updateProject = api.projects.update.useMutation({
-    onSuccess: (data) => {
-      const { project: newProject } = data
+  const updateProject = useMutation(
+    trpc.projects.update.mutationOptions({
+      onSuccess: async (data) => {
+        const { project: newProject } = data
 
-      toastAction("success")
+        toastAction("success")
 
-      // invalidate the projects query
-      apiUtils.projects.listByActiveWorkspace.invalidate()
+        // invalidate the projects query
+        await queryClient.invalidateQueries(trpc.projects.listByActiveWorkspace.queryOptions())
 
-      if (props.onSuccess) {
-        props.onSuccess(newProject)
-      }
-    },
-  })
+        if (props.onSuccess) {
+          props.onSuccess(newProject)
+        }
+      },
+    })
+  )
 
-  const createProject = api.projects.create.useMutation({
-    onSuccess: (data) => {
-      const { project: newProject } = data
+  const createProject = useMutation(
+    trpc.projects.create.mutationOptions({
+      onSuccess: async (data) => {
+        const { project: newProject } = data
 
-      toastAction("success")
+        toastAction("success")
 
-      // invalidate the projects query
-      apiUtils.projects.listByActiveWorkspace.invalidate()
+        // invalidate the projects query
+        await queryClient.invalidateQueries(trpc.projects.listByActiveWorkspace.queryOptions())
 
-      if (props.onSuccess) {
-        props.onSuccess(newProject)
-      } else {
-        router.push(`/${workspaceSlug}/${newProject?.slug}`)
-      }
-    },
-  })
+        if (props.onSuccess) {
+          props.onSuccess(newProject)
+        } else {
+          router.push(`/${workspaceSlug}/${newProject?.slug}`)
+        }
+      },
+    })
+  )
 
   const onSubmit = async (data: ProjectInsert | Project) => {
     if (editMode) {
