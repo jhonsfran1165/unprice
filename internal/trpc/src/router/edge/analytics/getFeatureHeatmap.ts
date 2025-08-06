@@ -3,23 +3,21 @@ import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
 
 export const getFeatureHeatmap = protectedProjectProcedure
-  .input(
-    z.object({
-      intervalDays: z.number().min(1).max(90).optional(),
-    })
-  )
+  .input(z.custom<Parameters<Analytics["getFeatureHeatmap"]>[0]>())
   .output(
     z.object({
       data: z.custom<Awaited<ReturnType<Analytics["getFeatureHeatmap"]>>["data"]>(),
     })
   )
   .query(async (opts) => {
-    const { intervalDays } = opts.input
+    const { intervalDays, start, end } = opts.input
 
     const data = await opts.ctx.analytics
       .getFeatureHeatmap({
         projectId: opts.ctx.project.id,
         intervalDays,
+        start,
+        end,
       })
       .catch((err) => {
         opts.ctx.logger.error("Failed to get feature heatmap", {

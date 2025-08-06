@@ -22,29 +22,30 @@ export default async function DashboardFeatures(props: {
   const filter = intervalParserCache.parse(props.searchParams)
   const interval = prepareInterval(filter.intervalFilter)
 
-  // prefetch feature heatmap
-  prefetch(
-    trpc.analytics.getFeatureHeatmap.queryOptions(
-      {
-        intervalDays: interval.intervalDays,
-      },
-      {
-        staleTime: 1000 * 60, // update every minute
-      }
-    )
-  )
-
-  // prefetch features overview
-  prefetch(
-    trpc.analytics.getFeaturesOverview.queryOptions(
-      {
-        intervalDays: interval.intervalDays,
-      },
-      {
-        staleTime: 1000 * 60, // update every minute
-      }
-    )
-  )
+  void Promise.all([
+    prefetch(
+      trpc.analytics.getFeatureHeatmap.queryOptions(
+        {
+          intervalDays: interval.intervalDays,
+          start: interval.start,
+          end: interval.end,
+        },
+        {
+          staleTime: 1000 * 60, // update every minute
+        }
+      )
+    ),
+    prefetch(
+      trpc.analytics.getFeaturesOverview.queryOptions(
+        {
+          intervalDays: interval.intervalDays,
+        },
+        {
+          staleTime: 1000 * 60, // update every minute
+        }
+      )
+    ),
+  ])
 
   return (
     <DashboardShell>

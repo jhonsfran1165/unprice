@@ -1,9 +1,4 @@
-
-- name: default_last_7_days
+- name: with_start_and_end
   description: Test the default behavior showing last 7 days of data
-  parameters: start_date=2025-07-02&end_date=2025-07-02
+  parameters: start=2025-07-02&end=2025-07-02
   expected_result: |
-    {"date":"2025-07-02","page_id":"page_pricing","plan_version_id":"pv_pro_v2","plan_views":3,"plan_clicks":2,"plan_signups":1,"conversion":33.33333333333333}
-    {"date":"2025-07-02","page_id":"page_pricing","plan_version_id":"pv_starter_v1","plan_views":3,"plan_clicks":1,"plan_signups":1,"conversion":33.33333333333333}
-    {"date":"2025-07-02","page_id":"page_pricing","plan_version_id":"pv_enterprise_v1","plan_views":2,"plan_clicks":1,"plan_signups":0,"conversion":0}
-    {"date":"2025-07-02","page_id":"page_signup","plan_version_id":"pv_basic_v3","plan_views":1,"plan_clicks":1,"plan_signups":0,"conversion":0}

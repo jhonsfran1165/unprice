@@ -168,6 +168,28 @@ export class Analytics {
     })
   }
 
+  public get getPagesOverview() {
+    return this.readClient.buildPipe({
+      pipe: "v1_get_pages_overview",
+      parameters: z.object({
+        intervalDays: z.number().optional(),
+        pageId: z.string().optional(),
+      }),
+      data: z.object({
+        date: z.coerce.date(),
+        page_id: z.string(),
+        desktop_visits: z.number(),
+        mobile_visits: z.number(),
+        other_visits: z.number(),
+        desktop_hits: z.number(),
+        mobile_hits: z.number(),
+        other_hits: z.number(),
+        total_visits: z.number(),
+        total_hits: z.number(),
+      }),
+    })
+  }
+
   public get getFeaturesOverview() {
     return this.readClient.buildPipe({
       pipe: "v1_get_features_overview",
@@ -309,7 +331,7 @@ export class Analytics {
         projectId: z.string().optional(),
         start: z.number().optional(),
         end: z.number().optional(),
-        intervalDays: z.number().default(7).optional(),
+        intervalDays: z.number().optional(),
       }),
       data: z.object({
         plan_slug: z.string(),

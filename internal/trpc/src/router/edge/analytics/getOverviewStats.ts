@@ -5,7 +5,7 @@ import { add, dinero, toDecimal } from "dinero.js"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
 
-export const getStats = protectedProjectProcedure
+export const getOverviewStats = protectedProjectProcedure
   .input(z.void())
   .output(
     z.object({
@@ -23,9 +23,6 @@ export const getStats = protectedProjectProcedure
   .query(async (opts) => {
     const projectId = opts.ctx.project.id
     const now = Date.now()
-
-    // wait 1 second
-    await new Promise((resolve) => setTimeout(resolve, 10000))
 
     // TODO: improve this query
     const data = await opts.ctx.db.query.subscriptions.findMany({

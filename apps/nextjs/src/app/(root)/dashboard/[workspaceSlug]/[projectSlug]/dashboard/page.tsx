@@ -1,3 +1,4 @@
+import { prepareInterval } from "@unprice/analytics"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import { BarChart2 } from "@unprice/ui/icons"
 import { cn } from "@unprice/ui/utils"
@@ -24,15 +25,17 @@ export default async function DashboardOverview(props: {
   const { projectSlug, workspaceSlug } = props.params
   const baseUrl = `/${workspaceSlug}/${projectSlug}`
   const filter = intervalParserCache.parse(props.searchParams)
+  const interval = prepareInterval(filter.intervalFilter)
 
   void Promise.all([
     // prefetch stats
-    prefetch(trpc.analytics.getStats.queryOptions()),
+    prefetch(trpc.analytics.getOverviewStats.queryOptions()),
     // prefetch verifications
     prefetch(
       trpc.analytics.getVerifications.queryOptions(
         {
-          range: filter.intervalFilter,
+          start: interval.start,
+          end: interval.end,
         },
         {
           staleTime: 1000 * 60, // update every minute
@@ -43,7 +46,8 @@ export default async function DashboardOverview(props: {
     prefetch(
       trpc.analytics.getUsage.queryOptions(
         {
-          range: filter.intervalFilter,
+          start: interval.start,
+          end: interval.end,
         },
         {
           staleTime: 1000 * 60, // update every minute

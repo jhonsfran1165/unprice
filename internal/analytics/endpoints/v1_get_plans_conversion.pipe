@@ -25,7 +25,6 @@ SQL >
         {% if defined(projectId) %}
         AND unprice_plan_versions.project_id = {{ String(projectId) }}
         {% end %}
-
         {% if defined(intervalDays) %}
             AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
         {% else %}
@@ -81,7 +80,6 @@ SQL >
         {% if defined(projectId) %}
         AND unprice_plan_versions.project_id = {{ String(projectId) }}
         {% end %}
-
         {% if defined(intervalDays) %}
             AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
         {% else %}

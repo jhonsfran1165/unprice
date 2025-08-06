@@ -3,11 +3,7 @@ import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
 
 export const getPlansConversion = protectedProjectProcedure
-  .input(
-    z.object({
-      intervalDays: z.number().min(1).max(90).optional(),
-    })
-  )
+  .input(z.custom<Parameters<Analytics["getPlansConversion"]>[0]>())
   .output(
     z.object({
       data: z.custom<Awaited<ReturnType<Analytics["getPlansConversion"]>>["data"]>(),

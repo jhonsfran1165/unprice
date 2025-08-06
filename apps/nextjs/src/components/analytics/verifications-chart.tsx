@@ -36,7 +36,8 @@ export function VerificationsChart() {
   const trpc = useTRPC()
   const { data: verifications } = useSuspenseQuery(
     trpc.analytics.getVerifications.queryOptions({
-      range: intervalFilter.name,
+      start: intervalFilter.start,
+      end: intervalFilter.end,
     })
   )
   const chartData = verifications.verifications.map((v) => ({

@@ -6,15 +6,15 @@ import StatsCards from "~/components/analytics/stats-cards"
 import { useTRPC } from "~/trpc/client"
 
 export const iconsPlansStats = {
-  totalRevenue: DollarSign,
-  newSignups: Users,
-  newSubscriptions: Activity,
-  newCustomers: Users,
+  totalPlans: DollarSign,
+  totalSubscriptions: Activity,
+  totalPlanVersions: Users,
+  totalFeatures: Users,
 }
 
 const PlansStats = () => {
   const trpc = useTRPC()
-  const { data: stats } = useSuspenseQuery(trpc.analytics.getStats.queryOptions())
+  const { data: stats } = useSuspenseQuery(trpc.analytics.getPlansStats.queryOptions())
 
   const statsCards = Object.entries(stats.stats).map(([key, value]) => {
     return {

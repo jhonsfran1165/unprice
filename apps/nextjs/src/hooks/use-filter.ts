@@ -2,7 +2,7 @@
 import { prepareInterval } from "@unprice/analytics"
 import { useQueryStates } from "nuqs"
 import { useMemo } from "react"
-import { intervalParser } from "~/lib/searchParams"
+import { intervalParser, pageParser } from "~/lib/searchParams"
 
 export function useIntervalFilter({
   shallow = true,
@@ -25,4 +25,23 @@ export function useIntervalFilter({
   }, [intervalFilter])
 
   return [parsedInterval, setIntervalFilter] as const
+}
+
+export function usePageFilter({
+  shallow = true,
+  history = "replace",
+  scroll = false,
+}: {
+  shallow?: boolean
+  history?: "push" | "replace"
+  scroll?: boolean
+} = {}) {
+  const [pageFilter, setPageFilter] = useQueryStates(pageParser, {
+    history,
+    shallow,
+    scroll,
+    clearOnDefault: true,
+  })
+
+  return [pageFilter, setPageFilter] as const
 }

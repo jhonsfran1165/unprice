@@ -19,5 +19,10 @@ export const intervalParser = {
   intervalFilter: parseAsStringEnum(INTERVAL_KEYS).withDefault(DEFAULT_INTERVAL),
 }
 
+export const pageParser = {
+  pageId: parseAsString.withDefault(""),
+}
+
 export const intervalParserCache = createSearchParamsCache(intervalParser)
 export const filtersDataTableCache = createSearchParamsCache(filtersDataTableParsers)
+export const pageParserCache = createSearchParamsCache(pageParser)

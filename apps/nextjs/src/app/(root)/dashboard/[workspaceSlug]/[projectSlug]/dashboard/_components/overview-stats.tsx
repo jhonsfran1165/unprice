@@ -14,7 +14,7 @@ export const iconsOverviewStats = {
 
 const OverviewStats = () => {
   const trpc = useTRPC()
-  const { data: stats } = useSuspenseQuery(trpc.analytics.getStats.queryOptions())
+  const { data: stats } = useSuspenseQuery(trpc.analytics.getOverviewStats.queryOptions())
 
   const statsCards = Object.entries(stats.stats).map(([key, value]) => {
     return {

@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
 
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import {
   type ChartConfig,
@@ -10,40 +11,31 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@unprice/ui/chart"
-
-import { useSuspenseQuery } from "@tanstack/react-query"
-import { nFormatter } from "@unprice/db/utils"
-import { BarChartBig } from "lucide-react"
-import { useIntervalFilter } from "~/hooks/use-filter"
+import { useIntervalFilter, usePageFilter } from "~/hooks/use-filter"
 import { useTRPC } from "~/trpc/client"
 
-export const description = "An interactive bar chart"
-
 const chartConfig = {
-  usage: {
-    label: "Usage",
-    color: "var(--chart-2)",
-    icon: BarChartBig,
-  },
-  latency: {
-    label: "Latency (p95)",
+  desktop_visits: {
+    label: "Desktop",
     color: "var(--chart-1)",
-    icon: BarChartBig,
   },
-  verifications: {
-    label: "Verifications",
+  mobile_visits: {
+    label: "Mobile",
+    color: "var(--chart-2)",
+  },
+  other_visits: {
+    label: "Other",
     color: "var(--chart-3)",
-    icon: BarChartBig,
   },
 } satisfies ChartConfig
 
-export function FeaturesStatsSkeleton() {
+export function PageVisitsSkeleton() {
   return (
     <Card className="py-0">
       <CardHeader className="!p-0 flex flex-col items-stretch space-y-0 border-b md:flex-row">
         <div className="md:!py-0 flex flex-1 flex-col justify-center gap-1 px-6 pt-4 pb-3 md:w-1/2">
-          <CardTitle>Feature usage</CardTitle>
-          <CardDescription>Showing feature usage for the last.</CardDescription>
+          <CardTitle>Page visits</CardTitle>
+          <CardDescription>Showing page visits for the last 3 months</CardDescription>
         </div>
         <div className="flex space-y-0 md:w-1/2">
           {Object.keys(chartConfig).map((key) => {
@@ -65,7 +57,7 @@ export function FeaturesStatsSkeleton() {
       </CardHeader>
       <CardContent className="px-2 md:p-6">
         <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
-          <BarChart
+          <LineChart
             accessibilityLayer
             data={[]}
             margin={{
@@ -84,46 +76,51 @@ export function FeaturesStatsSkeleton() {
             <ChartTooltip
               content={<ChartTooltipContent className="w-[200px]" nameKey="date" labelKey="date" />}
             />
-            <Bar dataKey="date" fill="var(--color-verifications)" />
-          </BarChart>
+            <Line dataKey="date" fill="var(--color-desktop)" />
+          </LineChart>
         </ChartContainer>
       </CardContent>
     </Card>
   )
 }
 
-export function FeaturesStats() {
-  const [intervalFilter] = useIntervalFilter()
+export function PageVisits() {
   const trpc = useTRPC()
-  const { data: featuresOverview } = useSuspenseQuery(
-    trpc.analytics.getFeaturesOverview.queryOptions({
-      intervalDays: intervalFilter.intervalDays,
-    })
+  const [pageFilter] = usePageFilter()
+  const [intervalFilter] = useIntervalFilter()
+
+  const { data: pageVisits } = useSuspenseQuery(
+    trpc.analytics.getPagesOverview.queryOptions(
+      {
+        intervalDays: intervalFilter.intervalDays,
+        pageId: pageFilter.pageId,
+      },
+      {
+        enabled: !!pageFilter.pageId,
+      }
+    )
   )
 
-  const chartData = featuresOverview.data
+  const chartData = pageVisits.data
 
-  const [activeChart, setActiveChart] = React.useState<keyof typeof chartConfig>("verifications")
+  const [activeChart, setActiveChart] = React.useState<keyof typeof chartConfig>("desktop_visits")
 
   const total = React.useMemo(
     () => ({
-      usage: chartData.reduce((acc, curr) => acc + curr.usage, 0),
-      // latency average not sum
-      latency:
-        (chartData.reduce((acc, curr) => acc + curr.latency, 0) ?? 0) /
-        (chartData.filter((item) => item.latency).length ?? 1),
-      verifications: chartData.reduce((acc, curr) => acc + curr.verifications, 0),
+      desktop_visits: chartData.reduce((acc, curr) => acc + curr.desktop_visits, 0),
+      mobile_visits: chartData.reduce((acc, curr) => acc + curr.mobile_visits, 0),
+      other_visits: chartData.reduce((acc, curr) => acc + curr.other_visits, 0),
     }),
     [intervalFilter.intervalDays]
   )
 
   return (
-    <Card className="py-0">
-      <CardHeader className="!p-0 flex flex-col items-stretch space-y-0 border-b md:flex-row">
-        <div className="md:!py-0 flex flex-1 flex-col justify-center gap-1 px-6 pt-4 pb-3 md:w-1/2">
-          <CardTitle>{chartConfig[activeChart].label}</CardTitle>
+    <Card className="py-4 sm:py-0">
+      <CardHeader className="!p-0 flex flex-col items-stretch space-y-0 border-b sm:flex-row">
+        <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0 md:w-1/2">
+          <CardTitle>Page Views</CardTitle>
           <CardDescription>
-            Showing feature usage for the last{" "}
+            Showing total page views for the last{" "}
             {intervalFilter.intervalDays === 90
               ? "3 months"
               : intervalFilter.intervalDays === 30
@@ -133,31 +130,29 @@ export function FeaturesStats() {
                   : "1 day"}
           </CardDescription>
         </div>
-        <div className="flex space-y-0 md:w-1/2">
-          {Object.keys(chartConfig).map((key) => {
+        <div className="flex md:w-1/2">
+          {["desktop_visits", "mobile_visits", "other_visits"].map((key) => {
             const chart = key as keyof typeof chartConfig
             return (
               // biome-ignore lint/a11y/useButtonType: <explanation>
               <button
                 key={chart}
                 data-active={activeChart === chart}
-                className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted md:border-t-0 md:border-l md:px-8 md:py-6"
+                className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
                 onClick={() => setActiveChart(chart)}
               >
-                <span className="line-clamp-1 text-muted-foreground text-xs">
-                  {chartConfig[chart].label}
-                </span>
-                <span className="font-bold text-lg leading-none md:text-3xl">
-                  {nFormatter(total[key as keyof typeof total])} {key === "latency" ? "ms" : ""}
+                <span className="text-muted-foreground text-xs">{chartConfig[chart].label}</span>
+                <span className="font-bold text-lg leading-none sm:text-3xl">
+                  {total[key as keyof typeof total].toLocaleString()}
                 </span>
               </button>
             )
           })}
         </div>
       </CardHeader>
-      <CardContent className="px-2 md:p-6">
+      <CardContent className="px-2 sm:p-6">
         <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
-          <BarChart
+          <LineChart
             accessibilityLayer
             data={chartData}
             margin={{
@@ -216,8 +211,14 @@ export function FeaturesStats() {
                 />
               }
             />
-            <Bar dataKey={activeChart} fill={`var(--color-${activeChart})`} />
-          </BarChart>
+            <Line
+              dataKey={activeChart}
+              type="monotone"
+              stroke={`var(--color-${activeChart})`}
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
         </ChartContainer>
       </CardContent>
     </Card>

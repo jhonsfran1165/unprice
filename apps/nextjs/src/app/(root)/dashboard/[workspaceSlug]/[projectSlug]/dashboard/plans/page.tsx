@@ -21,16 +21,19 @@ export default async function DashboardPlans(props: {
   const interval = prepareInterval(filter.intervalFilter)
 
   // prefetch
-  prefetch(
-    trpc.analytics.getFeatureHeatmap.queryOptions(
-      {
-        intervalDays: interval.intervalDays,
-      },
-      {
-        staleTime: 1000 * 60, // update every minute
-      }
-    )
-  )
+  void Promise.all([
+    prefetch(trpc.analytics.getPlansStats.queryOptions()),
+    prefetch(
+      trpc.analytics.getPlansConversion.queryOptions(
+        {
+          intervalDays: interval.intervalDays,
+        },
+        {
+          staleTime: 1000 * 60, // update every minute
+        }
+      )
+    ),
+  ])
 
   return (
     <DashboardShell>

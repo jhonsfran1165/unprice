@@ -5,12 +5,10 @@ import { geolocation, ipAddress } from "@vercel/functions"
 import { type NextRequest, userAgent } from "next/server"
 import { z } from "zod"
 import { env } from "~/env"
-import { capitalize } from "~/lib/capitalize"
 import { detectBot, getDomainWithoutWWW } from "~/lib/domains"
 import { LOCALHOST_GEO_DATA, LOCALHOST_IP } from "~/lib/localhost"
 import { setCorsHeaders } from "../_enableCors"
 
-export const maxDuration = 10
 export const runtime = "edge"
 
 /**
@@ -82,7 +80,7 @@ const trackPageHit = async (
       latitude: geo.latitude || "Unknown",
       longitude: geo.longitude || "Unknown",
       vercel_region: geo.region || "",
-      device: capitalize(ua.device.type) || "Desktop",
+      device: ua.device.type || "desktop",
       device_vendor: ua.device.vendor || "Unknown",
       device_model: ua.device.model || "Unknown",
       browser: ua.browser.name || "Unknown",

@@ -28,7 +28,8 @@ export function UsageChart() {
   const trpc = useTRPC()
   const { data: usage } = useSuspenseQuery(
     trpc.analytics.getUsage.queryOptions({
-      range: intervalFilter.name,
+      start: intervalFilter.start,
+      end: intervalFilter.end,
     })
   )
 

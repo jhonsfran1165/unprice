@@ -1,13 +1,9 @@
-import { type Analytics, analyticsIntervalSchema, prepareInterval } from "@unprice/analytics"
+import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
 
 export const getUsage = protectedProjectProcedure
-  .input(
-    z.object({
-      range: analyticsIntervalSchema,
-    })
-  )
+  .input(z.custom<Parameters<Analytics["getFeaturesUsagePeriod"]>[0]>())
   .output(
     z.object({
       usage: z.custom<Awaited<ReturnType<Analytics["getFeaturesUsagePeriod"]>>["data"]>(),
@@ -15,13 +11,13 @@ export const getUsage = protectedProjectProcedure
   )
   .query(async (opts) => {
     const projectId = opts.ctx.project.id
-    const interval = prepareInterval(opts.input.range)
+    const input = opts.input
 
     const data = await opts.ctx.analytics
       .getFeaturesUsagePeriod({
         projectId,
-        start: interval.start,
-        end: interval.end,
+        start: input.start,
+        end: input.end,
       })
       .catch((err) => {
         opts.ctx.logger.error(`Failed to get usage for project ${projectId}`, {

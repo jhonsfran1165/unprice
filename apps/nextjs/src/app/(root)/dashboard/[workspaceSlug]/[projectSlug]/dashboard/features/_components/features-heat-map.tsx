@@ -106,11 +106,13 @@ export const FeatureUsageHeatmapSkeleton = () => {
 
 export function FeatureUsageHeatmapContent() {
   const trpc = useTRPC()
-  const [{ intervalDays }] = useIntervalFilter()
+  const [{ intervalDays, start, end }] = useIntervalFilter()
 
   const { data: featureUsageEvents, isLoading } = useSuspenseQuery(
     trpc.analytics.getFeatureHeatmap.queryOptions({
       intervalDays: intervalDays,
+      start: start,
+      end: end,
     })
   )
 
