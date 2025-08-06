@@ -1,7 +1,7 @@
 "use client"
 
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { nFormatter } from "@unprice/db/utils"
-import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
 import {
   type ChartConfig,
@@ -13,19 +13,26 @@ import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { CodeApiSheet } from "~/components/code-api-sheet"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
+import { useIntervalFilter } from "~/hooks/use-filter"
+import { useTRPC } from "~/trpc/client"
 
 const chartConfig = {
   usage: {
     label: "Usage",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig
 
-export function UsageChart({
-  usage,
-}: {
-  usage: RouterOutputs["analytics"]["getUsage"]["usage"]
-}) {
-  const chartData = usage.map((v) => ({
+export function UsageChart() {
+  const [intervalFilter] = useIntervalFilter()
+  const trpc = useTRPC()
+  const { data: usage } = useSuspenseQuery(
+    trpc.analytics.getUsage.queryOptions({
+      range: intervalFilter.name,
+    })
+  )
+
+  const chartData = usage.usage.map((v) => ({
     feature: v.featureSlug,
     usage: v.sum,
   }))
@@ -64,7 +71,7 @@ export function UsageChart({
         data={chartData}
         layout="vertical"
         margin={{
-          left: 20,
+          left: 40,
           right: 30,
           top: 10,
           bottom: 10,
@@ -77,6 +84,7 @@ export function UsageChart({
           type="category"
           tickLine={false}
           tickMargin={10}
+          width={120}
           axisLine={false}
           tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
         />
@@ -86,7 +94,7 @@ export function UsageChart({
           dataKey="usage"
           layout="vertical"
           radius={5}
-          fill="hsl(var(--chart-1))"
+          fill="var(--color-usage)"
           maxBarSize={30}
           activeBar={{
             opacity: 0.5,

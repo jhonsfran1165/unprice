@@ -2,7 +2,7 @@ import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
 
-export const getFeatureHeatmap = protectedProjectProcedure
+export const getFeaturesOverview = protectedProjectProcedure
   .input(
     z.object({
       intervalDays: z.number().min(1).max(90).optional(),
@@ -10,19 +10,20 @@ export const getFeatureHeatmap = protectedProjectProcedure
   )
   .output(
     z.object({
-      data: z.custom<Awaited<ReturnType<Analytics["getFeatureHeatmap"]>>["data"]>(),
+      data: z.custom<Awaited<ReturnType<Analytics["getFeaturesOverview"]>>["data"]>(),
     })
   )
   .query(async (opts) => {
     const { intervalDays } = opts.input
+    const projectId = opts.ctx.project.id
 
     const data = await opts.ctx.analytics
-      .getFeatureHeatmap({
-        projectId: opts.ctx.project.id,
+      .getFeaturesOverview({
+        projectId,
         intervalDays,
       })
       .catch((err) => {
-        opts.ctx.logger.error("Failed to get feature heatmap", {
+        opts.ctx.logger.error("Failed to get features overview", {
           error: err,
         })
 

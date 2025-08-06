@@ -1,5 +1,7 @@
 import { createTRPCRouter } from "#trpc"
 import { getFeatureHeatmap } from "./getFeatureHeatmap"
+import { getFeaturesOverview } from "./getFeaturesOverview"
+import { getPlansConversion } from "./getPlansConversion"
 import { getStats } from "./getStats"
 import { getUsage } from "./getUsage"
 import { getVerifications } from "./getVerifications"
@@ -11,4 +13,6 @@ export const analyticsRouter = createTRPCRouter({
   migrate: migrate,
   getStats: getStats,
   getFeatureHeatmap: getFeatureHeatmap,
+  getPlansConversion: getPlansConversion,
+  getFeaturesOverview: getFeaturesOverview,
 })

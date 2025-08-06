@@ -19,12 +19,17 @@ SQL >
         uniqMerge(unique_views) AS unique_views,
         countMerge(total_views) AS total_views
     FROM unprice_plan_views_mv
+    JOIN unprice_plan_versions ON unprice_plan_views_mv.plan_version_id = unprice_plan_versions.id
     WHERE
         1 = 1
-        {% if defined(start_date) and defined(end_date) %}
-        AND date BETWEEN {{ Date(start_date) }} AND {{ Date(end_date) }}
+        {% if defined(projectId) %}
+        AND unprice_plan_versions.project_id = {{ String(projectId) }}
+        {% end %}
+
+        {% if defined(intervalDays) %}
+            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
         {% else %}
-        AND date >= today() - 7
+            AND date >= toStartOfDay(today() - 7)
         {% end %}
     GROUP BY date, plan_version_id, page_id
 
@@ -42,12 +47,17 @@ SQL >
         uniqMerge(unique_clicks) AS unique_clicks,
         countMerge(total_clicks) AS total_clicks
     FROM unprice_plan_clicks_mv
+    JOIN unprice_plan_versions ON unprice_plan_clicks_mv.plan_version_id = unprice_plan_versions.id
     WHERE
         1 = 1
-        {% if defined(start_date) and defined(end_date) %}
-        AND date BETWEEN {{ Date(start_date) }} AND {{ Date(end_date) }}
+        {% if defined(projectId) %}
+        AND unprice_plan_versions.project_id = {{ String(projectId) }}
+        {% end %}
+
+        {% if defined(intervalDays) %}
+            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
         {% else %}
-        AND date >= today() - 7
+            AND date >= toStartOfDay(today() - 7)
         {% end %}
     GROUP BY date, plan_version_id, page_id
 
@@ -65,12 +75,17 @@ SQL >
         page_id,
         argMaxMerge(final_status) AS final_status
     FROM unprice_signups_mv
+    JOIN unprice_plan_versions ON unprice_signups_mv.plan_version_id = unprice_plan_versions.id
     WHERE
         1 = 1
-        {% if defined(start_date) and defined(end_date) %}
-        AND date BETWEEN {{ Date(start_date) }} AND {{ Date(end_date) }}
+        {% if defined(projectId) %}
+        AND unprice_plan_versions.project_id = {{ String(projectId) }}
+        {% end %}
+
+        {% if defined(intervalDays) %}
+            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
         {% else %}
-        AND date >= today() - 7
+            AND date >= toStartOfDay(today() - 7)
         {% end %}
     GROUP BY date, plan_version_id, page_id
 
@@ -90,10 +105,10 @@ SQL >
     FROM plan_signups_merged
     WHERE
         1 = 1
-        {% if defined(start_date) and defined(end_date) %}
-        AND date BETWEEN {{ Date(start_date) }} AND {{ Date(end_date) }}
+        {% if defined(intervalDays) %}
+            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
         {% else %}
-        AND date >= today() - 7
+            AND date >= toStartOfDay(today() - 7)
         {% end %}
     GROUP BY date, plan_version_id, page_id
 

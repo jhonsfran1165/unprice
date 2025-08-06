@@ -139,10 +139,7 @@ export class Analytics {
         payload: z.string().transform((payload) => schemaPlanClick.parse(JSON.parse(payload))),
       }),
       opts: {
-        // this doesn't change once the event is ingested, so we can cache it
-        next: {
-          revalidate: 60 * 60 * 24, // 1 day
-        },
+        cache: "no-store",
       },
     })
   }
@@ -151,10 +148,8 @@ export class Analytics {
     return this.readClient.buildPipe({
       pipe: "v1_get_plans_conversion",
       parameters: z.object({
-        start_date: z.string().datetime().optional(),
-        end_date: z.string().datetime().optional(),
-        limit: z.number().optional(),
-        offset: z.number().optional(),
+        intervalDays: z.number().optional(),
+        projectId: z.string().optional(),
       }),
       data: z.object({
         date: z.coerce.date(),
@@ -166,9 +161,29 @@ export class Analytics {
         conversion: z.number(),
       }),
       opts: {
-        // this doesn't change once the event is ingested, so we can cache it
         next: {
-          revalidate: 60 * 60 * 24, // 1 day
+          revalidate: 60, // revalidate every minute
+        },
+      },
+    })
+  }
+
+  public get getFeaturesOverview() {
+    return this.readClient.buildPipe({
+      pipe: "v1_get_features_overview",
+      parameters: z.object({
+        intervalDays: z.number().optional(),
+        projectId: z.string().optional(),
+      }),
+      data: z.object({
+        date: z.coerce.date(),
+        latency: z.number(),
+        verifications: z.number(),
+        usage: z.number(),
+      }),
+      opts: {
+        next: {
+          revalidate: 60, // revalidate every minute
         },
       },
     })

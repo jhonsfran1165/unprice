@@ -1,6 +1,5 @@
 import * as currencies from "@dinero.js/currencies"
-
-import { formatMoney } from "@unprice/db/utils"
+import { currencySymbol } from "@unprice/db/utils"
 import { calculateFlatPricePlan } from "@unprice/db/validators"
 import { add, dinero, toDecimal } from "dinero.js"
 import { z } from "zod"
@@ -10,18 +9,25 @@ export const getStats = protectedProjectProcedure
   .input(z.void())
   .output(
     z.object({
-      stats: z.object({
-        newSignups: z.number(),
-        totalRevenue: z.string(),
-        newSubscriptions: z.number(),
-        newCustomers: z.number(),
-      }),
+      stats: z.record(
+        z.string(),
+        z.object({
+          total: z.number(),
+          title: z.string(),
+          description: z.string(),
+          unit: z.string().optional(),
+        })
+      ),
     })
   )
   .query(async (opts) => {
     const projectId = opts.ctx.project.id
     const now = Date.now()
 
+    // wait 1 second
+    await new Promise((resolve) => setTimeout(resolve, 10000))
+
+    // TODO: improve this query
     const data = await opts.ctx.db.query.subscriptions.findMany({
       where: (table, { eq }) => eq(table.projectId, projectId),
       columns: {
@@ -68,10 +74,27 @@ export const getStats = protectedProjectProcedure
     // TODO: this should come from the analytics service
     // basic calculations for now
     const stats = {
-      newSignups: 0,
-      totalRevenue: "",
-      newSubscriptions: 0,
-      newCustomers: 0,
+      newSignups: {
+        total: 0,
+        title: "New Signups",
+        description: "New signups last 30 days",
+      },
+      totalRevenue: {
+        total: 0,
+        title: "Total Revenue",
+        description: "Total revenue last 30 days",
+        unit: currencySymbol(opts.ctx.project.defaultCurrency),
+      },
+      newSubscriptions: {
+        total: 0,
+        title: "New Subscriptions",
+        description: "New subscriptions last 30 days",
+      },
+      newCustomers: {
+        total: 0,
+        title: "New Customers",
+        description: "New customers last 30 days",
+      },
     }
 
     for (const subscription of data) {
@@ -93,21 +116,16 @@ export const getStats = protectedProjectProcedure
 
       const price = val.dinero
 
-      stats.newSignups += 1
+      stats.newSignups.total += 1
       total = add(total, price)
-      stats.newSubscriptions += 1
-      stats.newCustomers += 1
+      stats.newSubscriptions.total += 1
+      stats.newCustomers.total += 1
     }
 
-    const displayAmount = toDecimal(
-      total,
-      ({ value, currency }) => `${formatMoney(value, currency.code)}`
-    )
+    const displayAmount = toDecimal(total, ({ value }) => Number(value))
+    stats.totalRevenue.total = displayAmount
 
     return {
-      stats: {
-        ...stats,
-        totalRevenue: displayAmount,
-      },
+      stats,
     }
   })

@@ -1,7 +1,7 @@
 "use client"
 
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { nFormatter, nFormatterTime } from "@unprice/db/utils"
-import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
 import {
   type ChartConfig,
@@ -13,6 +13,8 @@ import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { CodeApiSheet } from "~/components/code-api-sheet"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
+import { useIntervalFilter } from "~/hooks/use-filter"
+import { useTRPC } from "~/trpc/client"
 
 const chartConfig = {
   verifications: {
@@ -29,12 +31,15 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function VerificationsChart({
-  verifications,
-}: {
-  verifications: RouterOutputs["analytics"]["getVerifications"]["verifications"]
-}) {
-  const chartData = verifications.map((v) => ({
+export function VerificationsChart() {
+  const [intervalFilter] = useIntervalFilter()
+  const trpc = useTRPC()
+  const { data: verifications } = useSuspenseQuery(
+    trpc.analytics.getVerifications.queryOptions({
+      range: intervalFilter.name,
+    })
+  )
+  const chartData = verifications.verifications.map((v) => ({
     feature: v.featureSlug,
     verifications: v.count,
     p95_latency: v.p95_latency,
@@ -106,11 +111,7 @@ export function VerificationsChart({
   }
 
   return (
-    <ChartContainer
-      config={chartConfig}
-      height={chartData.length * 50}
-      className="min-h-[200px] w-full"
-    >
+    <ChartContainer config={chartConfig} height={chartData.length * 50} className="w-full">
       <BarChart
         accessibilityLayer
         data={chartData}
@@ -129,6 +130,7 @@ export function VerificationsChart({
           type="category"
           tickLine={false}
           tickMargin={10}
+          width={120}
           axisLine={false}
           tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
         />
@@ -142,7 +144,7 @@ export function VerificationsChart({
           dataKey="verifications"
           layout="vertical"
           radius={5}
-          fill="hsl(var(--chart-1))"
+          fill="var(--chart-1)"
           maxBarSize={25}
           activeBar={{ opacity: 0.5 }}
         >

@@ -42,9 +42,9 @@ SQL >
             AND date BETWEEN fromUnixTimestamp64Milli({{ Int64(start) }})
             AND fromUnixTimestamp64Milli({{ Int64(end) }})
         {% elif defined(intervalDays) %}
-            AND date >= now() - INTERVAL {{ Int32(intervalDays, 7) }} DAY
+            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
         {% else %}
-            AND date >= now() - INTERVAL 7 DAY
+            AND date >= toStartOfDay(today() - 7)
         {% end %}
         GROUP BY projectId, featureSlug
     ),
@@ -64,9 +64,9 @@ SQL >
             AND date BETWEEN fromUnixTimestamp64Milli({{ Int64(start) }})
             AND fromUnixTimestamp64Milli({{ Int64(end) }})
         {% elif defined(intervalDays) %}
-            AND date >= now() - INTERVAL {{ Int32(intervalDays, 7) }} DAY
+            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
         {% else %}
-            AND date >= now() - INTERVAL 7 DAY
+            AND date >= toStartOfDay(today() - 7)
         {% end %}
         GROUP BY projectId, featureSlug
     ),

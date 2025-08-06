@@ -1,69 +1,74 @@
-import { analytics } from "@unprice/analytics/client"
-import { Users } from "lucide-react"
 import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
-import { DataTable } from "~/components/data-table/data-table"
-import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
+
+import { prepareInterval } from "@unprice/analytics"
+import { IntervalFilter } from "~/components/analytics/interval-filter"
+import { StatsSkeleton } from "~/components/analytics/stats-cards"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
-import { filtersDataTableCache } from "~/lib/searchParams"
-import Stats from "../_components/stats"
+import { intervalParserCache } from "~/lib/searchParams"
+import { HydrateClient, prefetch, trpc } from "~/trpc/server"
 import TabsDashboard from "../_components/tabs-dashboard"
-import { columns } from "./_components/table/columns"
+import { PlansConversion, PlansConversionSkeleton } from "./_components/plans-convertion"
+import PlansStats from "./_components/plans-stats"
 
-export const dynamic = "force-dynamic"
-
-export default async function DashboardPage(props: {
+export default async function DashboardPlans(props: {
   params: { workspaceSlug: string; projectSlug: string }
   searchParams: SearchParams
 }) {
   const { projectSlug, workspaceSlug } = props.params
   const baseUrl = `/${workspaceSlug}/${projectSlug}`
+  const filter = intervalParserCache.parse(props.searchParams)
+  const interval = prepareInterval(filter.intervalFilter)
 
-  const filter = filtersDataTableCache.parse(props.searchParams)
-
-  const plansConversion = await analytics.getPlansConversion({
-    start_date: filter.from ? new Date(filter.from).toISOString() : undefined,
-    end_date: filter.to ? new Date(filter.to).toISOString() : undefined,
-    limit: filter.page_size,
-    offset: filter.page * filter.page_size,
-  })
+  // prefetch
+  prefetch(
+    trpc.analytics.getFeatureHeatmap.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+      },
+      {
+        staleTime: 1000 * 60, // update every minute
+      }
+    )
+  )
 
   return (
     <DashboardShell>
-      <TabsDashboard baseUrl={baseUrl} activeTab="plans" />
-      <Stats
-        stats={[
-          {
-            total: plansConversion.data.length.toString(),
-            icon: <Users />,
-            title: "Total Plans",
-            description: "Total number of plans",
-          },
-        ]}
-      />
-      <Suspense
-        fallback={
-          <DataTableSkeleton
-            columnCount={8}
-            showDateFilterOptions={true}
-            showViewOptions={true}
-            searchableColumnCount={1}
-            cellWidths={["10rem", "30rem", "20rem", "20rem", "20rem", "20rem", "12rem", "8rem"]}
-            shrinkZero
-          />
-        }
-      >
-        <DataTable
-          columns={columns}
-          data={plansConversion.data}
-          filterOptions={{
-            filterBy: "plan_version_id",
-            filterColumns: true,
-            filterDateRange: true,
-            filterServerSide: false,
-          }}
-        />
-      </Suspense>
+      <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+        <TabsDashboard baseUrl={baseUrl} activeTab="plans" />
+        <IntervalFilter className="ml-auto" />
+      </div>
+      <HydrateClient>
+        <Suspense
+          fallback={
+            <StatsSkeleton
+              stats={Object.entries({
+                totalRevenue: {
+                  title: "Total Revenue",
+                },
+                newSignups: {
+                  title: "New Signups",
+                },
+                newSubscriptions: {
+                  title: "New Subscriptions",
+                },
+                newCustomers: {
+                  title: "New Customers",
+                },
+              }).map(([key]) => {
+                return {
+                  title: key,
+                }
+              })}
+            />
+          }
+        >
+          <PlansStats />
+        </Suspense>
+        <Suspense fallback={<PlansConversionSkeleton />}>
+          <PlansConversion />
+        </Suspense>
+      </HydrateClient>
     </DashboardShell>
   )
 }

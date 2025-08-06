@@ -1,12 +1,16 @@
-import { Users } from "lucide-react"
-import { notFound } from "next/navigation"
+import { prepareInterval } from "@unprice/analytics"
 import type { SearchParams } from "nuqs/server"
+import { Suspense } from "react"
+import { IntervalFilter } from "~/components/analytics/interval-filter"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
-import { intervalDaysParserCache } from "~/lib/searchParams"
-import { HydrateClient, api, prefetch, trpc } from "~/trpc/server"
-import Stats from "../_components/stats"
+import { intervalParserCache } from "~/lib/searchParams"
+import { HydrateClient, prefetch, trpc } from "~/trpc/server"
 import TabsDashboard from "../_components/tabs-dashboard"
-import FeatureUsageHeatmap from "./_components/features-heat-map"
+import FeatureUsageHeatmap, {
+  FeatureUsageHeatmapContent,
+  FeatureUsageHeatmapSkeleton,
+} from "./_components/features-heat-map"
+import { FeaturesStats, FeaturesStatsSkeleton } from "./_components/features-stats"
 
 export default async function DashboardFeatures(props: {
   params: { workspaceSlug: string; projectSlug: string }
@@ -14,44 +18,56 @@ export default async function DashboardFeatures(props: {
 }) {
   const { projectSlug, workspaceSlug } = props.params
   const baseUrl = `/${workspaceSlug}/${projectSlug}`
-  const filter = intervalDaysParserCache.parse(props.searchParams)
 
-  const activeProject = await api.projects.getBySlug({
-    slug: projectSlug,
-  })
+  const filter = intervalParserCache.parse(props.searchParams)
+  const interval = prepareInterval(filter.intervalFilter)
 
-  if (!activeProject) {
-    return notFound()
-  }
-
-  // prefetch
+  // prefetch feature heatmap
   prefetch(
     trpc.analytics.getFeatureHeatmap.queryOptions(
       {
-        intervalDays: filter.intervalDays,
+        intervalDays: interval.intervalDays,
       },
       {
-        staleTime: 1000 * 60, // 1 minute
+        staleTime: 1000 * 60, // update every minute
+      }
+    )
+  )
+
+  // prefetch features overview
+  prefetch(
+    trpc.analytics.getFeaturesOverview.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+      },
+      {
+        staleTime: 1000 * 60, // update every minute
       }
     )
   )
 
   return (
     <DashboardShell>
-      <TabsDashboard baseUrl={baseUrl} activeTab="features" />
+      <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+        <TabsDashboard baseUrl={baseUrl} activeTab="features" />
+        <IntervalFilter className="ml-auto" />
+      </div>
 
-      <Stats
-        stats={[
-          {
-            total: "10",
-            icon: <Users />,
-            title: "Total Features",
-            description: "Total number of features",
-          },
-        ]}
-      />
       <HydrateClient>
-        <FeatureUsageHeatmap />
+        <Suspense fallback={<FeaturesStatsSkeleton />}>
+          <FeaturesStats />
+        </Suspense>
+        <Suspense
+          fallback={
+            <FeatureUsageHeatmap>
+              <FeatureUsageHeatmapSkeleton />
+            </FeatureUsageHeatmap>
+          }
+        >
+          <FeatureUsageHeatmap>
+            <FeatureUsageHeatmapContent />
+          </FeatureUsageHeatmap>
+        </Suspense>
       </HydrateClient>
     </DashboardShell>
   )

@@ -1,12 +1,13 @@
 import { z } from "zod"
 
 export const DEFAULT_INTERVALS = {
-  "24h": "Last 24 Hours",
-  "7d": "Last 7 Days",
-  "30d": "Last 30 Days",
+  "24h": "Last 24 hours",
+  "7d": "Last 7 days",
+  "30d": "Last 30 days",
+  "90d": "Last 90 days",
 } as const
 
-export const analyticsIntervalSchema = z.enum(["24h", "7d", "30d"] as const)
+export const analyticsIntervalSchema = z.enum(["24h", "7d", "30d", "90d"] as const)
 
 export type Interval = keyof typeof DEFAULT_INTERVALS
 export const INTERVAL_KEYS = Object.keys(DEFAULT_INTERVALS) as Array<keyof typeof DEFAULT_INTERVALS>
@@ -23,7 +24,10 @@ export function prepareInterval(interval: Interval) {
         start: end - intervalMs,
         end,
         intervalMs,
-        granularity: 1000 * 60 * 60,
+        intervalDays: 1,
+        granularity: "hour",
+        label: "Last 24 hours",
+        name: "24h" as const,
       }
     }
     case "7d": {
@@ -34,7 +38,10 @@ export function prepareInterval(interval: Interval) {
         start: end - intervalMs,
         end,
         intervalMs,
-        granularity: 1000 * 60 * 60 * 24,
+        intervalDays: 7,
+        granularity: "day",
+        label: "Last 7 days",
+        name: "7d" as const,
       }
     }
     case "30d": {
@@ -45,7 +52,24 @@ export function prepareInterval(interval: Interval) {
         start: end - intervalMs,
         end,
         intervalMs,
-        granularity: 1000 * 60 * 60 * 24,
+        intervalDays: 30,
+        granularity: "day",
+        label: "Last 30 days",
+        name: "30d" as const,
+      }
+    }
+    case "90d": {
+      now.setUTCDate(now.getUTCDate() + 1)
+      const end = now.setUTCHours(0, 0, 0, 0)
+      const intervalMs = 1000 * 60 * 60 * 24 * 90
+      return {
+        start: end - intervalMs,
+        end,
+        intervalMs,
+        intervalDays: 90,
+        granularity: "day",
+        label: "Last 90 days",
+        name: "90d" as const,
       }
     }
   }

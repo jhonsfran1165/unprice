@@ -1,12 +1,10 @@
-import { z } from "zod"
-
-import { TRPCError } from "@trpc/server"
 import {
   analyticsIntervalSchema,
   getAnalyticsVerificationsResponseSchema,
+  prepareInterval,
 } from "@unprice/analytics"
+import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
-import { unprice } from "#utils/unprice"
 
 export const getVerifications = protectedProjectProcedure
   .input(
@@ -21,20 +19,24 @@ export const getVerifications = protectedProjectProcedure
   )
   .query(async (opts) => {
     const projectId = opts.ctx.project.id
+    const interval = prepareInterval(opts.input.range)
 
-    const data = await unprice.analytics.getVerifications({
-      projectId,
-      range: opts.input.range,
-    })
-
-    if (data.error) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: data.error.message,
+    const data = await opts.ctx.analytics
+      .getFeaturesVerifications({
+        projectId,
+        start: interval.start,
+        end: interval.end,
       })
-    }
+      .catch((err) => {
+        opts.ctx.logger.error(`Failed to get verifications for project ${projectId}`, {
+          error: err,
+        })
+        return {
+          data: [],
+        }
+      })
 
     return {
-      verifications: data.result?.verifications,
+      verifications: data.data,
     }
   })

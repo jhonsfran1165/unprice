@@ -1,23 +1,23 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
-import { BarChart2, Users } from "@unprice/ui/icons"
+import { BarChart2 } from "@unprice/ui/icons"
 import { cn } from "@unprice/ui/utils"
 import { cookies } from "next/headers"
 import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
 import { AnalyticsCard } from "~/components/analytics/analytics-card"
+import { IntervalFilter } from "~/components/analytics/interval-filter"
+import { StatsSkeleton } from "~/components/analytics/stats-cards"
 import { UsageChart } from "~/components/analytics/usage-chart"
 import { VerificationsChart } from "~/components/analytics/verifications-chart"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { env } from "~/env"
 import { intervalParserCache } from "~/lib/searchParams"
-import { api } from "~/trpc/server"
+import { HydrateClient, api, prefetch, trpc } from "~/trpc/server"
 import { Events } from "./_components/events"
-import Stats from "./_components/stats"
+import OverviewStats from "./_components/overview-stats"
 import TabsDashboard from "./_components/tabs-dashboard"
 
-export const dynamic = "force-dynamic"
-
-export default async function DashboardPage(props: {
+export default async function DashboardOverview(props: {
   params: { workspaceSlug: string; projectSlug: string }
   searchParams: SearchParams
 }) {
@@ -25,75 +25,113 @@ export default async function DashboardPage(props: {
   const baseUrl = `/${workspaceSlug}/${projectSlug}`
   const filter = intervalParserCache.parse(props.searchParams)
 
-  // TODO: this prefetch doesn't work here, investigate why
-  const [stats, verifications, usage] = await Promise.all([
-    await api.analytics.getStats(),
-    await api.analytics.getVerifications({
-      range: filter.interval,
-    }),
-    await api.analytics.getUsage({
-      range: filter.interval,
-    }),
+  void Promise.all([
+    // prefetch stats
+    prefetch(trpc.analytics.getStats.queryOptions()),
+    // prefetch verifications
+    prefetch(
+      trpc.analytics.getVerifications.queryOptions(
+        {
+          range: filter.intervalFilter,
+        },
+        {
+          staleTime: 1000 * 60, // update every minute
+        }
+      )
+    ),
+    // prefetch usage
+    prefetch(
+      trpc.analytics.getUsage.queryOptions(
+        {
+          range: filter.intervalFilter,
+        },
+        {
+          staleTime: 1000 * 60, // update every minute
+        }
+      )
+    ),
   ])
 
   return (
     <DashboardShell>
-      <TabsDashboard baseUrl={baseUrl} activeTab="overview" />
-      {/* TODO: add icons */}
-      <Stats
-        stats={Object.entries(stats.stats).map(([key, value]) => ({
-          total: value.toString(),
-          icon: <Users />,
-          title: key,
-          description: key,
-        }))}
-      />
-      <div className="mt-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-        <AnalyticsCard
-          className="w-full md:w-2/3"
-          title="Feature Verifications & Usage"
-          description="Feature verifications and usage recorded for this month."
-          defaultTab="verifications"
-          tabs={[
-            {
-              id: "verifications",
-              label: "Verifications",
-              description: "Feature verifications recorded for the selected interval.",
-              chart: () => <VerificationsChart verifications={verifications.verifications} />,
-            },
-            {
-              id: "usage",
-              label: "Usage",
-              description: "Feature usage recorded for the selected interval.",
-              chart: () => <UsageChart usage={usage.usage} />,
-            },
-          ]}
-        />
-
+      <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+        <TabsDashboard baseUrl={baseUrl} activeTab="overview" />
+        <IntervalFilter className="ml-auto" />
+      </div>
+      <HydrateClient>
         <Suspense
           fallback={
-            <Card className="w-full md:w-1/3">
-              <CardHeader>
-                <CardTitle>Recent Events</CardTitle>
-                <CardDescription>Realtime events from your project.</CardDescription>
-              </CardHeader>
-              <CardContent className="flex items-center justify-center">
-                <div className="flex h-[450px] flex-col items-center justify-center py-12 text-muted-foreground">
-                  <BarChart2 className="mb-2 h-8 w-8 opacity-30" />
-                  <span className="font-medium text-sm">No events yet</span>
-                  <span className="mt-1 text-xs">Events will appear here.</span>
-                </div>
-              </CardContent>
-            </Card>
+            <StatsSkeleton
+              stats={Object.entries({
+                totalRevenue: {
+                  title: "Total Revenue",
+                },
+                newSignups: {
+                  title: "New Signups",
+                },
+                newSubscriptions: {
+                  title: "New Subscriptions",
+                },
+                newCustomers: {
+                  title: "New Customers",
+                },
+              }).map(([key]) => {
+                return {
+                  title: key,
+                }
+              })}
+            />
           }
         >
-          <RecentEvents
-            className="w-full md:w-1/3"
-            projectSlug={projectSlug}
-            workspaceSlug={workspaceSlug}
-          />
+          <OverviewStats />
         </Suspense>
-      </div>
+        <div className="mt-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
+          <AnalyticsCard
+            className="w-full md:w-2/3"
+            title="Feature Verifications & Usage"
+            description="Feature verifications and usage recorded for this month."
+            defaultTab="verifications"
+            tabs={[
+              {
+                id: "verifications",
+                label: "Verifications",
+                description: "Feature verifications recorded for the selected interval.",
+                chart: () => <VerificationsChart />,
+              },
+              {
+                id: "usage",
+                label: "Usage",
+                description: "Feature usage recorded for the selected interval.",
+                chart: () => <UsageChart />,
+              },
+            ]}
+          />
+
+          <Suspense
+            fallback={
+              <Card className="w-full md:w-1/3">
+                <CardHeader>
+                  <CardTitle>Recent Events</CardTitle>
+                  <CardDescription>Realtime events from your project.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex items-center justify-center">
+                  <div className="flex h-[450px] flex-col items-center justify-center py-12 text-muted-foreground">
+                    <BarChart2 className="mb-2 h-8 w-8 opacity-30" />
+                    <span className="font-medium text-sm">No events yet</span>
+                    <span className="mt-1 text-xs">Events will appear here.</span>
+                  </div>
+                </CardContent>
+              </Card>
+            }
+          >
+            <RecentEvents
+              className="w-full md:w-1/3"
+              projectSlug={projectSlug}
+              workspaceSlug={workspaceSlug}
+            />
+          </Suspense>
+        </div>
+      </HydrateClient>
     </DashboardShell>
   )
 }
