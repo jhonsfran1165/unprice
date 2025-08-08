@@ -19,6 +19,7 @@ import { useTRPC } from "~/trpc/client"
 const chartConfig = {
   verifications: {
     label: "Verifications",
+    color: "var(--chart-3)",
   },
   p95_latency: {
     label: "P95 Latency",
@@ -34,7 +35,7 @@ const chartConfig = {
 export function VerificationsChart() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
-  const { data: verifications } = useSuspenseQuery(
+  const { data: verifications, isLoading } = useSuspenseQuery(
     trpc.analytics.getVerifications.queryOptions({
       start: intervalFilter.start,
       end: intervalFilter.end,
@@ -48,10 +49,10 @@ export function VerificationsChart() {
     latest_latency: v.latest_latency,
   }))
 
-  if (chartData.length === 0) {
+  if (chartData.length === 0 || isLoading) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
-        <EmptyPlaceholder className="min-h-[420px]">
+        <EmptyPlaceholder className="min-h-[420px]" isLoading={isLoading}>
           <EmptyPlaceholder.Icon>
             <BarChart4 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
@@ -61,7 +62,7 @@ export function VerificationsChart() {
           </EmptyPlaceholder.Description>
           <EmptyPlaceholder.Action>
             <CodeApiSheet defaultMethod="verifyFeature">
-              <Button size={"sm"}>
+              <Button size={"sm"} disabled={isLoading}>
                 <Code className="mr-2 h-4 w-4" />
                 Start verifying data
               </Button>
@@ -145,7 +146,7 @@ export function VerificationsChart() {
           dataKey="verifications"
           layout="vertical"
           radius={5}
-          fill="var(--chart-1)"
+          fill="var(--color-verifications)"
           maxBarSize={25}
           activeBar={{ opacity: 0.5 }}
         >

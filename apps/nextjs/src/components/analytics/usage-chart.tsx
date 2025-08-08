@@ -19,14 +19,14 @@ import { useTRPC } from "~/trpc/client"
 const chartConfig = {
   usage: {
     label: "Usage",
-    color: "var(--chart-1)",
+    color: "var(--chart-4)",
   },
 } satisfies ChartConfig
 
 export function UsageChart() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
-  const { data: usage } = useSuspenseQuery(
+  const { data: usage, isLoading } = useSuspenseQuery(
     trpc.analytics.getUsage.queryOptions({
       start: intervalFilter.start,
       end: intervalFilter.end,
@@ -38,10 +38,10 @@ export function UsageChart() {
     usage: v.sum,
   }))
 
-  if (chartData.length === 0) {
+  if (chartData.length === 0 || isLoading) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
-        <EmptyPlaceholder className="min-h-[420px]">
+        <EmptyPlaceholder className="min-h-[420px]" isLoading={isLoading}>
           <EmptyPlaceholder.Icon>
             <BarChart4 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
@@ -51,7 +51,7 @@ export function UsageChart() {
           </EmptyPlaceholder.Description>
           <EmptyPlaceholder.Action>
             <CodeApiSheet defaultMethod="reportUsage">
-              <Button size={"sm"}>
+              <Button size={"sm"} disabled={isLoading}>
                 <Code className="mr-2 h-4 w-4" />
                 Start usage
               </Button>

@@ -24,15 +24,15 @@ import { useTRPC } from "~/trpc/client"
 const chartConfig = {
   desktop_visits: {
     label: "Desktop",
-    color: "var(--chart-1)",
+    color: "var(--chart-2)",
   },
   mobile_visits: {
     label: "Mobile",
-    color: "var(--chart-2)",
+    color: "var(--chart-5)",
   },
   other_visits: {
     label: "Other",
-    color: "var(--chart-3)",
+    color: "var(--chart-6)",
   },
 } satisfies ChartConfig
 

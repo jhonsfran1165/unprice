@@ -84,7 +84,7 @@ export const Notification = ({ name, description, icon, color, time, size }: Not
             </span>
           </figcaption>
           <p
-            className={cn("font-normal text-sm", {
+            className={cn("line-clamp-1 font-normal text-background-solid text-sm", {
               "text-xs": size === "sm",
             })}
           >

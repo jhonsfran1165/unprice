@@ -119,8 +119,8 @@ export function Events({
                   name={event.name}
                   description={event.description}
                   icon={"💬"}
-                  color={"red"}
-                  time={format(event.timestamp, "MMM d, yyyy hh:mm a")}
+                  color={"#e54d2e"}
+                  time={format(event.timestamp, "MMM d, hh:mm a")}
                   href={customerHref}
                 />
               </motion.div>

@@ -23,7 +23,7 @@ export const description = "An interactive bar chart"
 const chartConfig = {
   usage: {
     label: "Usage",
-    color: "var(--chart-2)",
+    color: "var(--chart-4)",
     icon: BarChartBig,
   },
   latency: {

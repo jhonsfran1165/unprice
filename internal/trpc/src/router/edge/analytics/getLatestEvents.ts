@@ -51,7 +51,7 @@ export const getLatestEvents = protectedProjectProcedure
             timestamp: event.timestamp,
             session_id: event.session_id,
             name: "Plan clicked",
-            description: `Plan clicked ${payload.plan_version_id}`,
+            description: `${payload.page_id}`,
           }
         }
         case "page_hit": {
@@ -61,7 +61,7 @@ export const getLatestEvents = protectedProjectProcedure
             timestamp: event.timestamp,
             session_id: event.session_id,
             name: "Page hit",
-            description: `Page hit ${payload.pathname}`,
+            description: `${payload.pathname}`,
           }
         }
         case "signup": {
@@ -71,7 +71,7 @@ export const getLatestEvents = protectedProjectProcedure
             timestamp: event.timestamp,
             session_id: event.session_id,
             name: "Signup",
-            description: `Signup ${payload.customer_id}`,
+            description: `${payload.customer_id}`,
           }
         }
         default: {
