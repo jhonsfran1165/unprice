@@ -1,6 +1,7 @@
 "use client"
 import type { UseFormReturn } from "react-hook-form"
 
+import { useQuery } from "@tanstack/react-query"
 import type { InsertSubscription } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import {
@@ -27,7 +28,7 @@ import { CheckIcon, ChevronDown } from "lucide-react"
 import { useState } from "react"
 import { CopyButton } from "~/components/copy-button"
 import { FilterScroll } from "~/components/filter-scroll"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export default function CustomerFormField({
   form,
@@ -36,17 +37,20 @@ export default function CustomerFormField({
   form: UseFormReturn<InsertSubscription>
   isDisabled?: boolean
 }) {
+  const trpc = useTRPC()
   const [switcherCustomerOpen, setSwitcherCustomerOpen] = useState(false)
   const customerId = form.watch("customerId")
 
   // customer lists
-  const { data: customers, isLoading } = api.customers.listByActiveProject.useQuery({
-    search: null,
-    from: null,
-    to: null,
-    page: 1,
-    page_size: 100,
-  })
+  const { data: customers, isLoading } = useQuery(
+    trpc.customers.listByActiveProject.queryOptions({
+      search: null,
+      from: null,
+      to: null,
+      page: 1,
+      page_size: 100,
+    })
+  )
 
   const selectedCustomer = customers?.customers.find((customer) => customer.id === customerId)
 

@@ -1,7 +1,7 @@
+import type { Analytics } from "@unprice/analytics"
 import type { Database, TransactionDatabase } from "@unprice/db"
 import { Err, FetchError, Ok, type Result, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import type { Analytics } from "@unprice/tinybird"
 import type { ProjectFeatureCache } from "../cache"
 import type { Cache } from "../cache/service"
 import type { Metrics } from "../metrics"

@@ -88,6 +88,11 @@ export const customerSignUpSchema = z
         "If the plan id is not provided, you can pass a plan slug and the system will intelligently pick the lastest plan for that slug and sign up the customer for it",
       example: "PRO",
     }),
+    sessionId: z.string().optional().openapi({
+      description:
+        "The session id of the customer. This is used to track conversion from pricing pages",
+      example: "sess_1234567890",
+    }),
     planVersionId: z.string().optional().openapi({
       description: "The plan version the customer is signing up for",
       example: "pv_1234567890",
@@ -211,6 +216,11 @@ export const stripePlanVersionSchema = z.object({
   projectId: z.string().min(1, "Project id is required"),
   config: subscriptionItemsConfigSchema.optional(),
   paymentMethodRequired: z.boolean(),
+})
+
+export const customerSessionMetadataSchema = z.object({
+  sessionId: z.string().optional(),
+  pageId: z.string().optional(),
 })
 
 export const customerEntitlementMetadataSchema = z.record(

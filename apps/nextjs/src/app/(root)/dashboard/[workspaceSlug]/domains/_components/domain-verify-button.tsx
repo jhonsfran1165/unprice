@@ -3,19 +3,23 @@
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
+import { useQuery } from "@tanstack/react-query"
 import { Button } from "@unprice/ui/button"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export const VerifyDomainButton = ({ domain }: { domain: string }) => {
   const router = useRouter()
-  const { data, isLoading, refetch, isRefetching } = api.domains.verify.useQuery(
-    { domain },
-    {
-      refetchInterval: (query) =>
-        query.state.data?.status === "Valid Configuration" ? false : 5000,
-    }
+  const trpc = useTRPC()
+  const { data, isLoading, refetch, isRefetching } = useQuery(
+    trpc.domains.verify.queryOptions(
+      { domain },
+      {
+        refetchInterval: (query) =>
+          query.state.data?.status === "Valid Configuration" ? false : 5000,
+      }
+    )
   )
 
   useEffect(() => {

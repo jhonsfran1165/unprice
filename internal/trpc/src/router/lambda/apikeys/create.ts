@@ -20,6 +20,7 @@ export const create = protectedProjectProcedure
     const project = opts.ctx.project
     const customerId = project.workspace.unPriceCustomerId
     const featureSlug = FEATURE_SLUGS.API_KEYS
+    const isRoot = project.workspace.isMain
 
     // only owner and admin
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
@@ -57,6 +58,7 @@ export const create = protectedProjectProcedure
         hash: apiKeyHash,
         expiresAt: expiresAt,
         projectId: project.id,
+        isRoot,
       })
       .returning()
       .then((res) => res[0])

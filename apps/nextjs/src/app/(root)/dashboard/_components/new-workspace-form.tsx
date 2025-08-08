@@ -1,5 +1,6 @@
 "use client"
 
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { APP_DOMAIN } from "@unprice/config"
 import { type WorkspaceSignup, workspaceSignupSchema } from "@unprice/db/validators"
 import {
@@ -12,12 +13,13 @@ import {
   FormMessage,
 } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
+import { useEffect } from "react"
 import ConfigItemsFormField from "~/components/forms/items-fields"
 import SelectPlanFormField from "~/components/forms/select-plan-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export default function NewWorkspaceForm({
   setDialogOpen,
@@ -26,6 +28,7 @@ export default function NewWorkspaceForm({
   defaultValues: WorkspaceSignup
   setDialogOpen?: (open: boolean) => void
 }) {
+  const trpc = useTRPC()
   const form = useZodForm({
     schema: workspaceSignupSchema,
     defaultValues: {
@@ -35,24 +38,23 @@ export default function NewWorkspaceForm({
     },
   })
 
-  const { data, isLoading, error } = api.planVersions.listByProjectUnprice.useQuery(
-    {
+  const { data, isLoading, error } = useQuery(
+    trpc.planVersions.listByProjectUnprice.queryOptions({
       published: true,
       enterprisePlan: true,
-    },
-    {
-      enabled: true,
-    }
+    })
   )
 
-  const signUpWorkspace = api.workspaces.signUp.useMutation({
-    onSuccess: async ({ url }) => {
-      setDialogOpen?.(false)
+  const signUpWorkspace = useMutation(
+    trpc.workspaces.signUp.mutationOptions({
+      onSuccess: async ({ url }) => {
+        setDialogOpen?.(false)
 
-      // redirect url
-      window.location.href = url
-    },
-  })
+        // redirect url
+        window.location.href = url
+      },
+    })
+  )
 
   const onSubmitForm = async (data: WorkspaceSignup) => {
     await signUpWorkspace.mutateAsync(data)
@@ -61,6 +63,12 @@ export default function NewWorkspaceForm({
   if (error) {
     toastAction("error", error.message)
   }
+
+  useEffect(() => {
+    if (defaultValues.planVersionId && defaultValues.planVersionId !== "") {
+      form.setValue("planVersionId", defaultValues.planVersionId)
+    }
+  }, [isLoading])
 
   return (
     <Form {...form}>

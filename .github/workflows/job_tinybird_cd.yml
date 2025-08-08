@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: internal/tinybird
+        working-directory: internal/analytics
     steps:
       - uses: actions/checkout@v4
 

@@ -4,7 +4,7 @@ import { type DrizzleSqliteDODatabase, drizzle } from "drizzle-orm/durable-sqlit
 import { migrate } from "drizzle-orm/durable-sqlite/migrator"
 import migrations from "../../drizzle/migrations"
 
-import { Analytics } from "@unprice/tinybird"
+import { Analytics } from "@unprice/analytics"
 import { count, eq, inArray, lte, sql } from "drizzle-orm"
 import { entitlements, usageRecords, verifications } from "~/db/schema"
 import type { Entitlement, NewEntitlement, schema } from "~/db/types"
@@ -228,7 +228,7 @@ export class DurableObjectUsagelimiter extends Server {
         projectId: data.projectId,
         featureSlug: data.featureSlug,
         requestId: data.requestId,
-        timestamp: Date.now(),
+        timestamp: data.timestamp,
         createdAt: Date.now(),
         latency: latency.toString() ?? "0",
         metadata: data.metadata ? JSON.stringify(data.metadata) : null,
@@ -274,7 +274,7 @@ export class DurableObjectUsagelimiter extends Server {
       // insert async verification
       this.ctx.waitUntil(
         Promise.all([
-          // broadcast the event to the project
+          // broadcast the event to the project notify about the denied reason
           this.broadcastEvents({
             customerId: data.customerId,
             featureSlug: data.featureSlug,
@@ -356,14 +356,6 @@ export class DurableObjectUsagelimiter extends Server {
     // insert verification
     this.ctx.waitUntil(
       Promise.all([
-        // broadcast the event
-        this.broadcastEvents({
-          featureSlug: data.featureSlug,
-          customerId: data.customerId,
-          type: "can",
-          success: result.success,
-          deniedReason: result.deniedReason,
-        }),
         // insert verification
         this.insertVerification(
           {
@@ -489,19 +481,6 @@ export class DurableObjectUsagelimiter extends Server {
     }
 
     const result = await this.setUsage(entitlement, data.usage)
-
-    // broadcast the event
-    this.ctx.waitUntil(
-      this.broadcastEvents({
-        featureSlug: data.featureSlug,
-        customerId: data.customerId,
-        type: "reportUsage",
-        success: result.success,
-        usage: data.usage,
-        limit: result.limit,
-        notifyUsage: result.notifyUsage,
-      })
-    )
 
     // return usage
     return result

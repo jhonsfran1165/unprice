@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import type { Page } from "@unprice/db/validators"
 import { Badge } from "@unprice/ui/badge"
 import { Button } from "@unprice/ui/button"
@@ -27,7 +28,7 @@ import { Calculator } from "lucide-react"
 import { Plus, Search, X } from "lucide-react"
 import { useState } from "react"
 import type { Control, UseFormGetValues, UseFormSetValue, UseFormWatch } from "react-hook-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 import { FilterScroll } from "../filter-scroll"
 
 interface PlanSelectionProps {
@@ -41,13 +42,11 @@ export function PlanSelection({ control, setValue, watch }: PlanSelectionProps) 
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
 
-  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
-    {
+  const trpc = useTRPC()
+  const { data, isLoading } = useQuery(
+    trpc.planVersions.listByActiveProject.queryOptions({
       onlyPublished: true,
-    },
-    {
-      enabled: true,
-    }
+    })
   )
 
   const selectedPlans = watch("selectedPlans")

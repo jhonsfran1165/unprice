@@ -1,5 +1,6 @@
 "use client"
 
+import { useMutation, useQuery } from "@tanstack/react-query"
 import {
   type InsertSubscriptionPhase,
   type SubscriptionPhase,
@@ -17,7 +18,7 @@ import TrialDaysFormField from "~/components/forms/trial-days-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 import DurationFormField from "./duration-field"
 
 export function SubscriptionPhaseForm({
@@ -29,6 +30,7 @@ export function SubscriptionPhaseForm({
   defaultValues: InsertSubscriptionPhase | Partial<SubscriptionPhase>
   onSubmit: (data: InsertSubscriptionPhase | SubscriptionPhase) => void
 }) {
+  const trpc = useTRPC()
   const editMode = defaultValues.id !== "" && defaultValues.id !== undefined
 
   const formSchema = editMode
@@ -54,12 +56,14 @@ export function SubscriptionPhaseForm({
     defaultValues,
   })
 
-  const createPhase = api.subscriptions.createPhase.useMutation()
-  const updatePhase = api.subscriptions.updatePhase.useMutation({
-    onSuccess: () => {
-      toastAction("success")
-    },
-  })
+  const createPhase = useMutation(trpc.subscriptions.createPhase.mutationOptions())
+  const updatePhase = useMutation(
+    trpc.subscriptions.updatePhase.mutationOptions({
+      onSuccess: () => {
+        toastAction("success")
+      },
+    })
+  )
 
   const onSubmitForm = async (data: InsertSubscriptionPhase | Partial<SubscriptionPhase>) => {
     // if subscription is not created yet no need to create phase
@@ -86,10 +90,12 @@ export function SubscriptionPhaseForm({
   }
 
   // all this querues are deduplicated inside each form field
-  const { data: planVersions, isLoading } = api.planVersions.listByActiveProject.useQuery({
-    onlyPublished: true,
-    onlyLatest: true,
-  })
+  const { data: planVersions, isLoading } = useQuery(
+    trpc.planVersions.listByActiveProject.queryOptions({
+      onlyPublished: true,
+      onlyLatest: false,
+    })
+  )
 
   const selectedPlanVersionId = form.watch("planVersionId")
   const selectedPlanVersion = planVersions?.planVersions.find(

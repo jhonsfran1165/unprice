@@ -1,37 +1,34 @@
+import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
-
-import { TRPCError } from "@trpc/server"
-import { analyticsIntervalSchema, getUsageResponseSchema } from "@unprice/tinybird"
 import { protectedProjectProcedure } from "#trpc"
-import { unprice } from "#utils/unprice"
 
 export const getUsage = protectedProjectProcedure
-  .input(
-    z.object({
-      range: analyticsIntervalSchema,
-    })
-  )
+  .input(z.custom<Parameters<Analytics["getFeaturesUsagePeriod"]>[0]>())
   .output(
     z.object({
-      usage: getUsageResponseSchema.array(),
+      usage: z.custom<Awaited<ReturnType<Analytics["getFeaturesUsagePeriod"]>>["data"]>(),
     })
   )
   .query(async (opts) => {
     const projectId = opts.ctx.project.id
+    const input = opts.input
 
-    const data = await unprice.analytics.getUsage({
-      projectId,
-      range: opts.input.range,
-    })
-
-    if (data.error) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: data.error.message,
+    const data = await opts.ctx.analytics
+      .getFeaturesUsagePeriod({
+        projectId,
+        start: input.start,
+        end: input.end,
       })
-    }
+      .catch((err) => {
+        opts.ctx.logger.error(`Failed to get usage for project ${projectId}`, {
+          error: err.message,
+        })
+        return {
+          data: [],
+        }
+      })
 
     return {
-      usage: data.result?.usage,
+      usage: data.data,
     }
   })

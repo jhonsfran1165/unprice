@@ -1,5 +1,7 @@
+import { COOKIES_APP } from "@unprice/config"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import { UserIcon } from "lucide-react"
+import { cookies } from "next/headers"
 import { Suspense } from "react"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -10,22 +12,47 @@ import Redirect from "./_components/redirect"
 
 export default async function NewPage(props: {
   searchParams: {
-    customer_id: string
+    customer_id?: string
   }
 }) {
   const { customer_id } = props.searchParams
+  const cookieStore = cookies()
+  const sessionId = cookieStore.get(COOKIES_APP.SESSION)?.value
+
+  if (!sessionId) {
+    return (
+      <Suspense fallback={<LayoutLoader />}>
+        <Content customerId={customer_id} />
+      </Suspense>
+    )
+  }
+
+  const { planClick } = await api.analytics.getPlanClickBySessionId({
+    session_id: sessionId,
+    action: "plan_click",
+  })
+
+  const session = planClick?.at(0) ?? null
 
   return (
     <Suspense fallback={<LayoutLoader />}>
-      <Content customerId={customer_id ?? undefined} />
+      <Content
+        customerId={customer_id}
+        planVersionId={session?.payload.plan_version_id}
+        sessionId={sessionId}
+      />
     </Suspense>
   )
 }
 
 async function Content({
   customerId,
+  planVersionId,
+  sessionId,
 }: {
-  customerId: string | undefined
+  customerId?: string
+  planVersionId?: string
+  sessionId?: string
 }) {
   if (!customerId || customerId === "") {
     return (
@@ -40,10 +67,12 @@ async function Content({
               <NewWorkspaceForm
                 defaultValues={{
                   name: "",
-                  planVersionId: "",
+                  // preselect the plan version if it exists
+                  planVersionId: planVersionId ?? "",
                   config: [],
                   successUrl: "",
                   cancelUrl: "",
+                  sessionId: sessionId,
                 }}
               />
             </CardContent>

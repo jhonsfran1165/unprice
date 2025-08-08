@@ -1,6 +1,7 @@
 {
   "name": "@unprice/tiny-tools",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "cookie": "tsx cookie.ts",
     "main": "tsx main.ts",
@@ -11,9 +12,8 @@
   "author": "Sebastian Franco",
   "license": "AGPL-3.0",
   "dependencies": {
-    "@tinybirdco/mockingbird": "2.0.0-rc.0",
+    "@unprice/analytics": "workspace:^",
     "@unprice/api": "workspace:^",
-    "@unprice/tinybird": "workspace:^",
     "zod": "^3.24.2"
   },
   "devDependencies": {

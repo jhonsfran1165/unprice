@@ -1,5 +1,6 @@
 "use client"
 
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { type SubscriptionChangePlan, subscriptionChangePlanSchema } from "@unprice/db/validators"
 import {
   Form,
@@ -17,7 +18,7 @@ import SelectPlanFormField from "~/components/forms/select-plan-field"
 import { SubmitButton } from "~/components/submit-button"
 import { formatDate } from "~/lib/dates"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export default function SubscriptionChangePlanForm({
   setDialogOpen,
@@ -27,28 +28,33 @@ export default function SubscriptionChangePlanForm({
   setDialogOpen?: (open: boolean) => void
 }) {
   const router = useRouter()
+  const trpc = useTRPC()
 
   const form = useZodForm({
     schema: subscriptionChangePlanSchema,
     defaultValues,
   })
 
-  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
-    {
-      onlyPublished: true,
-      onlyLatest: true,
-    },
-    {
-      enabled: true,
-    }
+  const { data, isLoading } = useQuery(
+    trpc.planVersions.listByActiveProject.queryOptions(
+      {
+        onlyPublished: true,
+        onlyLatest: true,
+      },
+      {
+        enabled: true,
+      }
+    )
   )
 
-  const changePhasePlan = api.subscriptions.changePhasePlan.useMutation({
-    onSuccess: async () => {
-      setDialogOpen?.(false)
-      router.refresh()
-    },
-  })
+  const changePhasePlan = useMutation(
+    trpc.subscriptions.changePhasePlan.mutationOptions({
+      onSuccess: async () => {
+        setDialogOpen?.(false)
+        router.refresh()
+      },
+    })
+  )
 
   const onSubmitForm = async (data: SubscriptionChangePlan) => {
     await changePhasePlan.mutateAsync(data)

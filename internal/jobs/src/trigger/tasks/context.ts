@@ -1,8 +1,8 @@
+import { Analytics } from "@unprice/analytics"
 import { db } from "@unprice/db"
 import { ConsoleLogger } from "@unprice/logging"
 import { CacheService } from "@unprice/services/cache"
 import { NoopMetrics } from "@unprice/services/metrics"
-import { Analytics } from "@unprice/tinybird"
 import { env } from "../../env"
 
 export const createContext = async ({

@@ -1,6 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation } from "@tanstack/react-query"
 import { type Page, pageInsertBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Card, CardContent } from "@unprice/ui/card"
@@ -10,7 +11,7 @@ import { Save } from "lucide-react"
 import { useEffect, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useDebounce } from "~/hooks/use-debounce"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 import { BasicInformation } from "./basic-information"
 import { ColorPalettePicker } from "./color-palette-picker"
 import { FAQSection } from "./faq-section"
@@ -18,6 +19,7 @@ import { LogoUpload } from "./logo-upload"
 import { PlanSelection } from "./plan-selection"
 
 export default function PageBuilderConfig({ page }: { page: Page }) {
+  const trpc = useTRPC()
   const form = useForm<Page>({
     resolver: zodResolver(pageInsertBaseSchema),
     defaultValues: {
@@ -28,19 +30,21 @@ export default function PageBuilderConfig({ page }: { page: Page }) {
   const initialValuesRef = useRef(page)
   const lastSavedValuesRef = useRef<Page>(page)
 
-  const { mutateAsync: updatePage, isPending } = api.pages.update.useMutation({
-    onSuccess: () => {
-      toast.success("Configuration saved successfully!", {
-        description: "Your page builder settings have been saved.",
-      })
-      initialValuesRef.current = lastSavedValuesRef.current
-    },
-    onError: (error) => {
-      toast.error("Failed to save configuration", {
-        description: error.message,
-      })
-    },
-  })
+  const { mutateAsync: updatePage, isPending } = useMutation(
+    trpc.pages.update.mutationOptions({
+      onSuccess: () => {
+        toast.success("Configuration saved successfully!", {
+          description: "Your page builder settings have been saved.",
+        })
+        initialValuesRef.current = lastSavedValuesRef.current
+      },
+      onError: (error) => {
+        toast.error("Failed to save configuration", {
+          description: error.message,
+        })
+      },
+    })
+  )
 
   const handleSaveConfig = async (data: Page) => {
     lastSavedValuesRef.current = data

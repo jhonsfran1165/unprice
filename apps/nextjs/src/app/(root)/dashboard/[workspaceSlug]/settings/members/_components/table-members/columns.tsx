@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { formatRelative } from "date-fns"
 
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Avatar, AvatarFallback, AvatarImage } from "@unprice/ui/avatar"
 import { Checkbox } from "@unprice/ui/checkbox"
 

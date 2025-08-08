@@ -1,9 +1,10 @@
-import { newId } from "@unprice/db/utils"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import Script from "next/script"
 import Footer from "~/components/layout/footer"
 import Header from "~/components/layout/header"
 import HeaderMarketing from "~/components/layout/header-marketing"
+import { env } from "~/env"
 import { generateColorsFromBackground } from "~/lib/colors"
 import { getPageData } from "~/lib/fetchers"
 import { getImageSrc, isSvgLogo } from "~/lib/image"
@@ -87,7 +88,7 @@ export default async function DomainPage({
             }) || []
 
         return {
-          id: version.plan.id,
+          id: version.id,
           name: version.plan.slug,
           flatPrice: version.flatPrice,
           currency: version.currency,
@@ -98,16 +99,31 @@ export default async function DomainPage({
           ctaLink: page.ctaLink,
           isEnterprisePlan: version.plan.enterprisePlan || false,
           billingPeriod: version.billingConfig.billingInterval,
+          contactEmail: page.project.contactEmail,
+          version: version.version.toString(),
         }
       })
       .filter(Boolean) as PricingPlan[]) || []
 
   const { text } = generateColorsFromBackground(page.colorPalette?.primary)
   const isUnprice = page.customDomain?.endsWith("unprice.dev")
-  const sessionId = newId("session")
 
   return (
     <div>
+      {env.TINYBIRD_TOKEN ? (
+        <Script
+          defer
+          strategy="afterInteractive"
+          src="/track.js"
+          data-host={env.TINYBIRD_URL}
+          data-proxy={" "}
+          data-storage={"cookie"}
+          data-token={env.TINYBIRD_TOKEN}
+          data-plan-ids={plans.map((plan) => plan.id).join(",")}
+          data-page-id={page.id}
+          data-project-id={page.project.id}
+        />
+      ) : null}
       <ApplyTheme
         cssVars={{
           "black-a12": text,
@@ -128,7 +144,7 @@ export default async function DomainPage({
       )}
 
       {!isUnprice ? (
-        <Header isUnprice={isUnprice}>
+        <Header isUnprice={false}>
           <div className="flex items-center space-x-2">
             <Link href="/">
               <img
@@ -145,13 +161,7 @@ export default async function DomainPage({
         <HeaderMarketing />
       )}
       <main className="container mx-auto space-y-24 px-4 py-16">
-        <PricingTable
-          plans={plans}
-          popularPlan="PRO"
-          title={page.title}
-          subtitle={page.copy}
-          sessionId={sessionId}
-        />
+        <PricingTable plans={plans} popularPlan="PRO" title={page.title} subtitle={page.copy} />
         <FeatureComparison plans={plans} />
         <Faqs faqs={page.faqs ?? []} />
       </main>

@@ -13,11 +13,12 @@ import { SubmitButton } from "~/components/submit-button"
 import { formatDate } from "~/lib/dates"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 import CustomerFormField from "./customer-field"
 import { SubscriptionCancelButton } from "./subscription-cancel-button"
 import SubscriptionPhaseFormField from "./subscription-phase-field"
 
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
 import { Separator } from "@unprice/ui/separator"
 
@@ -30,35 +31,40 @@ export function SubscriptionForm({
     | (InsertSubscription & { items?: SubscriptionItem[] })
     | (Subscription & { items?: SubscriptionItem[] })
 }) {
+  const trpc = useTRPC()
   const router = useRouter()
   const isEdit = !!defaultValues.id
   const isInactive = isEdit && !defaultValues.active
 
   const { workspaceSlug, projectSlug } = useParams()
 
-  const createSubscription = api.subscriptions.create.useMutation({
-    onSuccess: ({ subscription }) => {
-      form.reset(subscription)
-      toastAction("saved")
-      setDialogOpen?.(false)
-      router.refresh()
+  const createSubscription = useMutation(
+    trpc.subscriptions.create.mutationOptions({
+      onSuccess: ({ subscription }) => {
+        form.reset(subscription)
+        toastAction("saved")
+        setDialogOpen?.(false)
+        router.refresh()
 
-      router.push(`/${workspaceSlug}/${projectSlug}/customers/subscriptions/${subscription.id}`)
-    },
-  })
+        router.push(`/${workspaceSlug}/${projectSlug}/customers/subscriptions/${subscription.id}`)
+      },
+    })
+  )
 
   // customer lists
-  const { data: customers } = api.customers.listByActiveProject.useQuery(
-    {
-      search: null,
-      from: null,
-      to: null,
-      page: 1,
-      page_size: 100,
-    },
-    {
-      enabled: defaultValues.customerId === "",
-    }
+  const { data: customers } = useQuery(
+    trpc.customers.listByActiveProject.queryOptions(
+      {
+        search: null,
+        from: null,
+        to: null,
+        page: 1,
+        page_size: 100,
+      },
+      {
+        enabled: defaultValues.customerId === "",
+      }
+    )
   )
 
   const formSchema = subscriptionInsertSchema

@@ -35,7 +35,7 @@ export default function ErrorPage({
             {error.message}
           </EmptyPlaceholder.Description>
           <EmptyPlaceholder.Action>
-            <div className="mt-6 flex flex-row items-center justify-center gap-10">
+            <div className="mt-6 flex flex-row items-center justify-center gap-2">
               <Button variant="primary" onClick={() => reset()}>
                 Try again
               </Button>

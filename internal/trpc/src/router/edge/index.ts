@@ -1,3 +1,4 @@
+import { createTRPCRouter } from "#trpc"
 import { analyticsRouter } from "./analytics"
 import { customersRouter } from "./customers"
 
@@ -9,3 +10,5 @@ export const edgeEndpoints = {
   analytics: analyticsRouter,
   customers: customersRouter,
 }
+
+export const edgeRouter = createTRPCRouter(edgeEndpoints)

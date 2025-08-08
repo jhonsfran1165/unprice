@@ -1,3 +1,4 @@
+import type { Analytics } from "@unprice/analytics"
 import type { Database, TransactionDatabase } from "@unprice/db"
 import { nFormatter } from "@unprice/db/utils"
 import {
@@ -11,7 +12,6 @@ import {
 } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import type { Analytics } from "@unprice/tinybird"
 import type { Cache } from "../cache/service"
 import type { Metrics } from "../metrics"
 import { retry } from "../utils/retry"

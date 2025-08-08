@@ -42,7 +42,7 @@ export default async function AuthenticationPage({
                   Or continue with
                 </span>
               </div>
-              <SignUpCredentials />
+              <SignUpCredentials sessionId={sessionId} />
 
               <div className="text-center text-sm">
                 Already have an account?{" "}

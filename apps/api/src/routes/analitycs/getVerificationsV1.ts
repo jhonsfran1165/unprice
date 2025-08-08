@@ -1,6 +1,10 @@
 import { createRoute } from "@hono/zod-openapi"
+import {
+  analyticsIntervalSchema,
+  getAnalyticsVerificationsResponseSchema,
+  prepareInterval,
+} from "@unprice/analytics"
 import { FEATURE_SLUGS } from "@unprice/config"
-import { analyticsIntervalSchema, getAnalyticsVerificationsResponseSchema } from "@unprice/tinybird"
 import { endTime, startTime } from "hono/timing"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
@@ -20,7 +24,6 @@ export const route = createRoute({
   description: "Get verifications for a customer in a given range",
   method: "post",
   tags,
-
   request: {
     body: jsonContentRequired(
       z.object({
@@ -60,6 +63,7 @@ export type GetAnalyticsVerificationsRequest = z.infer<
 export type GetAnalyticsVerificationsResponse = z.infer<
   (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >
+
 export const registerGetAnalyticsVerificationsV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { customerId, range, projectId } = c.req.valid("json")
@@ -68,8 +72,6 @@ export const registerGetAnalyticsVerificationsV1 = (app: App) =>
 
     // start a new timer
     startTime(c, "keyAuth")
-
-    const now = Date.now()
 
     // validate the request
     const key = await keyAuth(c)
@@ -80,17 +82,8 @@ export const registerGetAnalyticsVerificationsV1 = (app: App) =>
     // start a new timer
     startTime(c, "getVerifications")
 
-    // TODO: improve this
-    const start =
-      range === "24h"
-        ? now - 1000 * 60 * 60 * 24
-        : range === "7d"
-          ? now - 1000 * 60 * 60 * 24 * 7
-          : range === "30d"
-            ? now - 1000 * 60 * 60 * 24 * 30
-            : now - 1000 * 60 * 60 * 24 * 24
+    const { start, end } = prepareInterval(range)
 
-    const end = now
     // main workspace can see all verifications
     // TODO: abstract this to analytics service
     const isMain = key.project.workspace.isMain
@@ -177,10 +170,11 @@ export const registerGetAnalyticsVerificationsV1 = (app: App) =>
               featureSlug: FEATURE_SLUGS.EVENTS,
               projectId: unPriceCustomer.projectId,
               requestId,
-              now: Date.now(),
               usage: 1,
               idempotenceKey: `${requestId}:${unPriceCustomer.id}`,
               timestamp: Date.now(),
+              // short ttl for dev
+              secondsToLive: c.env.NODE_ENV === "development" ? 5 : undefined,
               metadata: {
                 action: "verifications",
               },

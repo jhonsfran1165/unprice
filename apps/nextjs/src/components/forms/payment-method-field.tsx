@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { APP_DOMAIN } from "@unprice/config"
 import type { PaymentProvider } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
@@ -19,7 +20,7 @@ import { useParams } from "next/navigation"
 import type { FieldErrors, FieldPath, FieldValues, UseFormReturn } from "react-hook-form"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PaymentMethodDialog } from "~/components/forms/payment-method-dialog"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 interface FormValues extends FieldValues {
   customerId?: string
@@ -39,6 +40,7 @@ export default function PaymentMethodsFormField<TFieldValues extends FormValues>
   withSeparator?: boolean
   paymentProvider?: PaymentProvider
 }) {
+  const trpc = useTRPC()
   const workspaceSlug = useParams().workspaceSlug as string
   const projectSlug = useParams().projectSlug as string
   const customerId = form.watch("customerId" as FieldPath<TFieldValues>)
@@ -48,14 +50,16 @@ export default function PaymentMethodsFormField<TFieldValues extends FormValues>
 
   const { errors } = form.formState
 
-  const { data, isLoading } = api.customers.listPaymentMethods.useQuery(
-    {
-      customerId: customerId,
-      provider: paymentProvider ?? "stripe",
-    },
-    {
-      enabled: !!customerId,
-    }
+  const { data, isLoading } = useQuery(
+    trpc.customers.listPaymentMethods.queryOptions(
+      {
+        customerId: customerId,
+        provider: paymentProvider ?? "stripe",
+      },
+      {
+        enabled: !!customerId,
+      }
+    )
   )
 
   const hasPaymentMethods = (data?.paymentMethods.length ?? 0) > 0

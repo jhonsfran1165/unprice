@@ -14,8 +14,9 @@ import {
 } from "@unprice/ui/dropdown-menu"
 import { Ellipsis } from "@unprice/ui/icons"
 
+import { useMutation } from "@tanstack/react-query"
 import { toastAction } from "~/lib/toast"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
@@ -24,20 +25,25 @@ interface DataTableRowActionsProps<TData> {
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
   const apikey = selectApiKeySchema.parse(row.original)
   const router = useRouter()
+  const trpc = useTRPC()
 
-  const revokeApiKeys = api.apikeys.revoke.useMutation({
-    onSuccess: () => {
-      toastAction("saved")
-      router.refresh()
-    },
-  })
+  const revokeApiKeys = useMutation(
+    trpc.apikeys.revoke.mutationOptions({
+      onSuccess: () => {
+        toastAction("saved")
+        router.refresh()
+      },
+    })
+  )
 
-  const rollApiKey = api.apikeys.roll.useMutation({
-    onSuccess: () => {
-      toastAction("success")
-      router.refresh()
-    },
-  })
+  const rollApiKey = useMutation(
+    trpc.apikeys.roll.mutationOptions({
+      onSuccess: () => {
+        toastAction("success")
+        router.refresh()
+      },
+    })
+  )
 
   function onRevokeKey() {
     startTransition(() => {

@@ -73,9 +73,11 @@ export const invites = pgTableProject(
   {
     ...timestamps,
     ...workspaceID,
+    name: text("name").notNull(),
     email: text("email").notNull(),
     role: teamRolesEnum("role").default("MEMBER").notNull(),
     acceptedAt: bigint("accepted_at_m", { mode: "number" }),
+    invitedBy: cuid("invited_by").notNull(),
   },
   (table) => ({
     compoundKey: primaryKey({
@@ -86,6 +88,11 @@ export const invites = pgTableProject(
       columns: [table.workspaceId],
       foreignColumns: [workspaces.id],
       name: "invites_workspace_id_fkey",
+    }).onDelete("cascade"),
+    invitedByFk: foreignKey({
+      columns: [table.invitedBy],
+      foreignColumns: [users.id],
+      name: "invites_invited_by_fkey",
     }).onDelete("cascade"),
   })
 )
@@ -106,6 +113,17 @@ export const membersRelations = relations(members, ({ one }) => ({
   }),
   workspace: one(workspaces, {
     fields: [members.workspaceId],
+    references: [workspaces.id],
+  }),
+}))
+
+export const invitesRelations = relations(invites, ({ one }) => ({
+  invitedBy: one(users, {
+    fields: [invites.invitedBy],
+    references: [users.id],
+  }),
+  workspace: one(workspaces, {
+    fields: [invites.workspaceId],
     references: [workspaces.id],
   }),
 }))

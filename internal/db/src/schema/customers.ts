@@ -21,6 +21,7 @@ import { cuid, id, timestamps } from "../utils/fields"
 import type {
   customerCreditMetadataSchema,
   customerMetadataSchema,
+  customerSessionMetadataSchema,
   stripePlanVersionSchema,
   stripeSetupSchema,
 } from "../validators/customer"
@@ -181,6 +182,7 @@ export const customerSessions = pgTableProject("customer_sessions", {
   ...timestamps,
   customer: json("customer").notNull().$type<z.infer<typeof stripeSetupSchema>>(),
   planVersion: json("plan_version").notNull().$type<z.infer<typeof stripePlanVersionSchema>>(),
+  metadata: json("metadata").$type<z.infer<typeof customerSessionMetadataSchema>>(),
 })
 
 // when there is an overdue charge, we need to create a credit for the customer

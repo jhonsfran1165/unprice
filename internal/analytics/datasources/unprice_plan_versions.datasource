@@ -1,0 +1,27 @@
+TOKEN "web-apps" APPEND
+
+DESCRIPTION >
+    Once a plan version is published, we store it here.
+    This is used to get the plan version details.
+
+TAGS "plan_versions"
+
+SCHEMA >
+    `id` String `json:$.id`,
+    `project_id` String `json:$.project_id`,
+    `plan_id` String `json:$.plan_id`,
+    `plan_slug` String `json:$.plan_slug`,
+    `plan_version` Int16 `json:$.plan_version`,
+    `currency` LowCardinality(String) `json:$.currency`,
+    `payment_provider` LowCardinality(String) `json:$.payment_provider`,
+    `billing_interval` LowCardinality(String) `json:$.billing_interval`,
+    `billing_interval_count` Int8 `json:$.billing_interval_count`,
+    `billing_anchor` LowCardinality(String) `json:$.billing_anchor`,
+    `plan_type` LowCardinality(String) `json:$.plan_type`,
+    `trial_days` Int8 `json:$.trial_days`,
+    `payment_method_required` Int8 `json:$.payment_method_required`,
+    `timestamp` DateTime64(3) `json:$.timestamp`,
+
+ENGINE MergeTree
+ENGINE_PARTITION_KEY toYYYYMM(timestamp)
+ENGINE_SORTING_KEY id

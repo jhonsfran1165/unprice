@@ -168,6 +168,7 @@ export const duplicate = protectedProjectProcedure
     }
 
     opts.ctx.waitUntil(
+      // report usage
       reportUsageFeature({
         customerId: workspace.unPriceCustomerId,
         featureSlug: "plans",

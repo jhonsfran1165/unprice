@@ -21,10 +21,11 @@ import {
   usePlanFeaturesList,
   usePlanVersionFeatureOpen,
 } from "~/hooks/use-features"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 import { PlanVersionFeatureSheet } from "../[planSlug]/_components/plan-version-feature-sheet"
 import { FeatureDialog } from "./feature-dialog"
 
+import { useMutation } from "@tanstack/react-query"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 
 const featureVariants = cva(
@@ -57,9 +58,10 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
   const [active, setActiveFeature] = useActiveFeature()
   const [activePlanVersion] = useActivePlanVersion()
   const [planVersionFeatureOpen] = usePlanVersionFeatureOpen()
-  const [_planFeatures, setPlanFeaturesList] = usePlanFeaturesList()
+  const [, setPlanFeaturesList] = usePlanFeaturesList()
+  const trpc = useTRPC()
 
-  const removePlanVersionFeature = api.planVersionFeatures.remove.useMutation()
+  const removePlanVersionFeature = useMutation(trpc.planVersionFeatures.remove.mutationOptions())
 
   const feature = planFeatureVersion.feature
 

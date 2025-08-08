@@ -1,5 +1,6 @@
 "use client"
 
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { nFormatter, nFormatterTime } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import {
@@ -10,13 +11,15 @@ import {
 } from "@unprice/ui/chart"
 import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
+import { CodeApiSheet } from "~/components/code-api-sheet"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import type { RouterOutputs } from "#index"
-import { CodeApiSheet } from "../forms/code-api-sheet"
+import { useIntervalFilter } from "~/hooks/use-filter"
+import { useTRPC } from "~/trpc/client"
 
 const chartConfig = {
   verifications: {
     label: "Verifications",
+    color: "var(--chart-3)",
   },
   p95_latency: {
     label: "P95 Latency",
@@ -29,12 +32,16 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function VerificationsChart({
-  verifications,
-}: {
-  verifications: RouterOutputs["analytics"]["getVerifications"]["verifications"]
-}) {
-  const chartData = verifications.map((v) => ({
+export function VerificationsChart() {
+  const [intervalFilter] = useIntervalFilter()
+  const trpc = useTRPC()
+  const { data: verifications, isLoading } = useSuspenseQuery(
+    trpc.analytics.getVerifications.queryOptions({
+      start: intervalFilter.start,
+      end: intervalFilter.end,
+    })
+  )
+  const chartData = verifications.verifications.map((v) => ({
     feature: v.featureSlug,
     verifications: v.count,
     p95_latency: v.p95_latency,
@@ -42,10 +49,10 @@ export function VerificationsChart({
     latest_latency: v.latest_latency,
   }))
 
-  if (chartData.length === 0) {
+  if (chartData.length === 0 || isLoading) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
-        <EmptyPlaceholder className="min-h-[420px]">
+        <EmptyPlaceholder className="min-h-[420px]" isLoading={isLoading}>
           <EmptyPlaceholder.Icon>
             <BarChart4 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
@@ -55,7 +62,7 @@ export function VerificationsChart({
           </EmptyPlaceholder.Description>
           <EmptyPlaceholder.Action>
             <CodeApiSheet defaultMethod="verifyFeature">
-              <Button size={"sm"}>
+              <Button size={"sm"} disabled={isLoading}>
                 <Code className="mr-2 h-4 w-4" />
                 Start verifying data
               </Button>
@@ -106,11 +113,7 @@ export function VerificationsChart({
   }
 
   return (
-    <ChartContainer
-      config={chartConfig}
-      height={chartData.length * 50}
-      className="min-h-[200px] w-full"
-    >
+    <ChartContainer config={chartConfig} height={chartData.length * 50} className="w-full">
       <BarChart
         accessibilityLayer
         data={chartData}
@@ -129,6 +132,7 @@ export function VerificationsChart({
           type="category"
           tickLine={false}
           tickMargin={10}
+          width={120}
           axisLine={false}
           tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
         />
@@ -142,7 +146,7 @@ export function VerificationsChart({
           dataKey="verifications"
           layout="vertical"
           radius={5}
-          fill="hsl(var(--chart-1))"
+          fill="var(--color-verifications)"
           maxBarSize={25}
           activeBar={{ opacity: 0.5 }}
         >

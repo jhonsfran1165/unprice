@@ -7,7 +7,7 @@ import Header from "~/components/layout/header"
 import { Logo } from "~/components/layout/logo"
 import { entitlementFlag } from "~/lib/flags"
 import { unprice } from "~/lib/unprice"
-import { HydrateClient, trpc } from "~/trpc/server"
+import { HydrateClient, prefetch, trpc } from "~/trpc/server"
 import { ProjectSwitcher } from "../../_components/project-switcher"
 import { ProjectSwitcherSkeleton } from "../../_components/project-switcher-skeleton"
 import { UpdateClientCookie } from "../../_components/update-client-cookie"
@@ -48,9 +48,11 @@ export default async function Page(props: {
     workspace = `${workspaceSlug ?? all.at(0)}` as string
 
     // prefetch data for the workspace and project
-    void trpc.workspaces.listWorkspacesByActiveUser.prefetch(undefined, {
-      staleTime: 1000 * 60 * 60, // 1 hour
-    })
+    prefetch(
+      trpc.workspaces.listWorkspacesByActiveUser.queryOptions(undefined, {
+        staleTime: 1000 * 60 * 60, // 1 hour
+      })
+    )
 
     const atw = session?.user.workspaces.find((w) => w.slug === workspace)
 
@@ -76,9 +78,11 @@ export default async function Page(props: {
   if (isSlug(projectSlug) || isSlug(all.at(1))) {
     project = `${projectSlug ?? all.at(1)}` as string
 
-    void trpc.projects.listByActiveWorkspace.prefetch(undefined, {
-      staleTime: 1000 * 60 * 60, // 1 hour
-    })
+    prefetch(
+      trpc.projects.listByActiveWorkspace.queryOptions(undefined, {
+        staleTime: 1000 * 60 * 60, // 1 hour
+      })
+    )
   }
 
   if (!workspace && !project) {

@@ -20,12 +20,13 @@ import { Calendar as CalendarIcon } from "@unprice/ui/icons"
 import { Input } from "@unprice/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 
+import { useMutation } from "@tanstack/react-query"
 import { useParams, useSearchParams } from "next/navigation"
 import { revalidateAppPath } from "~/actions/revalidate"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export default function CreateApiKeyForm(props: {
   setDialogOpen?: (open: boolean) => void
@@ -33,6 +34,8 @@ export default function CreateApiKeyForm(props: {
   defaultValues?: CreateApiKey
   skip?: boolean
 }) {
+  const trpc = useTRPC()
+
   const params = useParams()
   const searchParams = useSearchParams()
 
@@ -54,15 +57,17 @@ export default function CreateApiKeyForm(props: {
     },
   })
 
-  const create = api.apikeys.create.useMutation({
-    onSuccess: () => {
-      toastAction("success")
-      form.reset()
-      props.setDialogOpen?.(false)
-      props.onSuccess?.("")
-      revalidateAppPath(`/${workspaceSlug}/${projectSlug}/apikeys`, "page")
-    },
-  })
+  const create = useMutation(
+    trpc.apikeys.create.mutationOptions({
+      onSuccess: () => {
+        toastAction("success")
+        form.reset()
+        props.setDialogOpen?.(false)
+        props.onSuccess?.("")
+        revalidateAppPath(`/${workspaceSlug}/${projectSlug}/apikeys`, "page")
+      },
+    })
+  )
 
   return (
     <Form {...form}>

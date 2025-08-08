@@ -5,7 +5,7 @@ import { use } from "react"
 
 import type { ProjectTransferToWorkspace } from "@unprice/db/validators"
 import { transferToWorkspaceSchema } from "@unprice/db/validators"
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import {
@@ -22,9 +22,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function TransferProjectToTeam({
   workspacesPromise,
@@ -39,7 +40,8 @@ export function TransferProjectToTeam({
 }) {
   const { workspaces } = use(workspacesPromise)
   const router = useRouter()
-  const apiUtils = api.useUtils()
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
 
   const form = useZodForm({
     schema: transferToWorkspaceSchema,
@@ -48,14 +50,16 @@ export function TransferProjectToTeam({
     },
   })
 
-  const transferToWorkspace = api.projects.transferToWorkspace.useMutation({
-    onSuccess: async (data) => {
-      toastAction("success")
-      await apiUtils.projects.listByActiveWorkspace.refetch()
-      // redirect to the new workspace
-      router.push(`/${data?.workspaceSlug}`)
-    },
-  })
+  const transferToWorkspace = useMutation(
+    trpc.projects.transferToWorkspace.mutationOptions({
+      onSuccess: async (data) => {
+        toastAction("success")
+        await queryClient.invalidateQueries(trpc.projects.listByActiveWorkspace.queryOptions())
+        // redirect to the new workspace
+        router.push(`/${data?.workspaceSlug}`)
+      },
+    })
+  )
 
   async function onSubmit(data: ProjectTransferToWorkspace) {
     await transferToWorkspace.mutateAsync(data)

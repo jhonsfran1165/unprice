@@ -1,0 +1,4 @@
+- name: with_start_and_end
+  description: Test the default behavior showing last 7 days of data
+  parameters: start=2025-07-02&end=2025-07-02
+  expected_result: |

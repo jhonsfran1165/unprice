@@ -11,7 +11,7 @@ export class AesGCM {
   static async withBase64Key(base64Key: string): Promise<AesGCM> {
     const key = await crypto.subtle.importKey(
       "raw",
-      base64.decodeBase64(base64Key),
+      new Uint8Array(base64.decodeBase64(base64Key)).buffer,
       { name: AesGCM.algorithm, length: 256 },
       false,
       ["encrypt", "decrypt"]
@@ -38,10 +38,10 @@ export class AesGCM {
     const decryptedBuffer = await crypto.subtle.decrypt(
       {
         name: AesGCM.algorithm,
-        iv: base64.decodeBase64(req.iv),
+        iv: new Uint8Array(base64.decodeBase64(req.iv)).buffer,
       },
       this.key,
-      base64.decodeBase64(req.ciphertext)
+      new Uint8Array(base64.decodeBase64(req.ciphertext)).buffer
     )
 
     return new TextDecoder().decode(decryptedBuffer)

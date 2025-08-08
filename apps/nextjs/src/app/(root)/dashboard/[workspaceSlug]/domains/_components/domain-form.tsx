@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useEffect, useTransition } from "react"
 
+import { useMutation } from "@tanstack/react-query"
 import type { CreateDomain, Domain } from "@unprice/db/validators"
 import { domainCreateBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
@@ -14,7 +15,7 @@ import { SubmitButton } from "~/components/submit-button"
 import { useDebounce } from "~/hooks/use-debounce"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function DomainForm({
   onSubmit,
@@ -24,6 +25,7 @@ export function DomainForm({
   defaultValues: CreateDomain
 }) {
   const router = useRouter()
+  const trpc = useTRPC()
 
   const form = useZodForm({
     schema: domainCreateBaseSchema,
@@ -36,7 +38,7 @@ export function DomainForm({
   const editMode = !!defaultValues.id
   const watchDomain = form.watch("name")
   const debouncedDomain = useDebounce(watchDomain, 1000)
-  const domainExist = api.domains.exists.useMutation()
+  const domainExist = useMutation(trpc.domains.exists.mutationOptions())
 
   // TODO: compare with the validation on feature-form.tsx
   useEffect(() => {
@@ -66,25 +68,29 @@ export function DomainForm({
     }
   }, [debouncedDomain])
 
-  const createDomain = api.domains.create.useMutation({
-    onSuccess: ({ domain }) => {
-      form.reset(defaultValues)
-      toastAction("saved")
-      router.refresh()
-      onSubmit?.(domain)
-    },
-  })
+  const createDomain = useMutation(
+    trpc.domains.create.mutationOptions({
+      onSuccess: ({ domain }) => {
+        form.reset(defaultValues)
+        toastAction("saved")
+        router.refresh()
+        onSubmit?.(domain)
+      },
+    })
+  )
 
-  const updateDomain = api.domains.update.useMutation({
-    onSuccess: ({ domain }) => {
-      form.reset()
-      toastAction("updated")
-      router.refresh()
-      onSubmit?.(domain)
-    },
-  })
+  const updateDomain = useMutation(
+    trpc.domains.update.mutationOptions({
+      onSuccess: ({ domain }) => {
+        form.reset()
+        toastAction("updated")
+        router.refresh()
+        onSubmit?.(domain)
+      },
+    })
+  )
 
-  const deleteDomain = api.domains.remove.useMutation()
+  const deleteDomain = useMutation(trpc.domains.remove.mutationOptions())
 
   function onDelete() {
     startTransition(async () => {

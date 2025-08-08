@@ -1,6 +1,6 @@
 import { createRoute } from "@hono/zod-openapi"
+import { analyticsIntervalSchema, getUsageResponseSchema } from "@unprice/analytics"
 import { FEATURE_SLUGS } from "@unprice/config"
-import { analyticsIntervalSchema, getUsageResponseSchema } from "@unprice/tinybird"
 import { endTime, startTime } from "hono/timing"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
@@ -173,8 +173,9 @@ export const registerGetAnalyticsUsageV1 = (app: App) =>
               featureSlug: FEATURE_SLUGS.EVENTS,
               projectId: unPriceCustomer.projectId,
               requestId,
-              now: Date.now(),
               usage: 1,
+              // short ttl for dev
+              secondsToLive: c.env.NODE_ENV === "development" ? 5 : undefined,
               idempotenceKey: `${requestId}:${unPriceCustomer.id}`,
               timestamp: Date.now(),
               metadata: {

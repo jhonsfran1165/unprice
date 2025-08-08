@@ -1,5 +1,5 @@
 {
-  "tinybird.dataProjectSubdir": "internal/tinybird",
+  "tinybird.dataProjectSubdir": "internal/analytics",
   "tinybird.venvActivate": "bin/activate",
   "tinybird.venv": ".venv",
   "editor.codeActionsOnSave": {

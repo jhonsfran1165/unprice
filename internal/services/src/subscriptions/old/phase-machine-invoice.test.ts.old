@@ -6,7 +6,7 @@ import {
 } from "@unprice/db/validators"
 import { Ok } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import type { Analytics } from "@unprice/tinybird"
+import type { Analytics } from "@unprice/analytics"
 import { addDays } from "date-fns"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { UnPriceSubscriptionError } from "./errors"

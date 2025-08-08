@@ -1,5 +1,6 @@
 import { type Database, type TransactionDatabase, and, eq, gte, isNull, lte, or } from "@unprice/db"
 
+import type { Analytics } from "@unprice/analytics"
 import {
   customerEntitlements,
   customerSessions,
@@ -21,7 +22,6 @@ import type {
 } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import type { Analytics } from "@unprice/tinybird"
 import { env } from "../../env"
 import type {
   CustomerCache,
@@ -1115,6 +1115,7 @@ export class CustomerService {
       defaultCurrency,
       externalId,
       planSlug,
+      sessionId,
       billingInterval,
       metadata,
     } = input
@@ -1122,8 +1123,40 @@ export class CustomerService {
     // plan version clould be empty, in which case we have to guess the best plan for the customer
     // given the currency, the plan slug and the version
     let planVersion: (PlanVersion & { project: Project; plan: Plan }) | null = null
+    let pageId: string | null = null
 
-    if (planVersionId) {
+    if (sessionId) {
+      // if session id is provided, we need to get the plan version from the session
+      // get the session from analytics
+      const data = await this.analytics.getPlanClickBySessionId({
+        session_id: sessionId,
+        action: "plan_click",
+      })
+
+      const session = data.data.at(0)
+
+      if (!session) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "PLAN_VERSION_NOT_FOUND",
+            message: "Session not found",
+          })
+        )
+      }
+
+      pageId = session.payload.page_id
+
+      planVersion = await this.db.query.versions
+        .findFirst({
+          with: {
+            project: true,
+            plan: true,
+          },
+          where: (version, { eq, and }) =>
+            and(eq(version.id, session.payload.plan_version_id), eq(version.projectId, projectId)),
+        })
+        .then((data) => data ?? null)
+    } else if (planVersionId) {
       planVersion = await this.db.query.versions
         .findFirst({
           with: {
@@ -1192,13 +1225,40 @@ export class CustomerService {
       }
 
       planVersion = plan.versions[0] ?? null
-    } else {
-      return Err(
-        new UnPriceCustomerError({
-          code: "PLAN_VERSION_NOT_FOUND",
-          message: "Plan version not found, either planVersionId or planSlug is required",
+    }
+
+    // if no plan version is provided, we use the default plan
+    if (!planVersion) {
+      // if no plan version is provided, we use the default plan
+      const defaultPlan = await this.db.query.plans.findFirst({
+        where: (plan, { eq, and }) =>
+          and(eq(plan.projectId, projectId), eq(plan.defaultPlan, true)),
+      })
+
+      if (!defaultPlan) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "NO_DEFAULT_PLAN_FOUND",
+            message: "Default plan not found, provide a plan version id, slug or session id",
+          })
+        )
+      }
+
+      planVersion = await this.db.query.versions
+        .findFirst({
+          with: {
+            project: true,
+            plan: true,
+          },
+          where: (version, { eq, and }) =>
+            and(
+              eq(version.planId, defaultPlan.id),
+              eq(version.latest, true),
+              eq(version.status, "published"),
+              eq(version.active, true)
+            ),
         })
-      )
+        .then((data) => data ?? null)
     }
 
     if (!planVersion) {
@@ -1227,6 +1287,7 @@ export class CustomerService {
         })
       )
     }
+
     const planProject = planVersion.project
     const paymentProvider = planVersion.paymentProvider
     const paymentRequired = planVersion.paymentMethodRequired
@@ -1296,11 +1357,11 @@ export class CustomerService {
 
       // create a session with the data of the customer, the plan version and the success and cancel urls
       // pass the session id to stripe metadata and then once the customer adds a payment method, we call our api to create the subscription
-      const sessionId = newId("customer_session")
+      const customerSessionId = newId("customer_session")
       const customerSession = await this.db
         .insert(customerSessions)
         .values({
-          id: sessionId,
+          id: customerSessionId,
           customer: {
             id: customerId,
             name: name,
@@ -1316,6 +1377,10 @@ export class CustomerService {
             projectId: projectId,
             config: config,
             paymentMethodRequired: paymentRequired,
+          },
+          metadata: {
+            sessionId: sessionId ?? undefined,
+            pageId: pageId ?? undefined,
           },
         })
         .returning()
@@ -1359,6 +1424,23 @@ export class CustomerService {
           })
         )
       }
+
+      // send event to analytics for tracking conversions
+      this.waitUntil(
+        this.analytics.ingestEvents({
+          action: "signup",
+          version: "1",
+          session_id: sessionId ?? "",
+          project_id: projectId,
+          timestamp: new Date().toISOString(),
+          payload: {
+            customer_id: customerId,
+            plan_version_id: planVersion.id,
+            page_id: pageId,
+            status: "waiting_payment_provider_setup",
+          },
+        })
+      )
 
       return Ok({
         success: true,
@@ -1451,6 +1533,23 @@ export class CustomerService {
 
         return { newCustomer, newSubscription }
       })
+
+      // send event to analytics for tracking conversions
+      this.waitUntil(
+        this.analytics.ingestEvents({
+          action: "signup",
+          version: "1",
+          session_id: sessionId ?? "",
+          project_id: projectId,
+          timestamp: new Date().toISOString(),
+          payload: {
+            customer_id: customerId,
+            plan_version_id: planVersion.id,
+            page_id: pageId,
+            status: "signup_success",
+          },
+        })
+      )
 
       return Ok({
         success: true,

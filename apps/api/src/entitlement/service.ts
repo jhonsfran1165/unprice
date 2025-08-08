@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers"
+import type { Analytics } from "@unprice/analytics"
 import type { Database } from "@unprice/db"
 import {
   calculateFlatPricePlan,
@@ -13,7 +14,6 @@ import type { Cache, CustomerEntitlementCache, SubcriptionCache } from "@unprice
 import type { CustomerService, DenyReason } from "@unprice/services/customers"
 import { UnPriceCustomerError } from "@unprice/services/customers"
 import type { Metrics } from "@unprice/services/metrics"
-import type { Analytics } from "@unprice/tinybird"
 import type { DurableObjectProject } from "~/project/do"
 import type { DurableObjectUsagelimiter } from "./do"
 import type {
@@ -275,7 +275,7 @@ export class EntitlementService {
         data.customerId,
         data.featureSlug,
         data.projectId,
-        data.now
+        data.timestamp // active entitlement actual timestamp
       )
 
       if (revalidateErr) {
@@ -330,7 +330,7 @@ export class EntitlementService {
       const idempotentKey =
         env.NODE_ENV === "production"
           ? `${data.idempotenceKey}`
-          : `${data.idempotenceKey}:${data.now}`
+          : `${data.idempotenceKey}:${data.timestamp}`
 
       // Fast path: check if the event has already been sent to the DO
       const { val: sent } = await this.cache.idempotentRequestUsageByHash.get(idempotentKey)
@@ -349,7 +349,7 @@ export class EntitlementService {
           data.customerId,
           data.featureSlug,
           data.projectId,
-          data.now
+          data.timestamp // active entitlement actual timestamp
         )
 
         if (revalidateErr) {
