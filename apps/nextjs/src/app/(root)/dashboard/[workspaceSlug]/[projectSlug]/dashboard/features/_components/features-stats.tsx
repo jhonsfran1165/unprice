@@ -38,6 +38,14 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+const LoadingSkeleton = () => {
+  return (
+    <div className="flex h-[250px] w-full items-center justify-center">
+      <LoadingAnimation className="size-6" />
+    </div>
+  )
+}
+
 export function FeaturesStatsSkeleton() {
   return (
     <Card className="py-0">
@@ -66,7 +74,7 @@ export function FeaturesStatsSkeleton() {
       </CardHeader>
       <CardContent className="px-2 md:p-6">
         <div className="flex h-[250px] w-full items-center justify-center">
-          <LoadingAnimation className="size-6" />
+          <LoadingSkeleton />
         </div>
       </CardContent>
     </Card>
@@ -77,7 +85,7 @@ export function FeaturesStats() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
 
-  const { data: featuresOverview } = useSuspenseQuery(
+  const { data: featuresOverview, isLoading } = useSuspenseQuery(
     trpc.analytics.getFeaturesOverview.queryOptions({
       intervalDays: intervalFilter.intervalDays,
     })
@@ -207,6 +215,7 @@ export function FeaturesStats() {
             <Bar dataKey={activeChart} fill={`var(--color-${activeChart})`} />
           </BarChart>
         </ChartContainer>
+        {isLoading && <LoadingSkeleton />}
       </CardContent>
     </Card>
   )

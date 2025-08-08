@@ -6,10 +6,7 @@ import { edgeRouter } from "@unprice/trpc/router/edge"
 
 import { CorsOptions, setCorsHeaders } from "../../../_enableCors"
 
-// export const runtime = "edge"
-// TODO: for some reason edge runtime was giving me 502 errors
-// INVESTIGATE LATER
-export const runtime = "nodejs"
+export const runtime = "edge"
 export const preferredRegion = ["fra1"]
 
 const handler = auth(async (req) => {

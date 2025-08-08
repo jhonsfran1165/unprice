@@ -101,29 +101,37 @@ async function generateData(customerId: string, date: Date) {
 }
 
 async function main() {
+  const today = new Date()
+
+  const yesterday = new Date(today.setDate(today.getDate() - 1))
+  const twoDaysAgo = new Date(today.setDate(today.getDate() - 2))
+  const threeDaysAgo = new Date(today.setDate(today.getDate() - 3))
+  const fourDaysAgo = new Date(today.setDate(today.getDate() - 4))
+  const fiveDaysAgo = new Date(today.setDate(today.getDate() - 5))
+
   // FREE plan
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date("2025-08-01"))
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date("2025-08-02"))
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date("2025-08-03"))
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date("2025-08-04"))
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date("2025-08-05"))
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date())
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", yesterday)
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", twoDaysAgo)
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", threeDaysAgo)
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", fourDaysAgo)
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", fiveDaysAgo)
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", today)
 
   // PRO plan
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date("2025-08-01"))
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date("2025-08-02"))
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date("2025-08-03"))
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date("2025-08-04"))
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date("2025-08-05"))
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date())
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", yesterday)
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", twoDaysAgo)
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", threeDaysAgo)
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", fourDaysAgo)
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", fiveDaysAgo)
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", today)
 
   // ENTERPRISE plan
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date("2025-08-01"))
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date("2025-08-02"))
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date("2025-08-03"))
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date("2025-08-04"))
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date("2025-08-05"))
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date())
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", yesterday)
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", twoDaysAgo)
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", threeDaysAgo)
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", fourDaysAgo)
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", fiveDaysAgo)
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", today)
 }
 
 main()
