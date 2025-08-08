@@ -10,11 +10,11 @@ import { columns } from "./table/columns"
 export function PlansConversionSkeleton() {
   return (
     <DataTableSkeleton
-      columnCount={8}
-      showDateFilterOptions={true}
+      columnCount={7}
+      showDateFilterOptions={false}
       showViewOptions={true}
       searchableColumnCount={1}
-      cellWidths={["10rem", "30rem", "20rem", "20rem", "20rem", "20rem", "12rem"]}
+      cellWidths={["20rem", "20rem", "20rem", "20rem", "20rem", "20rem", "12rem"]}
       shrinkZero
     />
   )

@@ -30,6 +30,10 @@ export const route = createRoute({
           description: "The feature slug",
           example: "tokens",
         }),
+        timestamp: z.number().optional().openapi({
+          description: "The timestamp of the request",
+          example: 1717852800,
+        }),
         metadata: z
           .record(z.string(), z.string())
           .openapi({
@@ -59,7 +63,7 @@ export type CanResponse = z.infer<
 
 export const registerCanV1 = (app: App) =>
   app.openapi(route, async (c) => {
-    const { customerId, featureSlug, metadata } = c.req.valid("json")
+    const { customerId, featureSlug, metadata, timestamp } = c.req.valid("json")
     const { entitlement, customer, logger } = c.get("services")
     const stats = c.get("stats")
     const requestId = c.get("requestId")
@@ -84,7 +88,9 @@ export const registerCanV1 = (app: App) =>
       projectId: key.projectId,
       requestId,
       performanceStart: performanceStart,
-      now: Date.now(),
+      // short ttl for dev
+      secondsToLive: c.env.NODE_ENV === "development" ? 5 : undefined,
+      timestamp: timestamp ?? Date.now(),
       metadata: {
         ...metadata,
         ip: stats.ip,
@@ -131,8 +137,9 @@ export const registerCanV1 = (app: App) =>
               featureSlug: FEATURE_SLUGS.EVENTS,
               projectId: unPriceCustomer.projectId,
               requestId,
-              now: Date.now(),
               usage: 1,
+              // short ttl for dev
+              secondsToLive: c.env.NODE_ENV === "development" ? 5 : undefined,
               idempotenceKey: `${requestId}:${unPriceCustomer.id}`,
               timestamp: Date.now(),
               metadata: {

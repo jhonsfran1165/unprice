@@ -1,6 +1,5 @@
 import { prepareInterval } from "@unprice/analytics"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
-import { BarChart2 } from "@unprice/ui/icons"
 import { cn } from "@unprice/ui/utils"
 import { cookies } from "next/headers"
 import type { SearchParams } from "nuqs/server"
@@ -14,7 +13,7 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { env } from "~/env"
 import { intervalParserCache } from "~/lib/searchParams"
 import { HydrateClient, api, prefetch, trpc } from "~/trpc/server"
-import { Events } from "./_components/events"
+import { Events, EventsEmptyState } from "./_components/events"
 import OverviewStats from "./_components/overview-stats"
 import TabsDashboard from "./_components/tabs-dashboard"
 
@@ -29,7 +28,16 @@ export default async function DashboardOverview(props: {
 
   void Promise.all([
     // prefetch stats
-    prefetch(trpc.analytics.getOverviewStats.queryOptions()),
+    prefetch(
+      trpc.analytics.getOverviewStats.queryOptions(
+        {
+          interval: filter.intervalFilter,
+        },
+        {
+          staleTime: 1000 * 60, // update every minute
+        }
+      )
+    ),
     // prefetch verifications
     prefetch(
       trpc.analytics.getVerifications.queryOptions(
@@ -119,11 +127,7 @@ export default async function DashboardOverview(props: {
                   <CardDescription>Realtime events from your project.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex items-center justify-center">
-                  <div className="flex h-[450px] flex-col items-center justify-center py-12 text-muted-foreground">
-                    <BarChart2 className="mb-2 h-8 w-8 opacity-30" />
-                    <span className="font-medium text-sm">No events yet</span>
-                    <span className="mt-1 text-xs">Events will appear here.</span>
-                  </div>
+                  <EventsEmptyState isLoading />
                 </CardContent>
               </Card>
             }
@@ -132,6 +136,7 @@ export default async function DashboardOverview(props: {
               className="w-full md:w-1/3"
               projectSlug={projectSlug}
               workspaceSlug={workspaceSlug}
+              intervalDays={interval.intervalDays}
             />
           </Suspense>
         </div>
@@ -145,32 +150,30 @@ async function RecentEvents(props: {
   projectSlug: string
   workspaceSlug: string
   className?: string
+  intervalDays: number
 }) {
-  const { project } = await api.projects.getBySlug({
-    slug: props.projectSlug,
-  })
-
-  if (!project) {
-    return null
-  }
-
   const cookie = cookies()
   const sessionToken =
     env.NODE_ENV === "production" ? "__Secure-authjs.session-token" : "authjs.session-token"
   const sessionTokenValue = cookie.get(sessionToken)?.value
 
+  const { data: events, projectId } = await api.analytics.getLatestEvents({
+    interval_days: props.intervalDays,
+  })
+
   return (
-    <Card className={cn("flex flex-col justify-between", props.className)}>
+    <Card className={cn("flex flex-col", props.className)}>
       <CardHeader>
         <CardTitle>Recent Events</CardTitle>
         <CardDescription>Realtime events from your project.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3">
         <Events
           sessionToken={sessionTokenValue ?? ""}
-          projectId={project.id}
+          projectId={projectId}
           workspaceSlug={props.workspaceSlug}
           projectSlug={props.projectSlug}
+          initialEvents={events}
         />
       </CardContent>
     </Card>

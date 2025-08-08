@@ -226,7 +226,8 @@ export const registerStripeSignUpV1 = (app: App) =>
       analytics.ingestEvents({
         action: "signup",
         version: "1",
-        session_id: customerSession.metadata?.sessionId ?? null,
+        session_id: customerSession.metadata?.sessionId ?? "",
+        project_id: projectId,
         timestamp: new Date().toISOString(),
         payload: {
           customer_id: customerUnprice.id,

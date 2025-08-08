@@ -20,7 +20,7 @@ export const getPlansConversion = protectedProjectProcedure
       })
       .catch((err) => {
         opts.ctx.logger.error("Failed to get plans conversion", {
-          error: err,
+          error: err.message,
         })
 
         return { data: [] }

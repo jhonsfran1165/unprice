@@ -12,6 +12,15 @@ export const migrate = protectedProjectProcedure
   )
   .mutation(async (opts) => {
     const projectId = opts.ctx.project.id
+    const isMain = opts.ctx.project.workspace.isMain
+    const isInternal = opts.ctx.project.workspace.isInternal
+
+    if (!isMain && !isInternal) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Only main or internal projects can be migrated to analytics",
+      })
+    }
 
     // only owner can migrate
     opts.ctx.verifyRole(["OWNER"])
@@ -33,7 +42,7 @@ export const migrate = protectedProjectProcedure
     if (!data || data.length === 0) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "No plan versions found",
+        message: "No data found for this project",
       })
     }
 

@@ -74,7 +74,7 @@ NODE feature_usage_total_node
 SQL >
     %
     SELECT
-        {% if intervalDays == 1 %}
+        {% if Int32(intervalDays) == 1 %}
             toStartOfHour(date, {{ String(timezone, 'UTC') }}) as interval,
         {% else %}
             toStartOfDay(date, {{ String(timezone, 'UTC') }}) as interval,

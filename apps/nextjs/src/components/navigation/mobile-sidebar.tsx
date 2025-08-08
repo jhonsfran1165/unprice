@@ -1,7 +1,6 @@
 import { Button } from "@unprice/ui/button"
 import {
   Drawer,
-  DrawerBody,
   DrawerContent,
   DrawerDescription,
   DrawerHeader,
@@ -35,7 +34,7 @@ export default function MobileSidebar({
                 <span className="text-muted-foreground">Quick access to</span>
               </DrawerDescription>
             </DrawerHeader>
-            <DrawerBody className="w-full">{children}</DrawerBody>
+            <div className="w-full overflow-y-auto pb-4">{children}</div>
           </div>
         </div>
       </DrawerContent>

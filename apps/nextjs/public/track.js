@@ -447,6 +447,7 @@
     domain = document.currentScript.getAttribute("data-domain")
     planIds = document.currentScript.getAttribute("data-plan-ids")
     pageId = document.currentScript.getAttribute("data-page-id")
+    projectId = document.currentScript.getAttribute("data-project-id")
     DATASOURCE = document.currentScript.getAttribute("data-datasource") || DATASOURCE
     STORAGE_METHOD = document.currentScript.getAttribute("data-storage") || STORAGE_METHOD
     stringifyPayload = document.currentScript.getAttribute("data-stringify-payload") !== "false"
@@ -631,6 +632,7 @@
         action: name,
         // version: "1",
         session_id,
+        project_id: projectId,
         payload: processedPayload,
       })
     )

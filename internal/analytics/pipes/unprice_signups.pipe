@@ -7,6 +7,7 @@ DESCRIPTION >
 SQL >
     SELECT
         toDate(timestamp) as date,
+        project_id,
         JSONExtractString(payload, 'plan_version_id') as plan_version_id,
         JSONExtractString(payload, 'customer_id') as customer_id,
         JSONExtractString(payload, 'page_id') as page_id,
@@ -16,7 +17,7 @@ SQL >
     WHERE action = 'signup'
       AND JSONExtractString(payload, 'customer_id') != ''
       AND JSONExtractString(payload, 'plan_version_id') != ''
-    GROUP BY date, plan_version_id, customer_id, page_id
+    GROUP BY date, project_id, plan_version_id, customer_id, page_id
 
 TYPE MATERIALIZED
 

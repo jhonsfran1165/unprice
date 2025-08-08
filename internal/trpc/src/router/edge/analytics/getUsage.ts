@@ -21,7 +21,7 @@ export const getUsage = protectedProjectProcedure
       })
       .catch((err) => {
         opts.ctx.logger.error(`Failed to get usage for project ${projectId}`, {
-          error: err,
+          error: err.message,
         })
         return {
           data: [],

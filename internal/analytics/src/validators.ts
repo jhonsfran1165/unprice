@@ -152,7 +152,6 @@ export const getUsageResponseSchema = z.object({
 })
 
 export const schemaPageHit = z.object({
-  session_id: z.string().optional(),
   page_id: z.string(),
   plan_ids: z.string().optional(),
   locale: z.string(),
@@ -175,26 +174,25 @@ export const schemaSignUp = z.object({
 
 export const analyticsEventBaseSchema = z.object({
   timestamp: z.string().datetime(),
-  session_id: z.string().nullable(),
+  session_id: z.string(),
+  project_id: z.string(),
+  version: z.string(),
 })
 
 export const analyticsEventSchema = z
   .discriminatedUnion("action", [
     z.object({
       action: z.literal("signup"),
-      version: z.string(),
       ...analyticsEventBaseSchema.shape,
       payload: schemaSignUp,
     }),
     z.object({
       action: z.literal("plan_click"),
-      version: z.string(),
       ...analyticsEventBaseSchema.shape,
       payload: schemaPlanClick,
     }),
     z.object({
       action: z.literal("page_hit"),
-      version: z.string(),
       ...analyticsEventBaseSchema.shape,
       payload: schemaPageHit,
     }),
@@ -207,7 +205,7 @@ export const analyticsEventSchema = z
   })
 
 export const pageEventSchema = z.object({
-  ...analyticsEventBaseSchema.shape,
+  ...{ ...analyticsEventBaseSchema.shape, version: z.string().optional() },
   page_id: z.string(),
   plan_ids: z.array(z.string()).nullable(),
   url: z.string(),
@@ -277,6 +275,7 @@ export const schemaPlanVersionFeature = z.object({
 
 export type PageAnalyticsEvent = z.infer<typeof pageEventSchema>
 export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>
+export type AnalyticsEventAction = z.infer<typeof analyticsEventSchema>["action"]
 export type GetUsageResponse = z.infer<typeof getUsageResponseSchema>
 
 // Plan conversion response schemas

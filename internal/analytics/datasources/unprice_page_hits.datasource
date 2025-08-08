@@ -8,6 +8,7 @@ TAGS "analytics,pages"
 SCHEMA >
     `timestamp` DateTime64(3) `json:$.timestamp`,
     `page_id` String `json:$.page_id`,
+    `project_id` String `json:$.project_id`,
     `session_id` String `json:$.session_id`,
     `plan_ids` Array(String) `json:$.plan_ids[:]`,
     `url` String `json:$.url`,

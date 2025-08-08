@@ -22,7 +22,14 @@ export default async function DashboardPlans(props: {
 
   // prefetch
   void Promise.all([
-    prefetch(trpc.analytics.getPlansStats.queryOptions()),
+    prefetch(
+      trpc.analytics.getPlansStats.queryOptions(
+        { interval: filter.intervalFilter },
+        {
+          staleTime: 1000 * 60, // update every minute
+        }
+      )
+    ),
     prefetch(
       trpc.analytics.getPlansConversion.queryOptions(
         {

@@ -19,7 +19,7 @@ export function IntervalFilter({ className }: { className?: string }) {
       value={intervalFilter.name}
     >
       <SelectTrigger className={cn("w-40 items-start [&_[data-description]]:hidden", className)}>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 font-medium text-xs">
           <Calendar className="size-4" />
           <SelectValue placeholder="Select date range" />
         </div>
@@ -29,8 +29,8 @@ export function IntervalFilter({ className }: { className?: string }) {
           <SelectItem value={i} key={i}>
             <div className="flex items-start gap-3">
               <div className="grid gap-0.5">
-                <p className="font-medium">{DEFAULT_INTERVALS[i]}</p>
-                <p className="text-muted-foreground text-xs" data-description>
+                <p className="font-medium text-xs">{DEFAULT_INTERVALS[i]}</p>
+                <p className="line-clamp-1 text-muted-foreground text-xs" data-description>
                   Look back at the last {i}
                 </p>
               </div>

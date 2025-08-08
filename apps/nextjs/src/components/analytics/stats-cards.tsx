@@ -9,6 +9,7 @@ type StatsProps = {
   icon: LucideIcon
   title: string
   description: string
+  isTime?: boolean
 }
 
 export const StatsSkeleton = ({
@@ -28,7 +29,7 @@ export const StatsSkeleton = ({
               <Skeleton className="h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <Skeleton className="my-1 h-[28px] w-24" />
+              <Skeleton className="my-1 h-[28px] w-16" />
               <p className="text-muted-foreground text-xs">from current billing period</p>
             </CardContent>
           </Card>
@@ -55,6 +56,7 @@ const StatsCards = ({ stats }: { stats: StatsProps[] }) => {
                   value={stat.total}
                   decimalPlaces={hasDecimalPlaces ? 2 : 0}
                   startValue={0}
+                  isTime={stat.isTime}
                 />
                 {stat.unit && <span>{stat.unit}</span>}
               </div>

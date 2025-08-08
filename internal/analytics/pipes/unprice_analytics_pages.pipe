@@ -5,6 +5,7 @@ DESCRIPTION >
 SQL >
     SELECT
         toDate(timestamp) AS date,
+        project_id,
         page_id,
         browser,
         country,
@@ -14,7 +15,7 @@ SQL >
         uniqState(session_id) AS visits,
         countState() AS hits
     FROM unprice_page_hits
-    GROUP BY date, page_id, device, browser, country, referrer, domain
+    GROUP BY date, project_id, page_id, device, browser, country, referrer, domain
 
 TYPE MATERIALIZED
 DATASOURCE unprice_analytics_pages_mv

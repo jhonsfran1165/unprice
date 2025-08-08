@@ -1,4 +1,3 @@
-import { analytics } from "@unprice/analytics/client"
 import { COOKIES_APP } from "@unprice/config"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import { UserIcon } from "lucide-react"
@@ -28,12 +27,12 @@ export default async function NewPage(props: {
     )
   }
 
-  const data = await analytics.getPlanClickBySessionId({
+  const { planClick } = await api.analytics.getPlanClickBySessionId({
     session_id: sessionId,
     action: "plan_click",
   })
 
-  const session = data.data.at(0)
+  const session = planClick?.at(0) ?? null
 
   return (
     <Suspense fallback={<LayoutLoader />}>

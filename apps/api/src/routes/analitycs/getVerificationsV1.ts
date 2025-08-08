@@ -170,10 +170,11 @@ export const registerGetAnalyticsVerificationsV1 = (app: App) =>
               featureSlug: FEATURE_SLUGS.EVENTS,
               projectId: unPriceCustomer.projectId,
               requestId,
-              now: Date.now(),
               usage: 1,
               idempotenceKey: `${requestId}:${unPriceCustomer.id}`,
               timestamp: Date.now(),
+              // short ttl for dev
+              secondsToLive: c.env.NODE_ENV === "development" ? 5 : undefined,
               metadata: {
                 action: "verifications",
               },

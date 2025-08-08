@@ -17,14 +17,13 @@ export const reportUsageSchema = z.object({
   secondsToLive: z.number().optional(),
   timestamp: z.number(),
   projectId: z.string(),
-  now: z.number().default(Date.now()),
   sync: z.boolean().optional(),
   requestId: z.string(),
   metadata: z.record(z.string(), z.any()).optional(),
 })
 
 export const canSchema = z.object({
-  now: z.number(),
+  timestamp: z.number(),
   customerId: z.string(),
   featureSlug: z.string(),
   projectId: z.string(),

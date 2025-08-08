@@ -228,7 +228,7 @@ export class DurableObjectUsagelimiter extends Server {
         projectId: data.projectId,
         featureSlug: data.featureSlug,
         requestId: data.requestId,
-        timestamp: Date.now(),
+        timestamp: data.timestamp,
         createdAt: Date.now(),
         latency: latency.toString() ?? "0",
         metadata: data.metadata ? JSON.stringify(data.metadata) : null,

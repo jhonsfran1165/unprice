@@ -9,6 +9,7 @@ SQL >
     SELECT
         date,
         session_id,
+        project_id,
         plan_version_id,
         page_id,
         countMerge(total_clicks) AS total_clicks,
@@ -23,7 +24,8 @@ SQL >
             AND date >= timestampAdd(today(), interval -{{ Int(intervalDays) }} day)
         {% else %} AND date >= timestampAdd(today(), interval -30 day)
         {% end %}
-    GROUP BY date, session_id, plan_version_id, page_id
+        {% if defined(project_id) %} AND project_id = {{ String(project_id) }} {% end %}
+    GROUP BY date, session_id, project_id, plan_version_id, page_id
     ORDER BY date DESC, total_clicks, unique_clicks DESC
 
 TYPE endpoint

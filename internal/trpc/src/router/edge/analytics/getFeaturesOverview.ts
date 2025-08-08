@@ -20,7 +20,7 @@ export const getFeaturesOverview = protectedProjectProcedure
       })
       .catch((err) => {
         opts.ctx.logger.error("Failed to get features overview", {
-          error: err,
+          error: err.message,
         })
 
         return { data: [] }

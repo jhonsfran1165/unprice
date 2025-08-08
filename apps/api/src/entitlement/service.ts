@@ -275,7 +275,7 @@ export class EntitlementService {
         data.customerId,
         data.featureSlug,
         data.projectId,
-        data.now
+        data.timestamp // active entitlement actual timestamp
       )
 
       if (revalidateErr) {
@@ -330,7 +330,7 @@ export class EntitlementService {
       const idempotentKey =
         env.NODE_ENV === "production"
           ? `${data.idempotenceKey}`
-          : `${data.idempotenceKey}:${data.now}`
+          : `${data.idempotenceKey}:${data.timestamp}`
 
       // Fast path: check if the event has already been sent to the DO
       const { val: sent } = await this.cache.idempotentRequestUsageByHash.get(idempotentKey)
@@ -349,7 +349,7 @@ export class EntitlementService {
           data.customerId,
           data.featureSlug,
           data.projectId,
-          data.now
+          data.timestamp // active entitlement actual timestamp
         )
 
         if (revalidateErr) {

@@ -34,7 +34,7 @@ const unprice = new Unprice({
   baseUrl: "http://localhost:8787",
 })
 
-async function generateData(customerId: string) {
+async function generateData(customerId: string, date: Date) {
   const now = performance.now()
 
   const { result: data } = await unprice.customers.getEntitlements(customerId)
@@ -51,6 +51,15 @@ async function generateData(customerId: string) {
   )!
 
   for (let i = 0; i < 100; i++) {
+    // set the date for the timestamp at a random hour + minute + second
+    const timestamp = new Date(
+      date.setHours(
+        Math.floor(Math.random() * 24),
+        Math.floor(Math.random() * 60),
+        Math.floor(Math.random() * 60)
+      )
+    ).getTime()
+
     // ramdom usage between 1 and 100
     const usage = Math.floor(Math.random() * 100) + 1
     // pick a random feature slug
@@ -63,6 +72,7 @@ async function generateData(customerId: string) {
         featureSlug,
         usage,
         idempotenceKey: randomUUID(),
+        timestamp,
       })
 
       console.info(`Usage ${usage} reported for ${featureSlug}`)
@@ -80,6 +90,7 @@ async function generateData(customerId: string) {
       await unprice.customers.can({
         customerId,
         featureSlug: randomFeatureSlug,
+        timestamp,
       })
 
       console.info(`Usage ${usage} verified for ${randomFeatureSlug}`)
@@ -91,11 +102,28 @@ async function generateData(customerId: string) {
 
 async function main() {
   // FREE plan
-  await generateData("cus_1MRwznYezUUEvhTidD9L5")
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date("2025-08-01"))
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date("2025-08-02"))
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date("2025-08-03"))
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date("2025-08-04"))
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date("2025-08-05"))
+  await generateData("cus_1MRwznYezUUEvhTidD9L5", new Date())
+
   // PRO plan
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU")
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date("2025-08-01"))
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date("2025-08-02"))
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date("2025-08-03"))
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date("2025-08-04"))
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date("2025-08-05"))
+  await generateData("cus_1MJ7etfqD3jbZTmayncaU", new Date())
+
   // ENTERPRISE plan
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ")
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date("2025-08-01"))
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date("2025-08-02"))
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date("2025-08-03"))
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date("2025-08-04"))
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date("2025-08-05"))
+  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", new Date())
 }
 
 main()

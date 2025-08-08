@@ -21,7 +21,7 @@ export const getFeatureHeatmap = protectedProjectProcedure
       })
       .catch((err) => {
         opts.ctx.logger.error("Failed to get feature heatmap", {
-          error: err,
+          error: err.message,
         })
 
         return { data: [] }

@@ -743,6 +743,11 @@ export interface operations {
            */
           featureSlug: string
           /**
+           * @description The timestamp of the request
+           * @example 1717852800
+           */
+          timestamp?: number
+          /**
            * @description The usage
            * @example 30
            */
@@ -992,6 +997,11 @@ export interface operations {
            * @example tokens
            */
           featureSlug: string
+          /**
+           * @description The timestamp of the request
+           * @example 1717852800
+           */
+          timestamp?: number
           /**
            * @description The metadata
            * @example {

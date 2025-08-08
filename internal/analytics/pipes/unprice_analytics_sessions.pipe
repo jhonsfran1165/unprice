@@ -5,6 +5,7 @@ DESCRIPTION >
 SQL >
     SELECT
         toDate(timestamp) AS date,
+        project_id,
         page_id,
         session_id,
         anySimpleState(device) AS device,
@@ -14,7 +15,7 @@ SQL >
         maxSimpleState(timestamp) AS latest_hit,
         countState() AS hits
     FROM unprice_page_hits
-    GROUP BY date, page_id, session_id
+    GROUP BY date, project_id, page_id, session_id
 
 TYPE MATERIALIZED
 DATASOURCE unprice_analytics_sessions_mv

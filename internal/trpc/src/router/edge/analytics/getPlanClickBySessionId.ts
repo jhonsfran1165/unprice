@@ -2,11 +2,11 @@ import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
 
-export const getVerifications = protectedProjectProcedure
-  .input(z.custom<Parameters<Analytics["getFeaturesVerifications"]>[0]>())
+export const getPlanClickBySessionId = protectedProjectProcedure
+  .input(z.custom<Parameters<Analytics["getPlanClickBySessionId"]>[0]>())
   .output(
     z.object({
-      verifications: z.custom<Awaited<ReturnType<Analytics["getFeaturesVerifications"]>>["data"]>(),
+      planClick: z.custom<Awaited<ReturnType<Analytics["getPlanClickBySessionId"]>>["data"]>(),
     })
   )
   .query(async (opts) => {
@@ -14,10 +14,9 @@ export const getVerifications = protectedProjectProcedure
     const input = opts.input
 
     const data = await opts.ctx.analytics
-      .getFeaturesVerifications({
-        projectId,
-        start: input.start,
-        end: input.end,
+      .getPlanClickBySessionId({
+        session_id: input.session_id,
+        action: input.action,
       })
       .catch((err) => {
         opts.ctx.logger.error(`Failed to get verifications for project ${projectId}`, {
@@ -30,6 +29,6 @@ export const getVerifications = protectedProjectProcedure
       })
 
     return {
-      verifications: data.data,
+      planClick: data.data,
     }
   })

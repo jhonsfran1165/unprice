@@ -1,6 +1,7 @@
 import { NoopTinybird, Tinybird } from "@chronark/zod-bird"
 import { z } from "zod"
 import {
+  type AnalyticsEventAction,
   analyticsEventSchema,
   auditLogSchemaV1,
   featureUsageSchemaV1,
@@ -141,6 +142,23 @@ export class Analytics {
       opts: {
         cache: "no-store",
       },
+    })
+  }
+
+  public get getLatestEvents() {
+    return this.readClient.buildPipe({
+      pipe: "v1_get_latest_events",
+      parameters: z.object({
+        action: z.custom<AnalyticsEventAction>().optional(),
+        project_id: z.string().optional(),
+        interval_days: z.number().optional(),
+      }),
+      data: z.object({
+        timestamp: z.coerce.date(),
+        action: z.string(),
+        session_id: z.string(),
+        payload: z.string(),
+      }),
     })
   }
 

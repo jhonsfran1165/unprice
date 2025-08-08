@@ -1430,7 +1430,8 @@ export class CustomerService {
         this.analytics.ingestEvents({
           action: "signup",
           version: "1",
-          session_id: sessionId ?? null,
+          session_id: sessionId ?? "",
+          project_id: projectId,
           timestamp: new Date().toISOString(),
           payload: {
             customer_id: customerId,
@@ -1538,7 +1539,8 @@ export class CustomerService {
         this.analytics.ingestEvents({
           action: "signup",
           version: "1",
-          session_id: sessionId ?? null,
+          session_id: sessionId ?? "",
+          project_id: projectId,
           timestamp: new Date().toISOString(),
           payload: {
             customer_id: customerId,

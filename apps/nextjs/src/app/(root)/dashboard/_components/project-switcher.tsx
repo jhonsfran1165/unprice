@@ -89,7 +89,7 @@ export function ProjectSwitcher() {
                   onSelect={() => {
                     setSwitcherOpen(false)
                     revalidateAppPath(`/${project.workspace.slug}/${project.slug}`, "page")
-                    router.push(`/${project.workspace.slug}/${project.slug}`)
+                    router.push(`/${project.workspace.slug}/${project.slug}/dashboard`)
                   }}
                   className={cn(
                     "cursor-pointer font-semibold text-sm",

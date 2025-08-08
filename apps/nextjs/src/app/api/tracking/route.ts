@@ -22,6 +22,7 @@ const trackPageHit = async (
   payload: {
     session_id: string
     page_id: string
+    project_id: string
     plan_ids: string | null
     locale: string
     referrer: string
@@ -68,6 +69,7 @@ const trackPageHit = async (
     const event = {
       timestamp: new Date(Date.now()).toISOString(),
       session_id: payload.session_id,
+      project_id: payload.project_id,
       page_id: payload.page_id,
       ip:
         // only record IP if it's a valid IP and not from a EU country
@@ -111,6 +113,7 @@ const trackPageHit = async (
 const bodySchema = z.object({
   action: z.enum(["page_hit", "plan_click"]),
   session_id: z.string(),
+  project_id: z.string(),
   payload: z.string(),
 })
 
@@ -135,6 +138,7 @@ export async function POST(req: NextRequest) {
     case "page_hit": {
       const result = await trackPageHit(req, {
         session_id: parsedBody.data.session_id,
+        project_id: parsedBody.data.project_id,
         ...payload,
       })
 
@@ -154,6 +158,7 @@ export async function POST(req: NextRequest) {
       const result = await analytics.ingestEvents({
         action: "plan_click",
         session_id: parsedBody.data.session_id,
+        project_id: parsedBody.data.project_id,
         payload: parsedPayload.data,
         version: "1",
         timestamp: new Date(Date.now()).toISOString(),

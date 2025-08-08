@@ -16,7 +16,7 @@ import {
 import { Separator } from "@unprice/ui/separator"
 import { Skeleton } from "@unprice/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@unprice/ui/tooltip"
-import { BarChart, HelpCircle, Loader2 } from "lucide-react"
+import { BarChart, HelpCircle } from "lucide-react"
 import { CodeApiSheet } from "~/components/code-api-sheet"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useIntervalFilter } from "~/hooks/use-filter"
@@ -32,7 +32,7 @@ const getIntensityColor = (value: number | undefined | null): string => {
   if (value <= 60) return "hover:border-secondary-border bg-secondary-bgActive text-secondary-text"
   if (value <= 80)
     return "hover:border-secondary-border bg-secondary-line text-secondary-textContrast"
-  return "hover:border-secondary-border bg-secondary-solid text-secondary-textContrast"
+  return "hover:border-secondary-border bg-secondary-borderHover text-secondary-textContrast"
 }
 
 const formatPlanName = (slug: string): string => {
@@ -41,23 +41,19 @@ const formatPlanName = (slug: string): string => {
 
 const FeatureUsageHeatmapEmptyState = ({ isLoading }: { isLoading?: boolean }) => {
   return (
-    <EmptyPlaceholder>
+    <EmptyPlaceholder isLoading={isLoading}>
       <EmptyPlaceholder.Icon>
         <BarChart className="h-8 w-8" />
       </EmptyPlaceholder.Icon>
       <EmptyPlaceholder.Title>No Data</EmptyPlaceholder.Title>
       <EmptyPlaceholder.Description>There is no data available.</EmptyPlaceholder.Description>
       <EmptyPlaceholder.Action>
-        {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <CodeApiSheet defaultMethod="verifyFeature">
-            <Button size={"sm"}>
-              <BarChart className="mr-2 h-4 w-4" />
-              Start verifying data
-            </Button>
-          </CodeApiSheet>
-        )}
+        <CodeApiSheet defaultMethod="verifyFeature">
+          <Button size={"sm"}>
+            <BarChart className="mr-2 h-4 w-4" />
+            Start verifying data
+          </Button>
+        </CodeApiSheet>
       </EmptyPlaceholder.Action>
     </EmptyPlaceholder>
   )

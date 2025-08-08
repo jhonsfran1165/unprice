@@ -12,8 +12,9 @@ import {
 } from "@unprice/ui/chart"
 
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { nFormatter } from "@unprice/db/utils"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { BarChartBig } from "lucide-react"
+import { NumberTicker } from "~/components/analytics/number-ticker"
 import { useIntervalFilter } from "~/hooks/use-filter"
 import { useTRPC } from "~/trpc/client"
 
@@ -64,29 +65,9 @@ export function FeaturesStatsSkeleton() {
         </div>
       </CardHeader>
       <CardContent className="px-2 md:p-6">
-        <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
-          <BarChart
-            accessibilityLayer
-            data={[]}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-            />
-            <ChartTooltip
-              content={<ChartTooltipContent className="w-[200px]" nameKey="date" labelKey="date" />}
-            />
-            <Bar dataKey="date" fill="var(--color-verifications)" />
-          </BarChart>
-        </ChartContainer>
+        <div className="flex h-[250px] w-full items-center justify-center">
+          <LoadingAnimation className="size-6" />
+        </div>
       </CardContent>
     </Card>
   )
@@ -95,6 +76,7 @@ export function FeaturesStatsSkeleton() {
 export function FeaturesStats() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
+
   const { data: featuresOverview } = useSuspenseQuery(
     trpc.analytics.getFeaturesOverview.queryOptions({
       intervalDays: intervalFilter.intervalDays,
@@ -108,10 +90,10 @@ export function FeaturesStats() {
   const total = React.useMemo(
     () => ({
       usage: chartData.reduce((acc, curr) => acc + curr.usage, 0),
-      // latency average not sum
+      // latency average not sum - if nan then 0
       latency:
-        (chartData.reduce((acc, curr) => acc + curr.latency, 0) ?? 0) /
-        (chartData.filter((item) => item.latency).length ?? 1),
+        chartData.reduce((acc, curr) => acc + curr.latency, 0) /
+        (chartData.filter((item) => item.latency).length || 1),
       verifications: chartData.reduce((acc, curr) => acc + curr.verifications, 0),
     }),
     [intervalFilter.intervalDays]
@@ -123,7 +105,7 @@ export function FeaturesStats() {
         <div className="md:!py-0 flex flex-1 flex-col justify-center gap-1 px-6 pt-4 pb-3 md:w-1/2">
           <CardTitle>{chartConfig[activeChart].label}</CardTitle>
           <CardDescription>
-            Showing feature usage for the last{" "}
+            Showing consumption behavior for the last{" "}
             {intervalFilter.intervalDays === 90
               ? "3 months"
               : intervalFilter.intervalDays === 30
@@ -147,8 +129,14 @@ export function FeaturesStats() {
                 <span className="line-clamp-1 text-muted-foreground text-xs">
                   {chartConfig[chart].label}
                 </span>
-                <span className="font-bold text-lg leading-none md:text-3xl">
-                  {nFormatter(total[key as keyof typeof total])} {key === "latency" ? "ms" : ""}
+                <span className="flex items-center gap-1 font-bold text-lg leading-none sm:text-3xl">
+                  <NumberTicker
+                    value={total[key as keyof typeof total]}
+                    startValue={0}
+                    decimalPlaces={0}
+                    withFormatter={true}
+                    isTime={key === "latency"}
+                  />
                 </span>
               </button>
             )

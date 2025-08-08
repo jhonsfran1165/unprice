@@ -3,6 +3,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { Activity, DollarSign, Users } from "lucide-react"
 import StatsCards from "~/components/analytics/stats-cards"
+import { useIntervalFilter } from "~/hooks/use-filter"
 import { useTRPC } from "~/trpc/client"
 
 export const iconsPlansStats = {
@@ -14,7 +15,10 @@ export const iconsPlansStats = {
 
 const PlansStats = () => {
   const trpc = useTRPC()
-  const { data: stats } = useSuspenseQuery(trpc.analytics.getPlansStats.queryOptions())
+  const [interval] = useIntervalFilter()
+  const { data: stats } = useSuspenseQuery(
+    trpc.analytics.getPlansStats.queryOptions({ interval: interval.name })
+  )
 
   const statsCards = Object.entries(stats.stats).map(([key, value]) => {
     return {

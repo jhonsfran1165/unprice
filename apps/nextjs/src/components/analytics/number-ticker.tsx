@@ -3,6 +3,7 @@
 import { useInView, useMotionValue, useSpring } from "framer-motion"
 import { type ComponentPropsWithoutRef, useEffect, useRef } from "react"
 
+import { nFormatter, nFormatterTime } from "@unprice/db/utils"
 import { cn } from "@unprice/ui/utils"
 
 interface NumberTickerProps extends ComponentPropsWithoutRef<"span"> {
@@ -10,7 +11,9 @@ interface NumberTickerProps extends ComponentPropsWithoutRef<"span"> {
   startValue?: number
   direction?: "up" | "down"
   delay?: number
+  isTime?: boolean
   decimalPlaces?: number
+  withFormatter?: boolean
 }
 
 export function NumberTicker({
@@ -20,6 +23,8 @@ export function NumberTicker({
   delay = 0,
   className,
   decimalPlaces = 0,
+  withFormatter = true,
+  isTime = false,
   ...props
 }: NumberTickerProps) {
   const ref = useRef<HTMLSpanElement>(null)
@@ -43,10 +48,15 @@ export function NumberTicker({
     () =>
       springValue.on("change", (latest: number) => {
         if (ref.current) {
-          ref.current.textContent = Intl.NumberFormat("en-US", {
-            minimumFractionDigits: decimalPlaces,
-            maximumFractionDigits: decimalPlaces,
-          }).format(Number(latest.toFixed(decimalPlaces)))
+          const formattedValue = withFormatter
+            ? isTime
+              ? nFormatterTime(latest, { digits: decimalPlaces })
+              : nFormatter(latest, { digits: decimalPlaces })
+            : Intl.NumberFormat("en-US", {
+                minimumFractionDigits: decimalPlaces,
+                maximumFractionDigits: decimalPlaces,
+              }).format(Number(latest.toFixed(decimalPlaces)))
+          ref.current.textContent = formattedValue
         }
       }),
     [springValue, decimalPlaces]

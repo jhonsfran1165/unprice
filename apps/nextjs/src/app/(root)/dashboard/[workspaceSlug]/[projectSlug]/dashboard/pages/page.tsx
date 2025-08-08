@@ -28,8 +28,8 @@ export default async function DashboardPages(props: {
         pageId: pageFilter.pageId,
       },
       {
-        enabled: !!pageFilter.pageId,
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
+        staleTime: 1000 * 60 * 1, // 1 minute
       }
     )
   )
