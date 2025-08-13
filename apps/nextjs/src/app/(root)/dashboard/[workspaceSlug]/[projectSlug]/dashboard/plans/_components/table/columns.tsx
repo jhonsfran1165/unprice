@@ -6,32 +6,24 @@ import type { analytics } from "@unprice/analytics/client"
 import { Badge } from "@unprice/ui/badge"
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@unprice/ui/drawer"
-import { Input } from "@unprice/ui/input"
-import { Label } from "@unprice/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 
+import { useQuery } from "@tanstack/react-query"
 import { Button } from "@unprice/ui/button"
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@unprice/ui/chart"
-import { Separator } from "@unprice/ui/separator"
+import { ScrollArea } from "@unprice/ui/scroll-area"
 import { cn } from "@unprice/ui/utils"
-import { ArrowUp, BarChart3, Eye, MousePointerClick, UserCheck2 } from "lucide-react"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import { BarChart3, Eye, Loader2, MousePointerClick, UserCheck2 } from "lucide-react"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { useMediaQuery } from "~/hooks/use-media-query"
 import { formatDate } from "~/lib/dates"
+import { useTRPC } from "~/trpc/client"
+import { PageForm } from "../../../../pages/_components/page-form"
+import { PlanVersionForm } from "../../../../plans/[planSlug]/_components/plan-version-form"
 
 type PlanConversion = Awaited<ReturnType<typeof analytics.getPlansConversion>>["data"][number]
 
@@ -56,7 +48,7 @@ export const columns: ColumnDef<PlanConversion>[] = [
   {
     accessorKey: "page_id",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Page" />,
-    cell: ({ row }) => <TableCellViewer item={row.original} />,
+    cell: ({ row }) => <TableCellPage pageId={row.original.page_id} />,
     enableSorting: true,
     enableHiding: false,
     enableResizing: true,
@@ -65,7 +57,7 @@ export const columns: ColumnDef<PlanConversion>[] = [
     accessorKey: "plan_version_id",
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Plan Version" />,
-    cell: ({ row }) => <TableCellViewer item={row.original} isPlanVersion />,
+    cell: ({ row }) => <TableCellPlanVersion planVersionId={row.original.plan_version_id} />,
     filterFn: (row, _id, value) => {
       if (value === undefined) return true
       // filter by page id and plan version id
@@ -134,166 +126,73 @@ export const columns: ColumnDef<PlanConversion>[] = [
   },
 ]
 
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-]
-
-const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "var(--primary)",
-  },
-  mobile: {
-    label: "Mobile",
-    color: "var(--primary)",
-  },
-} satisfies ChartConfig
-
-function TableCellViewer({
-  item,
-  isPlanVersion,
-}: { item: PlanConversion; isPlanVersion?: boolean }) {
+function TableCellPage({ pageId }: { pageId: string }) {
   const { isMobile } = useMediaQuery()
+  const trpc = useTRPC()
+  const { data: page, isLoading } = useQuery(
+    trpc.pages.getById.queryOptions({
+      id: pageId,
+    })
+  )
 
   return (
     <Drawer direction={isMobile ? "bottom" : "right"}>
       <DrawerTrigger asChild>
         <Button variant="link" className="w-fit px-0 text-left text-foreground">
-          {isPlanVersion ? item.plan_version_id : item.page_id}
+          {pageId}
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="h-screen w-full md:w-[500px]">
-        <DrawerHeader className="gap-1">
-          <DrawerTitle>{item.plan_version_id}</DrawerTitle>
-          <DrawerDescription>Showing total visitors for the last 6 months</DrawerDescription>
+      <DrawerContent className="h-screen w-full data-[vaul-drawer-direction=right]:sm:max-w-2xl">
+        <DrawerHeader className="gap-1 px-4">
+          <DrawerTitle>{page?.page?.title}</DrawerTitle>
+          <DrawerDescription>{page?.page?.description}</DrawerDescription>
         </DrawerHeader>
-        <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-          {!isMobile && (
-            <>
-              <ChartContainer config={chartConfig}>
-                <AreaChart
-                  accessibilityLayer
-                  data={chartData}
-                  margin={{
-                    left: 0,
-                    right: 10,
-                  }}
-                >
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    tickFormatter={(value) => value.slice(0, 3)}
-                    hide
-                  />
-                  <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-                  <Area
-                    dataKey="mobile"
-                    type="natural"
-                    fill="var(--color-mobile)"
-                    fillOpacity={0.6}
-                    stroke="var(--color-mobile)"
-                    stackId="a"
-                  />
-                  <Area
-                    dataKey="desktop"
-                    type="natural"
-                    fill="var(--color-desktop)"
-                    fillOpacity={0.4}
-                    stroke="var(--color-desktop)"
-                    stackId="a"
-                  />
-                </AreaChart>
-              </ChartContainer>
-              <Separator />
-              <div className="grid gap-2">
-                <div className="flex gap-2 font-medium leading-none">
-                  Trending up by 5.2% this month <ArrowUp className="size-4" />
-                </div>
-                <div className="text-muted-foreground">
-                  Showing total visitors for the last 6 months. This is just some random text to
-                  test the layout. It spans multiple lines and should wrap around.
-                </div>
-              </div>
-              <Separator />
-            </>
+        <ScrollArea className="h-[800px] px-4 py-4 md:px-6">
+          {isLoading || !page?.page ? (
+            <div className="flex items-center justify-center">
+              <Loader2 className="size-4 animate-spin" />
+            </div>
+          ) : (
+            <PageForm defaultValues={page.page} />
           )}
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="header">Header</Label>
-              <Input id="header" defaultValue={item.plan_version_id} />
+        </ScrollArea>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
+function TableCellPlanVersion({ planVersionId }: { planVersionId: string }) {
+  const { isMobile } = useMediaQuery()
+  const trpc = useTRPC()
+  const { data: planVersion, isLoading } = useQuery(
+    trpc.planVersions.getById.queryOptions({
+      id: planVersionId,
+    })
+  )
+
+  return (
+    <Drawer direction={isMobile ? "bottom" : "right"}>
+      <DrawerTrigger asChild>
+        <Button variant="link" className="w-fit px-0 text-left text-foreground">
+          {planVersionId}
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent className="h-screen w-full data-[vaul-drawer-direction=right]:sm:max-w-2xl">
+        <DrawerHeader className="gap-1 px-4">
+          <DrawerTitle>
+            {planVersion?.planVersion.title} - V{planVersion?.planVersion.version}
+          </DrawerTitle>
+          <DrawerDescription>{planVersion?.planVersion.description}</DrawerDescription>
+        </DrawerHeader>
+        <ScrollArea className="h-[800px] px-4 py-4 md:px-6">
+          {isLoading || !planVersion ? (
+            <div className="flex items-center justify-center">
+              <Loader2 className="size-4 animate-spin" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="type">Type</Label>
-                <Select defaultValue={item.plan_version_id}>
-                  <SelectTrigger id="type" className="w-full">
-                    <SelectValue placeholder="Select a type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Table of Contents">Table of Contents</SelectItem>
-                    <SelectItem value="Executive Summary">Executive Summary</SelectItem>
-                    <SelectItem value="Technical Approach">Technical Approach</SelectItem>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Capabilities">Capabilities</SelectItem>
-                    <SelectItem value="Focus Documents">Focus Documents</SelectItem>
-                    <SelectItem value="Narrative">Narrative</SelectItem>
-                    <SelectItem value="Cover Page">Cover Page</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="status">Status</Label>
-                <Select defaultValue={item.plan_version_id}>
-                  <SelectTrigger id="status" className="w-full">
-                    <SelectValue placeholder="Select a status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Done">Done</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Not Started">Not Started</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="target">Target</Label>
-                <Input id="target" defaultValue={item.plan_version_id} />
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="limit">Limit</Label>
-                <Input id="limit" defaultValue={item.plan_version_id} />
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="reviewer">Reviewer</Label>
-              <Select defaultValue={item.plan_version_id}>
-                <SelectTrigger id="reviewer" className="w-full">
-                  <SelectValue placeholder="Select a reviewer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                  <SelectItem value="Jamik Tashpulatov">Jamik Tashpulatov</SelectItem>
-                  <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </form>
-        </div>
-        <DrawerFooter>
-          <Button>Submit</Button>
-          <DrawerClose asChild>
-            <Button variant="outline">Done</Button>
-          </DrawerClose>
-        </DrawerFooter>
+          ) : (
+            <PlanVersionForm defaultValues={planVersion.planVersion} />
+          )}
+        </ScrollArea>
       </DrawerContent>
     </Drawer>
   )

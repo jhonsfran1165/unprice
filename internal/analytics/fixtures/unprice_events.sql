@@ -2,6 +2,7 @@ SELECT
     now() - randUniform(0, 86400) AS timestamp,
     ['session_12345', 'session_67890', 'session_10101', 'session_12121'][(rand() % 4) + 1] AS session_id,
     ['signup', 'plan_click'][(rand() % 2) + 1] AS action,
+    concat('proj_1234567889') AS project_id,
     concat('1') AS version,
     multiIf(
         action = 'signup',

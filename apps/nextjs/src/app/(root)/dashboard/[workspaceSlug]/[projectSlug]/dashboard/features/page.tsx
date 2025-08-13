@@ -55,7 +55,7 @@ export default async function DashboardFeatures(props: {
       </div>
 
       <HydrateClient>
-        <Suspense fallback={<FeaturesStatsSkeleton />}>
+        <Suspense fallback={<FeaturesStatsSkeleton isLoading={true} />}>
           <FeaturesStats />
         </Suspense>
         <Suspense

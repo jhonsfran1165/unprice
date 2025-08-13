@@ -26,7 +26,7 @@ export function prepareInterval(interval: Interval) {
         intervalMs,
         intervalDays: 1,
         granularity: "hour",
-        label: "Last 24 hours",
+        label: "last 24 hours",
         // format should be meaningful for the user depending on the interval
         dateFormat: "MMM d hh:mm",
         name: "24h" as const,
@@ -42,7 +42,7 @@ export function prepareInterval(interval: Interval) {
         intervalMs,
         intervalDays: 7,
         granularity: "day",
-        label: "Last 7 days",
+        label: "last 7 days",
         dateFormat: "MMM d",
         name: "7d" as const,
       }
@@ -57,7 +57,7 @@ export function prepareInterval(interval: Interval) {
         intervalMs,
         intervalDays: 30,
         granularity: "day",
-        label: "Last 30 days",
+        label: "last 30 days",
         dateFormat: "MMM d",
         name: "30d" as const,
       }
@@ -72,7 +72,7 @@ export function prepareInterval(interval: Interval) {
         intervalMs,
         intervalDays: 90,
         granularity: "day",
-        label: "Last 90 days",
+        label: "last 90 days",
         dateFormat: "MMM d",
         name: "90d" as const,
       }

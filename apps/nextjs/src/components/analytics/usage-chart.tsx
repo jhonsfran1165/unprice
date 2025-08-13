@@ -90,7 +90,7 @@ export function UsageChart() {
           tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
         />
         <XAxis dataKey="usage" type="number" hide />
-        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
         <Bar
           dataKey="usage"
           layout="vertical"

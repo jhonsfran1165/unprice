@@ -1,5 +1,6 @@
 SELECT
     toDateTime64(now() - randUniform(0, 86400), 3) AS timestamp,
+    concat('proj_1234567889') AS project_id,
     ['signup', 'page_landing', 'page_pricing', 'page_signup', 'page_checkout'][(rand() % 5) + 1] AS page_id,
     ['session_12345', 'session_67890', 'session_10101', 'session_12121'][(rand() % 4) + 1] AS session_id,
     splitByChar(',', ['pv_starter_v1,pv_pro_v2', 'pv_enterprise_v1,pv_basic_v3', 'pv_starter_v1,pv_pro_v2,pv_enterprise_v1,pv_basic_v3', 'pv_starter_v2,pv_pro_v3,pv_enterprise_v4,pv_basic_v5', 'pv_starter_v1,pv_pro_v2,pv_enterprise_v1,pv_basic_v'][(rand() % 5) + 1]) AS plan_ids,

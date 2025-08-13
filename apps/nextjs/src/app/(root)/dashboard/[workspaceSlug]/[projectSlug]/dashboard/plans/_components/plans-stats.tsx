@@ -1,16 +1,16 @@
 "use client"
 
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { Activity, DollarSign, Users } from "lucide-react"
+import { Calculator, Combine, GalleryHorizontalEnd, Users } from "lucide-react"
 import StatsCards from "~/components/analytics/stats-cards"
 import { useIntervalFilter } from "~/hooks/use-filter"
 import { useTRPC } from "~/trpc/client"
 
 export const iconsPlansStats = {
-  totalPlans: DollarSign,
-  totalSubscriptions: Activity,
-  totalPlanVersions: Users,
-  totalFeatures: Users,
+  totalPlans: Calculator,
+  totalSubscriptions: Users,
+  totalPlanVersions: GalleryHorizontalEnd,
+  totalFeatures: Combine,
 }
 
 const PlansStats = () => {

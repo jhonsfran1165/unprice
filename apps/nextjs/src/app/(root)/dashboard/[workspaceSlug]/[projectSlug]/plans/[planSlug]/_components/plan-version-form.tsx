@@ -4,6 +4,7 @@ import type { InsertPlanVersion } from "@unprice/db/validators"
 import { planVersionSelectBaseSchema, versionInsertBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Form, FormDescription, FormLabel } from "@unprice/ui/form"
+import { cn } from "@unprice/ui/utils"
 import { useParams, usePathname, useRouter } from "next/navigation"
 import { startTransition } from "react"
 import { z } from "zod"
@@ -44,9 +45,11 @@ export type PublishedPlanVersion = z.infer<typeof isPublishedSchema>
 export function PlanVersionForm({
   setDialogOpen,
   defaultValues,
+  className,
 }: {
   setDialogOpen?: (open: boolean) => void
   defaultValues: InsertPlanVersion | PublishedPlanVersion
+  className?: string
 }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -136,7 +139,7 @@ export function PlanVersionForm({
 
   return (
     <Form {...form}>
-      <form className="space-y-6">
+      <form className={cn("space-y-6", className)}>
         {editMode && (
           <div className="flex items-center justify-between">
             <div>

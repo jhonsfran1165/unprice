@@ -186,6 +186,38 @@ export class Analytics {
     })
   }
 
+  public get getBrowserVisits() {
+    return this.readClient.buildPipe({
+      pipe: "v1_get_top_browsers",
+      parameters: z.object({
+        intervalDays: z.number().optional(),
+        page_id: z.string().optional(),
+      }),
+      data: z.object({
+        page_id: z.string(),
+        browser: z.string(),
+        visits: z.number(),
+        hits: z.number(),
+      }),
+    })
+  }
+
+  public get getCountryVisits() {
+    return this.readClient.buildPipe({
+      pipe: "v1_get_top_countries",
+      parameters: z.object({
+        intervalDays: z.number().optional(),
+        page_id: z.string().optional(),
+      }),
+      data: z.object({
+        page_id: z.string(),
+        country: z.string(),
+        visits: z.number(),
+        hits: z.number(),
+      }),
+    })
+  }
+
   public get getPagesOverview() {
     return this.readClient.buildPipe({
       pipe: "v1_get_pages_overview",

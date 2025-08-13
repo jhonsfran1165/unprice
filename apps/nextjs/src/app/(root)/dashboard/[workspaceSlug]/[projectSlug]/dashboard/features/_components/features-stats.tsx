@@ -12,9 +12,9 @@ import {
 } from "@unprice/ui/chart"
 
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { LoadingAnimation } from "@unprice/ui/loading-animation"
-import { BarChartBig } from "lucide-react"
+import { BarChart3, BarChartBig } from "lucide-react"
 import { NumberTicker } from "~/components/analytics/number-ticker"
+import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useIntervalFilter } from "~/hooks/use-filter"
 import { useTRPC } from "~/trpc/client"
 
@@ -38,21 +38,20 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-const LoadingSkeleton = () => {
-  return (
-    <div className="flex h-[250px] w-full items-center justify-center">
-      <LoadingAnimation className="size-6" />
-    </div>
-  )
-}
-
-export function FeaturesStatsSkeleton() {
+export function FeaturesStatsSkeleton({
+  isLoading,
+}: {
+  isLoading: boolean
+}) {
+  const [intervalFilter] = useIntervalFilter()
   return (
     <Card className="py-0">
       <CardHeader className="!p-0 flex flex-col items-stretch space-y-0 border-b md:flex-row">
         <div className="md:!py-0 flex flex-1 flex-col justify-center gap-1 px-6 pt-4 pb-3 md:w-1/2">
-          <CardTitle>Feature usage</CardTitle>
-          <CardDescription>Showing feature usage for the last.</CardDescription>
+          <CardTitle>Verifications</CardTitle>
+          <CardDescription>
+            Showing consumption behavior for the {intervalFilter.label}
+          </CardDescription>
         </div>
         <div className="flex space-y-0 md:w-1/2">
           {Object.keys(chartConfig).map((key) => {
@@ -73,9 +72,15 @@ export function FeaturesStatsSkeleton() {
         </div>
       </CardHeader>
       <CardContent className="px-2 md:p-6">
-        <div className="flex h-[250px] w-full items-center justify-center">
-          <LoadingSkeleton />
-        </div>
+        <EmptyPlaceholder className="min-h-[250px]" isLoading={isLoading}>
+          <EmptyPlaceholder.Icon>
+            <BarChart3 className="h-8 w-8" />
+          </EmptyPlaceholder.Icon>
+          <EmptyPlaceholder.Title>No data available</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Description>
+            There is no data available for the {intervalFilter.label}
+          </EmptyPlaceholder.Description>
+        </EmptyPlaceholder>
       </CardContent>
     </Card>
   )
@@ -107,20 +112,17 @@ export function FeaturesStats() {
     [intervalFilter.intervalDays]
   )
 
+  if (isLoading || chartData.length === 0) {
+    return <FeaturesStatsSkeleton isLoading={isLoading} />
+  }
+
   return (
     <Card className="py-0">
       <CardHeader className="!p-0 flex flex-col items-stretch space-y-0 border-b md:flex-row">
         <div className="md:!py-0 flex flex-1 flex-col justify-center gap-1 px-6 pt-4 pb-3 md:w-1/2">
           <CardTitle>{chartConfig[activeChart].label}</CardTitle>
           <CardDescription>
-            Showing consumption behavior for the last{" "}
-            {intervalFilter.intervalDays === 90
-              ? "3 months"
-              : intervalFilter.intervalDays === 30
-                ? "30 days"
-                : intervalFilter.intervalDays === 7
-                  ? "7 days"
-                  : "1 day"}
+            Showing consumption behavior for the {intervalFilter.label}
           </CardDescription>
         </div>
         <div className="flex space-y-0 md:w-1/2">
@@ -215,7 +217,6 @@ export function FeaturesStats() {
             <Bar dataKey={activeChart} fill={`var(--color-${activeChart})`} />
           </BarChart>
         </ChartContainer>
-        {isLoading && <LoadingSkeleton />}
       </CardContent>
     </Card>
   )

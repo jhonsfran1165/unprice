@@ -14,20 +14,14 @@ SQL >
     select page_id, country, uniqMerge(visits) as visits, countMerge(hits) as hits
     from unprice_analytics_pages_mv
     where
+        1 = 1
         {% if defined(page_id) %}
-            page_id = {{ String(page_id, description="Page ID", required=False) }}
+            AND page_id = {{ String(page_id, description="Page ID", required=False) }}
         {% end %}
-        {% if defined(date_from) %}
-            date
-            >=
-            {{ Date(date_from, description="Starting day for filtering a date range", required=False) }}
-        {% else %} date >= timestampAdd(today(), interval -7 day)
-        {% end %}
-        {% if defined(date_to) %}
-            and date
-            <=
-            {{ Date(date_to, description="Finishing day for filtering a date range", required=False) }}
-        {% else %} and date <= today()
+        {% if defined(intervalDays) %}
+            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
+        {% else %}
+            AND date >= toStartOfDay(today() - 7)
         {% end %}
     group by page_id, country
     order by visits desc

@@ -7,6 +7,8 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { intervalParserCache, pageParserCache } from "~/lib/searchParams"
 import { HydrateClient, prefetch, trpc } from "~/trpc/server"
 import TabsDashboard from "../_components/tabs-dashboard"
+import { Browsers, BrowsersSkeleton } from "./_components/browsers"
+import { Countries, CountriesSkeleton } from "./_components/countries"
 import { PageVisits, PageVisitsSkeleton } from "./_components/page-visits"
 
 export default async function DashboardPages(props: {
@@ -44,9 +46,17 @@ export default async function DashboardPages(props: {
         </div>
       </div>
       <HydrateClient>
-        <Suspense fallback={<PageVisitsSkeleton />}>
+        <Suspense fallback={<PageVisitsSkeleton isLoading={true} pageId={pageFilter.pageId} />}>
           <PageVisits />
         </Suspense>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Suspense fallback={<BrowsersSkeleton isLoading={true} pageId={pageFilter.pageId} />}>
+            <Browsers />
+          </Suspense>
+          <Suspense fallback={<CountriesSkeleton isLoading={true} pageId={pageFilter.pageId} />}>
+            <Countries />
+          </Suspense>
+        </div>
       </HydrateClient>
     </DashboardShell>
   )

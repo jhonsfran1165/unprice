@@ -7,7 +7,6 @@ export const PROJECT_NAV: DashboardRoute[] = [
     name: "Dashboard",
     icon: Dashboard,
     href: "/dashboard",
-    slug: "dashboard",
   },
   {
     name: "Plans",

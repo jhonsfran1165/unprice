@@ -1,6 +1,6 @@
 "use client"
 
-import type { InsertPage } from "@unprice/db/validators"
+import type { InsertPage, Page } from "@unprice/db/validators"
 import { pageInsertBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import {
@@ -31,7 +31,7 @@ export function PageForm({
   defaultValues,
 }: {
   setDialogOpen?: (open: boolean) => void
-  defaultValues: InsertPage
+  defaultValues: InsertPage | Page
 }) {
   const router = useRouter()
   const editMode = !!defaultValues.id
