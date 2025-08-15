@@ -10,11 +10,13 @@ import { getPlanClickBySessionId } from "./getPlanClickBySessionId"
 import { getPlansConversion } from "./getPlansConversion"
 import { getPlansStats } from "./getPlansStats"
 import { getUsage } from "./getUsage"
+import { getVerificationRegions } from "./getVerificationRegions"
 import { getVerifications } from "./getVerifications"
 import { migrate } from "./migrate"
 
 export const analyticsRouter = createTRPCRouter({
   getVerifications: getVerifications,
+  getVerificationRegions: getVerificationRegions,
   getUsage: getUsage,
   getBrowserVisits: getBrowserVisits,
   getCountryVisits: getCountryVisits,

@@ -2,12 +2,14 @@ import { EU_COUNTRY_CODES, type Stats } from "@unprice/analytics/utils"
 import type { Context } from "hono"
 import { UAParser } from "ua-parser-js"
 import { isBot } from "ua-parser-js/helpers"
+import { parseCfRay } from "./ct-ray"
 
 function capitalize(type: string): string {
   return type.charAt(0).toUpperCase() + type.slice(1)
 }
 
 export const getStats = (c: Context): Stats => {
+  const cfRayHeader = c.req.header("cf-ray") || ""
   const continent = c.req.raw?.cf?.continent as string
   const country = c.req.raw?.cf?.country as string
   const city = c.req.raw?.cf?.city as string
@@ -15,6 +17,13 @@ export const getStats = (c: Context): Stats => {
   const colo = c.req.raw?.cf?.colo as string
   const latitude = c.req.raw?.cf?.latitude as string
   const longitude = c.req.raw?.cf?.longitude as string
+  const cfRay = parseCfRay(cfRayHeader)
+  // important to save the region code for analytics of latency
+  let regionCloudflare = "Unknown"
+
+  if (cfRay.status === "success") {
+    regionCloudflare = cfRay.data.code
+  }
 
   const isEuCountry = (country && EU_COUNTRY_CODES.includes(country)) || false
 
@@ -51,5 +60,6 @@ export const getStats = (c: Context): Stats => {
     bot: isBot(ua.ua),
     isEUCountry: isEuCountry,
     source: unpriceRequestSource || "Unknown",
+    dc: regionCloudflare || "Unknown",
   }
 }

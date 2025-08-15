@@ -149,14 +149,14 @@ export function Countries() {
                 dataKey="country"
                 position="insideLeft"
                 offset={8}
-                className="fill-background-textContrast"
+                className="fill-background-textContrast font-semibold text-background-textContrast"
                 fontSize={12}
               />
               <LabelList
                 dataKey="visits"
                 position="right"
                 offset={8}
-                className="fill-background-textContrast"
+                className="fill-background-textContrast font-semibold text-background-textContrast"
                 fontSize={12}
                 formatter={(value: number) => nFormatter(value)}
               />

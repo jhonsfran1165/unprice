@@ -278,9 +278,33 @@ export class Analytics {
         entitlementId: z.string().optional(),
         featureSlug: z.string(),
         count: z.number(),
+        p50_latency: z.number(),
         p95_latency: z.number(),
-        max_latency: z.number(),
-        latest_latency: z.number(),
+        p99_latency: z.number(),
+      }),
+      opts: {
+        cache: "no-store",
+      },
+    })
+  }
+
+  public get getFeaturesVerificationRegions() {
+    return this.readClient.buildPipe({
+      pipe: "v1_get_feature_verification_regions",
+      parameters: z.object({
+        intervalDays: z.number().optional(),
+        projectId: z.string(),
+        region: z.string().optional(),
+        start: z.number().optional(),
+        end: z.number().optional(),
+      }),
+      data: z.object({
+        date: z.coerce.date(),
+        region: z.string(),
+        count: z.number(),
+        p50_latency: z.number(),
+        p95_latency: z.number(),
+        p99_latency: z.number(),
       }),
       opts: {
         cache: "no-store",

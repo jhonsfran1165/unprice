@@ -21,14 +21,14 @@ const chartConfig = {
     label: "Verifications",
     color: "var(--chart-3)",
   },
+  p50_latency: {
+    label: "P50 Latency",
+  },
   p95_latency: {
     label: "P95 Latency",
   },
-  max_latency: {
-    label: "Max Latency",
-  },
-  latest_latency: {
-    label: "Latest Latency",
+  p99_latency: {
+    label: "P99 Latency",
   },
 } satisfies ChartConfig
 
@@ -41,12 +41,13 @@ export function VerificationsChart() {
       end: intervalFilter.end,
     })
   )
+
   const chartData = verifications.verifications.map((v) => ({
     feature: v.featureSlug,
     verifications: v.count,
+    p50_latency: v.p50_latency,
     p95_latency: v.p95_latency,
-    max_latency: v.max_latency,
-    latest_latency: v.latest_latency,
+    p99_latency: v.p99_latency,
   }))
 
   if (chartData.length === 0 || isLoading) {
@@ -93,16 +94,16 @@ export function VerificationsChart() {
           </div>
           <div>
             <div className="flex items-center gap-2">
+              <span className="font-semibold">P50 Latency:</span>{" "}
+              {nFormatterTime(payload.p50_latency)}
+            </div>
+            <div className="flex items-center gap-2">
               <span className="font-semibold">P95 Latency:</span>{" "}
               {nFormatterTime(payload.p95_latency)}
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold">Max Latency:</span>{" "}
-              {nFormatterTime(payload.max_latency)}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">Latest Latency:</span>{" "}
-              {nFormatterTime(payload.latest_latency)}
+              <span className="font-semibold">P99 Latency:</span>{" "}
+              {nFormatterTime(payload.p99_latency)}
             </div>
           </div>
         </div>

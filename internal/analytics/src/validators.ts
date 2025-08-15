@@ -135,9 +135,9 @@ export const getAnalyticsVerificationsResponseSchema = z.object({
   entitlementId: z.string().optional(),
   featureSlug: z.string(),
   count: z.number(),
+  p50_latency: z.number(),
   p95_latency: z.number(),
-  max_latency: z.number(),
-  latest_latency: z.number(),
+  p99_latency: z.number(),
 })
 
 export const getUsageResponseSchema = z.object({

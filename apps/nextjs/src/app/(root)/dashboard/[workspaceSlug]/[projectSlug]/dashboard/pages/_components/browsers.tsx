@@ -135,6 +135,7 @@ export function Browsers() {
               axisLine={false}
               width={120}
               tickFormatter={(value) => value.slice(0, 3)}
+              hide
             />
             <XAxis dataKey="visits" type="number" hide />
             <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
@@ -152,14 +153,14 @@ export function Browsers() {
                 dataKey="browser"
                 position="insideLeft"
                 offset={8}
-                className="fill-background-textContrast"
+                className="fill-background-textContrast font-semibold text-background-textContrast"
                 fontSize={12}
               />
               <LabelList
                 dataKey="visits"
                 position="right"
                 offset={8}
-                className="fill-background-textContrast"
+                className="fill-background-textContrast font-semibold text-background-textContrast"
                 fontSize={12}
                 formatter={(value: number) => nFormatter(value)}
               />

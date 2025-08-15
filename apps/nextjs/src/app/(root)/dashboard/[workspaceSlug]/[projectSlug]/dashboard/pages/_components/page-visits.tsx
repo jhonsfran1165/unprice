@@ -172,6 +172,8 @@ export function PageVisits() {
               accessibilityLayer
               data={chartData}
               margin={{
+                top: 5,
+                bottom: 5,
                 left: 12,
                 right: 12,
               }}

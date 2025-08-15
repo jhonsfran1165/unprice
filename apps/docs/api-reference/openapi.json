@@ -7737,13 +7737,13 @@
                           "count": {
                             "type": "number"
                           },
+                          "p50_latency": {
+                            "type": "number"
+                          },
                           "p95_latency": {
                             "type": "number"
                           },
-                          "max_latency": {
-                            "type": "number"
-                          },
-                          "latest_latency": {
+                          "p99_latency": {
                             "type": "number"
                           }
                         },
@@ -7751,9 +7751,9 @@
                           "projectId",
                           "featureSlug",
                           "count",
+                          "p50_latency",
                           "p95_latency",
-                          "max_latency",
-                          "latest_latency"
+                          "p99_latency"
                         ]
                       }
                     }

@@ -4025,9 +4025,9 @@ export interface operations {
               entitlementId?: string
               featureSlug: string
               count: number
+              p50_latency: number
               p95_latency: number
-              max_latency: number
-              latest_latency: number
+              p99_latency: number
             }[]
           }
         }

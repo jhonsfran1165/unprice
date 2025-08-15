@@ -154,6 +154,7 @@ export const registerReportUsageV1 = (app: App) =>
                 ip: stats.ip,
                 country: stats.country,
                 region: stats.region,
+                dc: stats.dc,
                 colo: stats.colo,
                 city: stats.city,
                 latitude: stats.latitude,
