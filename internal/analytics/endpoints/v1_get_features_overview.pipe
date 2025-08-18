@@ -57,7 +57,7 @@ SQL >
         {% end %}
         projectId,
         countMerge(count) AS count,
-        quantileTDigestMerge(0.95)(p95_latency) AS p95_latency
+        quantileTDigestMerge(0.99)(p99_latency) AS p99_latency
     FROM unprice_feature_verifications_hourly_mv
     WHERE
         1 = 1
@@ -99,7 +99,7 @@ SQL >
     SELECT
         verifications.interval AS interval,
         verifications.projectId AS project_id,
-        verifications.p95_latency AS latency,
+        verifications.p99_latency AS latency,
         verifications.count AS verifications,
         usage.sum AS usage
     FROM feature_verifications_node as verifications

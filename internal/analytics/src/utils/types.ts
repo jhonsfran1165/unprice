@@ -21,5 +21,5 @@ export interface Stats {
   bot: boolean
   isEUCountry: boolean
   source: string
-  dc: string // Data Center
+  datacenter: string // Data Center
 }

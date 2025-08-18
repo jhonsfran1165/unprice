@@ -1,6 +1,7 @@
 "use client"
 
 import { useSuspenseQuery } from "@tanstack/react-query"
+import { Typography } from "@unprice/ui/typography"
 import { useMemo } from "react"
 import { DataTable } from "~/components/data-table/data-table"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
@@ -15,7 +16,7 @@ export function LatencyTableSkeleton() {
       showDateFilterOptions={false}
       showViewOptions={true}
       searchableColumnCount={1}
-      cellWidths={["20rem", "20rem", "20rem", "20rem", "20rem", "20rem", "12rem"]}
+      cellWidths={["16rem", "16rem", "16rem", "16rem", "16rem", "16rem", "12rem"]}
       shrinkZero
     />
   )
@@ -32,7 +33,6 @@ export function LatencyTable() {
   )
 
   // group by region deleting the date and sum the count, p50_latency, p95_latency, p99_latency
-  // TODO: here I'm measuring the latency incorrectly, fix it
   const groupedByRegion = useMemo(
     () =>
       verifications?.verifications.reduce(
@@ -52,9 +52,10 @@ export function LatencyTable() {
           }
 
           acc[region].count += curr.count
-          acc[region].p50_latency += curr.p50_latency
-          acc[region].p95_latency += curr.p95_latency
-          acc[region].p99_latency += curr.p99_latency
+          // for this latency value I'll take the max value
+          acc[region].p50_latency = Math.max(acc[region].p50_latency, curr.p50_latency)
+          acc[region].p95_latency = Math.max(acc[region].p95_latency, curr.p95_latency)
+          acc[region].p99_latency = Math.max(acc[region].p99_latency, curr.p99_latency)
 
           return acc
         },
@@ -71,15 +72,33 @@ export function LatencyTable() {
   })
 
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      filterOptions={{
-        filterBy: "region",
-        filterColumns: true,
-        filterDateRange: false,
-        filterServerSide: false,
-      }}
-    />
+    <div className="mt-4">
+      <div className="flex flex-col px-1 py-4">
+        <Typography variant="h3" affects="removePaddingMargin">
+          Latency by region
+        </Typography>
+        <Typography variant="p" affects="removePaddingMargin">
+          Latency by region for the {intervalFilter.label}
+        </Typography>
+      </div>
+      <DataTable
+        columns={columns}
+        data={data}
+        filterOptions={{
+          filterBy: "region",
+          filterColumns: true,
+          filterDateRange: false,
+          filterSelectors: {
+            region: [
+              {
+                label: "All",
+                value: "All",
+              },
+            ],
+          },
+          filterServerSide: false,
+        }}
+      />
+    </div>
   )
 }

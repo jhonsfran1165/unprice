@@ -3,7 +3,7 @@ SQL >
     SELECT
         toStartOfHour(fromUnixTimestamp64Milli(timestamp)) as date,
         projectId,
-        metadata['colo'] AS region,
+        metadata['datacenter'] AS region,
         customerId,
         featureSlug,
         entitlementId,

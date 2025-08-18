@@ -20,8 +20,8 @@ import { ChartTooltipNumber } from "./chart-tooltip-number"
 import type { VerificationsMetrics } from "./latency/columns"
 
 const chartConfig = {
-  latency: {
-    label: "P99 Latency",
+  p99_latency: {
+    label: "Latency",
     color: "var(--chart-3)",
   },
 } satisfies ChartConfig
@@ -48,6 +48,7 @@ export function ChartLineRegion({
           cursor={false}
           content={
             <ChartTooltipContent
+              indicator="dot"
               className="w-[180px]"
               formatter={(value, name) => (
                 <ChartTooltipNumber chartConfig={chartConfig} value={value} name={name} />
@@ -58,7 +59,7 @@ export function ChartLineRegion({
         <Line
           dataKey="p99_latency"
           type="monotone"
-          stroke="var(--color-latency)"
+          stroke="var(--color-p99_latency)"
           strokeWidth={2}
           dot={false}
         />

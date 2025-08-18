@@ -19,7 +19,7 @@ export const getStats = (c: Context): Stats => {
   const longitude = c.req.raw?.cf?.longitude as string
   const cfRay = parseCfRay(cfRayHeader)
   // important to save the region code for analytics of latency
-  let regionCloudflare = "Unknown"
+  let regionCloudflare = "UNK" // Unknown
 
   if (cfRay.status === "success") {
     regionCloudflare = cfRay.data.code
@@ -60,6 +60,6 @@ export const getStats = (c: Context): Stats => {
     bot: isBot(ua.ua),
     isEUCountry: isEuCountry,
     source: unpriceRequestSource || "Unknown",
-    dc: regionCloudflare || "Unknown",
+    datacenter: regionCloudflare,
   }
 }

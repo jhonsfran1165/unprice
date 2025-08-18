@@ -28,13 +28,33 @@ export function DataTableToolbar<TData>({ table, filterOptions }: DataTableToolb
     const filter = table.getColumn(key)
     const options = filterBySelectors[key] ?? []
 
+    // get all possible values from the column key so I don't need to pass the options manually
+    const allValues = table.getFilteredRowModel().rows.map((row) => {
+      const value = row.original as Record<string, string>
+      const label = value[key] ?? ""
+
+      if (label === "") return null
+      return {
+        label,
+        value: label,
+      }
+    })
+
+    // delete duplicates with the key value in the object [{label: "value", value: "value"}]
+    const allOptions = options
+      .concat(allValues.filter((value) => value !== null))
+      .filter(
+        (value, index, self) =>
+          index === self.findIndex((t) => t.value === value.value && t.label === value.label)
+      )
+
     if (filter && options.length > 0) {
       return (
         <DataTableFacetedFilter
           key={key}
           column={filter}
           title={key.charAt(0).toUpperCase() + key.slice(1)}
-          options={options}
+          options={allOptions}
         />
       )
     }
@@ -47,7 +67,7 @@ export function DataTableToolbar<TData>({ table, filterOptions }: DataTableToolb
       <div className="flex flex-1 items-center space-x-2">
         {table.getColumn(filterBy) && (
           <Input
-            placeholder={`filter by ${filterBy}...`}
+            placeholder={`filter by ${filterBy}`}
             value={(table.getColumn(filterBy)?.getFilterValue() as string) ?? filters.search ?? ""}
             onChange={(event) => {
               if (filterOptions?.filterServerSide) {

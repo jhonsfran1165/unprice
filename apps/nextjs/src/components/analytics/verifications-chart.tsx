@@ -1,7 +1,7 @@
 "use client"
 
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { nFormatter, nFormatterTime } from "@unprice/db/utils"
+import { nFormatter } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import {
   type ChartConfig,
@@ -20,15 +20,6 @@ const chartConfig = {
   verifications: {
     label: "Verifications",
     color: "var(--chart-3)",
-  },
-  p50_latency: {
-    label: "P50 Latency",
-  },
-  p95_latency: {
-    label: "P95 Latency",
-  },
-  p99_latency: {
-    label: "P99 Latency",
   },
 } satisfies ChartConfig
 
@@ -74,45 +65,6 @@ export function VerificationsChart() {
     )
   }
 
-  // Custom formatter for the tooltip
-  function tooltipFormatter(
-    value: number,
-    name: string,
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    _props: any,
-    _index: number,
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    payload: any
-  ) {
-    // Only show the custom content for the verifications bar
-    if (name === "verifications") {
-      return (
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">Verifications:</span>{" "}
-            {nFormatter(payload.verifications)}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">P50 Latency:</span>{" "}
-              {nFormatterTime(payload.p50_latency)}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">P95 Latency:</span>{" "}
-              {nFormatterTime(payload.p95_latency)}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">P99 Latency:</span>{" "}
-              {nFormatterTime(payload.p99_latency)}
-            </div>
-          </div>
-        </div>
-      )
-    }
-    // fallback for other bars (if any)
-    return value
-  }
-
   return (
     <ChartContainer config={chartConfig} height={chartData.length * 50} className="w-full">
       <BarChart
@@ -138,11 +90,7 @@ export function VerificationsChart() {
           tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
         />
         <XAxis dataKey="verifications" type="number" hide />
-        <ChartTooltip
-          cursor={false}
-          content={<ChartTooltipContent />}
-          formatter={tooltipFormatter}
-        />
+        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
         <Bar
           dataKey="verifications"
           layout="vertical"

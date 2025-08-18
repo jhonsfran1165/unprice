@@ -107,19 +107,19 @@ export default async function DashboardOverview(props: {
         <AnalyticsCard
           className="w-full"
           title="Feature Verifications & Usage"
-          description="Feature verifications and usage recorded for this month."
+          description="Feature verifications and usage recorded for the selected interval."
           defaultTab="verifications"
           tabs={[
             {
               id: "verifications",
               label: "Verifications",
-              description: "Feature verifications recorded for the selected interval.",
+              description: `Feature verifications for the ${interval.label}.`,
               chart: () => <VerificationsChart />,
             },
             {
               id: "usage",
               label: "Usage",
-              description: "Feature usage recorded for the selected interval.",
+              description: `Feature usage for the ${interval.label}.`,
               chart: () => <UsageChart />,
             },
           ]}

@@ -27,7 +27,7 @@ const chartConfig = {
     icon: BarChartBig,
   },
   latency: {
-    label: "Latency (p95)",
+    label: "Latency",
     color: "var(--chart-1)",
     icon: BarChartBig,
   },

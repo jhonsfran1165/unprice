@@ -236,6 +236,7 @@ export type ParserReturn<T> = { status: "success"; data: T } | { status: "failed
 // REMINDER: nono-official data center list
 // https://www.feitsui.com/en/article/26
 export const regionsCloudflare: Record<string, RegionCloudflare> = {
+  UNK: { code: "UNK", location: "Unknown", flag: "🌐" },
   CGB: { code: "CGB", location: "Cuiabá, Brazil", flag: "🇧🇷" },
   COR: { code: "COR", location: "Córdoba, Argentina", flag: "🇦🇷" },
   BTS: { code: "BTS", location: "Bratislava, Slovakia", flag: "🇸🇰" },
