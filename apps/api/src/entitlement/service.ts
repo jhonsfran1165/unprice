@@ -67,6 +67,7 @@ export class EntitlementService {
     this.projectNamespace = opts.projectNamespace
   }
 
+  // TODO: add jurisdiction to the stub
   private getStub(
     name: string,
     locationHint?: DurableObjectLocationHint
