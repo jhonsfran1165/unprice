@@ -188,7 +188,6 @@ async function main() {
         operators.and(
           operators.eq(fields.projectId, project.id),
           operators.eq(fields.isRoot, true),
-          operators.eq(fields.name, "unprice"),
           operators.eq(fields.key, env.UNPRICE_API_KEY!)
         ),
     })
