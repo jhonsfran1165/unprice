@@ -57,7 +57,7 @@ export function PageFilter({ className }: { className?: string }) {
           <SelectItem value={page.id} key={page.id}>
             <div className="flex items-start gap-3">
               <div className="grid gap-0.5">
-                <p className="font-medium text-xs">{page.name}</p>
+                <p className="line-clamp-1 font-medium text-xs">{page.name}</p>
                 <p className="line-clamp-1 text-muted-foreground text-xs" data-description>
                   {page.description}
                 </p>
