@@ -9,7 +9,8 @@ function capitalize(type: string): string {
 }
 
 export const getStats = (c: Context): Stats => {
-  const cfRayHeader = c.req.header("cf-ray") || ""
+  console.info("c", c.req)
+  const cfRayHeader = c.req.header("Cf-Ray") || c.req.header("cf-ray") || ""
   const continent = c.req.raw?.cf?.continent as string
   const country = c.req.raw?.cf?.country as string
   const city = c.req.raw?.cf?.city as string

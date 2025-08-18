@@ -10,6 +10,7 @@ import { LOCALHOST_GEO_DATA, LOCALHOST_IP } from "~/lib/localhost"
 import { setCorsHeaders } from "../_enableCors"
 
 export const runtime = "edge"
+export const maxDuration = 30
 
 /**
  * Post event to Tinybird HFI

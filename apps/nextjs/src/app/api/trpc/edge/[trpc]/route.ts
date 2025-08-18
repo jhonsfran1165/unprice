@@ -8,6 +8,7 @@ import { CorsOptions, setCorsHeaders } from "../../../_enableCors"
 
 export const runtime = "edge"
 export const preferredRegion = ["fra1"]
+export const maxDuration = 30
 
 const handler = auth(async (req) => {
   // when we use the middleware to rewrite the request, the path doesn't include the /api prefix
