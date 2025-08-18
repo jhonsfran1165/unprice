@@ -38,3 +38,6 @@ SCHEMA >
 ENGINE MergeTree
 ENGINE_PARTITION_KEY toYYYYMM(timestamp)
 ENGINE_SORTING_KEY timestamp, page_id
+
+FORWARD_QUERY >
+  SELECT timestamp, page_id, defaultValueOfTypeName('String') AS project_id, session_id, plan_ids, url, country, city, region, latitude, longitude, device, device_model, device_vendor, browser, browser_version, os, os_version, engine, engine_version, cpu_architecture, ua, bot, referrer, referrer_url, ip, locale, continent
