@@ -2,7 +2,7 @@
 import { useCallback } from "react"
 
 import { calculatePricePerFeature } from "@unprice/db/validators"
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { isZero } from "dinero.js"
 
 type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]

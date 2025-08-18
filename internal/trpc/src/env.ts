@@ -1,8 +1,8 @@
 import { createEnv } from "@t3-oss/env-core"
+import { env as analyticsEnv } from "@unprice/analytics/env"
 import { env as dbEnv } from "@unprice/db/env"
 import { env as loggingEnv } from "@unprice/logging/env"
 import { env as servicesEnv } from "@unprice/services/env"
-import { env as analyticsEnv } from "@unprice/tinybird/env"
 import { env as vercelEnv } from "@unprice/vercel/env"
 
 import * as z from "zod"

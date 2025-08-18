@@ -743,6 +743,11 @@ export interface operations {
            */
           featureSlug: string
           /**
+           * @description The timestamp of the request
+           * @example 1717852800
+           */
+          timestamp?: number
+          /**
            * @description The usage
            * @example 30
            */
@@ -992,6 +997,11 @@ export interface operations {
            * @example tokens
            */
           featureSlug: string
+          /**
+           * @description The timestamp of the request
+           * @example 1717852800
+           */
+          timestamp?: number
           /**
            * @description The metadata
            * @example {
@@ -2489,6 +2499,11 @@ export interface operations {
            */
           planSlug?: string
           /**
+           * @description The session id of the customer. This is used to track conversion from pricing pages
+           * @example sess_1234567890
+           */
+          sessionId?: string
+          /**
            * @description The plan version the customer is signing up for
            * @example pv_1234567890
            */
@@ -2553,6 +2568,23 @@ export interface operations {
            * @example https://example.com/login
            */
           cancelUrl: string
+          /**
+           * @description The metadata of the customer
+           * @example {
+           *       "externalId": "1234567890"
+           *     }
+           */
+          metadata?: {
+            externalId?: string
+            stripeSubscriptionId?: string
+            stripeDefaultPaymentMethodId?: string
+            continent?: string
+            country?: string
+            region?: string
+            colo?: string
+            city?: string
+            isEUCountry?: boolean | null
+          }
         }
       }
     }
@@ -3850,7 +3882,7 @@ export interface operations {
            * @example 24h
            * @enum {string}
            */
-          range: "60m" | "24h" | "7d" | "30d" | "90d"
+          range: "24h" | "7d" | "30d" | "90d"
         }
       }
     }
@@ -3975,7 +4007,7 @@ export interface operations {
            * @example 24h
            * @enum {string}
            */
-          range: "60m" | "24h" | "7d" | "30d" | "90d"
+          range: "24h" | "7d" | "30d" | "90d"
         }
       }
     }
@@ -3993,9 +4025,9 @@ export interface operations {
               entitlementId?: string
               featureSlug: string
               count: number
+              p50_latency: number
               p95_latency: number
-              max_latency: number
-              latest_latency: number
+              p99_latency: number
             }[]
           }
         }

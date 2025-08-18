@@ -35,7 +35,7 @@ export default async function PageEditor({
     <DashboardShell
       header={
         <HeaderTab
-          title={page.title}
+          title={page.name}
           description={page.description}
           label={page.published ? "published" : "draft"}
           id={pageId}

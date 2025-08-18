@@ -1,3 +1,4 @@
+import type { Analytics } from "@unprice/analytics"
 import { and, eq } from "@unprice/db"
 import { invoices } from "@unprice/db/schema"
 import { AesGCM } from "@unprice/db/utils"
@@ -14,7 +15,6 @@ import {
 } from "@unprice/db/validators"
 import { Err, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import type { Analytics } from "@unprice/tinybird"
 import { env } from "../../env"
 import { PaymentProviderService } from "../payment-provider"
 

@@ -17,10 +17,11 @@ import {
 import { Input } from "@unprice/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 
+import { useMutation } from "@tanstack/react-query"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export const InviteMemberForm = ({
   onSuccess,
@@ -28,25 +29,28 @@ export const InviteMemberForm = ({
   onSuccess: () => void
 }) => {
   const router = useRouter()
-
+  const trpc = useTRPC()
   const form = useZodForm({
     schema: inviteMembersSchema,
     defaultValues: {
       email: "",
       role: utils.ROLES_APP[0],
+      name: "",
     },
   })
 
-  const inviteMember = api.workspaces.inviteMember.useMutation({
-    onSettled: () => {
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("success")
-      form.reset()
-      onSuccess()
-    },
-  })
+  const inviteMember = useMutation(
+    trpc.workspaces.inviteMember.mutationOptions({
+      onSettled: () => {
+        router.refresh()
+      },
+      onSuccess: () => {
+        toastAction("success")
+        form.reset()
+        onSuccess()
+      },
+    })
+  )
 
   async function onSubmit(data: InviteMember) {
     await inviteMember.mutateAsync(data)
@@ -56,6 +60,21 @@ export const InviteMemberForm = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormDescription>The name of the person you want to invite.</FormDescription>
+                <FormControl>
+                  <Input {...field} placeholder="John Doe" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="email"

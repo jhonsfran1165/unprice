@@ -17,10 +17,11 @@ import { useRouter } from "next/navigation"
 import { startTransition, useState } from "react"
 import { createPortal } from "react-dom"
 
+import { useMutation } from "@tanstack/react-query"
 import type { PlanVersionFeatureDragDrop } from "@unprice/db/validators"
 import { useActiveFeature, useActivePlanVersion, usePlanFeaturesList } from "~/hooks/use-features"
 import { toastAction } from "~/lib/toast"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 import { FeaturePlan } from "./feature-plan"
 
 const dropAnimation: DropAnimation = {
@@ -40,48 +41,53 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
   const [planFeaturesList, setPlanFeaturesList] = usePlanFeaturesList()
   const [activePlanVersion] = useActivePlanVersion()
   const isPublished = activePlanVersion?.status === "published"
+  const trpc = useTRPC()
 
-  const updatePlanVersionFeatures = api.planVersionFeatures.update.useMutation({
-    onSuccess: () => {
-      router.refresh()
-    },
-  })
+  const updatePlanVersionFeatures = useMutation(
+    trpc.planVersionFeatures.update.mutationOptions({
+      onSuccess: () => {
+        router.refresh()
+      },
+    })
+  )
 
   // TODO: when this takes too long we should show a loading state
-  const createPlanVersionFeatures = api.planVersionFeatures.create.useMutation({
-    onSuccess: ({ planVersionFeature }) => {
-      // Update the entire features list to maintain consistency with drag-drop
-      setPlanFeaturesList((features) => {
-        return features.map((feature) =>
-          feature.featureId === planVersionFeature.featureId
-            ? { ...feature, ...planVersionFeature }
-            : feature
-        )
-      })
-    },
-    // Optionally add optimistic updates
-    onMutate: (planVersionFeature) => {
-      const previousFeatures = planFeaturesList
+  const createPlanVersionFeatures = useMutation(
+    trpc.planVersionFeatures.create.mutationOptions({
+      onSuccess: ({ planVersionFeature }) => {
+        // Update the entire features list to maintain consistency with drag-drop
+        setPlanFeaturesList((features) => {
+          return features.map((feature) =>
+            feature.featureId === planVersionFeature.featureId
+              ? { ...feature, ...planVersionFeature }
+              : feature
+          )
+        })
+      },
+      // Optionally add optimistic updates
+      onMutate: (planVersionFeature) => {
+        const previousFeatures = planFeaturesList
 
-      setPlanFeaturesList((features) =>
-        features.map((feature) =>
-          feature.featureId === planVersionFeature.featureId
-            ? { ...feature, ...planVersionFeature }
-            : feature
+        setPlanFeaturesList((features) =>
+          features.map((feature) =>
+            feature.featureId === planVersionFeature.featureId
+              ? { ...feature, ...planVersionFeature }
+              : feature
+          )
         )
-      )
 
-      return { previousFeatures }
-    },
-    onError: (_, __, context) => {
-      // Rollback on error
-      if (context?.previousFeatures) {
-        setPlanFeaturesList(context.previousFeatures)
-      } else {
-        setPlanFeaturesList(clonedFeatures ?? [])
-      }
-    },
-  })
+        return { previousFeatures }
+      },
+      onError: (_, __, context) => {
+        // Rollback on error
+        if (context?.previousFeatures) {
+          setPlanFeaturesList(context.previousFeatures)
+        } else {
+          setPlanFeaturesList(clonedFeatures ?? [])
+        }
+      },
+    })
+  )
 
   function onChanges(planFeatureVersion: PlanVersionFeatureDragDrop) {
     startTransition(() => {

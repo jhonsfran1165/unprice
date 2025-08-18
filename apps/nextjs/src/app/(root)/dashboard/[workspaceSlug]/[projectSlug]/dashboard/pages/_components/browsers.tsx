@@ -1,0 +1,173 @@
+"use client"
+
+import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
+import { EmptyPlaceholder } from "~/components/empty-placeholder"
+
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { nFormatter } from "@unprice/db/utils"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@unprice/ui/chart"
+import { BarChart4 } from "lucide-react"
+import { useMemo } from "react"
+import { useIntervalFilter, usePageFilter } from "~/hooks/use-filter"
+import { useTRPC } from "~/trpc/client"
+
+const chartConfig = {
+  browser: {
+    label: "Browser",
+    color: "var(--chart-1)",
+  },
+  visits: {
+    label: "Visits",
+    color: "var(--chart-1)",
+  },
+  hits: {
+    label: "Hits",
+    color: "var(--chart-2)",
+  },
+} satisfies ChartConfig
+
+export function BrowsersSkeleton({
+  isLoading,
+  pageId,
+}: {
+  isLoading?: boolean
+  pageId: string
+}) {
+  const [intervalFilter] = useIntervalFilter()
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Browser vistis</CardTitle>
+        <CardDescription>All browser visits for the {intervalFilter.label}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <EmptyPlaceholder className="min-h-[250px]" isLoading={isLoading}>
+          <EmptyPlaceholder.Icon>
+            <BarChart4 className="h-8 w-8" />
+          </EmptyPlaceholder.Icon>
+          <EmptyPlaceholder.Title>
+            {pageId ? "No data available" : "No page selected"}
+          </EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Description>
+            {pageId
+              ? `There is no browser visits available for the ${intervalFilter.label}`
+              : "Please select a page to see browser visits."}
+          </EmptyPlaceholder.Description>
+        </EmptyPlaceholder>
+      </CardContent>
+    </Card>
+  )
+}
+
+export function Browsers() {
+  const [intervalFilter] = useIntervalFilter()
+  const [pageId] = usePageFilter()
+  const trpc = useTRPC()
+  const { data, isLoading } = useSuspenseQuery(
+    trpc.analytics.getBrowserVisits.queryOptions(
+      {
+        intervalDays: intervalFilter.intervalDays,
+        page_id: pageId.pageId,
+      },
+      {
+        enabled: !!pageId.pageId && pageId.pageId !== "",
+      }
+    )
+  )
+
+  // group by browser using useMemo having something like an array of { browser: "Chrome", visits: 214, hits: 140 }
+  // there are multiple items with the same browser that we need to sum the visits and hits
+  // we need to return an array of { browser: "Chrome", visits: 214, hits: 140 }
+  const groupedData = useMemo(() => {
+    return data.data.reduce(
+      (acc, curr) => {
+        const existingItem = acc.find((item) => item.browser === curr.browser)
+        if (existingItem) {
+          existingItem.visits += curr.visits
+          existingItem.hits += curr.hits
+        } else {
+          acc.push({
+            browser: curr.browser,
+            visits: curr.visits,
+            hits: curr.hits,
+          })
+        }
+        return acc
+      },
+      [] as { browser: string; visits: number; hits: number }[]
+    )
+  }, [pageId.pageId, intervalFilter.intervalDays])
+
+  if (data.data.length === 0 || isLoading) {
+    return <BrowsersSkeleton isLoading={isLoading} pageId={pageId.pageId} />
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Browser vistis</CardTitle>
+        <CardDescription>All browser visits for the {intervalFilter.label}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig}>
+          <BarChart
+            accessibilityLayer
+            data={groupedData}
+            layout="vertical"
+            margin={{
+              right: 40,
+              top: 0,
+            }}
+            barGap={5}
+            barCategoryGap={3}
+          >
+            <YAxis
+              dataKey="browser"
+              type="category"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              width={120}
+              tickFormatter={(value) => value.slice(0, 3)}
+              hide
+            />
+            <XAxis dataKey="visits" type="number" hide />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+            <Bar
+              dataKey="visits"
+              layout="vertical"
+              fill="var(--color-visits)"
+              radius={5}
+              maxBarSize={30}
+              activeBar={{
+                opacity: 0.5,
+              }}
+            >
+              <LabelList
+                dataKey="browser"
+                position="insideLeft"
+                offset={8}
+                className="fill-background-textContrast font-semibold text-background-textContrast"
+                fontSize={12}
+              />
+              <LabelList
+                dataKey="visits"
+                position="right"
+                offset={8}
+                className="fill-background-textContrast font-semibold text-background-textContrast"
+                fontSize={12}
+                formatter={(value: number) => nFormatter(value)}
+              />
+            </Bar>
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
+  )
+}

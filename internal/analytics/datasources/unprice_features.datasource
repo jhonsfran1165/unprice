@@ -1,0 +1,18 @@
+TOKEN "web-apps" APPEND
+
+DESCRIPTION >
+    Once a feature is created, we store it here.
+    This is used to get the feature details.
+
+TAGS "features"
+
+SCHEMA >
+    `id` String `json:$.id`,
+    `project_id` String `json:$.project_id`,
+    `slug` String `json:$.slug`,
+    `code` Int16 `json:$.code`,
+    `timestamp` DateTime64(3) `json:$.timestamp`,
+
+ENGINE MergeTree
+ENGINE_PARTITION_KEY toYYYYMM(timestamp)
+ENGINE_SORTING_KEY project_id, id, slug

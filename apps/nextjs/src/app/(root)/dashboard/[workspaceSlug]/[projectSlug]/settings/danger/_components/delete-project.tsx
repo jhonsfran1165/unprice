@@ -17,9 +17,10 @@ import {
 import { Warning } from "@unprice/ui/icons"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { revalidateAppPath } from "~/actions/revalidate"
 import { toastAction } from "~/lib/toast"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function DeleteProject({
   workspaceSlug,
@@ -30,17 +31,21 @@ export function DeleteProject({
   projectSlug: string
   isMain: boolean
 }) {
-  const apiUtils = api.useUtils()
   const router = useRouter()
 
-  const deleteProject = api.projects.delete.useMutation({
-    onSuccess: async () => {
-      toastAction("success")
-      await apiUtils.projects.listByActiveWorkspace.invalidate()
-      await revalidateAppPath(`/${workspaceSlug}`, "page")
-      router.push(`/${workspaceSlug}`)
-    },
-  })
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+
+  const deleteProject = useMutation(
+    trpc.projects.delete.mutationOptions({
+      onSuccess: async () => {
+        toastAction("success")
+        await queryClient.invalidateQueries(trpc.projects.listByActiveWorkspace.queryOptions())
+        await revalidateAppPath(`/${workspaceSlug}`, "page")
+        router.push(`/${workspaceSlug}`)
+      },
+    })
+  )
 
   const title = "Delete project"
   const description = "This will delete the project and all of its data."

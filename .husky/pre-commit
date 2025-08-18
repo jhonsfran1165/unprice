@@ -12,7 +12,7 @@ pnpm typecheck
 pnpm test
 
 echo "Checking tinybird deployment"
-cd internal/tinybird
+cd internal/analytics
 TB_VERSION_WARNING=0 tb build
 cd ../../
 

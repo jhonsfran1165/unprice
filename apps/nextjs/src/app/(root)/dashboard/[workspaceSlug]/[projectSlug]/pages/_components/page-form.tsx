@@ -1,6 +1,6 @@
 "use client"
 
-import type { InsertPage } from "@unprice/db/validators"
+import type { InsertPage, Page } from "@unprice/db/validators"
 import { pageInsertBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import {
@@ -16,6 +16,7 @@ import { Input } from "@unprice/ui/input"
 import { useRouter } from "next/navigation"
 import { startTransition } from "react"
 
+import { useMutation } from "@tanstack/react-query"
 import { SITES_BASE_DOMAIN } from "@unprice/config"
 import { Textarea } from "@unprice/ui/text-area"
 import { ConfirmAction } from "~/components/confirm-action"
@@ -23,17 +24,18 @@ import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function PageForm({
   setDialogOpen,
   defaultValues,
 }: {
   setDialogOpen?: (open: boolean) => void
-  defaultValues: InsertPage
+  defaultValues: InsertPage | Page
 }) {
   const router = useRouter()
   const editMode = !!defaultValues.id
+  const trpc = useTRPC()
 
   const form = useZodForm({
     schema: pageInsertBaseSchema,
@@ -41,52 +43,58 @@ export function PageForm({
     reValidateMode: "onSubmit",
   })
 
-  const createPage = api.pages.create.useMutation({
-    onSuccess: ({ page }) => {
-      form.reset(page)
-      toastAction("saved")
-      setDialogOpen?.(false)
-      router.refresh()
-    },
-  })
+  const createPage = useMutation(
+    trpc.pages.create.mutationOptions({
+      onSuccess: ({ page }) => {
+        form.reset(page)
+        toastAction("saved")
+        setDialogOpen?.(false)
+        router.refresh()
+      },
+    })
+  )
 
-  const updatePage = api.pages.update.useMutation({
-    onSuccess: ({ page }) => {
-      form.reset(page)
-      toastAction("updated")
-      setDialogOpen?.(false)
+  const updatePage = useMutation(
+    trpc.pages.update.mutationOptions({
+      onSuccess: ({ page }) => {
+        form.reset(page)
+        toastAction("updated")
+        setDialogOpen?.(false)
 
-      // Only needed when the form is inside a uncontrolled dialog - normally updates
-      // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
-      if (!setDialogOpen) {
-        const escKeyEvent = new KeyboardEvent("keydown", {
-          key: "Escape",
-        })
-        document.dispatchEvent(escKeyEvent)
-      }
+        // Only needed when the form is inside a uncontrolled dialog - normally updates
+        // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+        if (!setDialogOpen) {
+          const escKeyEvent = new KeyboardEvent("keydown", {
+            key: "Escape",
+          })
+          document.dispatchEvent(escKeyEvent)
+        }
 
-      router.refresh()
-    },
-  })
+        router.refresh()
+      },
+    })
+  )
 
-  const deletePage = api.pages.remove.useMutation({
-    onSuccess: () => {
-      toastAction("deleted")
+  const deletePage = useMutation(
+    trpc.pages.remove.mutationOptions({
+      onSuccess: () => {
+        toastAction("deleted")
 
-      setDialogOpen?.(false)
-      // Only needed when the form is inside a uncontrolled dialog - normally updates
-      // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
-      if (!setDialogOpen) {
-        const escKeyEvent = new KeyboardEvent("keydown", {
-          key: "Escape",
-        })
-        document.dispatchEvent(escKeyEvent)
-      }
+        setDialogOpen?.(false)
+        // Only needed when the form is inside a uncontrolled dialog - normally updates
+        // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+        if (!setDialogOpen) {
+          const escKeyEvent = new KeyboardEvent("keydown", {
+            key: "Escape",
+          })
+          document.dispatchEvent(escKeyEvent)
+        }
 
-      form.reset()
-      router.refresh()
-    },
-  })
+        form.reset()
+        router.refresh()
+      },
+    })
+  )
 
   const onSubmitForm = async (data: InsertPage) => {
     if (!defaultValues.id) {
@@ -118,12 +126,12 @@ export function PageForm({
         <div className="space-y-8">
           <FormField
             control={form.control}
-            name="title"
+            name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Page Title</FormLabel>
+                <FormLabel>Page Name</FormLabel>
                 <FormDescription>
-                  The title is publicly visible and is used to identify the page.
+                  The name is publicly visible and is used to identify the page.
                 </FormDescription>
                 <FormControl>
                   <Input {...field} placeholder="production price page" />

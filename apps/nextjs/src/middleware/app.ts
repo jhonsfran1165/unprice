@@ -4,8 +4,6 @@ import { NextResponse } from "next/server"
 import type { NextAuthRequest } from "@unprice/auth"
 
 import {
-  API_AUTH_ROUTE_PREFIX,
-  API_TRPC_ROUTE_PREFIX,
   APP_AUTH_ROUTES,
   APP_NON_WORKSPACE_ROUTES,
   AUTH_ROUTES,
@@ -47,15 +45,14 @@ export default function AppMiddleware(req: NextAuthRequest) {
   const isLoggedIn = !!req.auth?.user
   const { user, userBelongsToWorkspace } = getWorkspacesUser(req.auth)
   const isAppAuthRoute = APP_AUTH_ROUTES.has(path)
-  const isApiAuthRoute = path.startsWith(API_AUTH_ROUTE_PREFIX)
-  const isApiTrpcRoute = path.startsWith(API_TRPC_ROUTE_PREFIX)
+  const isApiRoute = path.startsWith("/api")
   const isNonWorkspaceRoute = APP_NON_WORKSPACE_ROUTES.has(path)
 
   // use next param to redirect to the workspace
   const next = req.nextUrl.searchParams.get("next")
 
   // API routes we don't need to check if the user is logged in
-  if (isApiAuthRoute || isApiTrpcRoute || isAppAuthRoute) {
+  if (isApiRoute || isAppAuthRoute) {
     return NextResponse.next()
   }
 

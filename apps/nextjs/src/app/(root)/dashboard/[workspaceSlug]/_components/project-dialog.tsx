@@ -42,6 +42,7 @@ export function ProjectDialog({
               url: "",
               defaultCurrency: "USD",
               timezone: "UTC",
+              contactEmail: "",
             }
           }
           onSuccess={() => setDialogOpen(false)}

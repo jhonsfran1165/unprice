@@ -91,3 +91,5 @@ yarn-error.log*
 .contentlayer
 tsconfig.tsbuildinfo
 .vitest
+
+mailpit/

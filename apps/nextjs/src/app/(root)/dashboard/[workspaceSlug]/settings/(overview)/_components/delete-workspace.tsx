@@ -1,4 +1,5 @@
 "use client"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { startTransition } from "react"
 
 import type { Workspace } from "@unprice/db/validators"
@@ -18,31 +19,36 @@ import { Warning } from "@unprice/ui/icons"
 import { updateSession } from "~/actions/update-session"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
   const isPersonal = workspace.isPersonal
   const isMain = workspace.isMain
 
-  const apiUtils = api.useUtils()
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
 
   const title = "Delete"
   const description = "This will delete the workspace and all of its data."
 
-  const deleteWorkspace = api.workspaces.delete.useMutation({
-    onSuccess: async () => {
-      toastAction("deleted")
+  const deleteWorkspace = useMutation(
+    trpc.workspaces.delete.mutationOptions({
+      onSuccess: async () => {
+        toastAction("deleted")
 
-      // invalidate the workspaces list to refresh the workspaces
-      await apiUtils.workspaces.listWorkspacesByActiveUser.invalidate()
+        // invalidate the workspaces list to refresh the workspaces
+        await queryClient.invalidateQueries(
+          trpc.workspaces.listWorkspacesByActiveUser.queryOptions()
+        )
 
-      // trigger the session update
-      await updateSession()
+        // trigger the session update
+        await updateSession()
 
-      // redirect url
-      window.location.href = "/"
-    },
-  })
+        // redirect url
+        window.location.href = "/"
+      },
+    })
+  )
 
   function handleDelete() {
     startTransition(() => {

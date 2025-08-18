@@ -21,7 +21,7 @@ import {
 } from "@unprice/db/validators"
 import { Err, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import type { Analytics } from "@unprice/tinybird"
+import type { Analytics } from "@unprice/analytics"
 import { addDays } from "date-fns"
 import { StateMachine } from "../machine/service"
 import { PaymentProviderService } from "../payment-provider"

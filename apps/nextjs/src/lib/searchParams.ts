@@ -1,4 +1,4 @@
-import { DEFAULT_INTERVAL, INTERVAL_KEYS } from "@unprice/tinybird"
+import { DEFAULT_INTERVAL, INTERVAL_KEYS } from "@unprice/analytics"
 import {
   createSearchParamsCache,
   parseAsInteger,
@@ -12,11 +12,17 @@ export const filtersDataTableParsers = {
   to: parseAsInteger,
   from: parseAsInteger,
   search: parseAsString,
+  intervalDays: parseAsInteger.withDefault(7),
 }
 
 export const intervalParser = {
-  interval: parseAsStringEnum(INTERVAL_KEYS).withDefault(DEFAULT_INTERVAL),
+  intervalFilter: parseAsStringEnum(INTERVAL_KEYS).withDefault(DEFAULT_INTERVAL),
+}
+
+export const pageParser = {
+  pageId: parseAsString.withDefault(""),
 }
 
 export const intervalParserCache = createSearchParamsCache(intervalParser)
 export const filtersDataTableCache = createSearchParamsCache(filtersDataTableParsers)
+export const pageParserCache = createSearchParamsCache(pageParser)

@@ -7,6 +7,7 @@ import { cn } from "@unprice/ui/utils"
 import { motion } from "framer-motion"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { z } from "zod"
 import { loginWithCredentials } from "~/actions/loginCredentials"
 import { useZodForm } from "~/lib/zod-form"
@@ -17,6 +18,7 @@ export const LoginSchema = z.object({
 })
 
 export function SignInCredentials({ className }: { className?: string }) {
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const form = useZodForm({
     schema: LoginSchema,
@@ -28,15 +30,18 @@ export function SignInCredentials({ className }: { className?: string }) {
   })
 
   const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
+    setIsLoading(true)
     const res = await loginWithCredentials(data)
 
     if (!res.success) {
       form.setError("root", { message: res.message })
+      setIsLoading(false)
       return
     }
 
     if (res.redirect) {
       router.push(res.redirect)
+      setIsLoading(false)
       return
     }
   }
@@ -83,8 +88,8 @@ export function SignInCredentials({ className }: { className?: string }) {
               </FormItem>
             )}
           />
-          <Button type="submit" className="mt-2 w-full" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
+          <Button type="submit" className="mt-2 w-full" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
             Login
           </Button>
         </div>

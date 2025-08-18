@@ -1,21 +1,24 @@
+import { relations } from "drizzle-orm"
 import { boolean, index, jsonb, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
 import type { z } from "zod"
 import { pgTableProject } from "../utils/_table"
 import { timestamps } from "../utils/fields"
 import { projectID } from "../utils/sql"
 import type { colorPaletteSchema, faqSchema, planSchema } from "../validators/pages"
+import { projects } from "./projects"
 
 export const pages = pgTableProject(
   "pages",
   {
     ...projectID,
     ...timestamps,
-    title: text("title").notNull(),
+    name: text("name").default("").notNull(),
     customDomain: text("custom_domain").unique(),
     subdomain: text("subdomain").unique().notNull(),
     slug: text("slug").notNull(),
     ctaLink: text("cta_link").notNull().default(""),
     description: text("description"),
+    title: text("title").notNull().default(""),
     copy: text("copy").notNull().default(""),
     faqs: jsonb("faqs").notNull().$type<z.infer<typeof faqSchema>[]>(),
     colorPalette: jsonb("color_palette").notNull().$type<z.infer<typeof colorPaletteSchema>>(),
@@ -35,3 +38,10 @@ export const pages = pgTableProject(
     indexCustomDomain: index("custom_domain_index").on(table.customDomain),
   })
 )
+
+export const pagesRelations = relations(pages, ({ one }) => ({
+  project: one(projects, {
+    fields: [pages.projectId],
+    references: [projects.id],
+  }),
+}))

@@ -111,3 +111,30 @@ export const featureUsageSchema = {
     ],
   },
 }
+
+export const analyticsEventsSchema = {
+  timestamp: {
+    type: "mockingbird.timestampNow",
+  },
+  session_id: {
+    type: "string.uuid",
+  },
+  action: {
+    type: "string",
+  },
+  payload: {
+    type: "mockingbird.pick",
+    params: [
+      {
+        values: [
+          '{"customer_id":"cus_123","plan_version_id":"pv_123","page_id":"page_123","status":"signup_success"}',
+          '{"customer_id":"cus_123","plan_version_id":"pv_123","page_id":"page_123","status":"signup_failed"}',
+          '{"customer_id":"cus_123","plan_version_id":"pv_123","page_id":"page_123","status":"waiting_payment_provider_setup"}',
+          '{"customer_id":"cus_456","plan_version_id":"pv_456","page_id":"page_456","status":"signup_success"}',
+          '{"customer_id":"cus_789","plan_version_id":"pv_789","page_id":"page_789","status":"signup_success"}',
+          '{"customer_id":"cus_101","plan_version_id":"pv_101","page_id":"page_101","status":"signup_success"}',
+        ],
+      },
+    ],
+  },
+}

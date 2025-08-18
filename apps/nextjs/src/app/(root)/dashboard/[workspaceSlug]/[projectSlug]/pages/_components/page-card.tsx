@@ -1,6 +1,6 @@
 import { MoreHorizontal, PlusIcon, Settings } from "lucide-react"
 
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import {
@@ -41,7 +41,7 @@ export function PageCard(props: {
           <div className="space-y-4">
             <CardTitle className={"line-clamp-1"}>
               <div className="flex items-center space-x-3">
-                <span>{page.title}</span>
+                <span>{page.name}</span>
                 {page.published && (
                   <div className="inline-flex items-center font-semibold text-info text-xs">
                     <span className="flex h-2 w-2 rounded-full bg-info" />

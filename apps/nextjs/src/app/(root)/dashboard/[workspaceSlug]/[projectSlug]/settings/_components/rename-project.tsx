@@ -5,12 +5,14 @@ import { use } from "react"
 
 import type { RenameProject } from "@unprice/db/validators"
 import { renameProjectSchema } from "@unprice/db/validators"
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
+import { startTransition } from "react"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   Card,
   CardContent,
@@ -19,27 +21,54 @@ import {
   CardHeader,
   CardTitle,
 } from "@unprice/ui/card"
-import { toastAction } from "~/lib/toast"
+import { toast, toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function RenameProjectForm(props: {
   projectPromise: Promise<RouterOutputs["projects"]["getBySlug"]>
 }) {
   const { project } = use(props.projectPromise)
-  const apiUtils = api.useUtils()
   const router = useRouter()
 
-  const renameProject = api.projects.rename.useMutation({
-    onSettled: async () => {
-      await apiUtils.projects.listByWorkspace.invalidate()
-      await apiUtils.projects.getBySlug.invalidate({ slug: project.slug })
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("success")
-    },
-  })
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+
+  const renameProject = useMutation(
+    trpc.projects.rename.mutationOptions({
+      onSettled: async () => {
+        await queryClient.invalidateQueries(
+          trpc.projects.listByWorkspace.queryOptions({
+            workspaceSlug: project.workspace.slug,
+          })
+        )
+        await queryClient.invalidateQueries(
+          trpc.projects.getBySlug.queryOptions({ slug: project.slug })
+        )
+        router.refresh()
+      },
+      onSuccess: () => {
+        toastAction("success")
+      },
+    })
+  )
+
+  const migrateProject = useMutation(
+    trpc.analytics.migrate.mutationOptions({
+      onSuccess: () => {
+        router.refresh()
+      },
+    })
+  )
+
+  function onMigrateProject() {
+    startTransition(() => {
+      toast.promise(migrateProject.mutateAsync(), {
+        loading: "Publishing...",
+        success: "Version published",
+      })
+    })
+  }
 
   const form = useZodForm({
     schema: renameProjectSchema,
@@ -78,10 +107,14 @@ export function RenameProjectForm(props: {
             />
           </CardContent>
 
-          <CardFooter className="border-t px-6 py-4">
+          <CardFooter className="flex justify-between gap-2 border-t px-6 py-4">
             <Button type="submit">
               Save
               {form.formState.isSubmitting && <LoadingAnimation className="ml-2" />}
+            </Button>
+            <Button type="button" variant="ghost" onClick={onMigrateProject}>
+              Migrate analytics data
+              {migrateProject.isPending && <LoadingAnimation className="ml-2" />}
             </Button>
           </CardFooter>
         </Card>

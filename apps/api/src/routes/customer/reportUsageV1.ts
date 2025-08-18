@@ -28,6 +28,10 @@ export const route = createRoute({
           description: "The feature slug",
           example: "tokens",
         }),
+        timestamp: z.number().optional().openapi({
+          description: "The timestamp of the request",
+          example: 1717852800,
+        }),
         usage: z.number().openapi({
           description: "The usage",
           example: 30,
@@ -73,9 +77,10 @@ export type ReportUsageResponse = z.infer<
 
 export const registerReportUsageV1 = (app: App) =>
   app.openapi(route, async (c) => {
-    const { customerId, featureSlug, usage, idempotenceKey, metadata } = c.req.valid("json")
+    const { customerId, featureSlug, usage, idempotenceKey, metadata, timestamp } =
+      c.req.valid("json")
     const { entitlement, customer, logger } = c.get("services")
-    const analytics = c.get("analytics")
+    const stats = c.get("stats")
     const requestId = c.get("requestId")
 
     // validate the request
@@ -87,15 +92,22 @@ export const registerReportUsageV1 = (app: App) =>
       featureSlug,
       usage,
       // timestamp of the record
-      timestamp: Date.now(),
-      // now date
-      now: Date.now(),
+      timestamp: timestamp ?? Date.now(),
       idempotenceKey,
       projectId: key.projectId,
       requestId,
       metadata: {
         ...metadata,
-        ...analytics,
+        ip: stats.ip,
+        country: stats.country,
+        region: stats.region,
+        colo: stats.colo,
+        city: stats.city,
+        latitude: stats.latitude,
+        longitude: stats.longitude,
+        ua: stats.ua,
+        continent: stats.continent,
+        source: stats.source,
       },
     })
 
@@ -132,13 +144,23 @@ export const registerReportUsageV1 = (app: App) =>
               featureSlug: FEATURE_SLUGS.EVENTS,
               projectId: unPriceCustomer.projectId,
               requestId,
-              now: Date.now(),
               usage: 1,
+              // short ttl for dev
+              secondsToLive: c.env.NODE_ENV === "development" ? 5 : undefined,
               idempotenceKey: `${requestId}:${unPriceCustomer.id}`,
               timestamp: Date.now(),
               metadata: {
                 action: "reportUsage",
-                ...analytics,
+                ip: stats.ip,
+                country: stats.country,
+                region: stats.region,
+                colo: stats.colo,
+                city: stats.city,
+                latitude: stats.latitude,
+                longitude: stats.longitude,
+                ua: stats.ua,
+                continent: stats.continent,
+                source: stats.source,
               },
             })
             .catch((err) => {

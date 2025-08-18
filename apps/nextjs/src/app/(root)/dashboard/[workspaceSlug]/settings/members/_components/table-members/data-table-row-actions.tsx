@@ -5,7 +5,7 @@ import { MoreHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import * as React from "react"
 
-import * as utils from "@unprice/db/utils"
+import { ROLES_APP } from "@unprice/db/utils"
 import type { WorkspaceRole } from "@unprice/db/validators"
 import { listMembersSchema } from "@unprice/db/validators"
 import {
@@ -37,8 +37,9 @@ import {
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toastAction } from "~/lib/toast"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
@@ -51,28 +52,38 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const [alertOpen, setAlertOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
 
-  const apiUtils = api.useUtils()
+  const trpc = useTRPC()
   const router = useRouter()
+  const queryClient = useQueryClient()
 
-  const deleteMember = api.workspaces.deleteMember.useMutation({
-    onSettled: async () => {
-      await apiUtils.workspaces.listMembersByActiveWorkspace.invalidate()
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("deleted")
-    },
-  })
+  const deleteMember = useMutation(
+    trpc.workspaces.deleteMember.mutationOptions({
+      onSettled: async () => {
+        await queryClient.invalidateQueries(
+          trpc.workspaces.listMembersByActiveWorkspace.queryOptions()
+        )
+        router.refresh()
+      },
+      onSuccess: () => {
+        toastAction("deleted")
+      },
+    })
+  )
 
-  const changeRoleMember = api.workspaces.changeRoleMember.useMutation({
-    onSettled: async () => {
-      await apiUtils.workspaces.listMembersByActiveWorkspace.invalidate()
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("success")
-    },
-  })
+  const changeRoleMember = useMutation(
+    trpc.workspaces.changeRoleMember.mutationOptions({
+      onSettled: async () => {
+        await queryClient.invalidateQueries(
+          trpc.workspaces.listMembersByActiveWorkspace.queryOptions()
+        )
+        router.refresh()
+      },
+      onSuccess: () => {
+        toastAction("success")
+        setIsOpen(false)
+      },
+    })
+  )
 
   function onChangeRole() {
     startTransition(async () => {
@@ -111,7 +122,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
           >
             Change role
           </DropdownMenuItem>
-          <AlertDialogTrigger asChild disabled={!["OWNER", "ADMIN"].includes(member.role)}>
+          <AlertDialogTrigger asChild>
             <DropdownMenuItem className="text-destructive focus:bg-destructive focus:text-background">
               Delete member from workspace
             </DropdownMenuItem>
@@ -122,11 +133,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Change role</DialogTitle>
-            <DialogDescription>
-              The content filter flags text that may violate our content policy. It&apos;s powered
-              by our moderation endpoint which is free to use to moderate your OpenAI API traffic.
-              Learn more.
-            </DialogDescription>
+            <DialogDescription>Select a new role for this user</DialogDescription>
           </DialogHeader>
           <Select
             onValueChange={(data: WorkspaceRole) => {
@@ -137,7 +144,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
               <SelectValue placeholder="Select a new role for this user" />
             </SelectTrigger>
             <SelectContent>
-              {utils.ROLES_APP.map((role) => {
+              {ROLES_APP.map((role) => {
                 return (
                   <SelectItem key={role} value={role}>
                     {role}
@@ -160,8 +167,9 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
                 e.preventDefault()
                 onChangeRole()
               }}
+              disabled={changeRoleMember.isPending}
             >
-              Save
+              Change role {changeRoleMember.isPending && <LoadingAnimation className="ml-2" />}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -183,7 +191,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
             disabled={isPending}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {!isPending ? "Remove" : <LoadingAnimation />}
+            Remove {isPending && <LoadingAnimation className="ml-2" />}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

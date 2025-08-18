@@ -22,6 +22,7 @@ export const projects = pgTableProject(
     isMain: boolean("is_main").default(false),
     defaultCurrency: currencyEnum("default_currency").notNull(),
     timezone: varchar("timezone", { length: 32 }).notNull(),
+    contactEmail: text("contact_email").default("").notNull(),
   },
   (table) => ({
     mainProject: uniqueIndex("main_project").on(table.isMain).where(eq(table.isMain, true)),

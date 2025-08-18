@@ -1,9 +1,10 @@
 import { eq } from "drizzle-orm"
 import { db } from "./index"
 import * as schema from "./schema"
-import { newId } from "./utils"
+import { hashStringSHA256, newId } from "./utils"
 
 import { migrate } from "drizzle-orm/neon-serverless/migrator"
+import { env } from "../env"
 
 async function main() {
   await migrate(db, { migrationsFolder: "src/migrations" })
@@ -178,6 +179,41 @@ async function main() {
     .update(schema.workspaces)
     .set({ unPriceCustomerId: unpriceOwner.id })
     .where(eq(schema.workspaces.id, workspace.id))
+
+  // create api key for the user
+  if (env.UNPRICE_API_KEY) {
+    // find the api key for the project
+    const apiKey = await db.query.apikeys.findFirst({
+      where: (fields, operators) =>
+        operators.and(
+          operators.eq(fields.projectId, project.id),
+          operators.eq(fields.isRoot, true),
+          operators.eq(fields.name, "unprice"),
+          operators.eq(fields.key, env.UNPRICE_API_KEY!)
+        ),
+    })
+
+    if (!apiKey) {
+      // create the api key
+      const apiKeyHash = await hashStringSHA256(env.UNPRICE_API_KEY)
+
+      const apiKey = await db
+        .insert(schema.apikeys)
+        .values({
+          id: newId("apikey"),
+          name: "unprice",
+          key: env.UNPRICE_API_KEY,
+          hash: apiKeyHash,
+          projectId: project.id,
+          isRoot: true,
+          createdAtM: Date.now(),
+        })
+        .returning()
+        .then((apiKey) => apiKey[0] ?? null)
+
+      if (!apiKey) throw "Error creating api key"
+    }
+  }
 
   // print all relevant data and save it to unfisical
   const end = Date.now()

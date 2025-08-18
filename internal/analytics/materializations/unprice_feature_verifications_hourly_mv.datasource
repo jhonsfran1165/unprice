@@ -1,0 +1,20 @@
+DESCRIPTION >
+    Materialized view that stores hourly aggregated feature verifications metrics
+
+SCHEMA >
+    `date` DateTime,
+    `projectId` String,
+    `region` String,
+    `customerId` String,
+    `featureSlug` LowCardinality(String),
+    `entitlementId` String,
+    `count` AggregateFunction(count, Int32),
+    `p50_latency` AggregateFunction(quantileTDigest(0.50), Float32),
+    `p95_latency` AggregateFunction(quantileTDigest(0.95), Float32),
+    `p99_latency` AggregateFunction(quantileTDigest(0.99), Float32)
+
+ENGINE AggregatingMergeTree
+ENGINE_PARTITION_KEY toYYYYMM(date)
+ENGINE_SORTING_KEY (date, region, projectId, customerId, featureSlug, entitlementId)
+ENGINE_TTL date + INTERVAL 6 MONTH
+

@@ -18,6 +18,7 @@ import {
 import { Input } from "@unprice/ui/input"
 import { Textarea } from "@unprice/ui/text-area"
 
+import { useMutation } from "@tanstack/react-query"
 import { CURRENCIES } from "@unprice/db/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Switch } from "@unprice/ui/switch"
@@ -27,7 +28,7 @@ import TimeZoneFormField from "~/components/forms/timezone-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toast, toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function CustomerForm({
   setDialogOpen,
@@ -36,6 +37,7 @@ export function CustomerForm({
   setDialogOpen?: (open: boolean) => void
   defaultValues: InsertCustomer
 }) {
+  const trpc = useTRPC()
   const router = useRouter()
   const editMode = !!defaultValues.id
 
@@ -50,40 +52,46 @@ export function CustomerForm({
     },
   })
 
-  const createCustomer = api.customers.create.useMutation({
-    onSuccess: ({ customer }) => {
-      form.reset(customer)
-      toastAction("saved")
-      setDialogOpen?.(false)
-      router.refresh()
-    },
-  })
+  const createCustomer = useMutation(
+    trpc.customers.create.mutationOptions({
+      onSuccess: ({ customer }) => {
+        form.reset(customer)
+        toastAction("saved")
+        setDialogOpen?.(false)
+        router.refresh()
+      },
+    })
+  )
 
-  const updateCustomer = api.customers.update.useMutation({
-    onSuccess: ({ customer }) => {
-      form.reset(customer)
-      toastAction("updated")
-      setDialogOpen?.(false)
+  const updateCustomer = useMutation(
+    trpc.customers.update.mutationOptions({
+      onSuccess: ({ customer }) => {
+        form.reset(customer)
+        toastAction("updated")
+        setDialogOpen?.(false)
 
-      // Only needed when the form is inside a uncontrolled dialog - normally updates
-      // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
-      if (!setDialogOpen) {
-        const escKeyEvent = new KeyboardEvent("keydown", {
-          key: "Escape",
-        })
-        document.dispatchEvent(escKeyEvent)
-      }
+        // Only needed when the form is inside a uncontrolled dialog - normally updates
+        // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+        if (!setDialogOpen) {
+          const escKeyEvent = new KeyboardEvent("keydown", {
+            key: "Escape",
+          })
+          document.dispatchEvent(escKeyEvent)
+        }
 
-      router.refresh()
-    },
-  })
+        router.refresh()
+      },
+    })
+  )
 
-  const deleteCustomer = api.customers.remove.useMutation({
-    onSuccess: () => {
-      form.reset()
-      router.refresh()
-    },
-  })
+  const deleteCustomer = useMutation(
+    trpc.customers.remove.mutationOptions({
+      onSuccess: () => {
+        form.reset()
+        router.refresh()
+      },
+    })
+  )
 
   const onSubmitForm = async (data: InsertCustomer) => {
     if (!defaultValues.id) {

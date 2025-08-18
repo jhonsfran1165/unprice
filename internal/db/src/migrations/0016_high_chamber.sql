@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_customer_sessions" ADD COLUMN "metadata" json;

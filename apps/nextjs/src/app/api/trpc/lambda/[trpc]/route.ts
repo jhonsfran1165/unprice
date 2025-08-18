@@ -2,12 +2,13 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
 
 import { auth } from "@unprice/auth/server"
 import { createTRPCContext } from "@unprice/trpc"
-import { lambdaRouter } from "@unprice/trpc/routes"
+import { lambdaRouter } from "@unprice/trpc/router/lambda"
 
 import { CorsOptions, setCorsHeaders } from "~/app/api/_enableCors"
 
 export const preferredRegion = ["fra1"]
 export const runtime = "nodejs"
+export const maxDuration = 30
 
 const handler = auth(async (req) => {
   // when we use the middleware to rewrite the request, the path doesn't include the /api prefix

@@ -1,0 +1,90 @@
+TOKEN "web-apps" READ
+
+TAGS "verifications"
+
+
+NODE day_intervals
+SQL >
+
+    %
+    WITH
+        toStartOfDay(
+            toDateTime64(today() - {{ Int32(intervalDays) }}, 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS start,
+        toStartOfDay(
+            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS end
+    SELECT
+        arrayJoin(
+            arrayMap(
+                x -> toDateTime64(toStartOfDay(toDateTime64(x, 3), {{ String(timezone, 'UTC') }}), 3),
+                range(toUInt32(start), toUInt32(end + 86400),
+                86400
+            )
+        )
+    ) as interval
+
+
+NODE hour_intervals
+SQL >
+    %
+    WITH
+        toStartOfHour(
+            toDateTime64(timestampAdd(today(), INTERVAL - {{ Int32(intervalDays, 1) }} DAY), 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS start,
+        toStartOfHour(
+            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS end
+    SELECT
+        arrayJoin(
+            arrayMap(x -> toDateTime64(x, 3), range(toUInt32(start), toUInt32(end + 3600), 3600)
+        )
+    ) as interval
+
+
+NODE feature_verification_regions_node
+SQL >
+    %
+    SELECT
+        {% if Int32(intervalDays) == 1 %}
+            toStartOfHour(date, {{ String(timezone, 'UTC') }}) as interval,
+        {% else %}
+            toStartOfDay(date, {{ String(timezone, 'UTC') }}) as interval,
+        {% end %}
+        region,
+        countMerge(count) AS count,
+        quantileTDigestMerge(0.50)(p50_latency) AS p50_latency,
+        quantileTDigestMerge(0.95)(p95_latency) AS p95_latency,
+        quantileTDigestMerge(0.99)(p99_latency) AS p99_latency
+    FROM unprice_feature_verifications_hourly_mv
+    WHERE
+        1 = 1
+        AND projectId = {{ String(projectId) }}
+        {% if defined(region) %}
+            AND region = {{ String(region) }}
+        {% end %}
+        {% if defined(intervalDays) %}
+            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
+        {% else %}
+            AND date >= toStartOfDay(today() - 7)
+        {% end %}
+    GROUP BY interval, region
+    ORDER BY interval, region
+
+
+NODE timeserie_feature_verification_regions
+SQL >
+    %
+    SELECT formatDateTime(interval, '%FT%T.000%z') as date, region, count, p50_latency, p95_latency, p99_latency
+    FROM
+        {% if Int32(intervalDays) == 1 %} hour_intervals
+        {% else %} day_intervals
+        {% end %}
+    LEFT JOIN feature_verification_regions_node USING interval
+
+
+TYPE endpoint

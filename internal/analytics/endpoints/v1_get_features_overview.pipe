@@ -1,0 +1,119 @@
+TOKEN "web-apps" READ
+
+TAGS "verifications,usage"
+
+
+NODE day_intervals
+SQL >
+
+    %
+    WITH
+        toStartOfDay(
+            toDateTime64(today() - {{ Int32(intervalDays) }}, 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS start,
+        toStartOfDay(
+            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS end
+    SELECT
+        arrayJoin(
+            arrayMap(
+                x -> toDateTime64(toStartOfDay(toDateTime64(x, 3), {{ String(timezone, 'UTC') }}), 3),
+                range(toUInt32(start), toUInt32(end + 86400),
+                86400
+            )
+        )
+    ) as interval
+
+
+NODE hour_intervals
+SQL >
+    %
+    WITH
+        toStartOfHour(
+            toDateTime64(timestampAdd(today(), INTERVAL - {{ Int32(intervalDays, 1) }} DAY), 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS start,
+        toStartOfHour(
+            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS end
+    SELECT
+        arrayJoin(
+            arrayMap(x -> toDateTime64(x, 3), range(toUInt32(start), toUInt32(end + 3600), 3600)
+        )
+    ) as interval
+
+
+NODE feature_verifications_node
+SQL >
+    %
+    SELECT
+        {% if Int32(intervalDays) == 1 %}
+            toStartOfHour(date, {{ String(timezone, 'UTC') }}) as interval,
+        {% else %}
+            toStartOfDay(date, {{ String(timezone, 'UTC') }}) as interval,
+        {% end %}
+        projectId,
+        countMerge(count) AS count,
+        quantileTDigestMerge(0.99)(p99_latency) AS p99_latency
+    FROM unprice_feature_verifications_hourly_mv
+    WHERE
+        1 = 1
+        {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
+        {% if defined(intervalDays) %}
+            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
+        {% else %}
+            AND date >= toStartOfDay(today() - 7)
+        {% end %}
+    GROUP BY interval, projectId
+
+
+NODE feature_usage_total_node
+SQL >
+    %
+    SELECT
+        {% if Int32(intervalDays) == 1 %}
+            toStartOfHour(date, {{ String(timezone, 'UTC') }}) as interval,
+        {% else %}
+            toStartOfDay(date, {{ String(timezone, 'UTC') }}) as interval,
+        {% end %}
+        projectId,
+        countMerge(count) AS count,
+        sumMerge(sum) AS sum
+    FROM unprice_feature_usage_hourly_mv
+    WHERE
+        1 = 1
+        {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
+        {% if defined(intervalDays) %}
+            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
+        {% else %}
+            AND date >= toStartOfDay(today() - 7)
+        {% end %}
+    GROUP BY interval, projectId
+
+NODE feature_overview_node
+SQL >
+    %
+    SELECT
+        verifications.interval AS interval,
+        verifications.projectId AS project_id,
+        verifications.p99_latency AS latency,
+        verifications.count AS verifications,
+        usage.sum AS usage
+    FROM feature_verifications_node as verifications
+    JOIN feature_usage_total_node as usage ON verifications.interval = usage.interval AND verifications.projectId = usage.projectId
+
+
+NODE timeserie_feature_overview
+SQL >
+    %
+    SELECT formatDateTime(interval, '%FT%T.000%z') as date, latency, verifications, usage
+    FROM
+        {% if Int32(intervalDays) == 1 %} hour_intervals
+        {% else %} day_intervals
+        {% end %}
+    LEFT JOIN feature_overview_node USING interval
+
+TYPE endpoint

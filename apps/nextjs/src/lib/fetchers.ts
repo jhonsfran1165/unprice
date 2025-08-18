@@ -8,6 +8,9 @@ export async function getPageData(domain: string) {
     async () => {
       const page = await db.query.pages.findFirst({
         where: (page, { eq, or }) => or(eq(page.customDomain, domain), eq(page.subdomain, domain)),
+        with: {
+          project: true,
+        },
       })
 
       if (!page?.id) return null

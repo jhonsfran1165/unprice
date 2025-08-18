@@ -1,4 +1,5 @@
 "use client"
+import { useMutation } from "@tanstack/react-query"
 import type {
   InsertPaymentProviderConfig,
   PaymentProvider,
@@ -13,7 +14,7 @@ import { revalidateAppPath } from "~/actions/revalidate"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function StripePaymentConfigForm({
   provider,
@@ -30,7 +31,7 @@ export function StripePaymentConfigForm({
 }) {
   const params = useParams()
   const searchParams = useSearchParams()
-
+  const trpc = useTRPC()
   const workspaceSlug = params.workspaceSlug as string
   let projectSlug = params.projectSlug as string
 
@@ -38,14 +39,16 @@ export function StripePaymentConfigForm({
     projectSlug = searchParams.get("projectSlug") as string
   }
 
-  const saveConfig = api.paymentProvider.saveConfig.useMutation({
-    onSuccess: () => {
-      toastAction("saved")
-      setDialogOpen?.(false)
-      onSuccess?.("")
-      revalidateAppPath(`/${workspaceSlug}/${projectSlug}/settings/payment`, "page")
-    },
-  })
+  const saveConfig = useMutation(
+    trpc.paymentProvider.saveConfig.mutationOptions({
+      onSuccess: () => {
+        toastAction("saved")
+        setDialogOpen?.(false)
+        onSuccess?.("")
+        revalidateAppPath(`/${workspaceSlug}/${projectSlug}/settings/payment`, "page")
+      },
+    })
+  )
 
   const form = useZodForm({
     schema: insertPaymentProviderConfigSchema,

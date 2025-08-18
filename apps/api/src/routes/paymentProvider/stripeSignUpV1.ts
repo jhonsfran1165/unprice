@@ -58,7 +58,8 @@ export const registerStripeSignUpV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { sessionId, projectId } = c.req.valid("param")
     const key = c.req.header("cf-connecting-ip") ?? c.req.header("x-forwarded-for") ?? projectId
-    const { customer, db, subscription } = c.get("services")
+    const { customer, db, subscription, analytics } = c.get("services")
+    const stats = c.get("stats")
 
     // rate limit the request
     const result = await c.env.RL_FREE_600_60s.limit({ key })
@@ -145,13 +146,13 @@ export const registerStripeSignUpV1 = (app: App) =>
           stripeSubscriptionId: stripeSession.subscriptionId ?? "",
           stripeDefaultPaymentMethodId: defaultPaymentMethodId ?? "",
           externalId: customerSession.customer.externalId,
-          // analytics
-          colo: c.get("analytics").colo,
-          country: c.get("analytics").country,
-          city: c.get("analytics").city,
-          isEUCountry: c.get("analytics").isEUCountry,
-          region: c.get("analytics").region,
-          continent: c.get("analytics").continent,
+          // stats
+          colo: stats.colo,
+          country: stats.country,
+          city: stats.city,
+          isEUCountry: stats.isEUCountry,
+          region: stats.region,
+          continent: stats.continent,
         },
       })
       .onConflictDoUpdate({
@@ -168,12 +169,12 @@ export const registerStripeSignUpV1 = (app: App) =>
             stripeDefaultPaymentMethodId: defaultPaymentMethodId ?? "",
             externalId: customerSession.customer.externalId,
             // analytics
-            colo: c.get("analytics").colo,
-            country: c.get("analytics").country,
-            city: c.get("analytics").city,
-            isEUCountry: c.get("analytics").isEUCountry,
-            region: c.get("analytics").region,
-            continent: c.get("analytics").continent,
+            colo: stats.colo,
+            country: stats.country,
+            city: stats.city,
+            isEUCountry: stats.isEUCountry,
+            region: stats.region,
+            continent: stats.continent,
           },
         },
       })
@@ -219,6 +220,23 @@ export const registerStripeSignUpV1 = (app: App) =>
     if (createPhaseErr) {
       throw createPhaseErr
     }
+
+    // ingest the sign up event
+    c.executionCtx.waitUntil(
+      analytics.ingestEvents({
+        action: "signup",
+        version: "1",
+        session_id: customerSession.metadata?.sessionId ?? "",
+        project_id: projectId,
+        timestamp: new Date().toISOString(),
+        payload: {
+          customer_id: customerUnprice.id,
+          plan_version_id: customerSession.planVersion.id,
+          page_id: customerSession.metadata?.pageId ?? "",
+          status: "signup_success",
+        },
+      })
+    )
 
     // in development wrangler do weird things with the url
     if (c.env.NODE_ENV === "development") {

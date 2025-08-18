@@ -15,8 +15,9 @@ import {
 } from "@unprice/ui/dialog"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toastAction } from "~/lib/toast"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 // TODO: could use server actions
 export function TransferProjectToPersonal({
@@ -26,16 +27,18 @@ export function TransferProjectToPersonal({
   projectSlug: string
   isMain: boolean
 }) {
-  const apiUtils = api.useUtils()
+  const trpc = useTRPC()
   const router = useRouter()
-
-  const transferProjectToPersonal = api.projects.transferToPersonal.useMutation({
-    onSuccess: async (data) => {
-      toastAction("success")
-      await apiUtils.projects.listByActiveWorkspace.refetch()
-      router.push(`/${data?.workspaceSlug}`)
-    },
-  })
+  const queryClient = useQueryClient()
+  const transferProjectToPersonal = useMutation(
+    trpc.projects.transferToPersonal.mutationOptions({
+      onSuccess: async (data) => {
+        toastAction("success")
+        await queryClient.invalidateQueries(trpc.projects.listByActiveWorkspace.queryOptions())
+        router.push(`/${data?.workspaceSlug}`)
+      },
+    })
+  )
 
   const title = "Transfer to Personal"
   const description = "Transfer this project to your personal workspace"

@@ -20,11 +20,12 @@ import {
 import { Input } from "@unprice/ui/input"
 import { Textarea } from "@unprice/ui/text-area"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function FeatureForm({
   setDialogOpen,
@@ -34,8 +35,10 @@ export function FeatureForm({
   defaultValues: InsertFeature
 }) {
   const router = useRouter()
-  const apiUtils = api.useUtils()
-  const featureExist = api.features.exist.useMutation()
+  const trpc = useTRPC()
+
+  const queryClient = useQueryClient()
+  const featureExist = useMutation(trpc.features.exist.mutationOptions())
 
   const editMode = !!defaultValues.id
 
@@ -61,43 +64,49 @@ export function FeatureForm({
     defaultValues,
   })
 
-  const createFeature = api.features.create.useMutation({
-    onSuccess: async ({ feature }) => {
-      form.reset(feature)
-      await apiUtils.features.searchBy.invalidate()
-      toastAction("saved")
-      setDialogOpen?.(false)
-      router.refresh()
-    },
-  })
+  const createFeature = useMutation(
+    trpc.features.create.mutationOptions({
+      onSuccess: async ({ feature }) => {
+        form.reset(feature)
+        await queryClient.invalidateQueries(trpc.features.searchBy.queryOptions({}))
+        toastAction("saved")
+        setDialogOpen?.(false)
+        router.refresh()
+      },
+    })
+  )
 
-  const updateFeature = api.features.update.useMutation({
-    onSuccess: async ({ feature }) => {
-      form.reset(feature)
-      await apiUtils.features.searchBy.invalidate()
-      toastAction("updated")
+  const updateFeature = useMutation(
+    trpc.features.update.mutationOptions({
+      onSuccess: async ({ feature }) => {
+        form.reset(feature)
+        await queryClient.invalidateQueries(trpc.features.searchBy.queryOptions({}))
+        toastAction("updated")
 
-      setDialogOpen?.(false)
-      // Only needed when the form is inside a uncontrolled dialog - normally updates
-      // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
-      if (!setDialogOpen) {
-        const escKeyEvent = new KeyboardEvent("keydown", {
-          key: "Escape",
-        })
-        document.dispatchEvent(escKeyEvent)
-      }
+        setDialogOpen?.(false)
+        // Only needed when the form is inside a uncontrolled dialog - normally updates
+        // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+        if (!setDialogOpen) {
+          const escKeyEvent = new KeyboardEvent("keydown", {
+            key: "Escape",
+          })
+          document.dispatchEvent(escKeyEvent)
+        }
 
-      router.refresh()
-    },
-  })
+        router.refresh()
+      },
+    })
+  )
 
-  const deleteFeature = api.features.remove.useMutation({
-    onSuccess: async () => {
-      await apiUtils.features.searchBy.invalidate()
-      toastAction("deleted")
-      form.reset()
-    },
-  })
+  const deleteFeature = useMutation(
+    trpc.features.remove.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(trpc.features.searchBy.queryOptions({}))
+        toastAction("deleted")
+        form.reset()
+      },
+    })
+  )
 
   function onDelete() {
     startTransition(() => {

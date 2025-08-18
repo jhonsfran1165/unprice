@@ -1,5 +1,6 @@
 "use client"
 
+import { useMutation } from "@tanstack/react-query"
 import type { Page } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
@@ -15,7 +16,7 @@ import { ImageIcon, Upload, X } from "lucide-react"
 import type { Control, UseFormGetValues, UseFormSetValue } from "react-hook-form"
 import { getImageSrc, isSvgLogo } from "~/lib/image"
 import { toastAction } from "~/lib/toast"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 interface LogoUploadProps {
   control: Control<Page>
@@ -41,16 +42,19 @@ async function fileToBase64(file: File): Promise<string> {
 }
 
 export function LogoUpload({ control, setValue, getValues }: LogoUploadProps) {
-  const { mutateAsync: uploadLogo } = api.pages.uploadLogo.useMutation({
-    onSuccess: (data) => {
-      setValue("logo", data.page.logo)
-      setValue("logoType", data.page.logoType)
-      toastAction("success", "Logo uploaded successfully")
-    },
-    onError: () => {
-      toastAction("error", "Failed to upload logo")
-    },
-  })
+  const trpc = useTRPC()
+  const { mutateAsync: uploadLogo } = useMutation(
+    trpc.pages.uploadLogo.mutationOptions({
+      onSuccess: (data) => {
+        setValue("logo", data.page.logo)
+        setValue("logoType", data.page.logoType)
+        toastAction("success", "Logo uploaded successfully")
+      },
+      onError: () => {
+        toastAction("error", "Failed to upload logo")
+      },
+    })
+  )
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]

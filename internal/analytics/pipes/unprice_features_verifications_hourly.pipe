@@ -1,0 +1,19 @@
+NODE features_verifications_hourly_mv_node
+SQL >
+    SELECT
+        toStartOfHour(fromUnixTimestamp64Milli(timestamp)) as date,
+        projectId,
+        metadata['colo'] AS region,
+        customerId,
+        featureSlug,
+        entitlementId,
+        countState() AS count,
+        quantileTDigestState(0.50)(latency) AS p50_latency,
+        quantileTDigestState(0.95)(latency) AS p95_latency,
+        quantileTDigestState(0.99)(latency) AS p99_latency
+    FROM unprice_feature_verifications
+    GROUP BY date, region, projectId, customerId, featureSlug, entitlementId
+    ORDER BY date DESC
+
+TYPE MATERIALIZED
+DATASOURCE unprice_feature_verifications_hourly_mv

@@ -1,5 +1,4 @@
 "use client"
-
 import { COOKIES_APP } from "@unprice/config"
 import Cookies from "js-cookie"
 import { useEffect } from "react"

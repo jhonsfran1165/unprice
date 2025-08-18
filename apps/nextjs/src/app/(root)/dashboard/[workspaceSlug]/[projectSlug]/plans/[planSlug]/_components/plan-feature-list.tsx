@@ -4,10 +4,11 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { FileStack, Search } from "lucide-react"
 import { useEffect, useState } from "react"
 
-import type { RouterOutputs } from "@unprice/trpc"
+import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Input } from "@unprice/ui/input"
 import { Separator } from "@unprice/ui/separator"
 
+import { ScrollArea } from "@unprice/ui/scroll-area"
 import { Typography } from "@unprice/ui/typography"
 import { useHydrateAtoms } from "jotai/utils"
 import { useRouter } from "next/navigation"
@@ -95,16 +96,18 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
                 </EmptyPlaceholder.Description>
               </EmptyPlaceholder>
             ) : (
-              <div className="space-y-2">
-                {filteredFeatures.map((feature) => (
-                  <SortableFeature
-                    disabled={activePlanVersion?.status === "published"}
-                    key={feature.featureId}
-                    mode="FeaturePlan"
-                    planFeatureVersion={feature}
-                  />
-                ))}
-              </div>
+              <ScrollArea className="h-[700px] w-full" hideScrollBar={true}>
+                <div className="space-y-2">
+                  {filteredFeatures.map((feature) => (
+                    <SortableFeature
+                      disabled={activePlanVersion?.status === "published"}
+                      key={feature.featureId}
+                      mode="FeaturePlan"
+                      planFeatureVersion={feature}
+                    />
+                  ))}
+                </div>
+              </ScrollArea>
             )}
           </SortableContext>
         </DroppableContainer>

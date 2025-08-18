@@ -16,7 +16,6 @@ export default async function AuthenticationPage({
     sessionId?: string
   }
 }) {
-  // TODO: report to analytics with sessionId
   const session = await getSession()
 
   if (session?.user?.id) {

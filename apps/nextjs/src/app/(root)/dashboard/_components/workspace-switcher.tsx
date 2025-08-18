@@ -1,4 +1,5 @@
 "use client"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { FEATURE_SLUGS } from "@unprice/config"
 import { Avatar, AvatarFallback, AvatarImage } from "@unprice/ui/avatar"
 import { Badge } from "@unprice/ui/badge"
@@ -23,7 +24,7 @@ import { revalidateAppPath } from "~/actions/revalidate"
 import { FilterScroll } from "~/components/filter-scroll"
 import { SuperLink } from "~/components/super-link"
 import { useFlags } from "~/hooks/use-flags"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 
 export function WorkspaceSwitcher({
@@ -31,19 +32,24 @@ export function WorkspaceSwitcher({
 }: {
   workspaceSlug: string
 }) {
+  const trpc = useTRPC()
   const router = useRouter()
   const [switcherOpen, setSwitcherOpen] = useState(false)
 
   const isProEnabled = useFlags(FEATURE_SLUGS.ACCESS_PRO)
 
-  const [data] = api.workspaces.listWorkspacesByActiveUser.useSuspenseQuery(undefined, {
-    staleTime: 1000 * 60 * 60, // 1 hour
-  })
+  const { data: dataWorkspaces } = useSuspenseQuery(
+    trpc.workspaces.listWorkspacesByActiveUser.queryOptions(undefined, {
+      staleTime: 1000 * 60 * 60, // 1 hour
+    })
+  )
 
-  const activeWorkspace = data.workspaces.find((workspace) => workspace.slug === workspaceSlug)
+  const activeWorkspace = dataWorkspaces?.workspaces.find(
+    (workspace) => workspace.slug === workspaceSlug
+  )
 
-  const personalWorkspace = data.workspaces.find((wk) => wk.isPersonal)
-  const teams = data.workspaces.filter((wk) => !wk.isPersonal)
+  const personalWorkspace = dataWorkspaces?.workspaces.find((wk) => wk.isPersonal)
+  const teams = dataWorkspaces?.workspaces.filter((wk) => !wk.isPersonal)
 
   if (!activeWorkspace) {
     return <WorkspaceSwitcherSkeleton />
@@ -132,7 +138,7 @@ export function WorkspaceSwitcher({
                 </CommandGroup>
               )}
 
-              {teams.length !== 0 && (
+              {teams && teams.length > 0 && (
                 <CommandGroup heading="Workspaces">
                   {teams?.map((workspace) => (
                     <CommandItem

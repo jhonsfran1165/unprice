@@ -1,5 +1,6 @@
 "use client"
 
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { Badge } from "@unprice/ui/badge"
 import { Button } from "@unprice/ui/button"
 import {
@@ -17,30 +18,35 @@ import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
 import { revalidateAppPath } from "~/actions/revalidate"
 import { SuperLink } from "~/components/super-link"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export function ProjectSwitcher() {
+  const trpc = useTRPC()
   const router = useRouter()
   const params = useParams()
 
   const projectSlug = params.projectSlug as string
   const workspaceSlug = params.workspaceSlug as string
 
-  const [data] = api.projects.listByActiveWorkspace.useSuspenseQuery(undefined, {
-    staleTime: 1000 * 60 * 60, // 1 hour
-  })
+  const { data: dataProjects } = useSuspenseQuery(
+    trpc.projects.listByActiveWorkspace.queryOptions(undefined, {
+      staleTime: 1000 * 60 * 60, // 1 hour
+    })
+  )
 
-  const [dataWorkspaces] = api.workspaces.listWorkspacesByActiveUser.useSuspenseQuery(undefined, {
-    staleTime: 1000 * 60 * 60, // 1 hour
-  })
+  const { data: dataWorkspaces } = useSuspenseQuery(
+    trpc.workspaces.listWorkspacesByActiveUser.queryOptions(undefined, {
+      staleTime: 1000 * 60 * 60, // 1 hour
+    })
+  )
 
-  const activeWorkspace = dataWorkspaces.workspaces.find(
+  const activeWorkspace = dataWorkspaces?.workspaces.find(
     (workspace) => workspace.slug === workspaceSlug
   )
 
   const [switcherOpen, setSwitcherOpen] = useState(false)
 
-  const activeProject = data.projects.find((p) => p.slug === projectSlug)
+  const activeProject = dataProjects?.projects.find((p) => p.slug === projectSlug)
 
   if (!projectSlug || !activeProject || !activeWorkspace) return null
 
@@ -76,14 +82,14 @@ export function ProjectSwitcher() {
           <CommandList>
             <CommandInput placeholder="Search project..." />
             <CommandGroup heading="All projects">
-              {data.projects.map((project) => (
+              {dataProjects?.projects.map((project) => (
                 <CommandItem
                   key={project.id}
                   value={project.slug}
                   onSelect={() => {
                     setSwitcherOpen(false)
                     revalidateAppPath(`/${project.workspace.slug}/${project.slug}`, "page")
-                    router.push(`/${project.workspace.slug}/${project.slug}`)
+                    router.push(`/${project.workspace.slug}/${project.slug}/dashboard`)
                   }}
                   className={cn(
                     "cursor-pointer font-semibold text-sm",

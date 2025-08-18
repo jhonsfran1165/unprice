@@ -1,5 +1,6 @@
 "use client"
 
+import { useMutation } from "@tanstack/react-query"
 import { Button } from "@unprice/ui/button"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { toast } from "@unprice/ui/sonner"
@@ -7,7 +8,7 @@ import { useParams } from "next/navigation"
 import { startTransition } from "react"
 import { revalidateAppPath } from "~/actions/revalidate"
 import { ConfirmAction } from "~/components/confirm-action"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 
 export const SubscriptionCancelButton = ({
   onConfirmAction,
@@ -18,13 +19,16 @@ export const SubscriptionCancelButton = ({
   subscriptionId: string
   variant?: "destructive" | "secondary"
 }) => {
+  const trpc = useTRPC()
   const workspaceSlug = useParams().workspaceSlug as string
 
-  const cancelSubscription = api.subscriptions.cancel.useMutation({
-    onSuccess: async () => {
-      await revalidateAppPath(`/dashboard/${workspaceSlug}/settings/billing`, "page")
-    },
-  })
+  const cancelSubscription = useMutation(
+    trpc.subscriptions.cancel.mutationOptions({
+      onSuccess: async () => {
+        await revalidateAppPath(`/dashboard/${workspaceSlug}/settings/billing`, "page")
+      },
+    })
+  )
 
   function onCancelSubscription() {
     startTransition(() => {

@@ -1,11 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
-import { ScrollArea } from "@unprice/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { type ReactNode, Suspense } from "react"
-import { Filter } from "./filter"
 
 export async function AnalyticsCard<T extends string>({
   tabs,
@@ -43,8 +41,6 @@ export async function AnalyticsCard<T extends string>({
                 </TabsTrigger>
               ))}
             </TabsList>
-
-            <Filter />
           </div>
 
           {tabs.map(({ id, chart, description }) => (
@@ -54,17 +50,15 @@ export async function AnalyticsCard<T extends string>({
                   {description}
                 </Typography>
               </div>
-              <ScrollArea className="h-[420px]">
-                <Suspense
-                  fallback={
-                    <div className="flex h-[430px] items-center justify-center">
-                      <LoadingAnimation className="size-8" />
-                    </div>
-                  }
-                >
-                  <div className="h-min-[430px]">{chart({ tab: id })}</div>
-                </Suspense>
-              </ScrollArea>
+              <Suspense
+                fallback={
+                  <div className="flex h-[430px] items-center justify-center">
+                    <LoadingAnimation className="size-8" />
+                  </div>
+                }
+              >
+                <div className="h-full">{chart({ tab: id })}</div>
+              </Suspense>
             </TabsContent>
           ))}
         </Tabs>

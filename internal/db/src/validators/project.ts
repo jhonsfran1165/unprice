@@ -14,6 +14,7 @@ export const projectInsertBaseSchema = createInsertSchema(schema.projects, {
   url: z.string().url().optional(),
   defaultCurrency: currencySchema,
   timezone: z.string().min(1, "Timezone is required"),
+  contactEmail: z.string().email().optional(),
 })
   .partial({
     id: true,

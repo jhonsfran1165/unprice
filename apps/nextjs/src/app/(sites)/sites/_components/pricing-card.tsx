@@ -13,12 +13,14 @@ import {
   CardTitle,
 } from "@unprice/ui/card"
 import { cn } from "@unprice/ui/utils"
+import Cookies from "js-cookie"
 
 export interface PricingPlan {
   name: string
   id: string
   flatPrice: string
   isEnterprisePlan: boolean
+  contactEmail: string
   description: string
   features: string[]
   detailedFeatures: Record<
@@ -33,23 +35,16 @@ export interface PricingPlan {
   ctaLink: string
   currency: string
   billingPeriod: string
+  version: string
 }
 
 export interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
   plan: PricingPlan
   isPopular: boolean
-  sessionId: string
   isOnly: boolean
 }
 
-export function PricingCard({
-  plan,
-  isPopular,
-  className,
-  sessionId,
-  isOnly,
-  ...props
-}: PricingCardProps) {
+export function PricingCard({ plan, isPopular, className, isOnly, ...props }: PricingCardProps) {
   const currentPrice = plan.flatPrice
 
   return (
@@ -106,9 +101,24 @@ export function PricingCard({
           variant={isPopular || isOnly ? "primary" : "default"}
           onClick={() => {
             const ctaLink = new URL(plan.ctaLink)
-            ctaLink.searchParams.set("sessionId", sessionId)
-            // TODO: report to analytics with sessionId
-            window.open(ctaLink.toString(), "_blank")
+            const sessionId = Cookies.get("session-id")
+            ctaLink.searchParams.set("sessionId", sessionId ?? "")
+
+            // @ts-ignore
+            window.Unprice.trackEvent("plan_click", {
+              plan_version_id: plan.id,
+            })
+
+            // if enterprise we need email
+            if (plan.isEnterprisePlan) {
+              // open mailto: with the email with subject and body
+              // TODO: change the copy to follow customer journey
+              const subject = `Enterprise Plan Inquiry for ${plan.name}`
+              const body = `I'm interested in the ${plan.name} (enterprise plan). Please contact me.`
+              window.open(`mailto:${plan.contactEmail}?subject=${subject}&body=${body}`, "_blank")
+            } else {
+              window.open(ctaLink.toString(), "_blank")
+            }
           }}
         >
           {plan.cta}

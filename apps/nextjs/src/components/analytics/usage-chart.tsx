@@ -1,5 +1,6 @@
 "use client"
 
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { nFormatter } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import {
@@ -10,30 +11,37 @@ import {
 } from "@unprice/ui/chart"
 import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
+import { CodeApiSheet } from "~/components/code-api-sheet"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import type { RouterOutputs } from "#index"
-import { CodeApiSheet } from "../forms/code-api-sheet"
+import { useIntervalFilter } from "~/hooks/use-filter"
+import { useTRPC } from "~/trpc/client"
 
 const chartConfig = {
   usage: {
     label: "Usage",
+    color: "var(--chart-4)",
   },
 } satisfies ChartConfig
 
-export function UsageChart({
-  usage,
-}: {
-  usage: RouterOutputs["analytics"]["getUsage"]["usage"]
-}) {
-  const chartData = usage.map((v) => ({
+export function UsageChart() {
+  const [intervalFilter] = useIntervalFilter()
+  const trpc = useTRPC()
+  const { data: usage, isLoading } = useSuspenseQuery(
+    trpc.analytics.getUsage.queryOptions({
+      start: intervalFilter.start,
+      end: intervalFilter.end,
+    })
+  )
+
+  const chartData = usage.usage.map((v) => ({
     feature: v.featureSlug,
     usage: v.sum,
   }))
 
-  if (chartData.length === 0) {
+  if (chartData.length === 0 || isLoading) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
-        <EmptyPlaceholder className="min-h-[420px]">
+        <EmptyPlaceholder className="min-h-[420px]" isLoading={isLoading}>
           <EmptyPlaceholder.Icon>
             <BarChart4 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
@@ -43,7 +51,7 @@ export function UsageChart({
           </EmptyPlaceholder.Description>
           <EmptyPlaceholder.Action>
             <CodeApiSheet defaultMethod="reportUsage">
-              <Button size={"sm"}>
+              <Button size={"sm"} disabled={isLoading}>
                 <Code className="mr-2 h-4 w-4" />
                 Start usage
               </Button>
@@ -58,13 +66,17 @@ export function UsageChart({
   const height = Math.min(chartData.length * 60, maxHeight)
 
   return (
-    <ChartContainer config={chartConfig} height={height} className="min-h-[200px] w-full">
+    <ChartContainer
+      config={chartConfig}
+      height={height}
+      className="aspect-auto min-h-[200px] w-full"
+    >
       <BarChart
         accessibilityLayer
         data={chartData}
         layout="vertical"
         margin={{
-          left: 20,
+          left: 40,
           right: 30,
           top: 10,
           bottom: 10,
@@ -77,16 +89,17 @@ export function UsageChart({
           type="category"
           tickLine={false}
           tickMargin={10}
+          width={120}
           axisLine={false}
           tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
         />
         <XAxis dataKey="usage" type="number" hide />
-        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
         <Bar
           dataKey="usage"
           layout="vertical"
           radius={5}
-          fill="hsl(var(--chart-1))"
+          fill="var(--color-usage)"
           maxBarSize={30}
           activeBar={{
             opacity: 0.5,

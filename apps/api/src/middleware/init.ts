@@ -1,3 +1,4 @@
+import { Analytics } from "@unprice/analytics"
 import { createConnection } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
 import { ConsoleLogger } from "@unprice/logging"
@@ -5,7 +6,6 @@ import { CacheService } from "@unprice/services/cache"
 import { CustomerService } from "@unprice/services/customers"
 import { LogdrainMetrics, NoopMetrics } from "@unprice/services/metrics"
 import type { Metrics } from "@unprice/services/metrics"
-import { Analytics } from "@unprice/tinybird"
 import type { MiddlewareHandler } from "hono"
 import { ApiKeysService } from "~/apikey/service"
 import { EntitlementService } from "~/entitlement/service"
@@ -71,10 +71,10 @@ export function init(): MiddlewareHandler<HonoEnv> {
         requestId: c.get("requestId"),
         requestStartedAt: c.get("requestStartedAt"),
         performanceStart: c.get("performanceStart"),
-        location: c.get("analytics").colo,
+        location: c.get("stats").colo,
         workspaceId: c.get("workspaceId"),
         projectId: c.get("projectId"),
-        userAgent: c.get("analytics").ua,
+        userAgent: c.get("stats").ua,
         path: c.req.path,
       },
     })

@@ -1,9 +1,9 @@
+import type { Analytics } from "@unprice/analytics"
 import { eq } from "@unprice/db"
 import { subscriptions } from "@unprice/db/schema"
 import type { Customer, Subscription, SubscriptionStatus } from "@unprice/db/validators"
 import { Err, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import type { Analytics } from "@unprice/tinybird"
 import {
   type AnyActorRef,
   type AnyMachineSnapshot,

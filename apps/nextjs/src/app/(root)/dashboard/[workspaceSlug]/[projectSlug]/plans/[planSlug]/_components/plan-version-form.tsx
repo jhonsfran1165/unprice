@@ -1,8 +1,10 @@
 "use client"
+import { useMutation } from "@tanstack/react-query"
 import type { InsertPlanVersion } from "@unprice/db/validators"
 import { planVersionSelectBaseSchema, versionInsertBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Form, FormDescription, FormLabel } from "@unprice/ui/form"
+import { cn } from "@unprice/ui/utils"
 import { useParams, usePathname, useRouter } from "next/navigation"
 import { startTransition } from "react"
 import { z } from "zod"
@@ -16,7 +18,7 @@ import WhenToBillFormField from "~/components/forms/when-to-bill-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { useTRPC } from "~/trpc/client"
 import { BannerPublishedVersion } from "../[planVersionId]/_components/banner"
 import {
   CurrencyFormField,
@@ -43,13 +45,16 @@ export type PublishedPlanVersion = z.infer<typeof isPublishedSchema>
 export function PlanVersionForm({
   setDialogOpen,
   defaultValues,
+  className,
 }: {
   setDialogOpen?: (open: boolean) => void
   defaultValues: InsertPlanVersion | PublishedPlanVersion
+  className?: string
 }) {
   const pathname = usePathname()
   const router = useRouter()
   const params = useParams()
+  const trpc = useTRPC()
 
   const editMode = !!defaultValues.id
   const isPublished = defaultValues.status === "published"
@@ -59,48 +64,54 @@ export function PlanVersionForm({
     defaultValues: defaultValues,
   })
 
-  const createPlanVersion = api.planVersions.create.useMutation({
-    onSuccess: ({ planVersion }) => {
-      form.reset(planVersion)
-      toastAction("saved")
-      setDialogOpen?.(false)
-      router.refresh()
-      router.push(`${params.planSlug}/${planVersion.id}`)
-    },
-  })
+  const createPlanVersion = useMutation(
+    trpc.planVersions.create.mutationOptions({
+      onSuccess: ({ planVersion }) => {
+        form.reset(planVersion)
+        toastAction("saved")
+        setDialogOpen?.(false)
+        router.refresh()
+        router.push(`${params.planSlug}/${planVersion.id}`)
+      },
+    })
+  )
 
-  const updatePlanVersion = api.planVersions.update.useMutation({
-    onSuccess: ({ planVersion }) => {
-      form.reset(planVersion)
-      toastAction("updated")
-      setDialogOpen?.(false)
+  const updatePlanVersion = useMutation(
+    trpc.planVersions.update.mutationOptions({
+      onSuccess: ({ planVersion }) => {
+        form.reset(planVersion)
+        toastAction("updated")
+        setDialogOpen?.(false)
 
-      // Only needed when the form is inside a uncontrolled dialog - normally updates
-      // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
-      if (!setDialogOpen) {
-        const escKeyEvent = new KeyboardEvent("keydown", {
-          key: "Escape",
-        })
-        document.dispatchEvent(escKeyEvent)
-      }
+        // Only needed when the form is inside a uncontrolled dialog - normally updates
+        // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+        if (!setDialogOpen) {
+          const escKeyEvent = new KeyboardEvent("keydown", {
+            key: "Escape",
+          })
+          document.dispatchEvent(escKeyEvent)
+        }
 
-      router.refresh()
-    },
-  })
+        router.refresh()
+      },
+    })
+  )
 
-  const deletePlanVersion = api.planVersions.remove.useMutation({
-    onSuccess: ({ planVersion }) => {
-      toastAction("deleted")
-      setDialogOpen?.(false)
-      form.reset()
+  const deletePlanVersion = useMutation(
+    trpc.planVersions.remove.mutationOptions({
+      onSuccess: ({ planVersion }) => {
+        toastAction("deleted")
+        setDialogOpen?.(false)
+        form.reset()
 
-      if (pathname.includes(planVersion.id)) {
-        router.push(pathname.replace(planVersion.id, ""))
-      }
+        if (pathname.includes(planVersion.id)) {
+          router.push(pathname.replace(planVersion.id, ""))
+        }
 
-      router.refresh()
-    },
-  })
+        router.refresh()
+      },
+    })
+  )
 
   const onSubmitForm = async (data: InsertPlanVersion | PublishedPlanVersion) => {
     if (!defaultValues.id && !isPublished) {
@@ -128,7 +139,7 @@ export function PlanVersionForm({
 
   return (
     <Form {...form}>
-      <form className="space-y-6">
+      <form className={cn("space-y-6", className)}>
         {editMode && (
           <div className="flex items-center justify-between">
             <div>
