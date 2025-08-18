@@ -1,5 +1,6 @@
 import { env } from "./env"
 
+// TODO: add when I decide what to use instead of baselime
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     const { BaselimeSDK, VercelPlugin, BetterHttpInstrumentation, StripePlugin } = await import(
