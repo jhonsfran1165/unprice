@@ -16,6 +16,7 @@ import { BarChart4 } from "lucide-react"
 import { useMemo } from "react"
 import { useIntervalFilter, usePageFilter } from "~/hooks/use-filter"
 import { useTRPC } from "~/trpc/client"
+import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
 const chartConfig = {
   browser: {
@@ -77,6 +78,7 @@ export function Browsers() {
       },
       {
         enabled: !!pageId.pageId && pageId.pageId !== "",
+        staleTime: ANALYTICS_STALE_TIME,
       }
     )
   )

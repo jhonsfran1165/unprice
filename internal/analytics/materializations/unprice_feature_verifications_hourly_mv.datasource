@@ -17,4 +17,3 @@ ENGINE AggregatingMergeTree
 ENGINE_PARTITION_KEY toYYYYMM(date)
 ENGINE_SORTING_KEY (date, region, projectId, customerId, featureSlug, entitlementId)
 ENGINE_TTL date + INTERVAL 6 MONTH
-
