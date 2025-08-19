@@ -179,9 +179,7 @@ export class Analytics {
         conversion: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 60, // revalidate every minute
-        },
+        cache: "no-store",
       },
     })
   }
@@ -199,6 +197,9 @@ export class Analytics {
         visits: z.number(),
         hits: z.number(),
       }),
+      opts: {
+        cache: "no-store",
+      },
     })
   }
 
@@ -215,6 +216,9 @@ export class Analytics {
         visits: z.number(),
         hits: z.number(),
       }),
+      opts: {
+        cache: "no-store",
+      },
     })
   }
 
@@ -237,6 +241,9 @@ export class Analytics {
         total_visits: z.number(),
         total_hits: z.number(),
       }),
+      opts: {
+        cache: "no-store",
+      },
     })
   }
 
@@ -254,9 +261,7 @@ export class Analytics {
         usage: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 60, // revalidate every minute
-        },
+        cache: "no-store",
       },
     })
   }

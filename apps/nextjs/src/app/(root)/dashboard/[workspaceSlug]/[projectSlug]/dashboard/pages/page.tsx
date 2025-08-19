@@ -41,7 +41,7 @@ export default async function DashboardPages(props: {
       <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
         <TabsDashboard baseUrl={baseUrl} activeTab="pages" />
         <div className="flex items-center gap-2">
-          <IntervalFilter className="ml-auto" />
+          <IntervalFilter className="md:ml-auto" />
           <PageFilter className="ml-auto" />
         </div>
       </div>

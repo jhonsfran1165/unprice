@@ -31,7 +31,7 @@ import { Unprice } from "@unprice/api"
 
 const unprice = new Unprice({
   token: process.env.UNPRICE_TOKEN || "",
-  baseUrl: "http://localhost:8787",
+  baseUrl: process.env.UNPRICE_API_URL || "http://localhost:8787",
 })
 
 async function generateData(customerId: string, date: Date) {
@@ -108,30 +108,33 @@ async function main() {
   const threeDaysAgo = new Date(today.setDate(today.getDate() - 3))
   const fourDaysAgo = new Date(today.setDate(today.getDate() - 4))
   const fiveDaysAgo = new Date(today.setDate(today.getDate() - 5))
+  const customerFree = "cus_1JVRbDotA94V4tVczEVjm"
+  const customerPro = "cus_1MJ7etfqD3jbZTmayncaU"
+  const customerEnterprise = "cus_1MVdMxZ45uJKDo5z48hYJ"
 
   // FREE plan
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", yesterday)
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", twoDaysAgo)
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", threeDaysAgo)
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", fourDaysAgo)
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", fiveDaysAgo)
-  await generateData("cus_1MRwznYezUUEvhTidD9L5", today)
+  await generateData(customerFree, yesterday)
+  await generateData(customerFree, twoDaysAgo)
+  await generateData(customerFree, threeDaysAgo)
+  await generateData(customerFree, fourDaysAgo)
+  await generateData(customerFree, fiveDaysAgo)
+  await generateData(customerFree, today)
 
   // PRO plan
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", yesterday)
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", twoDaysAgo)
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", threeDaysAgo)
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", fourDaysAgo)
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", fiveDaysAgo)
-  await generateData("cus_1MJ7etfqD3jbZTmayncaU", today)
+  await generateData(customerPro, yesterday)
+  await generateData(customerPro, twoDaysAgo)
+  await generateData(customerPro, threeDaysAgo)
+  await generateData(customerPro, fourDaysAgo)
+  await generateData(customerPro, fiveDaysAgo)
+  await generateData(customerPro, today)
 
   // ENTERPRISE plan
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", yesterday)
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", twoDaysAgo)
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", threeDaysAgo)
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", fourDaysAgo)
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", fiveDaysAgo)
-  await generateData("cus_1MVdMxZ45uJKDo5z48hYJ", today)
+  await generateData(customerEnterprise, yesterday)
+  await generateData(customerEnterprise, twoDaysAgo)
+  await generateData(customerEnterprise, threeDaysAgo)
+  await generateData(customerEnterprise, fourDaysAgo)
+  await generateData(customerEnterprise, fiveDaysAgo)
+  await generateData(customerEnterprise, today)
 }
 
 main()
