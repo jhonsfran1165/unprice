@@ -140,7 +140,9 @@ export class Analytics {
         payload: z.string().transform((payload) => schemaPlanClick.parse(JSON.parse(payload))),
       }),
       opts: {
-        cache: "no-store",
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }
@@ -179,7 +181,9 @@ export class Analytics {
         conversion: z.number(),
       }),
       opts: {
-        cache: "no-store",
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }
@@ -198,7 +202,9 @@ export class Analytics {
         hits: z.number(),
       }),
       opts: {
-        cache: "no-store",
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }
@@ -217,7 +223,9 @@ export class Analytics {
         hits: z.number(),
       }),
       opts: {
-        cache: "no-store",
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }
@@ -242,7 +250,9 @@ export class Analytics {
         total_hits: z.number(),
       }),
       opts: {
-        cache: "no-store",
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }
@@ -261,7 +271,9 @@ export class Analytics {
         usage: z.number(),
       }),
       opts: {
-        cache: "no-store",
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }
@@ -274,8 +286,7 @@ export class Analytics {
         customerId: z.string().optional(),
         entitlementId: z.string().optional(),
         featureSlug: z.string().optional(),
-        start: z.number().optional(),
-        end: z.number().optional(),
+        intervalDays: z.number().optional(),
       }),
       data: z.object({
         projectId: z.string(),
@@ -288,7 +299,9 @@ export class Analytics {
         p99_latency: z.number(),
       }),
       opts: {
-        cache: "no-store",
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }
@@ -312,7 +325,9 @@ export class Analytics {
         p99_latency: z.number(),
       }),
       opts: {
-        cache: "no-store",
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }
@@ -325,8 +340,9 @@ export class Analytics {
         customerId: z.string().optional(),
         featureSlug: z.string().optional(),
         entitlementId: z.string().optional(),
-        start: z.number(),
-        end: z.number(),
+        intervalDays: z.number().optional(),
+        start: z.number().optional(),
+        end: z.number().optional(),
       }),
       data: z.object({
         projectId: z.string(),
@@ -339,11 +355,9 @@ export class Analytics {
         last_during_period: z.number(),
       }),
       opts: {
-        cache: "no-store",
-        // cache for 1 day
-        // next: {
-        //   revalidate: 60 * 60 * 24, // 1 day
-        // },
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }
@@ -368,11 +382,9 @@ export class Analytics {
         last_during_period: z.number(),
       }),
       opts: {
-        cache: "no-store",
-        // cache for 1 day
-        // next: {
-        //   revalidate: 60 * 60 * 24, // 1 day
-        // },
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }
@@ -398,7 +410,9 @@ export class Analytics {
         last_during_period: z.number(),
       }),
       opts: {
-        cache: "no-store",
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }
@@ -422,7 +436,9 @@ export class Analytics {
         activity_score: z.number(),
       }),
       opts: {
-        cache: "no-store",
+        next: {
+          revalidate: 10, // every 10 seconds
+        },
       },
     })
   }

@@ -1,6 +1,7 @@
 import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
+import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getFeatureHeatmap = protectedProjectProcedure
   .input(z.custom<Parameters<Analytics["getFeatureHeatmap"]>[0]>())
@@ -12,20 +13,30 @@ export const getFeatureHeatmap = protectedProjectProcedure
   .query(async (opts) => {
     const { intervalDays, start, end } = opts.input
 
-    const data = await opts.ctx.analytics
-      .getFeatureHeatmap({
+    try {
+      const result = await withTimeout(
+        opts.ctx.analytics.getFeatureHeatmap({
+          projectId: opts.ctx.project.id,
+          intervalDays,
+          start,
+          end,
+        }),
+        TIMEOUTS.ANALYTICS,
+        "getFeatureHeatmap analytics request timeout"
+      )
+
+      return { data: result.data }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+
+      opts.ctx.logger.error("getFeatureHeatmap failed", {
+        error: errorMessage,
         projectId: opts.ctx.project.id,
         intervalDays,
-        start,
-        end,
-      })
-      .catch((err) => {
-        opts.ctx.logger.error("Failed to get feature heatmap", {
-          error: err.message,
-        })
-
-        return { data: [] }
+        isTimeout: errorMessage.includes("timeout"),
       })
 
-    return { data: data.data }
+      // Return empty data as fallback
+      return { data: [] }
+    }
   })

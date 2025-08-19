@@ -6,6 +6,7 @@ import { PageFilter } from "~/components/analytics/page-filter"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { intervalParserCache, pageParserCache } from "~/lib/searchParams"
 import { HydrateClient, prefetch, trpc } from "~/trpc/server"
+import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import TabsDashboard from "../_components/tabs-dashboard"
 import { Browsers, BrowsersSkeleton } from "./_components/browsers"
 import { Countries, CountriesSkeleton } from "./_components/countries"
@@ -31,7 +32,7 @@ export default async function DashboardPages(props: {
       },
       {
         enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
-        staleTime: 1000 * 60 * 1, // 1 minute
+        staleTime: ANALYTICS_STALE_TIME,
       }
     )
   )

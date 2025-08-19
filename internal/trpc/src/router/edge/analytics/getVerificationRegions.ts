@@ -1,6 +1,7 @@
 import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
+import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getVerificationRegions = protectedProjectProcedure
   .input(z.custom<Omit<Parameters<Analytics["getFeaturesVerificationRegions"]>[0], "projectId">>())
@@ -14,23 +15,28 @@ export const getVerificationRegions = protectedProjectProcedure
     const projectId = opts.ctx.project.id
     const input = opts.input
 
-    const data = await opts.ctx.analytics
-      .getFeaturesVerificationRegions({
+    try {
+      const result = await withTimeout(
+        opts.ctx.analytics.getFeaturesVerificationRegions({
+          projectId,
+          region: input.region,
+          intervalDays: input.intervalDays,
+        }),
+        TIMEOUTS.ANALYTICS,
+        "getFeaturesVerificationRegions analytics request timeout"
+      )
+
+      return { verifications: result.data }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+
+      opts.ctx.logger.error("getFeaturesVerificationRegions failed", {
+        error: errorMessage,
         projectId,
-        region: input.region,
-        intervalDays: input.intervalDays,
-      })
-      .catch((err) => {
-        opts.ctx.logger.error(`Failed to get verification regions for project ${projectId}`, {
-          error: err.message,
-        })
-
-        return {
-          data: [],
-        }
+        isTimeout: errorMessage.includes("timeout"),
       })
 
-    return {
-      verifications: data.data,
+      // Return empty data as fallback
+      return { verifications: [] }
     }
   })

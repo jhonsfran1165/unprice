@@ -14,15 +14,14 @@ export const INTERVAL_KEYS = Object.keys(DEFAULT_INTERVALS) as Array<keyof typeo
 export const DEFAULT_INTERVAL = "24h"
 
 export function prepareInterval(interval: Interval) {
-  const now = new Date()
+  const now = Date.now()
 
   switch (interval) {
     case "24h": {
-      const end = now.setUTCHours(now.getUTCHours() + 1, 0, 0, 0)
       const intervalMs = 1000 * 60 * 60 * 24
       return {
-        start: end - intervalMs,
-        end,
+        start: now - intervalMs,
+        end: now,
         intervalMs,
         intervalDays: 1,
         granularity: "hour",
@@ -33,12 +32,10 @@ export function prepareInterval(interval: Interval) {
       }
     }
     case "7d": {
-      now.setUTCDate(now.getUTCDate() + 1)
-      const end = now.setUTCHours(0, 0, 0, 0)
       const intervalMs = 1000 * 60 * 60 * 24 * 7
       return {
-        start: end - intervalMs,
-        end,
+        start: now - intervalMs,
+        end: now,
         intervalMs,
         intervalDays: 7,
         granularity: "day",
@@ -48,12 +45,10 @@ export function prepareInterval(interval: Interval) {
       }
     }
     case "30d": {
-      now.setUTCDate(now.getUTCDate() + 1)
-      const end = now.setUTCHours(0, 0, 0, 0)
       const intervalMs = 1000 * 60 * 60 * 24 * 30
       return {
-        start: end - intervalMs,
-        end,
+        start: now - intervalMs,
+        end: now,
         intervalMs,
         intervalDays: 30,
         granularity: "day",
@@ -63,12 +58,10 @@ export function prepareInterval(interval: Interval) {
       }
     }
     case "90d": {
-      now.setUTCDate(now.getUTCDate() + 1)
-      const end = now.setUTCHours(0, 0, 0, 0)
       const intervalMs = 1000 * 60 * 60 * 24 * 90
       return {
-        start: end - intervalMs,
-        end,
+        start: now - intervalMs,
+        end: now,
         intervalMs,
         intervalDays: 90,
         granularity: "day",

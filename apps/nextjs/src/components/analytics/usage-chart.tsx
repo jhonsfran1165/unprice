@@ -28,8 +28,7 @@ export function UsageChart() {
   const trpc = useTRPC()
   const { data: usage, isLoading } = useSuspenseQuery(
     trpc.analytics.getUsage.queryOptions({
-      start: intervalFilter.start,
-      end: intervalFilter.end,
+      intervalDays: intervalFilter.intervalDays,
     })
   )
 
@@ -66,11 +65,7 @@ export function UsageChart() {
   const height = Math.min(chartData.length * 60, maxHeight)
 
   return (
-    <ChartContainer
-      config={chartConfig}
-      height={height}
-      className="aspect-auto min-h-[200px] w-full"
-    >
+    <ChartContainer config={chartConfig} height={height} className="min-h-[200px] w-full">
       <BarChart
         accessibilityLayer
         data={chartData}

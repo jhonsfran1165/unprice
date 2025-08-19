@@ -24,6 +24,10 @@ SQL >
         {% if defined(start) & defined(end) %}
             AND date BETWEEN fromUnixTimestamp64Milli({{ Int64(start) }})
             AND fromUnixTimestamp64Milli({{ Int64(end) }})
+        {% elif defined(intervalDays) %}
+            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
+        {% else %}
+            AND date >= toStartOfDay(today() - 7)
         {% end %}
     {% if defined(customerId) %} GROUP BY projectId, customerId, featureSlug, entitlementId {% else %} {% if defined(entitlementId) %} GROUP BY projectId, featureSlug, entitlementId {% else %} GROUP BY projectId, featureSlug {% end %} {% end %}
 

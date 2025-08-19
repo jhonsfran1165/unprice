@@ -108,7 +108,7 @@ async function main() {
   const threeDaysAgo = new Date(today.setDate(today.getDate() - 3))
   const fourDaysAgo = new Date(today.setDate(today.getDate() - 4))
   const fiveDaysAgo = new Date(today.setDate(today.getDate() - 5))
-  const customerFree = "cus_1JVRbDotA94V4tVczEVjm"
+  const customerFree = "cus_1MeUjVxFbv8DP9X7f1UW9"
   const customerPro = "cus_1MJ7etfqD3jbZTmayncaU"
   const customerEnterprise = "cus_1MVdMxZ45uJKDo5z48hYJ"
 

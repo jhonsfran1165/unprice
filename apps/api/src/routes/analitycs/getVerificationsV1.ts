@@ -82,7 +82,7 @@ export const registerGetAnalyticsVerificationsV1 = (app: App) =>
     // start a new timer
     startTime(c, "getVerifications")
 
-    const { start, end } = prepareInterval(range)
+    const { intervalDays } = prepareInterval(range)
 
     // main workspace can see all verifications
     // TODO: abstract this to analytics service
@@ -123,8 +123,7 @@ export const registerGetAnalyticsVerificationsV1 = (app: App) =>
       .getFeaturesVerifications({
         customerId,
         projectId,
-        start,
-        end,
+        intervalDays,
       })
       .catch((err) => {
         logger.error(

@@ -21,6 +21,7 @@ import { CodeApiSheet } from "~/components/code-api-sheet"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useIntervalFilter } from "~/hooks/use-filter"
 import { useTRPC } from "~/trpc/client"
+import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
 type FeatureUsageEvent = Awaited<ReturnType<Analytics["getFeatureHeatmap"]>>["data"][number]
 
@@ -102,14 +103,17 @@ export const FeatureUsageHeatmapSkeleton = () => {
 
 export function FeatureUsageHeatmapContent() {
   const trpc = useTRPC()
-  const [{ intervalDays, start, end }] = useIntervalFilter()
+  const [{ intervalDays }] = useIntervalFilter()
 
   const { data: featureUsageEvents, isLoading } = useSuspenseQuery(
-    trpc.analytics.getFeatureHeatmap.queryOptions({
-      intervalDays: intervalDays,
-      start: start,
-      end: end,
-    })
+    trpc.analytics.getFeatureHeatmap.queryOptions(
+      {
+        intervalDays: intervalDays,
+      },
+      {
+        staleTime: ANALYTICS_STALE_TIME,
+      }
+    )
   )
 
   // Get unique plans and features

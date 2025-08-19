@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server"
 import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
+import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getBrowserVisits = protectedProjectProcedure
   .input(z.custom<Parameters<Analytics["getBrowserVisits"]>[0]>())
@@ -29,18 +30,28 @@ export const getBrowserVisits = protectedProjectProcedure
       })
     }
 
-    const data = await opts.ctx.analytics
-      .getBrowserVisits({
-        page_id: page.id,
+    try {
+      const result = await withTimeout(
+        opts.ctx.analytics.getBrowserVisits({
+          page_id: page.id,
+          intervalDays,
+        }),
+        TIMEOUTS.ANALYTICS,
+        "getBrowserVisits analytics request timeout"
+      )
+
+      return { data: result.data }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+
+      opts.ctx.logger.error("getBrowserVisits failed", {
+        error: errorMessage,
+        projectId,
         intervalDays,
-      })
-      .catch((err) => {
-        opts.ctx.logger.error("Failed to get browser visits", {
-          error: err.message,
-        })
-
-        return { data: [] }
+        isTimeout: errorMessage.includes("timeout"),
       })
 
-    return { data: data.data }
+      // Return empty data as fallback
+      return { data: [] }
+    }
   })

@@ -16,8 +16,7 @@ export const getVerifications = protectedProjectProcedure
     const data = await opts.ctx.analytics
       .getFeaturesVerifications({
         projectId,
-        start: input.start,
-        end: input.end,
+        intervalDays: input.intervalDays,
       })
       .catch((err) => {
         opts.ctx.logger.error(`Failed to get verifications for project ${projectId}`, {

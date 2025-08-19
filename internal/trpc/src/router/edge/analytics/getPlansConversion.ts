@@ -1,6 +1,7 @@
 import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
+import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getPlansConversion = protectedProjectProcedure
   .input(z.custom<Parameters<Analytics["getPlansConversion"]>[0]>())
@@ -13,18 +14,28 @@ export const getPlansConversion = protectedProjectProcedure
     const { intervalDays } = opts.input
     const projectId = opts.ctx.project.id
 
-    const data = await opts.ctx.analytics
-      .getPlansConversion({
+    try {
+      const result = await withTimeout(
+        opts.ctx.analytics.getPlansConversion({
+          projectId,
+          intervalDays,
+        }),
+        TIMEOUTS.ANALYTICS,
+        "getPlansConversion analytics request timeout"
+      )
+
+      return { data: result.data }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+
+      opts.ctx.logger.error("getPlansConversion failed", {
+        error: errorMessage,
         projectId,
         intervalDays,
-      })
-      .catch((err) => {
-        opts.ctx.logger.error("Failed to get plans conversion", {
-          error: err.message,
-        })
-
-        return { data: [] }
+        isTimeout: errorMessage.includes("timeout"),
       })
 
-    return { data: data.data }
+      // Return empty data as fallback
+      return { data: [] }
+    }
   })

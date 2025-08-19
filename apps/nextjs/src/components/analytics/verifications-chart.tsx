@@ -28,8 +28,7 @@ export function VerificationsChart() {
   const trpc = useTRPC()
   const { data: verifications, isLoading } = useSuspenseQuery(
     trpc.analytics.getVerifications.queryOptions({
-      start: intervalFilter.start,
-      end: intervalFilter.end,
+      intervalDays: intervalFilter.intervalDays,
     })
   )
 

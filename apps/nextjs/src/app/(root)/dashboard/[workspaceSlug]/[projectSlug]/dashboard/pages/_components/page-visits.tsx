@@ -19,6 +19,7 @@ import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { SuperLink } from "~/components/super-link"
 import { useIntervalFilter, usePageFilter } from "~/hooks/use-filter"
 import { useTRPC } from "~/trpc/client"
+import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
 const chartConfig = {
   desktop_visits: {
@@ -112,7 +113,7 @@ export function PageVisits() {
       },
       {
         enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
-        staleTime: 1000 * 60 * 1, // 1 minute
+        staleTime: ANALYTICS_STALE_TIME,
       }
     )
   )

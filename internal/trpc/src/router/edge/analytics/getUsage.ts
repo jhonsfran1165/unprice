@@ -1,6 +1,7 @@
 import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
+import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getUsage = protectedProjectProcedure
   .input(z.custom<Parameters<Analytics["getFeaturesUsagePeriod"]>[0]>())
@@ -11,24 +12,29 @@ export const getUsage = protectedProjectProcedure
   )
   .query(async (opts) => {
     const projectId = opts.ctx.project.id
-    const input = opts.input
+    const { intervalDays } = opts.input
 
-    const data = await opts.ctx.analytics
-      .getFeaturesUsagePeriod({
+    try {
+      const result = await withTimeout(
+        opts.ctx.analytics.getFeaturesUsagePeriod({
+          projectId,
+          intervalDays,
+        }),
+        TIMEOUTS.ANALYTICS,
+        "getFeaturesUsagePeriod analytics request timeout"
+      )
+
+      return { usage: result.data }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+
+      opts.ctx.logger.error("getFeaturesUsagePeriod failed", {
+        error: errorMessage,
         projectId,
-        start: input.start,
-        end: input.end,
-      })
-      .catch((err) => {
-        opts.ctx.logger.error(`Failed to get usage for project ${projectId}`, {
-          error: err.message,
-        })
-        return {
-          data: [],
-        }
+        isTimeout: errorMessage.includes("timeout"),
       })
 
-    return {
-      usage: data.data,
+      // Return empty data as fallback
+      return { usage: [] }
     }
   })

@@ -9,6 +9,7 @@ import { VerificationsChart } from "~/components/analytics/verifications-chart"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { intervalParserCache } from "~/lib/searchParams"
 import { HydrateClient, prefetch, trpc } from "~/trpc/server"
+import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import { LatencyTable, LatencyTableSkeleton } from "./_components/latency-table"
 import OverviewStats from "./_components/overview-stats"
 import TabsDashboard from "./_components/tabs-dashboard"
@@ -30,7 +31,7 @@ export default async function DashboardOverview(props: {
           interval: filter.intervalFilter,
         },
         {
-          staleTime: 1000 * 60, // update every minute
+          staleTime: ANALYTICS_STALE_TIME,
         }
       )
     ),
@@ -38,11 +39,10 @@ export default async function DashboardOverview(props: {
     prefetch(
       trpc.analytics.getVerifications.queryOptions(
         {
-          start: interval.start,
-          end: interval.end,
+          intervalDays: interval.intervalDays,
         },
         {
-          staleTime: 1000 * 60, // update every minute
+          staleTime: ANALYTICS_STALE_TIME,
         }
       )
     ),
@@ -50,11 +50,10 @@ export default async function DashboardOverview(props: {
     prefetch(
       trpc.analytics.getUsage.queryOptions(
         {
-          start: interval.start,
-          end: interval.end,
+          intervalDays: interval.intervalDays,
         },
         {
-          staleTime: 1000 * 60, // update every minute
+          staleTime: ANALYTICS_STALE_TIME,
         }
       )
     ),
@@ -65,7 +64,7 @@ export default async function DashboardOverview(props: {
           intervalDays: interval.intervalDays,
         },
         {
-          staleTime: 1000 * 60, // update every minute
+          staleTime: ANALYTICS_STALE_TIME,
         }
       )
     ),

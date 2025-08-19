@@ -7,6 +7,7 @@ import { StatsSkeleton } from "~/components/analytics/stats-cards"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { intervalParserCache } from "~/lib/searchParams"
 import { HydrateClient, prefetch, trpc } from "~/trpc/server"
+import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import TabsDashboard from "../_components/tabs-dashboard"
 import { PlansConversion, PlansConversionSkeleton } from "./_components/plans-convertion"
 import PlansStats from "./_components/plans-stats"
@@ -26,7 +27,7 @@ export default async function DashboardPlans(props: {
       trpc.analytics.getPlansStats.queryOptions(
         { interval: filter.intervalFilter },
         {
-          staleTime: 1000 * 60, // update every minute
+          staleTime: ANALYTICS_STALE_TIME,
         }
       )
     ),
@@ -36,7 +37,7 @@ export default async function DashboardPlans(props: {
           intervalDays: interval.intervalDays,
         },
         {
-          staleTime: 1000 * 60, // update every minute
+          staleTime: ANALYTICS_STALE_TIME,
         }
       )
     ),

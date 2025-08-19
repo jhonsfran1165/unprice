@@ -5,6 +5,7 @@ import { IntervalFilter } from "~/components/analytics/interval-filter"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { intervalParserCache } from "~/lib/searchParams"
 import { HydrateClient, prefetch, trpc } from "~/trpc/server"
+import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import TabsDashboard from "../_components/tabs-dashboard"
 import FeatureUsageHeatmap, {
   FeatureUsageHeatmapContent,
@@ -27,11 +28,9 @@ export default async function DashboardFeatures(props: {
       trpc.analytics.getFeatureHeatmap.queryOptions(
         {
           intervalDays: interval.intervalDays,
-          start: interval.start,
-          end: interval.end,
         },
         {
-          staleTime: 1000 * 60, // update every minute
+          staleTime: ANALYTICS_STALE_TIME,
         }
       )
     ),
@@ -41,7 +40,7 @@ export default async function DashboardFeatures(props: {
           intervalDays: interval.intervalDays,
         },
         {
-          staleTime: 1000 * 60, // update every minute
+          staleTime: ANALYTICS_STALE_TIME,
         }
       )
     ),

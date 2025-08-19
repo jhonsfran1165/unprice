@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server"
 import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
+import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getPagesOverview = protectedProjectProcedure
   .input(z.custom<Parameters<Analytics["getPagesOverview"]>[0]>())
@@ -29,18 +30,28 @@ export const getPagesOverview = protectedProjectProcedure
       })
     }
 
-    const data = await opts.ctx.analytics
-      .getPagesOverview({
+    try {
+      const result = await withTimeout(
+        opts.ctx.analytics.getPagesOverview({
+          intervalDays,
+          pageId,
+        }),
+        TIMEOUTS.ANALYTICS,
+        "getPagesOverview analytics request timeout"
+      )
+
+      return { data: result.data }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+
+      opts.ctx.logger.error("getPagesOverview failed", {
+        error: errorMessage,
+        projectId,
         intervalDays,
-        pageId,
-      })
-      .catch((err) => {
-        opts.ctx.logger.error("Failed to get pages overview", {
-          error: err.message,
-        })
-
-        return { data: [] }
+        isTimeout: errorMessage.includes("timeout"),
       })
 
-    return { data: data.data }
+      // Return empty data as fallback
+      return { data: [] }
+    }
   })

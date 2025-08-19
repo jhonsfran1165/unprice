@@ -7,6 +7,7 @@ import {
 } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
+import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getLatestEvents = protectedProjectProcedure
   .input(z.custom<Parameters<Analytics["getLatestEvents"]>[0]>())
@@ -28,63 +29,72 @@ export const getLatestEvents = protectedProjectProcedure
     const { action, interval_days } = opts.input
     const projectId = opts.ctx.project.id
 
-    const data = await opts.ctx.analytics
-      .getLatestEvents({
-        action,
-        interval_days,
-        project_id: projectId,
+    try {
+      const data = await withTimeout(
+        opts.ctx.analytics.getLatestEvents({
+          action,
+          interval_days,
+          project_id: projectId,
+        }),
+        TIMEOUTS.ANALYTICS,
+        "getLatestEvents analytics request timeout"
+      )
+
+      const result = data.data.map((event) => {
+        switch (event.action) {
+          case "plan_click": {
+            const payload = schemaPlanClick.parse(JSON.parse(event.payload))
+            return {
+              action: event.action as AnalyticsEventAction,
+              timestamp: event.timestamp,
+              session_id: event.session_id,
+              name: "Plan clicked",
+              description: `${payload.page_id}`,
+            }
+          }
+          case "page_hit": {
+            const payload = schemaPageHit.parse(JSON.parse(event.payload))
+            return {
+              action: event.action as AnalyticsEventAction,
+              timestamp: event.timestamp,
+              session_id: event.session_id,
+              name: "Page hit",
+              description: `${payload.pathname}`,
+            }
+          }
+          case "signup": {
+            const payload = schemaSignUp.parse(JSON.parse(event.payload))
+            return {
+              action: event.action as AnalyticsEventAction,
+              timestamp: event.timestamp,
+              session_id: event.session_id,
+              name: "Signup",
+              description: `${payload.customer_id}`,
+            }
+          }
+          default: {
+            return {
+              action: event.action as AnalyticsEventAction,
+              timestamp: event.timestamp,
+              session_id: event.session_id,
+              name: "Unknown event",
+              description: `Unknown event ${event.action}`,
+            }
+          }
+        }
       })
-      .catch((err) => {
-        opts.ctx.logger.error("Failed to get latest events", {
-          error: err.message,
-        })
 
-        return { data: [] }
+      return { data: result, projectId }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+
+      opts.ctx.logger.error("getLatestEvents failed", {
+        error: errorMessage,
+        projectId,
+        isTimeout: errorMessage.includes("timeout"),
       })
 
-    const result = data.data.map((event) => {
-      switch (event.action) {
-        case "plan_click": {
-          const payload = schemaPlanClick.parse(JSON.parse(event.payload))
-          return {
-            action: event.action as AnalyticsEventAction,
-            timestamp: event.timestamp,
-            session_id: event.session_id,
-            name: "Plan clicked",
-            description: `${payload.page_id}`,
-          }
-        }
-        case "page_hit": {
-          const payload = schemaPageHit.parse(JSON.parse(event.payload))
-          return {
-            action: event.action as AnalyticsEventAction,
-            timestamp: event.timestamp,
-            session_id: event.session_id,
-            name: "Page hit",
-            description: `${payload.pathname}`,
-          }
-        }
-        case "signup": {
-          const payload = schemaSignUp.parse(JSON.parse(event.payload))
-          return {
-            action: event.action as AnalyticsEventAction,
-            timestamp: event.timestamp,
-            session_id: event.session_id,
-            name: "Signup",
-            description: `${payload.customer_id}`,
-          }
-        }
-        default: {
-          return {
-            action: event.action as AnalyticsEventAction,
-            timestamp: event.timestamp,
-            session_id: event.session_id,
-            name: "Unknown event",
-            description: `Unknown event ${event.action}`,
-          }
-        }
-      }
-    })
-
-    return { data: result, projectId }
+      // Return empty data as fallback
+      return { data: [], projectId }
+    }
   })
