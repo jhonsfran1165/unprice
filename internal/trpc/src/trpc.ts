@@ -11,7 +11,7 @@ import { COOKIES_APP } from "@unprice/config"
 import type { Database, TransactionDatabase } from "@unprice/db"
 import { db } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
-import { BaseLimeLogger, ConsoleLogger, type Logger } from "@unprice/logging"
+import { AxiomLogger, ConsoleLogger, type Logger } from "@unprice/logging"
 import type { CacheNamespaces } from "@unprice/services/cache"
 import { CacheService } from "@unprice/services/cache"
 import { LogdrainMetrics, type Metrics, NoopMetrics } from "@unprice/services/metrics"
@@ -101,17 +101,11 @@ export const createTRPCContext = async (opts: {
 
   // TODO: add when I decide what to use instead of baselime
   const logger = env.EMIT_METRICS_LOGS
-    ? new BaseLimeLogger({
-        apiKey: env.BASELIME_APIKEY,
+    ? new AxiomLogger({
+        apiKey: env.AXIOM_API_TOKEN,
         requestId,
         defaultFields: { userId, region, country, source, ip, pathname, userAgent },
-        namespace: "unprice-trpc",
-        dataset: "unprice-trpc",
-        service: "trpc", // default service name
-        flushAfterMs: 3000, // flush after 3 secs
-        ctx: {
-          waitUntil, // flush will be executed as a background task
-        },
+        dataset: env.AXIOM_DATASET,
         environment: env.NODE_ENV,
         application: "trpc",
       })

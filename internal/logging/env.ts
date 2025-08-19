@@ -7,7 +7,8 @@ export const env = createEnv({
     VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
   },
   server: {
-    BASELIME_APIKEY: z.string().min(1),
+    AXIOM_API_TOKEN: z.string(),
+    AXIOM_DATASET: z.string(),
     // transform the string to a boolean
     EMIT_METRICS_LOGS: z
       .string()
