@@ -1,6 +1,7 @@
 import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
+import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getVerifications = protectedProjectProcedure
   .input(z.custom<Parameters<Analytics["getFeaturesVerifications"]>[0]>())
@@ -13,22 +14,28 @@ export const getVerifications = protectedProjectProcedure
     const projectId = opts.ctx.project.id
     const input = opts.input
 
-    const data = await opts.ctx.analytics
-      .getFeaturesVerifications({
+    try {
+      const result = await withTimeout(
+        opts.ctx.analytics.getFeaturesVerifications({
+          projectId,
+          intervalDays: input.intervalDays,
+        }),
+        TIMEOUTS.ANALYTICS,
+        "getFeaturesVerifications analytics request timeout"
+      )
+
+      return { verifications: result.data }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+
+      opts.ctx.logger.error("getFeaturesVerifications failed", {
+        error: errorMessage,
         projectId,
         intervalDays: input.intervalDays,
-      })
-      .catch((err) => {
-        opts.ctx.logger.error(`Failed to get verifications for project ${projectId}`, {
-          error: err.message,
-        })
-
-        return {
-          data: [],
-        }
+        isTimeout: errorMessage.includes("timeout"),
       })
 
-    return {
-      verifications: data.data,
+      // Return empty data as fallback
+      return { verifications: [] }
     }
   })
