@@ -15,8 +15,8 @@ export default eventHandler((event) =>
     providers: [
       Credentials({
         credentials: {
-          password: { label: "Password", type: "password" },
           email: { label: "Email", type: "email" },
+          password: { label: "Password", type: "password" },
         },
       }),
       Github({
