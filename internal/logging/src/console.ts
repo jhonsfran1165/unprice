@@ -38,22 +38,22 @@ export class ConsoleLogger implements Logger {
   }
 
   public debug(message: string, fields?: Fields): void {
-    console.debug(this.marshal("debug", message, fields))
+    console.debug("\x1b[32m%s\x1b[0m", "debug", "-", this.marshal("debug", message, fields))
   }
   public emit(message: string, fields?: Fields): void {
     console.info(this.marshal("debug", message, fields))
   }
   public info(message: string, fields?: Fields): void {
-    console.info(this.marshal("info", message, fields))
+    console.info("\x1b[36m%s\x1b[0m", "info", "-", this.marshal("info", message, fields))
   }
   public warn(message: string, fields?: Fields): void {
-    console.warn(this.marshal("warn", message, fields))
+    console.warn("\x1b[33m%s\x1b[0m", "warn", "-", this.marshal("warn", message, fields))
   }
   public error(message: string, fields?: Fields): void {
-    console.error(this.marshal("error", message, fields))
+    console.error("\x1b[31m%s\x1b[0m", "error", "-", this.marshal("error", message, fields))
   }
   public fatal(message: string, fields?: Fields): void {
-    console.error(this.marshal("fatal", message, fields))
+    console.error("\x1b[31m%s\x1b[0m", "fatal", "-", this.marshal("fatal", message, fields))
   }
 
   public async flush(): Promise<void> {

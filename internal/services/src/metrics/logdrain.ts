@@ -33,7 +33,7 @@ export class LogdrainMetrics implements Metrics {
 
     this.logger.emit(log.toString(), {
       ...metric,
-      $baselime: {
+      $axiom: {
         metricName: metric.metric,
       },
     })
