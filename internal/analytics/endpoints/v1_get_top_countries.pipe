@@ -15,6 +15,9 @@ SQL >
     from unprice_analytics_pages_mv
     where
         1 = 1
+        {% if defined(project_id) %}
+            AND project_id = {{ String(project_id, description="Project ID", required=False) }}
+        {% end %}
         {% if defined(page_id) %}
             AND page_id = {{ String(page_id, description="Page ID", required=False) }}
         {% end %}

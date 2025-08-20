@@ -35,6 +35,7 @@ export const getBrowserVisits = protectedProjectProcedure
         opts.ctx.analytics.getBrowserVisits({
           page_id: page.id,
           intervalDays,
+          project_id: projectId,
         }),
         TIMEOUTS.ANALYTICS,
         "getBrowserVisits analytics request timeout"

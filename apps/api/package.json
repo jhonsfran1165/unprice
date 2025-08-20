@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "@auth/core": "^0.34.1",
-    "@chronark/zod-bird": "^0.3.10",
     "@hono/zod-openapi": "^0.19.2",
     "@scalar/hono-api-reference": "^0.7.2",
     "@t3-oss/env-core": "^0.12.0",

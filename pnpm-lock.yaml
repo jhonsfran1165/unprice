@@ -50,9 +50,6 @@ importers:
       '@auth/core':
         specifier: ^0.34.1
         version: 0.34.2
-      '@chronark/zod-bird':
-        specifier: ^0.3.10
-        version: 0.3.10
       '@hono/zod-openapi':
         specifier: ^0.19.2
         version: 0.19.10(hono@4.9.2)(zod@3.25.76)
@@ -392,9 +389,9 @@ importers:
 
   internal/analytics:
     dependencies:
-      '@chronark/zod-bird':
-        specifier: ^0.3.10
-        version: 0.3.10
+      '@jhonsfran/zod-bird':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@t3-oss/env-core':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.9.2)(zod@3.25.76)
@@ -2164,12 +2161,6 @@ packages:
       fs-extra: 7.0.1
       human-id: 4.1.1
       prettier: 2.8.8
-    dev: false
-
-  /@chronark/zod-bird@0.3.10:
-    resolution: {integrity: sha512-QkGvy8Lz+NTGPOfBH2lIEAxiaizp9vrEufxsi1wYz8WM0/ADqs4hUqO1zRjt7ntoZdKiXCcnpZtzUMdOjfo5AQ==}
-    dependencies:
-      zod: 3.25.76
     dev: false
 
   /@clack/core@0.4.2:
@@ -4606,6 +4597,12 @@ packages:
     dependencies:
       minipass: 7.1.2
     dev: true
+
+  /@jhonsfran/zod-bird@1.0.1:
+    resolution: {integrity: sha512-Xs8FrKmpdtbYlZMUD0PQyskHuTfMoM2LZiOp8SMBx0hQUSmjDB1e+oERxf+8JUpel6cswJUjHn3BZruyRN3KEw==}
+    dependencies:
+      zod: 3.25.76
+    dev: false
 
   /@jridgewell/gen-mapping@0.3.13:
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}

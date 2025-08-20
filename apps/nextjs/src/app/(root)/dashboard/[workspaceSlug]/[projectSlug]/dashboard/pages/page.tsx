@@ -23,46 +23,47 @@ export default async function DashboardPages(props: {
 
   const interval = prepareInterval(intervalFilter.intervalFilter)
 
-  // prefetch the page visits
-  prefetch(
-    trpc.analytics.getPagesOverview.queryOptions(
-      {
-        intervalDays: interval.intervalDays,
-        pageId: pageFilter.pageId,
-      },
-      {
-        enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
-        staleTime: ANALYTICS_STALE_TIME,
-      }
-    )
-  )
-  // prefetch the countries
-  prefetch(
-    trpc.analytics.getCountryVisits.queryOptions(
-      {
-        intervalDays: interval.intervalDays,
-        page_id: pageFilter.pageId,
-      },
-      {
-        enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
-        staleTime: ANALYTICS_STALE_TIME,
-      }
-    )
-  )
-
-  // prefetch the browsers
-  prefetch(
-    trpc.analytics.getBrowserVisits.queryOptions(
-      {
-        intervalDays: interval.intervalDays,
-        page_id: pageFilter.pageId,
-      },
-      {
-        enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
-        staleTime: ANALYTICS_STALE_TIME,
-      }
-    )
-  )
+  void Promise.all([
+    // prefetch the page visits
+    prefetch(
+      trpc.analytics.getPagesOverview.queryOptions(
+        {
+          intervalDays: interval.intervalDays,
+          pageId: pageFilter.pageId,
+        },
+        {
+          enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
+          staleTime: ANALYTICS_STALE_TIME,
+        }
+      )
+    ),
+    // prefetch the countries
+    prefetch(
+      trpc.analytics.getCountryVisits.queryOptions(
+        {
+          intervalDays: interval.intervalDays,
+          page_id: pageFilter.pageId,
+        },
+        {
+          enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
+          staleTime: ANALYTICS_STALE_TIME,
+        }
+      )
+    ),
+    // prefetch the browsers
+    prefetch(
+      trpc.analytics.getBrowserVisits.queryOptions(
+        {
+          intervalDays: interval.intervalDays,
+          page_id: pageFilter.pageId,
+        },
+        {
+          enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
+          staleTime: ANALYTICS_STALE_TIME,
+        }
+      )
+    ),
+  ])
 
   return (
     <DashboardShell>

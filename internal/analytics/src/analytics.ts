@@ -1,4 +1,4 @@
-import { NoopTinybird, Tinybird } from "@chronark/zod-bird"
+import { NoopTinybird, Tinybird } from "@jhonsfran/zod-bird"
 import { z } from "zod"
 import {
   type AnalyticsEventAction,
@@ -194,6 +194,7 @@ export class Analytics {
       parameters: z.object({
         intervalDays: z.number().optional(),
         page_id: z.string().optional(),
+        project_id: z.string().optional(),
       }),
       data: z.object({
         page_id: z.string(),
@@ -205,6 +206,8 @@ export class Analytics {
         next: {
           revalidate: 10, // every 10 seconds
         },
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
@@ -215,6 +218,7 @@ export class Analytics {
       parameters: z.object({
         intervalDays: z.number().optional(),
         page_id: z.string().optional(),
+        project_id: z.string().optional(),
       }),
       data: z.object({
         page_id: z.string(),
@@ -226,6 +230,8 @@ export class Analytics {
         next: {
           revalidate: 10, // every 10 seconds
         },
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
@@ -253,6 +259,8 @@ export class Analytics {
         next: {
           revalidate: 10, // every 10 seconds
         },
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
@@ -274,6 +282,8 @@ export class Analytics {
         next: {
           revalidate: 10, // every 10 seconds
         },
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
@@ -302,6 +312,8 @@ export class Analytics {
         next: {
           revalidate: 10, // every 10 seconds
         },
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
@@ -328,6 +340,8 @@ export class Analytics {
         next: {
           revalidate: 10, // every 10 seconds
         },
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
@@ -358,6 +372,8 @@ export class Analytics {
         next: {
           revalidate: 10, // every 10 seconds
         },
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
@@ -385,6 +401,8 @@ export class Analytics {
         next: {
           revalidate: 10, // every 10 seconds
         },
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
@@ -413,6 +431,8 @@ export class Analytics {
         next: {
           revalidate: 10, // every 10 seconds
         },
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
@@ -439,6 +459,8 @@ export class Analytics {
         next: {
           revalidate: 10, // every 10 seconds
         },
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
