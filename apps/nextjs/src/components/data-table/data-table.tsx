@@ -171,7 +171,7 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
+                <TableCell colSpan={table.getAllColumns().length} className="h-24 p-4 text-center">
                   <EmptyPlaceholder className="min-h-[300px]">
                     <EmptyPlaceholder.Icon>
                       <AlertTriangle className="h-8 w-8" />

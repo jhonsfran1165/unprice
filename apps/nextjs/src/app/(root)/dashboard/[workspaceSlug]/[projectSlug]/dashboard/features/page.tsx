@@ -13,6 +13,10 @@ import FeatureUsageHeatmap, {
 } from "./_components/features-heat-map"
 import { FeaturesStats, FeaturesStatsSkeleton } from "./_components/features-stats"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+export const maxDuration = 10
+
 export default async function DashboardFeatures(props: {
   params: { workspaceSlug: string; projectSlug: string }
   searchParams: SearchParams

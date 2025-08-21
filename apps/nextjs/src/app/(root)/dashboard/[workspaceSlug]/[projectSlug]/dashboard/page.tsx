@@ -14,6 +14,10 @@ import { LatencyTable, LatencyTableSkeleton } from "./_components/latency-table"
 import OverviewStats from "./_components/overview-stats"
 import TabsDashboard from "./_components/tabs-dashboard"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+export const maxDuration = 10
+
 export default async function DashboardOverview(props: {
   params: { workspaceSlug: string; projectSlug: string }
   searchParams: SearchParams

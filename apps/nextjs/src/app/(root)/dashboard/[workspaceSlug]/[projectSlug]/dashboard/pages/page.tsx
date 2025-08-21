@@ -12,6 +12,10 @@ import { Browsers, BrowsersSkeleton } from "./_components/browsers"
 import { Countries, CountriesSkeleton } from "./_components/countries"
 import { PageVisits, PageVisitsSkeleton } from "./_components/page-visits"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+export const maxDuration = 10
+
 export default async function DashboardPages(props: {
   params: { workspaceSlug: string; projectSlug: string }
   searchParams: SearchParams
