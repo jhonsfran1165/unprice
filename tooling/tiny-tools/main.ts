@@ -103,11 +103,11 @@ async function generateData(customerId: string, date: Date) {
 async function main() {
   const today = new Date()
 
-  const yesterday = new Date(today.setDate(today.getDate() - 1))
-  const twoDaysAgo = new Date(today.setDate(today.getDate() - 2))
-  const threeDaysAgo = new Date(today.setDate(today.getDate() - 3))
-  const fourDaysAgo = new Date(today.setDate(today.getDate() - 4))
-  const fiveDaysAgo = new Date(today.setDate(today.getDate() - 5))
+  const yesterday = new Date(today.setDate(today.getDate() - 3))
+  const twoDaysAgo = new Date(today.setDate(today.getDate() - 4))
+  const threeDaysAgo = new Date(today.setDate(today.getDate() - 5))
+  const fourDaysAgo = new Date(today.setDate(today.getDate() - 6))
+  const fiveDaysAgo = new Date(today.setDate(today.getDate() - 7))
   const customerFree = "cus_1MeUjVxFbv8DP9X7f1UW9"
   const customerPro = "cus_1MJ7etfqD3jbZTmayncaU"
   const customerEnterprise = "cus_1MVdMxZ45uJKDo5z48hYJ"

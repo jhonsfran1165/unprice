@@ -625,7 +625,7 @@ export class DurableObjectUsagelimiter extends Server {
 
   async sendVerificationsToTinybird() {
     // Process events in batches to avoid memory issues
-    const BATCH_SIZE = 1000
+    const BATCH_SIZE = 700 // Max 999 for SQLite, but keep a buffer
     let processedCount = 0
     let lastProcessedId = 0
 
@@ -728,7 +728,7 @@ export class DurableObjectUsagelimiter extends Server {
 
   async sendUsageToTinybird() {
     // Process events in batches to avoid memory issues
-    const BATCH_SIZE = 1000
+    const BATCH_SIZE = 700 // Max 999 for SQLite, but keep a buffer
     let processedCount = 0
     let lastProcessedId = 0
 
