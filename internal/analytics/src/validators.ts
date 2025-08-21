@@ -1,4 +1,5 @@
 import * as z from "zod"
+import type { Analytics } from "./analytics"
 
 export type MaybeArray<T> = T | T[]
 
@@ -293,4 +294,28 @@ export const planConversionResponseSchema = z.object({
   overall_conversion_rate: z.number(),
 })
 
+export const statsSchema = z.record(
+  z.string(),
+  z.object({
+    total: z.number(),
+    title: z.string(),
+    description: z.string(),
+    unit: z.string().optional(),
+  })
+)
+
 export type PlanConversionResponse = z.infer<typeof planConversionResponseSchema>
+
+export type PageCountryVisits = Awaited<ReturnType<Analytics["getCountryVisits"]>>["data"]
+export type PageBrowserVisits = Awaited<ReturnType<Analytics["getBrowserVisits"]>>["data"]
+export type PageOverview = Awaited<ReturnType<Analytics["getPagesOverview"]>>["data"]
+export type FeatureHeatmap = Awaited<ReturnType<Analytics["getFeatureHeatmap"]>>["data"]
+export type FeaturesOverview = Awaited<ReturnType<Analytics["getFeaturesOverview"]>>["data"]
+export type PlansConversion = Awaited<ReturnType<Analytics["getPlansConversion"]>>["data"]
+export type Usage = Awaited<ReturnType<Analytics["getFeaturesUsagePeriod"]>>["data"]
+export type Verifications = Awaited<ReturnType<Analytics["getFeaturesVerifications"]>>["data"]
+export type VerificationRegions = Awaited<
+  ReturnType<Analytics["getFeaturesVerificationRegions"]>
+>["data"]
+
+export type Stats = z.infer<typeof statsSchema>

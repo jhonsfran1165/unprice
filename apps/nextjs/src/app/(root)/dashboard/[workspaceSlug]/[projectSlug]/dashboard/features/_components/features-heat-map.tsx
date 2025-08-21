@@ -40,14 +40,21 @@ const formatPlanName = (slug: string): string => {
   return slug.charAt(0).toUpperCase() + slug.slice(1)
 }
 
-const FeatureUsageHeatmapEmptyState = ({ isLoading }: { isLoading?: boolean }) => {
+const FeatureUsageHeatmapEmptyState = ({
+  isLoading,
+  error,
+}: { isLoading?: boolean; error?: string }) => {
   return (
     <EmptyPlaceholder isLoading={isLoading}>
       <EmptyPlaceholder.Icon>
         <BarChart className="h-8 w-8" />
       </EmptyPlaceholder.Icon>
-      <EmptyPlaceholder.Title>No Data</EmptyPlaceholder.Title>
-      <EmptyPlaceholder.Description>There is no data available.</EmptyPlaceholder.Description>
+      <EmptyPlaceholder.Title>
+        {error ? "Ups, something went wrong" : "No Data"}
+      </EmptyPlaceholder.Title>
+      <EmptyPlaceholder.Description>
+        {error ? error : "There is no data available. Please try again later."}
+      </EmptyPlaceholder.Description>
       <EmptyPlaceholder.Action>
         <CodeApiSheet defaultMethod="verifyFeature">
           <Button size={"sm"}>
@@ -74,7 +81,16 @@ export const FeatureUsageHeatmapSkeleton = () => {
           ))}
         </div>
         {/* Data Rows - Features */}
-        {["feature1", "feature2", "feature3"].map((featureSlug) => (
+        {[
+          "feature1",
+          "feature2",
+          "feature3",
+          "feature4",
+          "feature5",
+          "feature6",
+          "feature7",
+          "feature8",
+        ].map((featureSlug) => (
           <div key={featureSlug} className={"grid grid-cols-4"}>
             {/* Feature Name */}
             <div className="flex items-center justify-end align-middle">
@@ -130,7 +146,7 @@ export function FeatureUsageHeatmapContent() {
   }
 
   return featureUsageEvents?.data.length === 0 ? (
-    <FeatureUsageHeatmapEmptyState isLoading={isLoading} />
+    <FeatureUsageHeatmapEmptyState isLoading={isLoading} error={featureUsageEvents?.error} />
   ) : (
     <TooltipProvider>
       <div className="overflow-x-auto">

@@ -23,6 +23,7 @@ export function PageFilter({ className }: { className?: string }) {
       {},
       {
         // force refetch on navigation
+        // this is important to keep pages in sync when the user changes project or workspace
         refetchOnWindowFocus: true,
         refetchOnMount: true,
         refetchOnReconnect: true,

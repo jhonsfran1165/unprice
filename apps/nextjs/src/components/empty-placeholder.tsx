@@ -56,7 +56,7 @@ EmptyPlaceholder.Title = function EmptyPlaceholderTitle({
   return (
     <Typography
       variant={variant}
-      className={cn("mt-4 mb-2 font-medium text-muted-foreground", className)}
+      className={cn("mt-4 mb-2 font-medium text-background-solid", className)}
       {...props}
     >
       {children}
@@ -83,7 +83,7 @@ EmptyPlaceholder.Description = function EmptyPlaceholderDescription({
     <Typography
       variant="p"
       affects="removePaddingMargin"
-      className={cn("mb-4 text-muted-foreground text-xs", className)}
+      className={cn("mb-4 text-muted-foreground text-xs opacity-60", className)}
       {...props}
     >
       {children}

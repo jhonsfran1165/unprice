@@ -1,41 +1,36 @@
-import type { Analytics } from "@unprice/analytics"
+import type { Analytics, PlansConversion } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
-import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getPlansConversion = protectedProjectProcedure
   .input(z.custom<Parameters<Analytics["getPlansConversion"]>[0]>())
   .output(
     z.object({
-      data: z.custom<Awaited<ReturnType<Analytics["getPlansConversion"]>>["data"]>(),
+      data: z.custom<PlansConversion>(),
+      error: z.string().optional(),
     })
   )
   .query(async (opts) => {
     const { intervalDays } = opts.input
     const projectId = opts.ctx.project.id
 
-    try {
-      const result = await withTimeout(
-        opts.ctx.analytics.getPlansConversion({
+    const cacheKey = `${projectId}:${intervalDays}`
+    const result = await opts.ctx.cache.getPlansConversion.swr(cacheKey, async () => {
+      const result = await opts.ctx.analytics
+        .getPlansConversion({
           projectId,
           intervalDays,
-        }),
-        TIMEOUTS.ANALYTICS,
-        "getPlansConversion analytics request timeout"
-      )
+        })
+        .then((res) => res.data)
 
-      return { data: result.data }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+      return result
+    })
 
-      opts.ctx.logger.error("getPlansConversion failed", {
-        error: errorMessage,
-        projectId,
-        intervalDays,
-        isTimeout: errorMessage.includes("timeout"),
-      })
-
-      // Return empty data as fallback
-      return { data: [] }
+    if (result.err) {
+      return { data: [], error: result.err.message }
     }
+
+    const data = result.val ?? []
+
+    return { data }
   })

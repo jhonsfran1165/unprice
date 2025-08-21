@@ -1,42 +1,38 @@
-import type { Analytics } from "@unprice/analytics"
+import type { Analytics, VerificationRegions } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
-import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getVerificationRegions = protectedProjectProcedure
   .input(z.custom<Omit<Parameters<Analytics["getFeaturesVerificationRegions"]>[0], "projectId">>())
   .output(
     z.object({
-      verifications:
-        z.custom<Awaited<ReturnType<Analytics["getFeaturesVerificationRegions"]>>["data"]>(),
+      verifications: z.custom<VerificationRegions>(),
+      error: z.string().optional(),
     })
   )
   .query(async (opts) => {
     const projectId = opts.ctx.project.id
     const input = opts.input
 
-    try {
-      const result = await withTimeout(
-        opts.ctx.analytics.getFeaturesVerificationRegions({
+    const cacheKey = `${projectId}:${input.region}:${input.intervalDays}`
+
+    const result = await opts.ctx.cache.getVerificationRegions.swr(cacheKey, async () => {
+      const result = await opts.ctx.analytics
+        .getFeaturesVerificationRegions({
           projectId,
           region: input.region,
           intervalDays: input.intervalDays,
-        }),
-        TIMEOUTS.ANALYTICS,
-        "getFeaturesVerificationRegions analytics request timeout"
-      )
+        })
+        .then((res) => res.data)
 
-      return { verifications: result.data }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+      return result
+    })
 
-      opts.ctx.logger.error("getFeaturesVerificationRegions failed", {
-        error: errorMessage,
-        projectId,
-        isTimeout: errorMessage.includes("timeout"),
-      })
-
-      // Return empty data as fallback
-      return { verifications: [] }
+    if (result.err) {
+      return { verifications: [], error: result.err.message }
     }
+
+    const verifications = result.val ?? []
+
+    return { verifications }
   })

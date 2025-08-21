@@ -28,7 +28,7 @@ export const createContext = async ({
     false
   )
 
-  await cache.init()
+  await cache.init([])
 
   const tinybird = new Analytics({
     emit: true,

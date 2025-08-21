@@ -38,13 +38,14 @@ const chartConfig = {
 
 export function PageVisitsSkeleton({
   isLoading,
-  pageId,
+  error,
 }: {
   isLoading: boolean
-  pageId: string
+  error?: string
 }) {
   const params = useParams()
   const [intervalFilter] = useIntervalFilter()
+  const [pageFilter] = usePageFilter()
   const workspaceSlug = params.workspaceSlug as string
   const projectSlug = params.projectSlug as string
   const basePath = `/${workspaceSlug}/${projectSlug}`
@@ -80,14 +81,20 @@ export function PageVisitsSkeleton({
             <BarChart3 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
           <EmptyPlaceholder.Title>
-            {pageId ? "No page selected" : "No data available for this page"}
+            {error
+              ? "Ups, something went wrong"
+              : !pageFilter.pageId
+                ? "No page selected"
+                : "No data available for this page"}
           </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
-            {pageId
-              ? "Select a page to see page views"
-              : "Create a page to start tracking page views"}
+            {error
+              ? error
+              : !pageFilter.pageId
+                ? `There is no data available for the ${intervalFilter.label}. Please try again later.`
+                : "Please select a page to see page views."}
           </EmptyPlaceholder.Description>
-          {!pageId && (
+          {!pageFilter.pageId && (
             <EmptyPlaceholder.Action>
               <SuperLink href={`${basePath}/pages`} className="mt-2 w-full">
                 <Button size={"sm"}>Create a page</Button>
@@ -132,7 +139,7 @@ export function PageVisits() {
   )
 
   if (isLoadingPageVisits || chartData.length === 0) {
-    return <PageVisitsSkeleton isLoading={isLoadingPageVisits} pageId={pageFilter.pageId} />
+    return <PageVisitsSkeleton isLoading={isLoadingPageVisits} error={pageVisits.error} />
   }
 
   return (

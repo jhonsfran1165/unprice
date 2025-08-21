@@ -16,6 +16,8 @@ export const env = createEnv({
     UNPRICE_API_KEY: z.string(),
     UNPRICE_API_URL: z.string().url(),
     FLAGS_SECRET: z.string(),
+    UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+    UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   },
   runtimeEnv: process.env,
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",

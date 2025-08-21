@@ -1,12 +1,15 @@
 import { type Cache as C, type Context, Namespace, createCache } from "@unkey/cache"
 import { withMetrics } from "@unkey/cache/middleware"
 
-import { CloudflareStore, MemoryStore, type Store } from "@unkey/cache/stores"
-
-import { env } from "../../env"
+import { MemoryStore, type Store } from "@unkey/cache/stores"
 import type { Metrics } from "../metrics"
 import type { CacheNamespace, CacheNamespaces } from "./namespaces"
-import { CACHE_FRESHNESS_TIME_MS, CACHE_STALENESS_TIME_MS } from "./stale-while-revalidate"
+import {
+  CACHE_ANALYTICS_FRESHNESS_TIME_MS,
+  CACHE_ANALYTICS_STALENESS_TIME_MS,
+  CACHE_FRESHNESS_TIME_MS,
+  CACHE_STALENESS_TIME_MS,
+} from "./stale-while-revalidate"
 
 const persistentMap = new Map()
 
@@ -26,8 +29,9 @@ export class CacheService {
 
   /**
    * Initialize the cache service
+   * @param extraStores - Extra stores to add to the cache
    */
-  async init(): Promise<void> {
+  async init(extraStores: Store<CacheNamespace, CacheNamespaces[CacheNamespace]>[]): Promise<void> {
     if (this.cache) return
 
     // emit the cache size
@@ -49,21 +53,11 @@ export class CacheService {
       },
     })
 
+    // push the memory first to hit it first
     stores.push(memory)
 
-    const cloudflare: Store<CacheNamespace, CacheNamespaces[CacheNamespace]> | undefined =
-      env.CLOUDFLARE_ZONE_ID && env.CLOUDFLARE_API_TOKEN
-        ? new CloudflareStore({
-            cloudflareApiKey: env.CLOUDFLARE_API_TOKEN,
-            zoneId: env.CLOUDFLARE_ZONE_ID,
-            domain: "cache.unprice.dev",
-            cacheBuster: "v2",
-          })
-        : undefined
-
-    if (cloudflare) {
-      stores.push(cloudflare)
-    }
+    // push the extra stores
+    stores.push(...extraStores)
 
     const metricsMiddleware = withMetrics(this.metrics)
     const storesWithMetrics = this.emitMetrics
@@ -103,12 +97,70 @@ export class CacheService {
         {
           ...defaultOpts,
           fresh: 1000 * 60, // 1 minute
-          stale: 1000 * 60, // delete after 1 minutes
+          stale: 1000 * 60, // revalidate after 1 minutes
         }
       ),
       customerSubscription: new Namespace<CacheNamespaces["customerSubscription"]>(
         this.context,
         defaultOpts
+      ),
+      pageCountryVisits: new Namespace<CacheNamespaces["pageCountryVisits"]>(this.context, {
+        ...defaultOpts,
+        fresh: CACHE_ANALYTICS_FRESHNESS_TIME_MS, // 30 seconds
+        stale: CACHE_ANALYTICS_STALENESS_TIME_MS, // revalidate 1 hour
+      }),
+      pageBrowserVisits: new Namespace<CacheNamespaces["pageBrowserVisits"]>(this.context, {
+        ...defaultOpts,
+        fresh: CACHE_ANALYTICS_FRESHNESS_TIME_MS, // 30 seconds
+        stale: CACHE_ANALYTICS_STALENESS_TIME_MS, // revalidate 1 hour
+      }),
+      getPagesOverview: new Namespace<CacheNamespaces["getPagesOverview"]>(this.context, {
+        ...defaultOpts,
+        fresh: CACHE_ANALYTICS_FRESHNESS_TIME_MS, // 30 seconds
+        stale: CACHE_ANALYTICS_STALENESS_TIME_MS, // revalidate 1 hour
+      }),
+      getFeatureHeatmap: new Namespace<CacheNamespaces["getFeatureHeatmap"]>(this.context, {
+        ...defaultOpts,
+        fresh: CACHE_ANALYTICS_FRESHNESS_TIME_MS, // 30 seconds
+        stale: CACHE_ANALYTICS_STALENESS_TIME_MS, // revalidate 1 hour
+      }),
+      getFeaturesOverview: new Namespace<CacheNamespaces["getFeaturesOverview"]>(this.context, {
+        ...defaultOpts,
+        fresh: CACHE_ANALYTICS_FRESHNESS_TIME_MS, // 30 seconds
+        stale: CACHE_ANALYTICS_STALENESS_TIME_MS, // revalidate 1 hour
+      }),
+      getPlansStats: new Namespace<CacheNamespaces["getPlansStats"]>(this.context, {
+        ...defaultOpts,
+        fresh: CACHE_ANALYTICS_FRESHNESS_TIME_MS, // 30 seconds
+        stale: CACHE_ANALYTICS_STALENESS_TIME_MS, // revalidate 1 hour
+      }),
+      getPlansConversion: new Namespace<CacheNamespaces["getPlansConversion"]>(this.context, {
+        ...defaultOpts,
+        fresh: CACHE_ANALYTICS_FRESHNESS_TIME_MS, // 30 seconds
+        stale: CACHE_ANALYTICS_STALENESS_TIME_MS, // revalidate 1 hour
+      }),
+      getOverviewStats: new Namespace<CacheNamespaces["getOverviewStats"]>(this.context, {
+        ...defaultOpts,
+        fresh: CACHE_ANALYTICS_FRESHNESS_TIME_MS, // 30 seconds
+        stale: CACHE_ANALYTICS_STALENESS_TIME_MS, // revalidate 1 hour
+      }),
+      getUsage: new Namespace<CacheNamespaces["getUsage"]>(this.context, {
+        ...defaultOpts,
+        fresh: CACHE_ANALYTICS_FRESHNESS_TIME_MS, // 30 seconds
+        stale: CACHE_ANALYTICS_STALENESS_TIME_MS, // revalidate 1 hour
+      }),
+      getVerifications: new Namespace<CacheNamespaces["getVerifications"]>(this.context, {
+        ...defaultOpts,
+        fresh: CACHE_ANALYTICS_FRESHNESS_TIME_MS, // 30 seconds
+        stale: CACHE_ANALYTICS_STALENESS_TIME_MS, // revalidate 1 hour
+      }),
+      getVerificationRegions: new Namespace<CacheNamespaces["getVerificationRegions"]>(
+        this.context,
+        {
+          ...defaultOpts,
+          fresh: CACHE_ANALYTICS_FRESHNESS_TIME_MS, // 30 seconds
+          stale: CACHE_ANALYTICS_STALENESS_TIME_MS, // revalidate 1 hour
+        }
       ),
     })
   }

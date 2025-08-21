@@ -29,13 +29,14 @@ export function LatencyTable() {
   const { data: verifications } = useSuspenseQuery(
     trpc.analytics.getVerificationRegions.queryOptions({
       intervalDays: intervalFilter.intervalDays,
+      region: "All",
     })
   )
 
   // group by region deleting the date and sum the count, p50_latency, p95_latency, p99_latency
   const groupedByRegion = useMemo(
     () =>
-      verifications?.verifications.reduce(
+      verifications.verifications.reduce(
         (acc, curr) => {
           if (!curr.region) return acc
           const region = curr.region
@@ -84,6 +85,7 @@ export function LatencyTable() {
       <DataTable
         columns={columns}
         data={data}
+        error={verifications.error}
         filterOptions={{
           filterBy: "region",
           filterColumns: true,

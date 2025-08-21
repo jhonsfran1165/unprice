@@ -40,25 +40,31 @@ export function VerificationsChart() {
     p99_latency: v.p99_latency,
   }))
 
-  if (chartData.length === 0 || isLoading) {
+  if (chartData.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
         <EmptyPlaceholder className="min-h-[420px]" isLoading={isLoading}>
           <EmptyPlaceholder.Icon>
             <BarChart4 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
-          <EmptyPlaceholder.Title>No data available</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>
+            {verifications.error ? "Unable to load data" : "No data available"}
+          </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
-            There is no data available for the selected interval.
+            {verifications.error
+              ? verifications.error
+              : "There is no data available for the selected interval."}
           </EmptyPlaceholder.Description>
-          <EmptyPlaceholder.Action>
-            <CodeApiSheet defaultMethod="verifyFeature">
-              <Button size={"sm"} disabled={isLoading}>
-                <Code className="mr-2 h-4 w-4" />
-                Start verifying data
-              </Button>
-            </CodeApiSheet>
-          </EmptyPlaceholder.Action>
+          {!verifications.error && (
+            <EmptyPlaceholder.Action>
+              <CodeApiSheet defaultMethod="verifyFeature">
+                <Button size={"sm"} disabled={isLoading}>
+                  <Code className="mr-2 h-4 w-4" />
+                  Start verifying data
+                </Button>
+              </CodeApiSheet>
+            </EmptyPlaceholder.Action>
+          )}
         </EmptyPlaceholder>
       </div>
     )

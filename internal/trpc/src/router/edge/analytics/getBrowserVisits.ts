@@ -1,14 +1,13 @@
-import { TRPCError } from "@trpc/server"
-import type { Analytics } from "@unprice/analytics"
+import type { Analytics, PageBrowserVisits } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
-import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getBrowserVisits = protectedProjectProcedure
   .input(z.custom<Parameters<Analytics["getBrowserVisits"]>[0]>())
   .output(
     z.object({
-      data: z.custom<Awaited<ReturnType<Analytics["getBrowserVisits"]>>["data"]>(),
+      data: z.custom<PageBrowserVisits>(),
+      error: z.string().optional(),
     })
   )
   .query(async (opts) => {
@@ -16,7 +15,7 @@ export const getBrowserVisits = protectedProjectProcedure
     const projectId = opts.ctx.project.id
 
     if (!page_id || page_id === "") {
-      return { data: [] }
+      return { data: [], error: "Page ID is required" }
     }
 
     const page = await opts.ctx.db.query.pages.findFirst({
@@ -24,35 +23,27 @@ export const getBrowserVisits = protectedProjectProcedure
     })
 
     if (!page) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Page not found",
-      })
+      return { data: [], error: "Page not found" }
     }
 
-    try {
-      const result = await withTimeout(
-        opts.ctx.analytics.getBrowserVisits({
+    const cacheKey = `${projectId}:${page.id}:${intervalDays}`
+    const result = await opts.ctx.cache.pageBrowserVisits.swr(cacheKey, async () => {
+      const result = await opts.ctx.analytics
+        .getBrowserVisits({
           page_id: page.id,
           intervalDays,
           project_id: projectId,
-        }),
-        TIMEOUTS.ANALYTICS,
-        "getBrowserVisits analytics request timeout"
-      )
+        })
+        .then((res) => res.data)
 
-      return { data: result.data }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+      return result
+    })
 
-      opts.ctx.logger.error("getBrowserVisits failed", {
-        error: errorMessage,
-        projectId,
-        intervalDays,
-        isTimeout: errorMessage.includes("timeout"),
-      })
-
-      // Return empty data as fallback
-      return { data: [] }
+    if (result.err) {
+      return { data: [], error: result.err.message }
     }
+
+    const data = result.val ?? []
+
+    return { data }
   })

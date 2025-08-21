@@ -3,6 +3,7 @@ import "server-only"
 import { tracing } from "@baselime/trpc-opentelemetry-middleware"
 import { TRPCError, initTRPC } from "@trpc/server"
 import type { Cache as C } from "@unkey/cache"
+import { UpstashRedisStore } from "@unkey/cache/stores"
 import { Analytics } from "@unprice/analytics"
 import type { NextAuthRequest } from "@unprice/auth"
 import type { Session } from "@unprice/auth/server"
@@ -21,6 +22,7 @@ import { fromZodError } from "zod-validation-error"
 import { env } from "./env"
 import { transformer } from "./transformer"
 import { projectWorkspaceGuard } from "./utils"
+import { redis } from "./utils/upstash"
 import { workspaceGuard } from "./utils/workspace-guard"
 
 /**
@@ -128,7 +130,14 @@ export const createTRPCContext = async (opts: {
     env.EMIT_METRICS_LOGS
   )
 
-  await cacheService.init()
+  const upstashCacheStore =
+    env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN
+      ? new UpstashRedisStore({
+          redis,
+        })
+      : undefined
+
+  await cacheService.init(upstashCacheStore ? [upstashCacheStore] : [])
 
   const cache = cacheService.getCache()
 

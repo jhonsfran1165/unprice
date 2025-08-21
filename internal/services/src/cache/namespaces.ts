@@ -1,4 +1,16 @@
 import type {
+  FeatureHeatmap,
+  FeaturesOverview,
+  PageBrowserVisits,
+  PageCountryVisits,
+  PageOverview,
+  PlansConversion,
+  Stats,
+  Usage,
+  VerificationRegions,
+  Verifications,
+} from "@unprice/analytics"
+import type {
   ApiKeyExtended,
   Customer,
   CustomerEntitlementExtended,
@@ -55,6 +67,17 @@ export type CacheNamespaces = {
   idempotentRequestUsageByHash: UsageEntitlementCache | null
   planVersionList: PlanVersionApi[] | null
   planVersion: PlanVersionApi | null
+  pageCountryVisits: PageCountryVisits | null
+  pageBrowserVisits: PageBrowserVisits | null
+  getPagesOverview: PageOverview | null
+  getFeatureHeatmap: FeatureHeatmap | null
+  getFeaturesOverview: FeaturesOverview | null
+  getPlansStats: Stats | null
+  getPlansConversion: PlansConversion | null
+  getOverviewStats: Stats | null
+  getUsage: Usage | null
+  getVerifications: Verifications | null
+  getVerificationRegions: VerificationRegions | null
 }
 
 export type CacheNamespace = keyof CacheNamespaces

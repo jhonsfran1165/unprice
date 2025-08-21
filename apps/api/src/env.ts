@@ -25,6 +25,8 @@ export const env = createEnv({
       (ns) => typeof ns === "object"
     ),
     RL_FREE_600_60s: cloudflareRatelimiter,
+    CLOUDFLARE_ZONE_ID: z.string().optional(),
+    CLOUDFLARE_API_TOKEN: z.string().optional(),
   },
   emptyStringAsUndefined: true,
   runtimeEnv: process.env,

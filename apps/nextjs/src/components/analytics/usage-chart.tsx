@@ -11,7 +11,6 @@ import {
 } from "@unprice/ui/chart"
 import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
-import { CodeApiSheet } from "~/components/code-api-sheet"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useIntervalFilter } from "~/hooks/use-filter"
 import { useTRPC } from "~/trpc/client"
@@ -37,25 +36,29 @@ export function UsageChart() {
     usage: v.sum,
   }))
 
-  if (chartData.length === 0 || isLoading) {
+  if (chartData.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
         <EmptyPlaceholder className="min-h-[420px]" isLoading={isLoading}>
           <EmptyPlaceholder.Icon>
             <BarChart4 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
-          <EmptyPlaceholder.Title>No data available</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>
+            {usage.error ? "Ups, something went wrong" : "No data available"}
+          </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
-            There is no usage available for the selected interval.
+            {usage.error
+              ? usage.error
+              : "There is no usage available for the selected interval. Start usage to see data."}
           </EmptyPlaceholder.Description>
-          <EmptyPlaceholder.Action>
-            <CodeApiSheet defaultMethod="reportUsage">
+          {!usage.error && (
+            <EmptyPlaceholder.Action>
               <Button size={"sm"} disabled={isLoading}>
                 <Code className="mr-2 h-4 w-4" />
                 Start usage
               </Button>
-            </CodeApiSheet>
-          </EmptyPlaceholder.Action>
+            </EmptyPlaceholder.Action>
+          )}
         </EmptyPlaceholder>
       </div>
     )

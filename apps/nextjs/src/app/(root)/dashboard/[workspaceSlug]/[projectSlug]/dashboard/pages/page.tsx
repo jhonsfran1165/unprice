@@ -75,14 +75,14 @@ export default async function DashboardPages(props: {
         </div>
       </div>
       <HydrateClient>
-        <Suspense fallback={<PageVisitsSkeleton isLoading={true} pageId={pageFilter.pageId} />}>
+        <Suspense fallback={<PageVisitsSkeleton isLoading={true} />}>
           <PageVisits />
         </Suspense>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Suspense fallback={<BrowsersSkeleton isLoading={true} pageId={pageFilter.pageId} />}>
+          <Suspense fallback={<BrowsersSkeleton isLoading={true} />}>
             <Browsers />
           </Suspense>
-          <Suspense fallback={<CountriesSkeleton isLoading={true} pageId={pageFilter.pageId} />}>
+          <Suspense fallback={<CountriesSkeleton isLoading={true} />}>
             <Countries />
           </Suspense>
         </div>

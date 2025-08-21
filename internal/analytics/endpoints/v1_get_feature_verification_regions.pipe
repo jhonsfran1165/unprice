@@ -64,7 +64,7 @@ SQL >
     WHERE
         1 = 1
         AND projectId = {{ String(projectId) }}
-        {% if defined(region) %}
+        {% if defined(region) and region != "All" %}
             AND region = {{ String(region) }}
         {% end %}
         {% if defined(intervalDays) %}

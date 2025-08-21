@@ -62,6 +62,7 @@ export default async function DashboardOverview(props: {
       trpc.analytics.getVerificationRegions.queryOptions(
         {
           intervalDays: interval.intervalDays,
+          region: "All",
         },
         {
           staleTime: ANALYTICS_STALE_TIME,

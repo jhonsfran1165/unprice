@@ -35,12 +35,13 @@ const chartConfig = {
 
 export function BrowsersSkeleton({
   isLoading,
-  pageId,
+  error,
 }: {
   isLoading?: boolean
-  pageId: string
+  error?: string
 }) {
   const [intervalFilter] = useIntervalFilter()
+  const [pageFilter] = usePageFilter()
   return (
     <Card>
       <CardHeader>
@@ -53,12 +54,18 @@ export function BrowsersSkeleton({
             <BarChart4 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
           <EmptyPlaceholder.Title>
-            {pageId ? "No data available" : "No page selected"}
+            {error
+              ? "Ups, something went wrong"
+              : !pageFilter.pageId
+                ? "No page selected"
+                : "No data available"}
           </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
-            {pageId
-              ? `There is no browser visits available for the ${intervalFilter.label}`
-              : "Please select a page to see browser visits."}
+            {error
+              ? error
+              : !pageFilter.pageId
+                ? `There is no browser visits available for the ${intervalFilter.label}. Please try again later.`
+                : "Please select a page to see browser visits."}
           </EmptyPlaceholder.Description>
         </EmptyPlaceholder>
       </CardContent>
@@ -106,8 +113,8 @@ export function Browsers() {
     )
   }, [pageId.pageId, intervalFilter.intervalDays])
 
-  if (data.data.length === 0 || isLoading) {
-    return <BrowsersSkeleton isLoading={isLoading} pageId={pageId.pageId} />
+  if (groupedData.length === 0 || isLoading) {
+    return <BrowsersSkeleton isLoading={isLoading} error={data.error} />
   }
 
   return (

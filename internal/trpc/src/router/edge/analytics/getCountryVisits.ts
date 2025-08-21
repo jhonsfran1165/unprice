@@ -1,14 +1,15 @@
-import { TRPCError } from "@trpc/server"
 import type { Analytics } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
-import { TIMEOUTS, withTimeout } from "#utils/timeout"
+
+export type PageCountryVisits = Awaited<ReturnType<Analytics["getCountryVisits"]>>["data"]
 
 export const getCountryVisits = protectedProjectProcedure
   .input(z.custom<Parameters<Analytics["getCountryVisits"]>[0]>())
   .output(
     z.object({
-      data: z.custom<Awaited<ReturnType<Analytics["getCountryVisits"]>>["data"]>(),
+      data: z.custom<PageCountryVisits>(),
+      error: z.string().optional(),
     })
   )
   .query(async (opts) => {
@@ -16,7 +17,7 @@ export const getCountryVisits = protectedProjectProcedure
     const projectId = opts.ctx.project.id
 
     if (!page_id || page_id === "") {
-      return { data: [] }
+      return { data: [], error: "Page ID is required" }
     }
 
     const page = await opts.ctx.db.query.pages.findFirst({
@@ -24,34 +25,27 @@ export const getCountryVisits = protectedProjectProcedure
     })
 
     if (!page) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Page not found",
-      })
+      return { data: [], error: "Page not found" }
     }
 
-    try {
-      const result = await withTimeout(
-        opts.ctx.analytics.getCountryVisits({
+    const cacheKey = `${projectId}:${page.id}:${intervalDays}`
+    const result = await opts.ctx.cache.pageCountryVisits.swr(cacheKey, async () => {
+      const result = await opts.ctx.analytics
+        .getCountryVisits({
           page_id: page.id,
           intervalDays,
-        }),
-        TIMEOUTS.ANALYTICS,
-        "getCountryVisits analytics request timeout"
-      )
+          project_id: projectId,
+        })
+        .then((res) => res.data)
 
-      return { data: result.data }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+      return result
+    })
 
-      opts.ctx.logger.error("getCountryVisits failed", {
-        error: errorMessage,
-        projectId,
-        intervalDays,
-        isTimeout: errorMessage.includes("timeout"),
-      })
-
-      // Return empty data as fallback
-      return { data: [] }
+    if (result.err) {
+      return { data: [], error: result.err.message }
     }
+
+    const data = result.val ?? []
+
+    return { data }
   })

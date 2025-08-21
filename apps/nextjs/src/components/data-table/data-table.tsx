@@ -22,7 +22,9 @@ import * as React from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
 import { cn } from "@unprice/ui/utils"
 
+import { AlertTriangle } from "lucide-react"
 import { useFilterDataTable } from "~/hooks/use-filter-datatable"
+import { EmptyPlaceholder } from "../empty-placeholder"
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
 
@@ -48,6 +50,7 @@ interface DataTableProps<TData, TValue> {
   filterOptions?: FilterOptionDataTable
   className?: string
   pageCount?: number
+  error?: string
 }
 
 export function DataTable<TData, TValue>({
@@ -56,6 +59,7 @@ export function DataTable<TData, TValue>({
   filterOptions,
   className,
   pageCount,
+  error,
 }: DataTableProps<TData, TValue>) {
   const [filters] = useFilterDataTable()
   const [rowSelection, setRowSelection] = React.useState({})
@@ -168,7 +172,17 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
-                  No results.
+                  <EmptyPlaceholder className="min-h-[300px]">
+                    <EmptyPlaceholder.Icon>
+                      <AlertTriangle className="h-8 w-8" />
+                    </EmptyPlaceholder.Icon>
+                    <EmptyPlaceholder.Title>
+                      {error ? "Ups, something went wrong" : "No Results"}
+                    </EmptyPlaceholder.Title>
+                    <EmptyPlaceholder.Description>
+                      {error ? error : "There are no results for the selected filters."}
+                    </EmptyPlaceholder.Description>
+                  </EmptyPlaceholder>
                 </TableCell>
               </TableRow>
             )}

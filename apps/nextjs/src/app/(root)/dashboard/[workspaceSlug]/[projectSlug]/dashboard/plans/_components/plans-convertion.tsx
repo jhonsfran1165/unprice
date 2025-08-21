@@ -14,7 +14,7 @@ export function PlansConversionSkeleton() {
       showDateFilterOptions={false}
       showViewOptions={true}
       searchableColumnCount={1}
-      cellWidths={["20rem", "20rem", "20rem", "20rem", "20rem", "20rem", "12rem"]}
+      cellWidths={["10rem", "10rem", "10rem", "10rem", "10rem", "10rem", "12rem"]}
       shrinkZero
     />
   )
@@ -34,6 +34,7 @@ export function PlansConversion() {
     <DataTable
       columns={columns}
       data={plansConversion?.data ?? []}
+      error={plansConversion?.error}
       filterOptions={{
         filterBy: "plan_version_id",
         filterColumns: true,

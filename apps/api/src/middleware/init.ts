@@ -12,6 +12,7 @@ import { EntitlementService } from "~/entitlement/service"
 import type { HonoEnv } from "~/hono/env"
 import { ApiProjectService } from "~/project"
 
+import { CloudflareStore } from "@unkey/cache/stores"
 import { SubscriptionService } from "@unprice/services/subscriptions"
 import { endTime, startTime } from "hono/timing"
 
@@ -107,7 +108,19 @@ export function init(): MiddlewareHandler<HonoEnv> {
       emitMetrics
     )
 
-    await cacheService.init()
+    const cloudflareCacheStore =
+      c.env.CLOUDFLARE_ZONE_ID && c.env.CLOUDFLARE_API_TOKEN
+        ? new CloudflareStore({
+            cloudflareApiKey: c.env.CLOUDFLARE_API_TOKEN,
+            zoneId: c.env.CLOUDFLARE_ZONE_ID,
+            domain: "cache.unprice.dev",
+            cacheBuster: "v2",
+          })
+        : undefined
+
+    // register the cloudflare store if it is configured
+    await cacheService.init(cloudflareCacheStore ? [cloudflareCacheStore] : [])
+
     const cache = cacheService.getCache()
 
     endTime(c, "initCache")

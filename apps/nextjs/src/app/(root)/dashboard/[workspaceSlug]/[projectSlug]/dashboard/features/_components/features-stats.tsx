@@ -40,8 +40,10 @@ const chartConfig = {
 
 export function FeaturesStatsSkeleton({
   isLoading,
+  error,
 }: {
   isLoading: boolean
+  error?: string
 }) {
   const [intervalFilter] = useIntervalFilter()
   return (
@@ -76,9 +78,13 @@ export function FeaturesStatsSkeleton({
           <EmptyPlaceholder.Icon>
             <BarChart3 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
-          <EmptyPlaceholder.Title>No data available</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>
+            {error ? "Ups, something went wrong" : "No data available"}
+          </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
-            There is no data available for the {intervalFilter.label}
+            {error
+              ? error
+              : `There is no data available for the ${intervalFilter.label}. Please try again later.`}
           </EmptyPlaceholder.Description>
         </EmptyPlaceholder>
       </CardContent>
@@ -113,7 +119,7 @@ export function FeaturesStats() {
   )
 
   if (isLoading || chartData.length === 0) {
-    return <FeaturesStatsSkeleton isLoading={isLoading} />
+    return <FeaturesStatsSkeleton isLoading={isLoading} error={featuresOverview.error} />
   }
 
   return (

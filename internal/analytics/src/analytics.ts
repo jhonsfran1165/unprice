@@ -140,9 +140,9 @@ export class Analytics {
         payload: z.string().transform((payload) => schemaPlanClick.parse(JSON.parse(payload))),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
+        cache: "no-store",
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
@@ -181,9 +181,9 @@ export class Analytics {
         conversion: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
+        cache: "no-store",
+        retries: 3,
+        timeout: 5000, // 5 seconds
       },
     })
   }
@@ -203,9 +203,6 @@ export class Analytics {
         hits: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
         retries: 3,
         timeout: 5000, // 5 seconds
       },
@@ -227,9 +224,6 @@ export class Analytics {
         hits: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
         retries: 3,
         timeout: 5000, // 5 seconds
       },
@@ -256,9 +250,7 @@ export class Analytics {
         total_hits: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
+        cache: "no-store",
         retries: 3,
         timeout: 5000, // 5 seconds
       },
@@ -279,9 +271,7 @@ export class Analytics {
         usage: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
+        cache: "no-store",
         retries: 3,
         timeout: 5000, // 5 seconds
       },
@@ -309,9 +299,7 @@ export class Analytics {
         p99_latency: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
+        cache: "no-store",
         retries: 3,
         timeout: 5000, // 5 seconds
       },
@@ -337,9 +325,7 @@ export class Analytics {
         p99_latency: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
+        cache: "no-store",
         retries: 3,
         timeout: 5000, // 5 seconds
       },
@@ -369,9 +355,7 @@ export class Analytics {
         last_during_period: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
+        cache: "no-store",
         retries: 3,
         timeout: 5000, // 5 seconds
       },
@@ -398,9 +382,7 @@ export class Analytics {
         last_during_period: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
+        cache: "no-store",
         retries: 3,
         timeout: 5000, // 5 seconds
       },
@@ -428,9 +410,7 @@ export class Analytics {
         last_during_period: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
+        cache: "no-store",
         retries: 3,
         timeout: 5000, // 5 seconds
       },
@@ -456,9 +436,7 @@ export class Analytics {
         activity_score: z.number(),
       }),
       opts: {
-        next: {
-          revalidate: 10, // every 10 seconds
-        },
+        cache: "no-store",
         retries: 3,
         timeout: 5000, // 5 seconds
       },

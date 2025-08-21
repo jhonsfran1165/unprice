@@ -50,7 +50,9 @@
         "FLAGS_SECRET",
         "AXIOM_API_TOKEN",
         "AXIOM_DATASET",
-        "EMIT_ANALYTICS"
+        "EMIT_ANALYTICS",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN"
       ]
     },
     "fmt": {
@@ -96,7 +98,9 @@
         "FLAGS_SECRET",
         "AXIOM_API_TOKEN",
         "AXIOM_DATASET",
-        "EMIT_ANALYTICS"
+        "EMIT_ANALYTICS",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN"
       ]
     },
     "test": {

@@ -1,41 +1,37 @@
 import type { Analytics } from "@unprice/analytics"
+import type { FeaturesOverview } from "@unprice/analytics"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
-import { TIMEOUTS, withTimeout } from "#utils/timeout"
 
 export const getFeaturesOverview = protectedProjectProcedure
   .input(z.custom<Parameters<Analytics["getFeaturesOverview"]>[0]>())
   .output(
     z.object({
-      data: z.custom<Awaited<ReturnType<Analytics["getFeaturesOverview"]>>["data"]>(),
+      data: z.custom<FeaturesOverview>(),
+      error: z.string().optional(),
     })
   )
   .query(async (opts) => {
     const { intervalDays } = opts.input
     const projectId = opts.ctx.project.id
 
-    try {
-      const result = await withTimeout(
-        opts.ctx.analytics.getFeaturesOverview({
+    const cacheKey = `${projectId}:${intervalDays}`
+    const result = await opts.ctx.cache.getFeaturesOverview.swr(cacheKey, async () => {
+      const result = await opts.ctx.analytics
+        .getFeaturesOverview({
           projectId,
           intervalDays,
-        }),
-        TIMEOUTS.ANALYTICS,
-        "getFeaturesOverview analytics request timeout"
-      )
+        })
+        .then((res) => res.data)
 
-      return { data: result.data }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+      return result
+    })
 
-      opts.ctx.logger.error("getFeaturesOverview failed", {
-        error: errorMessage,
-        projectId,
-        intervalDays,
-        isTimeout: errorMessage.includes("timeout"),
-      })
-
-      // Return empty data as fallback
-      return { data: [] }
+    if (result.err) {
+      return { data: [], error: result.err.message }
     }
+
+    const data = result.val ?? []
+
+    return { data }
   })
