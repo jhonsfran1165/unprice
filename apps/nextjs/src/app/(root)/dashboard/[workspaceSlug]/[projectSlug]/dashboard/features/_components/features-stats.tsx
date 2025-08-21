@@ -97,7 +97,11 @@ export function FeaturesStats() {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  const { data: featuresOverview, isLoading } = useSuspenseQuery(
+  const {
+    data: featuresOverview,
+    isLoading,
+    isSuccess,
+  } = useSuspenseQuery(
     trpc.analytics.getFeaturesOverview.queryOptions({
       intervalDays: intervalFilter.intervalDays,
     })
@@ -132,7 +136,7 @@ export function FeaturesStats() {
     }
 
     invalidate()
-  }, [featuresOverview.data?.length])
+  }, [isSuccess])
 
   const chartData = featuresOverview.data
 
