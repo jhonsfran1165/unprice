@@ -390,8 +390,8 @@ importers:
   internal/analytics:
     dependencies:
       '@jhonsfran/zod-bird':
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.0.2
+        version: 1.0.2
       '@t3-oss/env-core':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.9.2)(zod@3.25.76)
@@ -4601,8 +4601,8 @@ packages:
       minipass: 7.1.2
     dev: true
 
-  /@jhonsfran/zod-bird@1.0.1:
-    resolution: {integrity: sha512-Xs8FrKmpdtbYlZMUD0PQyskHuTfMoM2LZiOp8SMBx0hQUSmjDB1e+oERxf+8JUpel6cswJUjHn3BZruyRN3KEw==}
+  /@jhonsfran/zod-bird@1.0.2:
+    resolution: {integrity: sha512-1lAVPlJYRZY2ANOGJnreB0LEBUM93efoMbcqoNo/qwn3BQujAD4+QLwUimvoQT+Wb9EZ+Q3AnC/mVCK/mZ6Gig==}
     dependencies:
       zod: 3.25.76
     dev: false

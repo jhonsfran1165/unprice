@@ -12,11 +12,11 @@ import { type VerificationsMetricsGrouped, columns } from "./latency/columns"
 export function LatencyTableSkeleton() {
   return (
     <DataTableSkeleton
-      columnCount={7}
+      columnCount={6}
       showDateFilterOptions={false}
       showViewOptions={true}
       searchableColumnCount={1}
-      cellWidths={["16rem", "16rem", "16rem", "16rem", "16rem", "16rem", "12rem"]}
+      cellWidths={["16rem", "16rem", "16rem", "16rem", "16rem", "12rem"]}
       shrinkZero
     />
   )

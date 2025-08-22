@@ -7,7 +7,7 @@ import { intervalParser, pageParser } from "~/lib/searchParams"
 export function useIntervalFilter() {
   const [intervalFilter, setIntervalFilter] = useQueryStates(intervalParser, {
     history: "replace", // push or replace -> push will add a new entry to the history, replace will replace the current entry
-    shallow: false, // otherwise it will not trigger a re-render on the server
+    shallow: true,
     scroll: false, // scroll to the top of the page when the filter changes
     clearOnDefault: true,
     throttleMs: 1000, // throttle the query state changes to 1 second
@@ -23,7 +23,7 @@ export function useIntervalFilter() {
 export function usePageFilter() {
   const [pageFilter, setPageFilter] = useQueryStates(pageParser, {
     history: "replace",
-    shallow: false, // notify the server when the page changes
+    shallow: true,
     scroll: false,
     clearOnDefault: true,
     throttleMs: 1000, // throttle the query state changes to 1 second

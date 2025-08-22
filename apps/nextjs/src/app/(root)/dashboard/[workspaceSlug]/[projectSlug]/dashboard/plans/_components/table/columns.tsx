@@ -20,7 +20,6 @@ import { cn } from "@unprice/ui/utils"
 import { BarChart3, Eye, Loader2, MousePointerClick, UserCheck2 } from "lucide-react"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { useMediaQuery } from "~/hooks/use-media-query"
-import { formatDate } from "~/lib/dates"
 import { useTRPC } from "~/trpc/client"
 import { PageForm } from "../../../../pages/_components/page-form"
 import { PlanVersionForm } from "../../../../plans/[planSlug]/_components/plan-version-form"
@@ -35,19 +34,6 @@ export const columns: ColumnDef<PlanConversion>[] = [
     cell: () => <div className="w-4" />,
     enableSorting: false,
     enableHiding: false,
-  },
-  {
-    accessorKey: "date",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Date" />,
-    cell: ({ row }) => {
-      const date = row.original.date
-
-      if (!(date instanceof Date)) return null
-
-      return <div className="whitespace-nowrap text-sm">{formatDate(date.getTime())}</div>
-    },
-    enableResizing: true,
-    size: 20,
   },
   {
     accessorKey: "page_id",

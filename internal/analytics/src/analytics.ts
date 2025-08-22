@@ -172,7 +172,6 @@ export class Analytics {
         projectId: z.string().optional(),
       }),
       data: z.object({
-        date: z.coerce.date(),
         page_id: z.string(),
         plan_version_id: z.string(),
         plan_views: z.number(),
