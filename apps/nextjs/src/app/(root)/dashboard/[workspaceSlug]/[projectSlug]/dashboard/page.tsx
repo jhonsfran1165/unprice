@@ -8,7 +8,7 @@ import { UsageChart } from "~/components/analytics/usage-chart"
 import { VerificationsChart } from "~/components/analytics/verifications-chart"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { intervalParserCache } from "~/lib/searchParams"
-import { HydrateClient, prefetch, trpc } from "~/trpc/server"
+import { HydrateClient, batchPrefetch, trpc } from "~/trpc/server"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import { LatencyTable, LatencyTableSkeleton } from "./_components/latency-table"
 import OverviewStats from "./_components/overview-stats"
@@ -27,51 +27,39 @@ export default async function DashboardOverview(props: {
   const filter = intervalParserCache.parse(props.searchParams)
   const interval = prepareInterval(filter.intervalFilter)
 
-  void Promise.all([
-    // prefetch stats
-    prefetch(
-      trpc.analytics.getOverviewStats.queryOptions(
-        {
-          interval: filter.intervalFilter,
-        },
-        {
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      )
+  batchPrefetch([
+    trpc.analytics.getOverviewStats.queryOptions(
+      {
+        interval: filter.intervalFilter,
+      },
+      {
+        staleTime: ANALYTICS_STALE_TIME,
+      }
     ),
-    // prefetch verifications
-    prefetch(
-      trpc.analytics.getVerifications.queryOptions(
-        {
-          intervalDays: interval.intervalDays,
-        },
-        {
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      )
+    trpc.analytics.getVerifications.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+      },
+      {
+        staleTime: ANALYTICS_STALE_TIME,
+      }
     ),
-    // prefetch usage
-    prefetch(
-      trpc.analytics.getUsage.queryOptions(
-        {
-          intervalDays: interval.intervalDays,
-        },
-        {
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      )
+    trpc.analytics.getUsage.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+      },
+      {
+        staleTime: ANALYTICS_STALE_TIME,
+      }
     ),
-    // prefetch verification regions
-    prefetch(
-      trpc.analytics.getVerificationRegions.queryOptions(
-        {
-          intervalDays: interval.intervalDays,
-          region: "All",
-        },
-        {
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      )
+    trpc.analytics.getVerificationRegions.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+        region: "All",
+      },
+      {
+        staleTime: ANALYTICS_STALE_TIME,
+      }
     ),
   ])
 

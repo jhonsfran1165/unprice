@@ -57,7 +57,6 @@ export const columns: ColumnDef<Subscription>[] = [
       return (
         <SuperLink
           href={`/${workspaceSlug}/${projectSlug}/customers/subscriptions/${row.original.id}`}
-          prefetch={false}
         >
           <div className="whitespace-nowrap text-sm">
             {row.original.customer.email} - {row.original.customer.name}

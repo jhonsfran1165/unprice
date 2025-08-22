@@ -236,6 +236,7 @@ export class Analytics {
       parameters: z.object({
         intervalDays: z.number().optional(),
         pageId: z.string().optional(),
+        projectId: z.string().optional(),
       }),
       data: z.object({
         date: z.coerce.date(),

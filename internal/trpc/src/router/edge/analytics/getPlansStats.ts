@@ -130,6 +130,11 @@ export const getPlansStats = protectedProjectProcedure
     })
 
     if (result.err) {
+      opts.ctx.logger.error(result.err.message, {
+        projectId,
+        interval,
+      })
+
       return { stats: {}, error: result.err.message }
     }
 

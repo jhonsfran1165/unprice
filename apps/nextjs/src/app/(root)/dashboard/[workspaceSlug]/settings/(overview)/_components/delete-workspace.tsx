@@ -37,9 +37,9 @@ export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
         toastAction("deleted")
 
         // invalidate the workspaces list to refresh the workspaces
-        await queryClient.invalidateQueries(
-          trpc.workspaces.listWorkspacesByActiveUser.queryOptions()
-        )
+        await queryClient.invalidateQueries({
+          queryKey: trpc.workspaces.listWorkspacesByActiveUser.queryKey(),
+        })
 
         // trigger the session update
         await updateSession()

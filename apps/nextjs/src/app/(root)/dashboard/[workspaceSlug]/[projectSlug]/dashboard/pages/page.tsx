@@ -5,7 +5,7 @@ import { IntervalFilter } from "~/components/analytics/interval-filter"
 import { PageFilter } from "~/components/analytics/page-filter"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { intervalParserCache, pageParserCache } from "~/lib/searchParams"
-import { HydrateClient, prefetch, trpc } from "~/trpc/server"
+import { HydrateClient, batchPrefetch, trpc } from "~/trpc/server"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import TabsDashboard from "../_components/tabs-dashboard"
 import { Browsers, BrowsersSkeleton } from "./_components/browsers"
@@ -27,45 +27,36 @@ export default async function DashboardPages(props: {
 
   const interval = prepareInterval(intervalFilter.intervalFilter)
 
-  void Promise.all([
-    // prefetch the page visits
-    prefetch(
-      trpc.analytics.getPagesOverview.queryOptions(
-        {
-          intervalDays: interval.intervalDays,
-          pageId: pageFilter.pageId,
-        },
-        {
-          enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      )
+  batchPrefetch([
+    trpc.analytics.getPagesOverview.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+        pageId: pageFilter.pageId,
+      },
+      {
+        enabled: pageFilter.pageId !== "",
+        staleTime: ANALYTICS_STALE_TIME,
+      }
     ),
-    // prefetch the countries
-    prefetch(
-      trpc.analytics.getCountryVisits.queryOptions(
-        {
-          intervalDays: interval.intervalDays,
-          page_id: pageFilter.pageId,
-        },
-        {
-          enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      )
+    trpc.analytics.getCountryVisits.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+        page_id: pageFilter.pageId,
+      },
+      {
+        enabled: pageFilter.pageId !== "",
+        staleTime: ANALYTICS_STALE_TIME,
+      }
     ),
-    // prefetch the browsers
-    prefetch(
-      trpc.analytics.getBrowserVisits.queryOptions(
-        {
-          intervalDays: interval.intervalDays,
-          page_id: pageFilter.pageId,
-        },
-        {
-          enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      )
+    trpc.analytics.getBrowserVisits.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+        page_id: pageFilter.pageId,
+      },
+      {
+        enabled: pageFilter.pageId !== "",
+        staleTime: ANALYTICS_STALE_TIME,
+      }
     ),
   ])
 

@@ -7,9 +7,7 @@ import { Calendar } from "lucide-react"
 import { useIntervalFilter } from "~/hooks/use-filter"
 
 export function IntervalFilter({ className }: { className?: string }) {
-  const [intervalFilter, setIntervalFilter] = useIntervalFilter({
-    shallow: true,
-  })
+  const [intervalFilter, setIntervalFilter] = useIntervalFilter()
 
   return (
     <Select

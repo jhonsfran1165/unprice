@@ -40,9 +40,9 @@ export function WorkspaceName(props: {
   const renamedWorkspace = useMutation(
     trpc.workspaces.rename.mutationOptions({
       onSettled: async () => {
-        await queryClient.invalidateQueries(
-          trpc.workspaces.listWorkspacesByActiveUser.queryOptions()
-        )
+        await queryClient.invalidateQueries({
+          queryKey: trpc.workspaces.listWorkspacesByActiveUser.queryKey(),
+        })
         router.refresh()
       },
       onSuccess: () => {

@@ -4,7 +4,7 @@ import { Suspense } from "react"
 import { IntervalFilter } from "~/components/analytics/interval-filter"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { intervalParserCache } from "~/lib/searchParams"
-import { HydrateClient, prefetch, trpc } from "~/trpc/server"
+import { HydrateClient, batchPrefetch, trpc } from "~/trpc/server"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import TabsDashboard from "../_components/tabs-dashboard"
 import FeatureUsageHeatmap, {
@@ -27,26 +27,22 @@ export default async function DashboardFeatures(props: {
   const filter = intervalParserCache.parse(props.searchParams)
   const interval = prepareInterval(filter.intervalFilter)
 
-  void Promise.all([
-    prefetch(
-      trpc.analytics.getFeatureHeatmap.queryOptions(
-        {
-          intervalDays: interval.intervalDays,
-        },
-        {
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      )
+  batchPrefetch([
+    trpc.analytics.getFeatureHeatmap.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+      },
+      {
+        staleTime: ANALYTICS_STALE_TIME,
+      }
     ),
-    prefetch(
-      trpc.analytics.getFeaturesOverview.queryOptions(
-        {
-          intervalDays: interval.intervalDays,
-        },
-        {
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      )
+    trpc.analytics.getFeaturesOverview.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+      },
+      {
+        staleTime: ANALYTICS_STALE_TIME,
+      }
     ),
   ])
 

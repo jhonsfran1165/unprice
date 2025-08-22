@@ -37,14 +37,14 @@ export function RenameProjectForm(props: {
   const renameProject = useMutation(
     trpc.projects.rename.mutationOptions({
       onSettled: async () => {
-        await queryClient.invalidateQueries(
-          trpc.projects.listByWorkspace.queryOptions({
+        await queryClient.invalidateQueries({
+          queryKey: trpc.projects.listByWorkspace.queryKey({
             workspaceSlug: project.workspace.slug,
-          })
-        )
-        await queryClient.invalidateQueries(
-          trpc.projects.getBySlug.queryOptions({ slug: project.slug })
-        )
+          }),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.projects.getBySlug.queryKey({ slug: project.slug }),
+        })
         router.refresh()
       },
       onSuccess: () => {

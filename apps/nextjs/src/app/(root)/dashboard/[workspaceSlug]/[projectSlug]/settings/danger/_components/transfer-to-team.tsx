@@ -54,7 +54,9 @@ export function TransferProjectToTeam({
     trpc.projects.transferToWorkspace.mutationOptions({
       onSuccess: async (data) => {
         toastAction("success")
-        await queryClient.invalidateQueries(trpc.projects.listByActiveWorkspace.queryOptions())
+        await queryClient.invalidateQueries({
+          queryKey: trpc.projects.listByActiveWorkspace.queryKey(),
+        })
         // redirect to the new workspace
         router.push(`/${data?.workspaceSlug}`)
       },

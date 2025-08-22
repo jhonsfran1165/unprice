@@ -18,22 +18,8 @@ export function PageFilter({ className }: { className?: string }) {
   const projectSlug = params.projectSlug as string
   const basePath = `/${workspaceSlug}/${projectSlug}`
 
-  const { data: pages, isLoading } = useQuery(
-    trpc.pages.listByActiveProject.queryOptions(
-      {},
-      {
-        // force refetch on navigation
-        // this is important to keep pages in sync when the user changes project or workspace
-        refetchOnWindowFocus: true,
-        refetchOnMount: true,
-        refetchOnReconnect: true,
-        staleTime: 0,
-      }
-    )
-  )
-  const [pageFilter, setPageFilter] = usePageFilter({
-    shallow: true,
-  })
+  const { data: pages, isLoading } = useQuery(trpc.pages.listByActiveProject.queryOptions({}))
+  const [pageFilter, setPageFilter] = usePageFilter()
 
   return (
     <Select

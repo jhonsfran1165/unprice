@@ -29,6 +29,12 @@ export const getVerificationRegions = protectedProjectProcedure
     })
 
     if (result.err) {
+      opts.ctx.logger.error(result.err.message, {
+        projectId,
+        region: input.region,
+        intervalDays: input.intervalDays,
+      })
+
       return { verifications: [], error: result.err.message }
     }
 

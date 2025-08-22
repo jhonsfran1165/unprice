@@ -59,9 +59,9 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const deleteMember = useMutation(
     trpc.workspaces.deleteMember.mutationOptions({
       onSettled: async () => {
-        await queryClient.invalidateQueries(
-          trpc.workspaces.listMembersByActiveWorkspace.queryOptions()
-        )
+        await queryClient.invalidateQueries({
+          queryKey: trpc.workspaces.listMembersByActiveWorkspace.queryKey(),
+        })
         router.refresh()
       },
       onSuccess: () => {
@@ -73,9 +73,9 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const changeRoleMember = useMutation(
     trpc.workspaces.changeRoleMember.mutationOptions({
       onSettled: async () => {
-        await queryClient.invalidateQueries(
-          trpc.workspaces.listMembersByActiveWorkspace.queryOptions()
-        )
+        await queryClient.invalidateQueries({
+          queryKey: trpc.workspaces.listMembersByActiveWorkspace.queryKey(),
+        })
         router.refresh()
       },
       onSuccess: () => {

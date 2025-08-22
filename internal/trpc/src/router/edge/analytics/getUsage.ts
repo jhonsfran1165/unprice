@@ -27,6 +27,11 @@ export const getUsage = protectedProjectProcedure
     })
 
     if (result.err) {
+      opts.ctx.logger.error(result.err.message, {
+        projectId,
+        intervalDays,
+      })
+
       return { usage: [], error: result.err.message }
     }
 

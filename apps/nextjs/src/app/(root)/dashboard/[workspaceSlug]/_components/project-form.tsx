@@ -54,7 +54,9 @@ export function ProjectForm(props: {
         toastAction("success")
 
         // invalidate the projects query
-        await queryClient.invalidateQueries(trpc.projects.listByActiveWorkspace.queryOptions())
+        await queryClient.invalidateQueries({
+          queryKey: trpc.projects.listByActiveWorkspace.queryKey(),
+        })
 
         if (props.onSuccess) {
           props.onSuccess(newProject)
@@ -71,7 +73,9 @@ export function ProjectForm(props: {
         toastAction("success")
 
         // invalidate the projects query
-        await queryClient.invalidateQueries(trpc.projects.listByActiveWorkspace.queryOptions())
+        await queryClient.invalidateQueries({
+          queryKey: trpc.projects.listByActiveWorkspace.queryKey(),
+        })
 
         if (props.onSuccess) {
           props.onSuccess(newProject)

@@ -83,7 +83,7 @@ EmptyPlaceholder.Description = function EmptyPlaceholderDescription({
     <Typography
       variant="p"
       affects="removePaddingMargin"
-      className={cn("mb-4 text-muted-foreground text-xs opacity-60", className)}
+      className={cn("mb-4 text-muted-foreground text-xs", className)}
       {...props}
     >
       {children}

@@ -40,7 +40,9 @@ export function DeleteProject({
     trpc.projects.delete.mutationOptions({
       onSuccess: async () => {
         toastAction("success")
-        await queryClient.invalidateQueries(trpc.projects.listByActiveWorkspace.queryOptions())
+        await queryClient.invalidateQueries({
+          queryKey: trpc.projects.listByActiveWorkspace.queryKey(),
+        })
         await revalidateAppPath(`/${workspaceSlug}`, "page")
         router.push(`/${workspaceSlug}`)
       },

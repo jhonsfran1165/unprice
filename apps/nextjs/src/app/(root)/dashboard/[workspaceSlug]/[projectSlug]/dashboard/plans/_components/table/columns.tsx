@@ -39,9 +39,13 @@ export const columns: ColumnDef<PlanConversion>[] = [
   {
     accessorKey: "date",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Date" />,
-    cell: ({ row }) => (
-      <div className="whitespace-nowrap text-sm">{formatDate(row.original.date.getTime())}</div>
-    ),
+    cell: ({ row }) => {
+      const date = row.original.date
+
+      if (!(date instanceof Date)) return null
+
+      return <div className="whitespace-nowrap text-sm">{formatDate(date.getTime())}</div>
+    },
     enableResizing: true,
     size: 20,
   },

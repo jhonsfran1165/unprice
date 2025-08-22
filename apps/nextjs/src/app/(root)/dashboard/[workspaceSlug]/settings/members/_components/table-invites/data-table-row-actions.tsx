@@ -62,9 +62,9 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const changeRoleInvite = useMutation(
     trpc.workspaces.changeRoleInvite.mutationOptions({
       onSettled: async () => {
-        await queryClient.invalidateQueries(
-          trpc.workspaces.listInvitesByActiveWorkspace.queryOptions()
-        )
+        await queryClient.invalidateQueries({
+          queryKey: trpc.workspaces.listInvitesByActiveWorkspace.queryKey(),
+        })
         router.refresh()
       },
       onSuccess: () => {
@@ -77,9 +77,9 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const deleteInvite = useMutation(
     trpc.workspaces.deleteInvite.mutationOptions({
       onSettled: async () => {
-        await queryClient.invalidateQueries(
-          trpc.workspaces.listInvitesByActiveWorkspace.queryOptions()
-        )
+        await queryClient.invalidateQueries({
+          queryKey: trpc.workspaces.listInvitesByActiveWorkspace.queryKey(),
+        })
         router.refresh()
       },
       onSuccess: () => {
@@ -92,9 +92,9 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const resendInvite = useMutation(
     trpc.workspaces.resendInvite.mutationOptions({
       onSettled: async () => {
-        await queryClient.invalidateQueries(
-          trpc.workspaces.listInvitesByActiveWorkspace.queryOptions()
-        )
+        await queryClient.invalidateQueries({
+          queryKey: trpc.workspaces.listInvitesByActiveWorkspace.queryKey(),
+        })
         router.refresh()
       },
       onSuccess: () => {

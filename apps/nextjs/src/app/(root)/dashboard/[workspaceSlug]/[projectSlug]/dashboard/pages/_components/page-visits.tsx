@@ -119,7 +119,7 @@ export function PageVisits() {
         pageId: pageFilter.pageId,
       },
       {
-        enabled: !!pageFilter.pageId && pageFilter.pageId !== "",
+        enabled: pageFilter.pageId !== "",
         staleTime: ANALYTICS_STALE_TIME,
       }
     )

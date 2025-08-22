@@ -68,7 +68,9 @@ export function FeatureForm({
     trpc.features.create.mutationOptions({
       onSuccess: async ({ feature }) => {
         form.reset(feature)
-        await queryClient.invalidateQueries(trpc.features.searchBy.queryOptions({}))
+        await queryClient.invalidateQueries({
+          queryKey: trpc.features.searchBy.queryKey(),
+        })
         toastAction("saved")
         setDialogOpen?.(false)
         router.refresh()
@@ -80,7 +82,9 @@ export function FeatureForm({
     trpc.features.update.mutationOptions({
       onSuccess: async ({ feature }) => {
         form.reset(feature)
-        await queryClient.invalidateQueries(trpc.features.searchBy.queryOptions({}))
+        await queryClient.invalidateQueries({
+          queryKey: trpc.features.searchBy.queryKey(),
+        })
         toastAction("updated")
 
         setDialogOpen?.(false)
@@ -101,7 +105,9 @@ export function FeatureForm({
   const deleteFeature = useMutation(
     trpc.features.remove.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries(trpc.features.searchBy.queryOptions({}))
+        await queryClient.invalidateQueries({
+          queryKey: trpc.features.searchBy.queryKey(),
+        })
         toastAction("deleted")
         form.reset()
       },

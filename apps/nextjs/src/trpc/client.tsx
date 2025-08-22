@@ -3,7 +3,7 @@
 import { type QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import type { TRPCLink } from "@trpc/client"
-import { createTRPCClient, httpBatchStreamLink, loggerLink } from "@trpc/client"
+import { createTRPCClient, httpBatchStreamLink, httpLink, loggerLink } from "@trpc/client"
 import { createTRPCContext } from "@trpc/tanstack-react-query"
 import { use, useState } from "react"
 
@@ -30,7 +30,9 @@ export const endingLinkClient = (opts?: {
       ...(opts?.cookies ? { cookie: opts.cookies } : {}),
     }
 
-    const edgeLink = httpBatchStreamLink({
+    // INFO: httpLink is used for edge because it's more reliable and easier to debug
+    // normally edge is use for analytics.
+    const edgeLink = httpLink({
       headers,
       transformer: transformer,
       url: `${getBaseUrl()}/api/trpc/edge`,

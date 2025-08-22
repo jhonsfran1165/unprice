@@ -34,7 +34,9 @@ export function TransferProjectToPersonal({
     trpc.projects.transferToPersonal.mutationOptions({
       onSuccess: async (data) => {
         toastAction("success")
-        await queryClient.invalidateQueries(trpc.projects.listByActiveWorkspace.queryOptions())
+        await queryClient.invalidateQueries({
+          queryKey: trpc.projects.listByActiveWorkspace.queryKey(),
+        })
         router.push(`/${data?.workspaceSlug}`)
       },
     })

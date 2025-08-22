@@ -63,3 +63,17 @@ export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(queryOptio
     void queryClient.prefetchQuery(queryOptions)
   }
 }
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export function batchPrefetch<T extends ReturnType<TRPCQueryOptions<any>>>(queryOptionsArray: T[]) {
+  const queryClient = getQueryClient()
+
+  for (const queryOptions of queryOptionsArray) {
+    if (queryOptions.queryKey[1]?.type === "infinite") {
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      void queryClient.prefetchInfiniteQuery(queryOptions as any)
+    } else {
+      void queryClient.prefetchQuery(queryOptions)
+    }
+  }
+}

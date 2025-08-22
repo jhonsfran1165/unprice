@@ -42,6 +42,11 @@ export const getCountryVisits = protectedProjectProcedure
     })
 
     if (result.err) {
+      opts.ctx.logger.error(result.err.message, {
+        projectId,
+        intervalDays,
+      })
+
       return { data: [], error: result.err.message }
     }
 

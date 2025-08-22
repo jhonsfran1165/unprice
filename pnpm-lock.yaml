@@ -302,7 +302,7 @@ importers:
         specifier: ^0.3.4
         version: 0.3.4(next@14.2.32)(react-dom@18.3.1)(react@18.3.1)
       nuqs:
-        specifier: ^1.17.6
+        specifier: ^1.20.0
         version: 1.20.0(next@14.2.32)
       openapi-types:
         specifier: 12.1.3
