@@ -1,24 +1,37 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import type { Page } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Skeleton } from "@unprice/ui/skeleton"
 import { cn } from "@unprice/ui/utils"
 import { Sticker } from "lucide-react"
 import { useParams } from "next/navigation"
+import { use } from "react"
 import { SuperLink } from "~/components/super-link"
 import { usePageFilter } from "~/hooks/use-filter"
 import { useTRPC } from "~/trpc/client"
 
-export function PageFilter({ className }: { className?: string }) {
+export function PageFilter({
+  className,
+  pagesPromise,
+}: { className?: string; pagesPromise: Promise<{ pages: Page[] }> }) {
   const trpc = useTRPC()
   const params = useParams()
   const workspaceSlug = params.workspaceSlug as string
   const projectSlug = params.projectSlug as string
   const basePath = `/${workspaceSlug}/${projectSlug}`
+  const initialData = use(pagesPromise)
 
-  const { data: pages, isLoading } = useQuery(trpc.pages.listByActiveProject.queryOptions({}))
+  const { data: pages, isLoading } = useSuspenseQuery(
+    trpc.pages.listByActiveProject.queryOptions(
+      {},
+      {
+        initialData: initialData,
+      }
+    )
+  )
   const [pageFilter, setPageFilter] = usePageFilter()
 
   return (

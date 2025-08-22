@@ -12,7 +12,7 @@ SQL >
         quantileTDigestState(0.95)(latency) AS p95_latency,
         quantileTDigestState(0.99)(latency) AS p99_latency
     FROM unprice_feature_verifications
-    GROUP BY date, region, projectId, customerId, featureSlug, entitlementId
+    GROUP BY date, projectId, region, customerId, featureSlug, entitlementId
     ORDER BY date DESC
 
 TYPE MATERIALIZED

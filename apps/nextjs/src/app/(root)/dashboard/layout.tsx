@@ -2,9 +2,7 @@ import { TooltipProvider } from "@unprice/ui/tooltip"
 
 import { allEndpointsProcedures } from "@unprice/trpc/routes"
 import { Provider } from "jotai"
-import { cookies } from "next/headers"
 import type { ReactNode } from "react"
-import { cloakSSROnlySecret } from "ssr-only-secrets"
 import { ToasterProvider } from "~/components/layout/theme-provider"
 import { TRPCReactProvider } from "~/trpc/client"
 
@@ -19,17 +17,9 @@ export default async function DashboardLayout({
   sidebar: ReactNode
   header: ReactNode
 }) {
-  // FIXME:: workaround to get the cookies on the client on SSR
-  const encryptedCookiePromise = Promise.resolve(cookies()).then((cookies) => {
-    return cloakSSROnlySecret(cookies.toString(), "COOKIE_ENCRYPTION_KEY")
-  })
-
   return (
     <div className="min-h-screen overflow-hidden ">
-      <TRPCReactProvider
-        allEndpointsProcedures={allEndpointsProcedures}
-        cookiePromise={encryptedCookiePromise}
-      >
+      <TRPCReactProvider allEndpointsProcedures={allEndpointsProcedures}>
         <TooltipProvider delayDuration={300}>
           <Provider>
             <div className="flex h-screen flex-col overflow-hidden lg:flex-row">

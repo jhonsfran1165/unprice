@@ -1,6 +1,6 @@
 "use client"
 
-import { useSuspenseQuery } from "@tanstack/react-query"
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
 import { nFormatter } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import {
@@ -10,6 +10,7 @@ import {
   ChartTooltipContent,
 } from "@unprice/ui/chart"
 import { BarChart4, Code } from "lucide-react"
+import * as React from "react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useIntervalFilter } from "~/hooks/use-filter"
@@ -25,7 +26,12 @@ const chartConfig = {
 export function UsageChart() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
-  const { data: usage, isLoading } = useSuspenseQuery(
+  const queryClient = useQueryClient()
+  const {
+    data: usage,
+    isLoading,
+    isFetching,
+  } = useSuspenseQuery(
     trpc.analytics.getUsage.queryOptions({
       intervalDays: intervalFilter.intervalDays,
     })
@@ -35,6 +41,36 @@ export function UsageChart() {
     feature: v.featureSlug,
     usage: v.sum,
   }))
+
+  // invalidate when data points change
+  React.useEffect(() => {
+    const invalidate = async () => {
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey0 = query.queryKey[0] as string[]
+
+          // only invalidate if the query is for the usage
+          if (queryKey0.join(".") !== "analytics.getUsage") return false
+
+          const queryKey1 = query.queryKey[1] as {
+            type: string
+            input: {
+              intervalDays: number
+            }
+          }
+
+          // only invalidate if the interval days is different
+          if (queryKey1.input.intervalDays !== intervalFilter.intervalDays) {
+            return true
+          }
+
+          return false
+        },
+      })
+    }
+
+    invalidate()
+  }, [isFetching])
 
   if (chartData.length === 0) {
     return (

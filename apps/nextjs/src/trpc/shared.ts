@@ -1,5 +1,8 @@
 import { QueryClient, defaultShouldDehydrateQuery } from "@tanstack/react-query"
-import { TRPCClientError } from "@trpc/client"
+import { TRPCClientError, type TRPCLink } from "@trpc/client"
+import { httpBatchStreamLink } from "@trpc/client"
+import { newId } from "@unprice/db/utils"
+import type { AppRouter } from "@unprice/trpc/routes"
 import { transformer } from "@unprice/trpc/transformer"
 import { getErrorMessage } from "~/lib/handle-error"
 import { toastAction } from "~/lib/toast"
@@ -19,10 +22,10 @@ export const createQueryClient = () =>
       queries: {
         // Since queries are prefetched on the server, we set a stale time so that
         // queries aren't immediately refetched on the client
-        staleTime: 1000 * 30, // 30 seconds
+        staleTime: 60 * 1000,
       },
       mutations:
-        typeof window === "undefined"
+        typeof window !== "undefined"
           ? {
               onError: (err) => {
                 // TODO: log this error
@@ -53,3 +56,43 @@ export const createQueryClient = () =>
       },
     },
   })
+
+export const endingLinkClient = (opts?: {
+  allEndpointsProcedures: {
+    lambda: string[]
+    edge: string[]
+  }
+}) =>
+  ((runtime) => {
+    const headers = {
+      "unprice-request-id": newId("request"),
+      "unprice-request-source":
+        typeof window !== "undefined" ? "app-react-query" : "app-react-query-ssr",
+    }
+
+    const edgeLink = httpBatchStreamLink({
+      headers,
+      transformer: transformer,
+      url: `${getBaseUrl()}/api/trpc/edge`,
+    })(runtime)
+
+    const lambdaLink = httpBatchStreamLink({
+      headers,
+      transformer: transformer,
+      url: `${getBaseUrl()}/api/trpc/lambda`,
+    })(runtime)
+
+    return (ctx) => {
+      const path = ctx.op.path.split(".") as [string, ...string[]]
+      // this is a bit of a hack, but it works for now
+      // we try to infer the endpoint based on the path
+      // and split the endpoint to the given runtime
+      const endpoint = opts?.allEndpointsProcedures.lambda.includes(ctx.op.path) ? "lambda" : "edge"
+
+      const newCtx = {
+        ...ctx,
+        op: { ...ctx.op, path: path.join(".") },
+      }
+      return endpoint === "edge" ? edgeLink(newCtx) : lambdaLink(newCtx)
+    }
+  }) satisfies TRPCLink<AppRouter>

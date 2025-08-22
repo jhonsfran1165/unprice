@@ -37,7 +37,7 @@ export function CountriesSkeleton({
   isLoading,
   error,
 }: {
-  isLoading?: boolean
+  isLoading: boolean
   error?: string
 }) {
   const [intervalFilter] = useIntervalFilter()
@@ -56,16 +56,16 @@ export function CountriesSkeleton({
           <EmptyPlaceholder.Title>
             {error
               ? "Ups, something went wrong"
-              : !pageFilter.pageId
+              : pageFilter.pageId === ""
                 ? "No page selected"
                 : "No data available"}
           </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
             {error
               ? error
-              : !pageFilter.pageId
-                ? `There is no countries visits available for the ${intervalFilter.label}. Please try again later.`
-                : "Please select a page to see countries visits."}
+              : pageFilter.pageId === ""
+                ? "Please select a page to see countries visits."
+                : `There is no countries visits available for the ${intervalFilter.label}.`}
           </EmptyPlaceholder.Description>
         </EmptyPlaceholder>
       </CardContent>
@@ -84,7 +84,7 @@ export function Countries() {
         page_id: pageId.pageId,
       },
       {
-        enabled: !!pageId.pageId && pageId.pageId !== "",
+        enabled: pageId.pageId !== "",
         staleTime: ANALYTICS_STALE_TIME,
       }
     )

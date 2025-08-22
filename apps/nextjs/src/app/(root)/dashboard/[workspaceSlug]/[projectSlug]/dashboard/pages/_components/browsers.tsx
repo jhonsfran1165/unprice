@@ -56,16 +56,16 @@ export function BrowsersSkeleton({
           <EmptyPlaceholder.Title>
             {error
               ? "Ups, something went wrong"
-              : !pageFilter.pageId
+              : pageFilter.pageId === ""
                 ? "No page selected"
                 : "No data available"}
           </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
             {error
               ? error
-              : !pageFilter.pageId
-                ? `There is no browser visits available for the ${intervalFilter.label}. Please try again later.`
-                : "Please select a page to see browser visits."}
+              : pageFilter.pageId === ""
+                ? "Please select a page to see browser visits."
+                : `There is no browser visits available for the ${intervalFilter.label}.`}
           </EmptyPlaceholder.Description>
         </EmptyPlaceholder>
       </CardContent>

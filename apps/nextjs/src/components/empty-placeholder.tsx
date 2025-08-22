@@ -23,7 +23,7 @@ export function EmptyPlaceholder({
       {isLoading ? (
         <LoadingAnimation className="size-6" />
       ) : (
-        <div className="mx-auto flex flex-col items-center justify-center text-center">
+        <div className="mx-auto flex w-full max-w-[80%] flex-col items-center justify-center text-center">
           {children}
         </div>
       )}
@@ -83,7 +83,11 @@ EmptyPlaceholder.Description = function EmptyPlaceholderDescription({
     <Typography
       variant="p"
       affects="removePaddingMargin"
-      className={cn("mb-4 text-muted-foreground text-xs", className)}
+      // takes up to 80% of the width of the parent
+      className={cn(
+        "mb-4 w-full max-w-[80%] whitespace-normal break-words text-muted-foreground text-xs",
+        className
+      )}
       {...props}
     >
       {children}

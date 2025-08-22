@@ -100,7 +100,7 @@ export function FeaturesStats() {
   const {
     data: featuresOverview,
     isLoading,
-    isSuccess,
+    isFetching,
   } = useSuspenseQuery(
     trpc.analytics.getFeaturesOverview.queryOptions({
       intervalDays: intervalFilter.intervalDays,
@@ -136,7 +136,7 @@ export function FeaturesStats() {
     }
 
     invalidate()
-  }, [isSuccess])
+  }, [isFetching])
 
   const chartData = featuresOverview.data
 

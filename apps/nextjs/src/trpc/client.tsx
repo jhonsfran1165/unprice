@@ -1,86 +1,40 @@
 "use client"
 
-import { type QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { type QueryClient, QueryClientProvider, isServer } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-import type { TRPCLink } from "@trpc/client"
-import { createTRPCClient, httpBatchStreamLink, httpLink, loggerLink } from "@trpc/client"
+import { createTRPCClient, loggerLink } from "@trpc/client"
 import { createTRPCContext } from "@trpc/tanstack-react-query"
-import { use, useState } from "react"
-
-import { newId } from "@unprice/db/utils"
 import type { AppRouter } from "@unprice/trpc/routes"
-import { transformer } from "@unprice/trpc/transformer"
-import { useSSROnlySecret } from "ssr-only-secrets"
-import { createQueryClient, getBaseUrl } from "./shared"
+import { useState } from "react"
+import { createQueryClient, endingLinkClient } from "./shared"
 
 export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>()
 
-export const endingLinkClient = (opts?: {
-  allEndpointsProcedures: {
-    lambda: string[]
-    edge: string[]
-  }
-  cookies: string | undefined
-}) =>
-  ((runtime) => {
-    const headers = {
-      "unprice-request-id": newId("request"),
-      "unprice-request-source":
-        typeof window !== "undefined" ? "app-react-query" : "app-react-query-ssr",
-      ...(opts?.cookies ? { cookie: opts.cookies } : {}),
-    }
+let browserQueryClient: QueryClient
 
-    // INFO: httpLink is used for edge because it's more reliable and easier to debug
-    // normally edge is use for analytics.
-    const edgeLink = httpLink({
-      headers,
-      transformer: transformer,
-      url: `${getBaseUrl()}/api/trpc/edge`,
-    })(runtime)
-
-    const lambdaLink = httpBatchStreamLink({
-      headers,
-      transformer: transformer,
-      url: `${getBaseUrl()}/api/trpc/lambda`,
-    })(runtime)
-
-    return (ctx) => {
-      const path = ctx.op.path.split(".") as [string, ...string[]]
-      // this is a bit of a hack, but it works for now
-      // we try to infer the endpoint based on the path
-      // and split the endpoint to the given runtime
-      const endpoint = opts?.allEndpointsProcedures.lambda.includes(ctx.op.path) ? "lambda" : "edge"
-
-      const newCtx = {
-        ...ctx,
-        op: { ...ctx.op, path: path.join(".") },
-      }
-      return endpoint === "edge" ? edgeLink(newCtx) : lambdaLink(newCtx)
-    }
-  }) satisfies TRPCLink<AppRouter>
-
-let clientQueryClientSingleton: QueryClient | undefined = undefined
-
-const getQueryClient = () => {
-  if (typeof window === "undefined") {
+function getQueryClient() {
+  if (isServer) {
     // Server: always make a new query client
     return createQueryClient()
   }
-  // Browser: use singleton pattern to keep the same query client
-  // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-  return (clientQueryClientSingleton ??= createQueryClient())
+
+  // Browser: make a new query client if we don't already have one
+  // This is very important, so we don't re-make a new client if React
+  // suspends during the initial render. This may not be needed if we
+  // have a suspense boundary BELOW the creation of the query client
+  if (!browserQueryClient) browserQueryClient = createQueryClient()
+
+  return browserQueryClient
 }
 
 export function TRPCReactProvider(props: {
   children: React.ReactNode
-  cookiePromise: Promise<string>
   allEndpointsProcedures: {
     lambda: string[]
     edge: string[]
   }
 }) {
   const queryClient = getQueryClient()
-  const cookies = useSSROnlySecret(use(props.cookiePromise), "COOKIE_ENCRYPTION_KEY")
 
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
@@ -92,7 +46,6 @@ export function TRPCReactProvider(props: {
         }),
         endingLinkClient({
           allEndpointsProcedures: props.allEndpointsProcedures,
-          cookies: cookies,
         }),
       ],
     })

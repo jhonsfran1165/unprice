@@ -5,7 +5,7 @@ export function setCorsHeaders(res: Response) {
 
   res.headers.set(
     "Access-Control-Allow-Headers",
-    "Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Unprice-Telemetry-Platform, Unprice-Telemetry-Runtime, Unprice-Telemetry-SDK, X-Trpc-Source"
+    "Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Unprice-Telemetry-Platform, Unprice-Telemetry-Runtime, Unprice-Telemetry-SDK, X-Trpc-Source, Unprice-Request-Id, Unprice-Request-Source"
   )
 }
 

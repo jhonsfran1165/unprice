@@ -83,18 +83,18 @@ export function PageVisitsSkeleton({
           <EmptyPlaceholder.Title>
             {error
               ? "Ups, something went wrong"
-              : !pageFilter.pageId
+              : pageFilter.pageId === ""
                 ? "No page selected"
                 : "No data available for this page"}
           </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
             {error
               ? error
-              : !pageFilter.pageId
-                ? `There is no data available for the ${intervalFilter.label}. Please try again later.`
-                : "Please select a page to see page views."}
+              : pageFilter.pageId === ""
+                ? "Please select a page to see page views."
+                : `There is no data available for the ${intervalFilter.label}.`}
           </EmptyPlaceholder.Description>
-          {!pageFilter.pageId && (
+          {pageFilter.pageId === "" && (
             <EmptyPlaceholder.Action>
               <SuperLink href={`${basePath}/pages`} className="mt-2 w-full">
                 <Button size={"sm"}>Create a page</Button>

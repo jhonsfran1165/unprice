@@ -5,7 +5,7 @@ import { IntervalFilter } from "~/components/analytics/interval-filter"
 import { PageFilter } from "~/components/analytics/page-filter"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { intervalParserCache, pageParserCache } from "~/lib/searchParams"
-import { HydrateClient, batchPrefetch, trpc } from "~/trpc/server"
+import { HydrateClient, api, batchPrefetch, trpc } from "~/trpc/server"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import TabsDashboard from "../_components/tabs-dashboard"
 import { Browsers, BrowsersSkeleton } from "./_components/browsers"
@@ -27,38 +27,40 @@ export default async function DashboardPages(props: {
 
   const interval = prepareInterval(intervalFilter.intervalFilter)
 
-  batchPrefetch([
-    trpc.analytics.getPagesOverview.queryOptions(
-      {
-        intervalDays: interval.intervalDays,
-        pageId: pageFilter.pageId,
-      },
-      {
-        enabled: pageFilter.pageId !== "",
-        staleTime: ANALYTICS_STALE_TIME,
-      }
-    ),
-    trpc.analytics.getCountryVisits.queryOptions(
-      {
-        intervalDays: interval.intervalDays,
-        page_id: pageFilter.pageId,
-      },
-      {
-        enabled: pageFilter.pageId !== "",
-        staleTime: ANALYTICS_STALE_TIME,
-      }
-    ),
-    trpc.analytics.getBrowserVisits.queryOptions(
-      {
-        intervalDays: interval.intervalDays,
-        page_id: pageFilter.pageId,
-      },
-      {
-        enabled: pageFilter.pageId !== "",
-        staleTime: ANALYTICS_STALE_TIME,
-      }
-    ),
-  ])
+  if (pageFilter.pageId !== "") {
+    batchPrefetch([
+      trpc.analytics.getPagesOverview.queryOptions(
+        {
+          intervalDays: interval.intervalDays,
+          pageId: pageFilter.pageId,
+        },
+        {
+          enabled: pageFilter.pageId !== "",
+          staleTime: ANALYTICS_STALE_TIME,
+        }
+      ),
+      trpc.analytics.getCountryVisits.queryOptions(
+        {
+          intervalDays: interval.intervalDays,
+          page_id: pageFilter.pageId,
+        },
+        {
+          enabled: pageFilter.pageId !== "",
+          staleTime: ANALYTICS_STALE_TIME,
+        }
+      ),
+      trpc.analytics.getBrowserVisits.queryOptions(
+        {
+          intervalDays: interval.intervalDays,
+          page_id: pageFilter.pageId,
+        },
+        {
+          enabled: pageFilter.pageId !== "",
+          staleTime: ANALYTICS_STALE_TIME,
+        }
+      ),
+    ])
+  }
 
   return (
     <DashboardShell>
@@ -66,20 +68,32 @@ export default async function DashboardPages(props: {
         <TabsDashboard baseUrl={baseUrl} activeTab="pages" />
         <div className="flex items-center gap-2">
           <IntervalFilter className="md:ml-auto" />
-          <PageFilter className="ml-auto" />
+          <PageFilter className="ml-auto" pagesPromise={api.pages.listByActiveProject({})} />
         </div>
       </div>
       <HydrateClient>
-        <Suspense fallback={<PageVisitsSkeleton isLoading={true} />}>
-          <PageVisits />
-        </Suspense>
+        {pageFilter.pageId !== "" ? (
+          <Suspense fallback={<PageVisitsSkeleton isLoading={true} />}>
+            <PageVisits />
+          </Suspense>
+        ) : (
+          <PageVisitsSkeleton isLoading={false} />
+        )}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Suspense fallback={<BrowsersSkeleton isLoading={true} />}>
-            <Browsers />
-          </Suspense>
-          <Suspense fallback={<CountriesSkeleton isLoading={true} />}>
-            <Countries />
-          </Suspense>
+          {pageFilter.pageId !== "" ? (
+            <Suspense fallback={<BrowsersSkeleton isLoading={true} />}>
+              <Browsers />
+            </Suspense>
+          ) : (
+            <BrowsersSkeleton isLoading={false} />
+          )}
+          {pageFilter.pageId !== "" ? (
+            <Suspense fallback={<CountriesSkeleton isLoading={true} />}>
+              <Countries />
+            </Suspense>
+          ) : (
+            <CountriesSkeleton isLoading={false} />
+          )}
         </div>
       </HydrateClient>
     </DashboardShell>

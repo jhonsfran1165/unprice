@@ -23,7 +23,7 @@ export function useIntervalFilter() {
 export function usePageFilter() {
   const [pageFilter, setPageFilter] = useQueryStates(pageParser, {
     history: "replace",
-    shallow: true,
+    shallow: false, // trigger a full page reload when the filter changes
     scroll: false,
     clearOnDefault: true,
     throttleMs: 1000, // throttle the query state changes to 1 second
