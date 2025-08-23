@@ -7,7 +7,7 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
 import { entitlementFlag } from "~/lib/flags"
-import { filtersDataTableCache } from "~/lib/searchParams"
+import { dataTableParams } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
 import NewApiKeyDialog from "./_components/new-api-key-dialog"
 import { columns } from "./_components/table/columns"
@@ -24,7 +24,7 @@ export default async function ApiKeysPage(props: {
     return <UpgradePlanError />
   }
 
-  const filters = filtersDataTableCache.parse(props.searchParams)
+  const filters = dataTableParams(props.searchParams)
   const { apikeys, pageCount } = await api.apikeys.listByActiveProject(filters)
 
   return (

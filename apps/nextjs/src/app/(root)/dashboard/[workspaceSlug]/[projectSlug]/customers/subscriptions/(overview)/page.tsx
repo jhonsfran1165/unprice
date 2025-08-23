@@ -10,7 +10,7 @@ import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
-import { filtersDataTableCache } from "~/lib/searchParams"
+import { dataTableParams } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
 import { columns } from "../../_components/subscriptions/table-subscriptions/columns"
 
@@ -27,7 +27,7 @@ export default async function PlanSubscriptionsPage({
 }) {
   const { workspaceSlug, projectSlug } = params
   const baseUrl = `/${workspaceSlug}/${projectSlug}/customers`
-  const filters = filtersDataTableCache.parse(searchParams)
+  const filters = dataTableParams(searchParams)
 
   const { subscriptions } = await api.subscriptions.listByActiveProject(filters)
 

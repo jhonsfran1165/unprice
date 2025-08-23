@@ -625,7 +625,7 @@ export class DurableObjectUsagelimiter extends Server {
 
   async sendVerificationsToTinybird() {
     // Process events in batches to avoid memory issues
-    const BATCH_SIZE = 700 // Max 999 for SQLite, but keep a buffer
+    const BATCH_SIZE = 500 // Max 999 for SQLite, but keep a buffer
     let processedCount = 0
     let lastProcessedId = 0
 
@@ -688,7 +688,7 @@ export class DurableObjectUsagelimiter extends Server {
                   .delete(verifications)
                   .where(inArray(verifications.id, ids))
                   .catch((e) => {
-                    this.logger.error("error deleting verifications from do", {
+                    this.logger.error(`error deleting ${ids.length} verifications from do`, {
                       error: e.message,
                     })
                   })
@@ -728,7 +728,7 @@ export class DurableObjectUsagelimiter extends Server {
 
   async sendUsageToTinybird() {
     // Process events in batches to avoid memory issues
-    const BATCH_SIZE = 700 // Max 999 for SQLite, but keep a buffer
+    const BATCH_SIZE = 500 // Max 999 for SQLite, but keep a buffer
     let processedCount = 0
     let lastProcessedId = 0
 
@@ -768,7 +768,7 @@ export class DurableObjectUsagelimiter extends Server {
           await this.analytics
             .ingestFeaturesUsage(deduplicatedEvents)
             .catch((e) => {
-              this.logger.error("Failed to send events to Tinybird:", {
+              this.logger.error(`Failed to send ${ids.length} events to Tinybird:`, {
                 error: e.message,
               })
 
@@ -781,7 +781,7 @@ export class DurableObjectUsagelimiter extends Server {
               const total = rows + quarantined
 
               if (total >= ids.length) {
-                this.logger.info(`deleted ${total} usage records from do`, {
+                this.logger.info(`deleted ${ids.length} usage records from do`, {
                   rows: total,
                 })
               } else {

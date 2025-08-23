@@ -11,7 +11,7 @@ import {
   ChartTooltipContent,
 } from "@unprice/ui/chart"
 
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { BarChart3, BarChartBig } from "lucide-react"
 import { NumberTicker } from "~/components/analytics/number-ticker"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
@@ -95,48 +95,12 @@ export function FeaturesStatsSkeleton({
 export function FeaturesStats() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
-  const queryClient = useQueryClient()
 
-  const {
-    data: featuresOverview,
-    isLoading,
-    isFetching,
-  } = useSuspenseQuery(
+  const { data: featuresOverview, isLoading } = useSuspenseQuery(
     trpc.analytics.getFeaturesOverview.queryOptions({
       intervalDays: intervalFilter.intervalDays,
     })
   )
-
-  // invalidate when data points change
-  React.useEffect(() => {
-    const invalidate = async () => {
-      // invalidate queries when interval changes if the data changed for the current interval
-      await queryClient.invalidateQueries({
-        predicate: (query) => {
-          const queryKey0 = query.queryKey[0] as string[]
-
-          // only invalidate if the query is for the features overview
-          if (queryKey0.join(".") !== "analytics.getFeaturesOverview") return false
-
-          const queryKey1 = query.queryKey[1] as {
-            type: string
-            input: {
-              intervalDays: number
-            }
-          }
-
-          // only invalidate if the interval days is different
-          if (queryKey1.input.intervalDays !== intervalFilter.intervalDays) {
-            return true
-          }
-
-          return false
-        },
-      })
-    }
-
-    invalidate()
-  }, [isFetching])
 
   const chartData = featuresOverview.data
 

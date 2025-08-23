@@ -1,10 +1,5 @@
 import { DEFAULT_INTERVAL, INTERVAL_KEYS } from "@unprice/analytics"
-import {
-  createSearchParamsCache,
-  parseAsInteger,
-  parseAsString,
-  parseAsStringEnum,
-} from "nuqs/server"
+import { createLoader, parseAsInteger, parseAsString, parseAsStringEnum } from "nuqs/server"
 
 export const filtersDataTableParsers = {
   page: parseAsInteger.withDefault(1),
@@ -23,6 +18,6 @@ export const pageParser = {
   pageId: parseAsString.withDefault(""),
 }
 
-export const intervalParserCache = createSearchParamsCache(intervalParser)
-export const filtersDataTableCache = createSearchParamsCache(filtersDataTableParsers)
-export const pageParserCache = createSearchParamsCache(pageParser)
+export const intervalParams = createLoader(intervalParser)
+export const dataTableParams = createLoader(filtersDataTableParsers)
+export const pageParams = createLoader(pageParser)

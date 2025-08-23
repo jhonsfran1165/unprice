@@ -5,7 +5,7 @@ import { prepareInterval } from "@unprice/analytics"
 import { IntervalFilter } from "~/components/analytics/interval-filter"
 import { StatsSkeleton } from "~/components/analytics/stats-cards"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
-import { intervalParserCache } from "~/lib/searchParams"
+import { intervalParams } from "~/lib/searchParams"
 import { HydrateClient, batchPrefetch, trpc } from "~/trpc/server"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import TabsDashboard from "../_components/tabs-dashboard"
@@ -22,7 +22,7 @@ export default async function DashboardPlans(props: {
 }) {
   const { projectSlug, workspaceSlug } = props.params
   const baseUrl = `/${workspaceSlug}/${projectSlug}`
-  const filter = intervalParserCache.parse(props.searchParams)
+  const filter = intervalParams(props.searchParams)
   const interval = prepareInterval(filter.intervalFilter)
 
   // prefetch

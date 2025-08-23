@@ -4,7 +4,7 @@ import { Suspense } from "react"
 import { IntervalFilter } from "~/components/analytics/interval-filter"
 import { PageFilter } from "~/components/analytics/page-filter"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
-import { intervalParserCache, pageParserCache } from "~/lib/searchParams"
+import { intervalParams, pageParams } from "~/lib/searchParams"
 import { HydrateClient, api, batchPrefetch, trpc } from "~/trpc/server"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import TabsDashboard from "../_components/tabs-dashboard"
@@ -22,8 +22,8 @@ export default async function DashboardPages(props: {
 }) {
   const { projectSlug, workspaceSlug } = props.params
   const baseUrl = `/${workspaceSlug}/${projectSlug}`
-  const intervalFilter = intervalParserCache.parse(props.searchParams)
-  const pageFilter = pageParserCache.parse(props.searchParams)
+  const intervalFilter = intervalParams(props.searchParams)
+  const pageFilter = pageParams(props.searchParams)
 
   const interval = prepareInterval(intervalFilter.intervalFilter)
 

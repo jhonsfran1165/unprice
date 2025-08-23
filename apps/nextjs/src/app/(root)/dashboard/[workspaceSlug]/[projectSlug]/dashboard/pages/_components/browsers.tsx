@@ -84,7 +84,7 @@ export function Browsers() {
         page_id: pageId.pageId,
       },
       {
-        enabled: !!pageId.pageId && pageId.pageId !== "",
+        enabled: pageId.pageId !== "",
         staleTime: ANALYTICS_STALE_TIME,
       }
     )

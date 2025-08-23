@@ -7,7 +7,7 @@ import { StatsSkeleton } from "~/components/analytics/stats-cards"
 import { UsageChart } from "~/components/analytics/usage-chart"
 import { VerificationsChart } from "~/components/analytics/verifications-chart"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
-import { intervalParserCache } from "~/lib/searchParams"
+import { intervalParams } from "~/lib/searchParams"
 import { HydrateClient, batchPrefetch, trpc } from "~/trpc/server"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import { LatencyTable, LatencyTableSkeleton } from "./_components/latency-table"
@@ -24,7 +24,7 @@ export default async function DashboardOverview(props: {
 }) {
   const { projectSlug, workspaceSlug } = props.params
   const baseUrl = `/${workspaceSlug}/${projectSlug}`
-  const filter = intervalParserCache.parse(props.searchParams)
+  const filter = intervalParams(props.searchParams)
   const interval = prepareInterval(filter.intervalFilter)
 
   batchPrefetch([

@@ -3,7 +3,7 @@ import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
 import { IntervalFilter } from "~/components/analytics/interval-filter"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
-import { intervalParserCache } from "~/lib/searchParams"
+import { intervalParams } from "~/lib/searchParams"
 import { HydrateClient, batchPrefetch, trpc } from "~/trpc/server"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import TabsDashboard from "../_components/tabs-dashboard"
@@ -24,7 +24,7 @@ export default async function DashboardFeatures(props: {
   const { projectSlug, workspaceSlug } = props.params
   const baseUrl = `/${workspaceSlug}/${projectSlug}`
 
-  const filter = intervalParserCache.parse(props.searchParams)
+  const filter = intervalParams(props.searchParams)
   const interval = prepareInterval(filter.intervalFilter)
 
   batchPrefetch([

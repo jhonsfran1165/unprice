@@ -19,14 +19,13 @@ SQL >
         countMerge(total_views) AS total_views
     FROM unprice_plan_views_mv
     WHERE
-        1 = 1
+        {% if defined(intervalDays) %}
+            date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
+        {% else %}
+            date >= toStartOfDay(today() - 7)
+        {% end %}
         {% if defined(projectId) %}
             AND project_id = {{ String(projectId) }}
-        {% end %}
-        {% if defined(intervalDays) %}
-            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
-        {% else %}
-            AND date >= toStartOfDay(today() - 7)
         {% end %}
     GROUP BY plan_version_id, page_id
 
@@ -44,14 +43,13 @@ SQL >
         countMerge(total_clicks) AS total_clicks
     FROM unprice_plan_clicks_mv
     WHERE
-        1 = 1
+        {% if defined(intervalDays) %}
+            date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
+        {% else %}
+            date >= toStartOfDay(today() - 7)
+        {% end %}
         {% if defined(projectId) %}
             AND project_id = {{ String(projectId) }}
-        {% end %}
-        {% if defined(intervalDays) %}
-            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
-        {% else %}
-            AND date >= toStartOfDay(today() - 7)
         {% end %}
     GROUP BY plan_version_id, page_id
 
@@ -64,22 +62,20 @@ DESCRIPTION >
 SQL >
     %
     SELECT
-        date,
         plan_version_id,
         page_id,
         argMaxMerge(final_status) AS final_status
     FROM unprice_signups_mv
     WHERE
-        1 = 1
+        {% if defined(intervalDays) %}
+            date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
+        {% else %}
+            date >= toStartOfDay(today() - 7)
+        {% end %}
         {% if defined(project_id) %}
             AND project_id = {{ String(project_id) }}
         {% end %}
-        {% if defined(intervalDays) %}
-            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
-        {% else %}
-            AND date >= toStartOfDay(today() - 7)
-        {% end %}
-    GROUP BY date, plan_version_id, page_id
+    GROUP BY plan_version_id, page_id
 
 NODE plan_signups
 DESCRIPTION >
@@ -94,13 +90,6 @@ SQL >
         COUNTIf(final_status = 'waiting_payment_provider_setup') AS signups_pending,
         COUNTIf(final_status = 'signup_failed') AS signups_failed
     FROM plan_signups_merged
-    WHERE
-        1 = 1
-        {% if defined(intervalDays) %}
-            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
-        {% else %}
-            AND date >= toStartOfDay(today() - 7)
-        {% end %}
     GROUP BY plan_version_id, page_id
 
 NODE conversion_summary

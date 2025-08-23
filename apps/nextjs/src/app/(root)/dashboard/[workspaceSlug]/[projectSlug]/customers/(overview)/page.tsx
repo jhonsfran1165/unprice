@@ -14,7 +14,7 @@ import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
 import { entitlementFlag } from "~/lib/flags"
-import { filtersDataTableCache } from "~/lib/searchParams"
+import { dataTableParams } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
 import { CustomerDialog } from "../_components/customers/customer-dialog"
 
@@ -24,7 +24,7 @@ export default async function ProjectUsersPage(props: {
 }) {
   const { workspaceSlug, projectSlug } = props.params
   const baseUrl = `/${workspaceSlug}/${projectSlug}/customers`
-  const filters = filtersDataTableCache.parse(props.searchParams)
+  const filters = dataTableParams(props.searchParams)
 
   const isCustomersEnabled = await entitlementFlag(FEATURE_SLUGS.CUSTOMERS)
 
