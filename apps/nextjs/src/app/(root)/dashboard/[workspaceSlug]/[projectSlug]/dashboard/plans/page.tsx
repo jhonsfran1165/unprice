@@ -3,14 +3,13 @@ import { Suspense } from "react"
 
 import { prepareInterval } from "@unprice/analytics"
 import { IntervalFilter } from "~/components/analytics/interval-filter"
-import { StatsSkeleton } from "~/components/analytics/stats-cards"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { intervalParams } from "~/lib/searchParams"
 import { HydrateClient, batchPrefetch, trpc } from "~/trpc/server"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import TabsDashboard from "../_components/tabs-dashboard"
 import { PlansConversion, PlansConversionSkeleton } from "./_components/plans-convertion"
-import PlansStats from "./_components/plans-stats"
+import PlansStats, { PlansStatsSkeleton } from "./_components/plans-stats"
 
 export const dynamic = "force-dynamic"
 
@@ -48,30 +47,7 @@ export default async function DashboardPlans(props: {
         <IntervalFilter className="ml-auto" />
       </div>
       <HydrateClient>
-        <Suspense
-          fallback={
-            <StatsSkeleton
-              stats={Object.entries({
-                totalRevenue: {
-                  title: "Total Revenue",
-                },
-                newSignups: {
-                  title: "New Signups",
-                },
-                newSubscriptions: {
-                  title: "New Subscriptions",
-                },
-                newCustomers: {
-                  title: "New Customers",
-                },
-              }).map(([key]) => {
-                return {
-                  title: key,
-                }
-              })}
-            />
-          }
-        >
+        <Suspense fallback={<PlansStatsSkeleton isLoading={true} />}>
           <PlansStats />
         </Suspense>
         <Suspense fallback={<PlansConversionSkeleton />}>

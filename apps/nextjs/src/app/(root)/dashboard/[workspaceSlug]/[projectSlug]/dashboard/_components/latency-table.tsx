@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { Typography } from "@unprice/ui/typography"
 import { useMemo } from "react"
 import { DataTable } from "~/components/data-table/data-table"
@@ -26,7 +26,7 @@ export function LatencyTable() {
   const trpc = useTRPC()
   const [intervalFilter] = useIntervalFilter()
 
-  const { data: verifications, isLoading } = useQuery(
+  const { data: verifications, isLoading } = useSuspenseQuery(
     trpc.analytics.getVerificationRegions.queryOptions({
       intervalDays: intervalFilter.intervalDays,
       region: "All",
@@ -36,7 +36,7 @@ export function LatencyTable() {
   // group by region deleting the date and sum the count, p50_latency, p95_latency, p99_latency
   const groupedByRegion = useMemo(
     () =>
-      verifications?.verifications.reduce(
+      verifications.verifications.reduce(
         (acc, curr) => {
           if (!curr.region) return acc
           const region = curr.region
@@ -65,14 +65,12 @@ export function LatencyTable() {
     [intervalFilter.intervalDays]
   )
 
-  const data = groupedByRegion
-    ? Object.values(groupedByRegion).map((region) => {
-        return {
-          ...region,
-          trend: verifications?.verifications.filter((v) => v.region === region.region) ?? [],
-        }
-      })
-    : undefined
+  const data = Object.values(groupedByRegion).map((region) => {
+    return {
+      ...region,
+      trend: verifications.verifications.filter((v) => v.region === region.region),
+    }
+  })
 
   return (
     <div className="mt-4">
@@ -84,13 +82,13 @@ export function LatencyTable() {
           Latency by region for the {intervalFilter.label}
         </Typography>
       </div>
-      {isLoading || !data ? (
+      {isLoading ? (
         <LatencyTableSkeleton />
       ) : (
         <DataTable
           columns={columns}
           data={data}
-          error={verifications?.error}
+          error={verifications.error}
           filterOptions={{
             filterBy: "region",
             filterColumns: true,

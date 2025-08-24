@@ -118,7 +118,7 @@ export function FeaturesStats() {
     [intervalFilter.intervalDays]
   )
 
-  if (isLoading || chartData.length === 0) {
+  if (isLoading || !chartData || chartData.length === 0) {
     return <FeaturesStatsSkeleton isLoading={isLoading} error={featuresOverview.error} />
   }
 

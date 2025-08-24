@@ -24,17 +24,21 @@ export function PlansConversion() {
   const trpc = useTRPC()
   const [intervalFilter] = useIntervalFilter()
 
-  const { data: plansConversion } = useSuspenseQuery(
+  const { data: plansConversion, isLoading } = useSuspenseQuery(
     trpc.analytics.getPlansConversion.queryOptions({
       intervalDays: intervalFilter.intervalDays,
     })
   )
 
+  if (isLoading) {
+    return <PlansConversionSkeleton />
+  }
+
   return (
     <DataTable
       columns={columns}
-      data={plansConversion?.data ?? []}
-      error={plansConversion?.error}
+      data={plansConversion.data}
+      error={plansConversion.error}
       filterOptions={{
         filterBy: "plan_version_id",
         filterColumns: true,

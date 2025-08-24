@@ -58,7 +58,7 @@ export default async function DashboardFeatures(props: {
         <Suspense
           fallback={
             <FeatureUsageHeatmap>
-              <FeatureUsageHeatmapSkeleton />
+              <FeatureUsageHeatmapSkeleton isLoading={true} />
             </FeatureUsageHeatmap>
           }
         >

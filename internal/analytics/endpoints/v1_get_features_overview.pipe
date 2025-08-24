@@ -9,17 +9,17 @@ SQL >
     %
     WITH
         toStartOfDay(
-            toDateTime64(today() - {{ Int32(intervalDays) }}, 3),
+            toDateTime64(today() - {{ Int32(intervalDays) }}, 1),
             {{ String(timezone, 'UTC') }}
         ) AS start,
         toStartOfDay(
-            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 3),
+            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 1),
             {{ String(timezone, 'UTC') }}
         ) AS end
     SELECT
         arrayJoin(
             arrayMap(
-                x -> toDateTime64(toStartOfDay(toDateTime64(x, 3), {{ String(timezone, 'UTC') }}), 3),
+                x -> toDateTime64(toStartOfDay(toDateTime64(x, 1), {{ String(timezone, 'UTC') }}), 1),
                 range(toUInt32(start), toUInt32(end + 86400),
                 86400
             )
@@ -32,16 +32,16 @@ SQL >
     %
     WITH
         toStartOfHour(
-            toDateTime64(timestampAdd(today(), INTERVAL - {{ Int32(intervalDays, 1) }} DAY), 3),
+            toDateTime64(timestampAdd(today(), INTERVAL - {{ Int32(intervalDays, 1) }} DAY), 1),
             {{ String(timezone, 'UTC') }}
         ) AS start,
         toStartOfHour(
-            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 3),
+            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 1),
             {{ String(timezone, 'UTC') }}
         ) AS end
     SELECT
         arrayJoin(
-            arrayMap(x -> toDateTime64(x, 3), range(toUInt32(start), toUInt32(end + 3600), 3600)
+            arrayMap(x -> toDateTime64(x, 1), range(toUInt32(start), toUInt32(end + 3600), 3600)
         )
     ) as interval
 

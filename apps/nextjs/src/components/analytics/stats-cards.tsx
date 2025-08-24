@@ -14,10 +14,12 @@ type StatsProps = {
 
 export const StatsSkeleton = ({
   stats,
+  isLoading,
 }: {
   stats: {
     title: string
   }[]
+  isLoading?: boolean
 }) => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -29,7 +31,11 @@ export const StatsSkeleton = ({
               <Skeleton className="h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <Skeleton className="my-1 h-[28px] w-16" />
+              {isLoading ? (
+                <Skeleton className="my-1 h-[28px] w-16" />
+              ) : (
+                <NumberTicker value={0} decimalPlaces={0} startValue={0} />
+              )}
               <p className="text-muted-foreground text-xs">from current billing period</p>
             </CardContent>
           </Card>

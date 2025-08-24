@@ -33,7 +33,9 @@ function Pill({ label, value }: { label: string | undefined; value: string | und
 export const columns: ColumnDef<VerificationsMetricsGrouped>[] = [
   {
     accessorKey: "region",
-    header: () => <div className="px-4">Region</div>,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Region" className="px-4" />
+    ),
     enableSorting: false,
     enableHiding: false,
     size: 10,
@@ -63,7 +65,7 @@ export const columns: ColumnDef<VerificationsMetricsGrouped>[] = [
   },
   {
     accessorKey: "trend",
-    header: "Trend",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Trend" />,
     cell: ({ row }) => {
       return <ChartLineRegion trend={row.original.trend} className="h-[50px]" />
     },

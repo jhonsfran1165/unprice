@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { nFormatter } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import {
@@ -60,7 +60,7 @@ export function VerificationsChart() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
 
-  const { data: verifications, isLoading } = useQuery(
+  const { data: verifications, isLoading } = useSuspenseQuery(
     trpc.analytics.getVerifications.queryOptions(
       {
         intervalDays: intervalFilter.intervalDays,
@@ -71,7 +71,7 @@ export function VerificationsChart() {
     )
   )
 
-  if (!verifications || verifications.verifications.length === 0) {
+  if (isLoading || !verifications || verifications.verifications.length === 0) {
     return <VerificationsChartSkeleton isLoading={isLoading} error={verifications?.error} />
   }
 

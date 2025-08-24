@@ -138,7 +138,7 @@ export function PageVisits() {
     [intervalFilter.intervalDays, pageFilter.pageId]
   )
 
-  if (isLoadingPageVisits || chartData.length === 0) {
+  if (isLoadingPageVisits || !chartData || chartData.length === 0) {
     return <PageVisitsSkeleton isLoading={isLoadingPageVisits} error={pageVisits.error} />
   }
 

@@ -14,7 +14,6 @@ import {
   CardTitle,
 } from "@unprice/ui/card"
 import { Separator } from "@unprice/ui/separator"
-import { Skeleton } from "@unprice/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@unprice/ui/tooltip"
 import { BarChart, HelpCircle } from "lucide-react"
 import { CodeApiSheet } from "~/components/code-api-sheet"
@@ -40,7 +39,7 @@ const formatPlanName = (slug: string): string => {
   return slug.charAt(0).toUpperCase() + slug.slice(1)
 }
 
-const FeatureUsageHeatmapEmptyState = ({
+export const FeatureUsageHeatmapSkeleton = ({
   isLoading,
   error,
 }: { isLoading?: boolean; error?: string }) => {
@@ -67,56 +66,6 @@ const FeatureUsageHeatmapEmptyState = ({
   )
 }
 
-export const FeatureUsageHeatmapSkeleton = () => {
-  return (
-    <div className="overflow-x-auto">
-      <div className="min-w-[600px]">
-        {/* Header Row - Plans */}
-        <div className={"mb-4 grid grid-cols-4 gap-2"}>
-          <div className="flex items-center justify-end font-semibold text-sm">Feature \ Plan</div>
-          {["plan1", "plan2", "plan3"].map((planSlug) => (
-            <div key={planSlug} className="flex items-center justify-center gap-2 align-middle">
-              <Skeleton className="mr-4 h-[22px] w-[57px]" />
-            </div>
-          ))}
-        </div>
-        {/* Data Rows - Features */}
-        {[
-          "feature1",
-          "feature2",
-          "feature3",
-          "feature4",
-          "feature5",
-          "feature6",
-          "feature7",
-          "feature8",
-        ].map((featureSlug) => (
-          <div key={featureSlug} className={"grid grid-cols-4"}>
-            {/* Feature Name */}
-            <div className="flex items-center justify-end align-middle">
-              <Skeleton className="mr-4 h-[22px] w-[57px]" />
-            </div>
-
-            {/* Plan Usage Cells */}
-            {["plan1", "plan2", "plan3"].map((planSlug) => {
-              return (
-                <div key={planSlug}>
-                  <Skeleton
-                    className={`flex h-12 w-full cursor-pointer items-center justify-center rounded-none ${getIntensityColor(10)}
-                              `}
-                  >
-                    <span className="font-medium text-xs">—</span>
-                  </Skeleton>
-                </div>
-              )
-            })}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 export function FeatureUsageHeatmapContent() {
   const trpc = useTRPC()
   const [{ intervalDays }] = useIntervalFilter()
@@ -133,21 +82,23 @@ export function FeatureUsageHeatmapContent() {
   )
 
   // Get unique plans and features
-  const plans = [...new Set(featureUsageEvents?.data.map((event) => event.plan_slug))]
-  const features = [...new Set(featureUsageEvents?.data.map((event) => event.feature_slug))]
+  const plans = [...new Set(featureUsageEvents.data.map((event) => event.plan_slug))]
+  const features = [...new Set(featureUsageEvents.data.map((event) => event.feature_slug))]
 
   // Create lookup function for event data
   const getEventData = (planSlug: string, featureSlug: string): FeatureUsageEvent | null => {
     return (
-      featureUsageEvents?.data.find(
+      featureUsageEvents.data.find(
         (event) => event.plan_slug === planSlug && event.feature_slug === featureSlug
       ) || null
     )
   }
 
-  return featureUsageEvents?.data.length === 0 ? (
-    <FeatureUsageHeatmapEmptyState isLoading={isLoading} error={featureUsageEvents?.error} />
-  ) : (
+  if (isLoading || !featureUsageEvents || featureUsageEvents.data.length === 0) {
+    return <FeatureUsageHeatmapSkeleton isLoading={isLoading} error={featureUsageEvents?.error} />
+  }
+
+  return (
     <TooltipProvider>
       <div className="overflow-x-auto">
         <div className="min-w-[600px]">

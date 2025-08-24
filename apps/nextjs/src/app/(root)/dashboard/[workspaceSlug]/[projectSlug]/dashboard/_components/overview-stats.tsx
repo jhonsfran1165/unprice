@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { Activity, DollarSign, Users } from "lucide-react"
 import StatsCards, { StatsSkeleton } from "~/components/analytics/stats-cards"
 import { useIntervalFilter } from "~/hooks/use-filter"
@@ -13,7 +13,7 @@ export const iconsOverviewStats = {
   newCustomers: Users,
 }
 
-export const OverviewStatsSkeleton = () => {
+export const OverviewStatsSkeleton = ({ isLoading }: { isLoading?: boolean }) => {
   return (
     <StatsSkeleton
       stats={Object.entries({
@@ -34,6 +34,7 @@ export const OverviewStatsSkeleton = () => {
           title: key,
         }
       })}
+      isLoading={isLoading}
     />
   )
 }
@@ -41,12 +42,12 @@ export const OverviewStatsSkeleton = () => {
 const OverviewStats = () => {
   const trpc = useTRPC()
   const [interval] = useIntervalFilter()
-  const { data: stats, isLoading } = useQuery(
+  const { data: stats, isLoading } = useSuspenseQuery(
     trpc.analytics.getOverviewStats.queryOptions({ interval: interval.name })
   )
 
-  if (!stats || isLoading) {
-    return <OverviewStatsSkeleton />
+  if (isLoading || !stats.stats) {
+    return <OverviewStatsSkeleton isLoading={isLoading} />
   }
 
   const statsCards = Object.entries(stats.stats).map(([key, value]) => {

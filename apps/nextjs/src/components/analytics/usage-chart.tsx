@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { nFormatter } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import {
@@ -58,7 +58,7 @@ export const UsageChartSkeleton = ({
 export function UsageChart() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
-  const { data: usage, isLoading } = useQuery(
+  const { data: usage, isLoading } = useSuspenseQuery(
     trpc.analytics.getUsage.queryOptions(
       {
         intervalDays: intervalFilter.intervalDays,
@@ -69,7 +69,7 @@ export function UsageChart() {
     )
   )
 
-  if (!usage || usage.usage.length === 0) {
+  if (isLoading || !usage || usage.usage.length === 0) {
     return <UsageChartSkeleton isLoading={isLoading} error={usage?.error} />
   }
 

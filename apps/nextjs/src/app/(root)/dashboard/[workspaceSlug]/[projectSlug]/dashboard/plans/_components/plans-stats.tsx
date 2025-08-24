@@ -2,7 +2,7 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { Calculator, Combine, GalleryHorizontalEnd, Users } from "lucide-react"
-import StatsCards from "~/components/analytics/stats-cards"
+import StatsCards, { StatsSkeleton } from "~/components/analytics/stats-cards"
 import { useIntervalFilter } from "~/hooks/use-filter"
 import { useTRPC } from "~/trpc/client"
 
@@ -13,12 +13,41 @@ export const iconsPlansStats = {
   totalFeatures: Combine,
 }
 
+export const PlansStatsSkeleton = ({ isLoading }: { isLoading?: boolean }) => {
+  return (
+    <StatsSkeleton
+      stats={Object.entries({
+        totalPlans: {
+          title: "Total Revenue",
+        },
+        totalSubscriptions: {
+          title: "Total Subscriptions",
+        },
+        totalPlanVersions: {
+          title: "Total Plan Versions",
+        },
+        totalFeatures: {
+          title: "New Customers",
+        },
+      }).map(([key]) => {
+        return {
+          title: key,
+        }
+      })}
+      isLoading={isLoading}
+    />
+  )
+}
 const PlansStats = () => {
   const trpc = useTRPC()
   const [interval] = useIntervalFilter()
-  const { data: stats } = useSuspenseQuery(
+  const { data: stats, isLoading } = useSuspenseQuery(
     trpc.analytics.getPlansStats.queryOptions({ interval: interval.name })
   )
+
+  if (isLoading || !stats.stats) {
+    return <PlansStatsSkeleton isLoading={isLoading} />
+  }
 
   const statsCards = Object.entries(stats.stats).map(([key, value]) => {
     return {
