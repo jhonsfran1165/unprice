@@ -109,17 +109,17 @@ export const createTRPCContext = async (opts: {
         defaultFields: { userId, region, country, source, ip, pathname, userAgent },
         dataset: env.AXIOM_DATASET,
         environment: env.NODE_ENV,
-        application: "trpc",
+        service: "trpc",
       })
     : new ConsoleLogger({
         requestId,
         environment: env.NODE_ENV,
-        application: "trpc",
+        service: "trpc",
         defaultFields: { userId, region, country, source, ip, pathname },
       })
 
   const metrics: Metrics = env.EMIT_METRICS_LOGS
-    ? new LogdrainMetrics({ requestId, logger, environment: env.NODE_ENV, application: "trpc" })
+    ? new LogdrainMetrics({ requestId, logger, environment: env.NODE_ENV, service: "trpc" })
     : new NoopMetrics()
 
   const cacheService = new CacheService(

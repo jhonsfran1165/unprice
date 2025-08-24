@@ -1,4 +1,5 @@
 import { createTRPCRouter } from "#trpc"
+import { analyticsRouter } from "./analytics"
 import { apiKeyRouter } from "./apikeys"
 import { authRouter } from "./auth"
 import { customersRouter } from "./customers"
@@ -33,6 +34,7 @@ export const lambdaEndpoints = {
   customers: customersRouter,
   pages: pageRouter,
   paymentProvider: paymentProviderRouter,
+  analytics: analyticsRouter,
 }
 
 export const lambdaRouter = createTRPCRouter(lambdaEndpoints)

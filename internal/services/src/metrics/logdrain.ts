@@ -7,18 +7,18 @@ export class LogdrainMetrics implements Metrics {
   private readonly requestId: string
   private readonly logger: Logger
   private readonly environment: LogSchema["environment"]
-  private readonly application: LogSchema["application"]
+  private readonly service: LogSchema["service"]
 
   constructor(opts: {
     requestId: string
     logger: Logger
     environment: LogSchema["environment"]
-    application: LogSchema["application"]
+    service: LogSchema["service"]
   }) {
     this.requestId = opts.requestId
     this.logger = opts.logger
     this.environment = opts.environment
-    this.application = opts.application
+    this.service = opts.service
   }
 
   public emit(metric: Metric): void {
@@ -28,7 +28,7 @@ export class LogdrainMetrics implements Metrics {
       time: Date.now(),
       metric,
       environment: this.environment,
-      application: this.application,
+      service: this.service,
     })
 
     this.logger.emit(log.toString(), {

@@ -6,17 +6,17 @@ export class ConsoleLogger implements Logger {
   private readonly defaultFields?: Fields
 
   private readonly environment: LogSchema["environment"]
-  private readonly application: LogSchema["application"]
+  private readonly service: LogSchema["service"]
 
   constructor(opts: {
     requestId: string
     environment: LogSchema["environment"]
-    application: LogSchema["application"]
+    service: LogSchema["service"]
     defaultFields?: Fields
   }) {
     this.requestId = opts.requestId
     this.environment = opts.environment
-    this.application = opts.application
+    this.service = opts.service
     this.defaultFields = opts?.defaultFields ?? {}
   }
 
@@ -33,7 +33,7 @@ export class ConsoleLogger implements Logger {
       message,
       context: { ...this.defaultFields, ...fields },
       environment: this.environment,
-      application: this.application,
+      service: this.service,
     }).toString()
   }
 

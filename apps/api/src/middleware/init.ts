@@ -65,7 +65,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
     const logger = new ConsoleLogger({
       requestId,
       environment: c.env.NODE_ENV,
-      application: "api",
+      service: "api",
       defaultFields: {
         isolateId: c.get("isolateId"),
         isolateCreatedAt: c.get("isolateCreatedAt"),
@@ -91,7 +91,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
           requestId,
           environment: c.env.NODE_ENV,
           logger,
-          application: "api",
+          service: "api",
         })
       : new NoopMetrics()
 

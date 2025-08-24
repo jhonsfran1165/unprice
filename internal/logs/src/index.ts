@@ -14,7 +14,7 @@ export const logSchema = z.discriminatedUnion("type", [
     message: z.string(),
     context: z.record(z.any()).optional(),
     environment: z.enum(["development", "test", "production", "preview"]).default("development"),
-    application: z.string(),
+    service: z.string(),
   }),
   z.object({
     type: z.literal("metric"),
@@ -22,7 +22,7 @@ export const logSchema = z.discriminatedUnion("type", [
     time: z.number(),
     metric: metricSchema,
     environment: z.enum(["development", "test", "production", "preview"]).default("development"),
-    application: z.string(),
+    service: z.string(),
   }),
 ])
 

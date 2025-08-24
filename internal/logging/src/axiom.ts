@@ -13,7 +13,7 @@ export class AxiomLogger implements Logger {
   private readonly client: LoggerAxiom
   private readonly defaultFields?: Fields
   private readonly environment: LogSchema["environment"]
-  private readonly application: LogSchema["application"]
+  private readonly service: LogSchema["service"]
 
   constructor(opts: {
     requestId: string
@@ -21,16 +21,16 @@ export class AxiomLogger implements Logger {
     apiKey: string
     dataset: string
     environment: LogSchema["environment"]
-    application: LogSchema["application"]
+    service: LogSchema["service"]
   }) {
     this.requestId = opts.requestId
     this.defaultFields = {
       ...opts?.defaultFields,
-      application: opts.application,
+      service: opts.service,
       environment: opts.environment,
     }
     this.environment = opts.environment
-    this.application = opts.application
+    this.service = opts.service
 
     this.client = new LoggerAxiom({
       transports: [
@@ -50,7 +50,7 @@ export class AxiomLogger implements Logger {
       level,
       message,
       environment: this.environment,
-      application: this.application,
+      service: this.service,
     }).toString()
   }
 

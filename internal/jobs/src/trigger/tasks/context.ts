@@ -39,7 +39,7 @@ export const createContext = async ({
   const logger = new ConsoleLogger({
     requestId: taskId,
     environment: env.NODE_ENV,
-    application: "jobs",
+    service: "jobs",
     defaultFields: {
       ...defaultFields,
       subscriptionId,

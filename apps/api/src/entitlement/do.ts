@@ -53,7 +53,7 @@ export class DurableObjectUsagelimiter extends Server {
 
     this.logger = new ConsoleLogger({
       requestId: this.ctx.id.toString(),
-      application: "usagelimiter",
+      service: "usagelimiter",
       environment: env.NODE_ENV,
     })
 
