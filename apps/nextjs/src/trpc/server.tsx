@@ -2,18 +2,16 @@ import "server-only"
 
 import { dehydrate } from "@tanstack/react-query"
 import { HydrationBoundary } from "@tanstack/react-query"
-import { createTRPCClient, loggerLink } from "@trpc/client"
 import type { TRPCQueryOptions } from "@trpc/tanstack-react-query"
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query"
 import { getSession } from "@unprice/auth/server-rsc"
 import { COOKIES_APP } from "@unprice/config"
 import { newId } from "@unprice/db/utils"
 import { createCallerFactory, createTRPCContext } from "@unprice/trpc"
-import type { AppRouter } from "@unprice/trpc/routes"
-import { allEndpointsProcedures, appRouter } from "@unprice/trpc/routes"
+import { appRouter } from "@unprice/trpc/routes"
 import { cookies, headers } from "next/headers"
 import { cache } from "react"
-import { createQueryClient, endingLinkClient } from "./shared"
+import { createQueryClient } from "./shared"
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
@@ -47,22 +45,11 @@ export const trpc = createTRPCOptionsProxy({
   router: appRouter,
   queryClient: getQueryClient,
   ctx: createContext,
-  client: createTRPCClient<AppRouter>({
-    links: [
-      loggerLink({
-        enabled: (opts) =>
-          process.env.TRPC_LOGGER === "true" ||
-          (opts.direction === "down" && opts.result instanceof Error),
-      }),
-      endingLinkClient({
-        allEndpointsProcedures: allEndpointsProcedures,
-      }),
-    ],
-  }),
 })
 
 export function HydrateClient(props: { children: React.ReactNode }) {
-  const dehydratedState = dehydrate(getQueryClient())
+  const queryClient = getQueryClient()
+  const dehydratedState = dehydrate(queryClient)
 
   return <HydrationBoundary state={dehydratedState}>{props.children}</HydrationBoundary>
 }
@@ -70,6 +57,7 @@ export function HydrateClient(props: { children: React.ReactNode }) {
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(queryOptions: T) {
   const queryClient = getQueryClient()
+
   if (queryOptions.queryKey[1]?.type === "infinite") {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     void queryClient.prefetchInfiniteQuery(queryOptions as any)

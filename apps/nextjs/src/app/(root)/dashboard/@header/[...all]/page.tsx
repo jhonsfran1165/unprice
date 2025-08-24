@@ -24,18 +24,19 @@ export default async function Page(props: {
   }
 }) {
   const { all } = props.params
-  const { workspaceSlug, projectSlug } = props.searchParams
+  const { workspaceSlug: ws, projectSlug: ps } = props.searchParams
 
   // delete first segment because it's always "/app" for the redirection from the middleware
   all.shift()
+
+  const workspaceSlug = ws ?? all.at(0)
+  const projectSlug = ps ?? all.at(1)
 
   // pages has another layout
   // if (all.length > 3 && all.includes("pages")) {
   //   return null
   // }
 
-  let workspace: string | null = null
-  let project: string | null = null
   let customerEntitlements: {
     [x: string]: boolean
   }[] = []
@@ -43,9 +44,8 @@ export default async function Page(props: {
   let isMain = false
   let customerId = ""
 
-  if (isSlug(workspaceSlug) || isSlug(all.at(0))) {
+  if (isSlug(workspaceSlug)) {
     const session = await getSession()
-    workspace = `${workspaceSlug ?? all.at(0)}` as string
 
     // prefetch data for the workspace and project
     prefetch(
@@ -54,7 +54,7 @@ export default async function Page(props: {
       })
     )
 
-    const atw = session?.user.workspaces.find((w) => w.slug === workspace)
+    const atw = session?.user.workspaces.find((w) => w.slug === workspaceSlug)
 
     if (atw) {
       isMain = atw.isMain
@@ -75,9 +75,7 @@ export default async function Page(props: {
     }
   }
 
-  if (isSlug(projectSlug) || isSlug(all.at(1))) {
-    project = `${projectSlug ?? all.at(1)}` as string
-
+  if (isSlug(projectSlug)) {
     prefetch(
       trpc.projects.listByActiveWorkspace.queryOptions(undefined, {
         staleTime: 1000 * 60 * 60, // 1 hour
@@ -85,10 +83,10 @@ export default async function Page(props: {
     )
   }
 
-  if (!workspace && !project) {
+  if (!workspaceSlug && !projectSlug) {
     return (
       <Header className="px-4">
-        <UpdateClientCookie workspaceSlug={workspace} projectSlug={project} />
+        <UpdateClientCookie workspaceSlug={workspaceSlug} projectSlug={projectSlug} />
         <Logo className="size-6 text-lg" />
       </Header>
     )
@@ -96,12 +94,12 @@ export default async function Page(props: {
 
   return (
     <Header>
-      <UpdateClientCookie workspaceSlug={workspace} projectSlug={project} />
+      <UpdateClientCookie workspaceSlug={workspaceSlug} projectSlug={projectSlug} />
       <HydrateClient>
         <Fragment>
-          {workspace && (
+          {workspaceSlug && (
             <Suspense fallback={<WorkspaceSwitcherSkeleton />}>
-              <WorkspaceSwitcher workspaceSlug={workspace} />
+              <WorkspaceSwitcher workspaceSlug={workspaceSlug} />
             </Suspense>
           )}
 
@@ -111,7 +109,7 @@ export default async function Page(props: {
             customerId={customerId}
           />
 
-          {project && (
+          {projectSlug && (
             <Fragment>
               <div className="flex size-4 items-center justify-center px-2">
                 <Separator className="rotate-[30deg]" orientation="vertical" />

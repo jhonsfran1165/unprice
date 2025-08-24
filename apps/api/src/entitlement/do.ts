@@ -5,7 +5,7 @@ import { migrate } from "drizzle-orm/durable-sqlite/migrator"
 import migrations from "../../drizzle/migrations"
 
 import { Analytics } from "@unprice/analytics"
-import { count, eq, inArray, lte, sql } from "drizzle-orm"
+import { count, eq, lte, sql } from "drizzle-orm"
 import { entitlements, usageRecords, verifications } from "~/db/schema"
 import type { Entitlement, NewEntitlement, schema } from "~/db/types"
 import type { Env } from "~/env"
@@ -625,7 +625,7 @@ export class DurableObjectUsagelimiter extends Server {
 
   async sendVerificationsToTinybird() {
     // Process events in batches to avoid memory issues
-    const BATCH_SIZE = 500 // Max 999 for SQLite, but keep a buffer
+    const BATCH_SIZE = 500
     let processedCount = 0
     let lastProcessedId = 0
 
@@ -640,9 +640,10 @@ export class DurableObjectUsagelimiter extends Server {
 
       if (verificationEvents.length === 0) break
 
-      const ids = verificationEvents.map((e) => e.id)
+      const firstId = verificationEvents[0]?.id
+      const lastId = verificationEvents[verificationEvents.length - 1]?.id
 
-      if (ids.length > 0) {
+      if (firstId && lastId) {
         try {
           const transformedEvents = verificationEvents.map((event) => ({
             featureSlug: event.featureSlug,
@@ -663,17 +664,14 @@ export class DurableObjectUsagelimiter extends Server {
           await this.analytics
             .ingestFeaturesVerification(transformedEvents)
             .catch((e) => {
-              console.error(e)
               this.logger.error(`Failed in ingestFeaturesVerification from do ${e.message}`, {
                 error: JSON.stringify(e),
               })
-
               throw e
             })
             .then(async (data) => {
               const rows = data?.successful_rows ?? 0
               const quarantined = data?.quarantined_rows ?? 0
-
               const total = rows + quarantined
 
               if (quarantined > 0) {
@@ -682,22 +680,24 @@ export class DurableObjectUsagelimiter extends Server {
                 })
               }
 
-              if (total >= ids.length) {
-                // Only delete events that were successfully sent
-                await this.db
+              if (total >= verificationEvents.length) {
+                // Delete by range - much more efficient, only 2 SQL variables
+                const deletedResult = await this.db
                   .delete(verifications)
-                  .where(inArray(verifications.id, ids))
-                  .catch((e) => {
-                    this.logger.error(`error deleting ${ids.length} verifications from do`, {
-                      error: e.message,
-                    })
-                  })
+                  .where(sql`id >= ${firstId} AND id <= ${lastId}`)
+                  .returning({ id: verifications.id })
 
-                processedCount += ids.length
+                const deletedCount = deletedResult.length
+                processedCount += deletedCount
 
-                this.logger.info(`deleted ${total} verifications from do`, {
-                  rows: total,
-                })
+                this.logger.info(
+                  `deleted ${deletedCount} verifications from do (range: ${firstId}-${lastId})`,
+                  {
+                    rows: total,
+                    deletedCount,
+                    expectedCount: verificationEvents.length,
+                  }
+                )
 
                 this.logger.info(`Processed ${processedCount} verifications in this batch`)
               } else {
@@ -705,6 +705,7 @@ export class DurableObjectUsagelimiter extends Server {
                   "the total of verifications sent to tinybird are not the same as the total of verifications in the db",
                   {
                     total,
+                    expected: verificationEvents.length,
                   }
                 )
               }
@@ -716,19 +717,18 @@ export class DurableObjectUsagelimiter extends Server {
               error: error instanceof Error ? JSON.stringify(error) : "unknown error",
             }
           )
-          // Don't delete events if sending failed
-          // We'll try again in the next alarm
           break
         }
       }
+
       // Update the last processed ID for the next batch
-      lastProcessedId = verificationEvents[verificationEvents.length - 1]?.id ?? lastProcessedId
+      lastProcessedId = lastId ?? lastProcessedId
     }
   }
 
   async sendUsageToTinybird() {
     // Process events in batches to avoid memory issues
-    const BATCH_SIZE = 500 // Max 999 for SQLite, but keep a buffer
+    const BATCH_SIZE = 500
     let processedCount = 0
     let lastProcessedId = 0
 
@@ -742,6 +742,9 @@ export class DurableObjectUsagelimiter extends Server {
         .orderBy(usageRecords.id)
 
       if (events.length === 0) break
+
+      const firstId = events[0]?.id
+      const lastId = events[events.length - 1]?.id
 
       // Create a Map to deduplicate events based on their unique identifiers
       const uniqueEvents = new Map()
@@ -761,55 +764,69 @@ export class DurableObjectUsagelimiter extends Server {
       }
 
       const deduplicatedEvents = Array.from(uniqueEvents.values())
-      const ids = deduplicatedEvents.map((e) => e.id)
 
-      if (deduplicatedEvents.length > 0) {
+      if (deduplicatedEvents.length > 0 && firstId && lastId) {
         try {
           await this.analytics
             .ingestFeaturesUsage(deduplicatedEvents)
             .catch((e) => {
-              this.logger.error(`Failed to send ${ids.length} events to Tinybird:`, {
+              this.logger.error(`Failed to send ${deduplicatedEvents.length} events to Tinybird:`, {
                 error: e.message,
               })
-
               throw e
             })
             .then(async (data) => {
               const rows = data?.successful_rows ?? 0
               const quarantined = data?.quarantined_rows ?? 0
-
               const total = rows + quarantined
 
-              if (total >= ids.length) {
-                this.logger.info(`deleted ${ids.length} usage records from do`, {
-                  rows: total,
-                })
+              if (total >= deduplicatedEvents.length) {
+                this.logger.info(
+                  `successfully sent ${deduplicatedEvents.length} usage records to Tinybird`,
+                  {
+                    rows: total,
+                  }
+                )
+
+                // Delete by range - much more efficient, only 2 SQL variables
+                const deletedResult = await this.db
+                  .delete(usageRecords)
+                  .where(sql`id >= ${firstId} AND id <= ${lastId}`)
+                  .returning({ id: usageRecords.id })
+
+                const deletedCount = deletedResult.length
+                processedCount += deletedCount
+
+                this.logger.info(
+                  `deleted ${deletedCount} usage records from do (range: ${firstId}-${lastId})`,
+                  {
+                    originalCount: events.length,
+                    deduplicatedCount: deduplicatedEvents.length,
+                    deletedCount,
+                  }
+                )
               } else {
                 this.logger.info(
                   "the total of usage records sent to tinybird are not the same as the total of usage records in the db",
                   {
                     total,
+                    expected: deduplicatedEvents.length,
                   }
                 )
               }
 
               this.logger.info(`Processed ${processedCount} usage events in this batch`)
-
-              // Only delete events that were successfully sent
-              await this.db.delete(usageRecords).where(inArray(usageRecords.id, ids))
-              processedCount += ids.length
             })
         } catch (error) {
           this.logger.error("Failed to send events to Tinybird:", {
             error: error instanceof Error ? error.message : "unknown error",
           })
-          // Don't delete events if sending failed
-          // We'll try again in the next alarm
           break
         }
       }
+
       // Update the last processed ID for the next batch
-      lastProcessedId = events[events.length - 1]?.id ?? lastProcessedId
+      lastProcessedId = lastId ?? lastProcessedId
     }
   }
 

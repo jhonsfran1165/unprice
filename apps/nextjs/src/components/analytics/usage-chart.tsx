@@ -1,6 +1,6 @@
 "use client"
 
-import { useSuspenseQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { nFormatter } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import {
@@ -9,6 +9,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@unprice/ui/chart"
+import { ScrollArea } from "@unprice/ui/scroll-area"
 import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
@@ -23,10 +24,41 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+export const UsageChartSkeleton = ({
+  isLoading,
+  error,
+}: { isLoading?: boolean; error?: string }) => {
+  return (
+    <div className="flex h-full flex-col items-center justify-center">
+      <EmptyPlaceholder className="min-h-[420px]" isLoading={isLoading}>
+        <EmptyPlaceholder.Icon>
+          <BarChart4 className="h-8 w-8" />
+        </EmptyPlaceholder.Icon>
+        <EmptyPlaceholder.Title>
+          {error ? "Ups, something went wrong" : "No data available"}
+        </EmptyPlaceholder.Title>
+        <EmptyPlaceholder.Description>
+          {error
+            ? error
+            : "There is no usage available for the selected interval. Start usage to see data."}
+        </EmptyPlaceholder.Description>
+        {!error && (
+          <EmptyPlaceholder.Action>
+            <Button size={"sm"} disabled={isLoading}>
+              <Code className="mr-2 h-4 w-4" />
+              Start usage
+            </Button>
+          </EmptyPlaceholder.Action>
+        )}
+      </EmptyPlaceholder>
+    </div>
+  )
+}
+
 export function UsageChart() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
-  const { data: usage, isLoading } = useSuspenseQuery(
+  const { data: usage, isLoading } = useQuery(
     trpc.analytics.getUsage.queryOptions(
       {
         intervalDays: intervalFilter.intervalDays,
@@ -37,90 +69,68 @@ export function UsageChart() {
     )
   )
 
+  if (!usage || usage.usage.length === 0) {
+    return <UsageChartSkeleton isLoading={isLoading} error={usage?.error} />
+  }
+
   const chartData = usage.usage.map((v) => ({
     feature: v.featureSlug,
     usage: v.sum,
   }))
 
-  if (chartData.length === 0) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center">
-        <EmptyPlaceholder className="min-h-[420px]" isLoading={isLoading}>
-          <EmptyPlaceholder.Icon>
-            <BarChart4 className="h-8 w-8" />
-          </EmptyPlaceholder.Icon>
-          <EmptyPlaceholder.Title>
-            {usage.error ? "Ups, something went wrong" : "No data available"}
-          </EmptyPlaceholder.Title>
-          <EmptyPlaceholder.Description>
-            {usage.error
-              ? usage.error
-              : "There is no usage available for the selected interval. Start usage to see data."}
-          </EmptyPlaceholder.Description>
-          {!usage.error && (
-            <EmptyPlaceholder.Action>
-              <Button size={"sm"} disabled={isLoading}>
-                <Code className="mr-2 h-4 w-4" />
-                Start usage
-              </Button>
-            </EmptyPlaceholder.Action>
-          )}
-        </EmptyPlaceholder>
-      </div>
-    )
-  }
-
   const maxHeight = 400
   const height = Math.min(chartData.length * 60, maxHeight)
 
   return (
-    <ChartContainer config={chartConfig} height={height} className="min-h-[200px] w-full">
-      <BarChart
-        accessibilityLayer
-        data={chartData}
-        layout="vertical"
-        margin={{
-          left: 40,
-          right: 30,
-          top: 10,
-          bottom: 10,
-        }}
-        barGap={5}
-        barCategoryGap={3}
-      >
-        <YAxis
-          dataKey="feature"
-          type="category"
-          tickLine={false}
-          tickMargin={10}
-          width={120}
-          axisLine={false}
-          tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
-        />
-        <XAxis dataKey="usage" type="number" hide />
-        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-        <Bar
-          dataKey="usage"
+    <ScrollArea className="h-[500px] w-full">
+      <ChartContainer config={chartConfig} height={height} className="w-full">
+        <BarChart
+          accessibilityLayer
+          data={chartData}
           layout="vertical"
-          radius={5}
-          fill="var(--color-usage)"
-          maxBarSize={30}
-          activeBar={{
-            opacity: 0.5,
+          margin={{
+            left: 0,
+            right: 80,
+            top: 10,
+            bottom: 10,
           }}
-          // TODO: onclick explore details of the feature on different page
-          // onClick={(data) => console.info(data)}
+          barGap={5}
+          barCategoryGap={3}
         >
-          <LabelList
-            dataKey="usage"
-            position="right"
-            offset={8}
-            className="fill-foreground"
-            fontSize={12}
-            formatter={(value: number) => nFormatter(value)}
+          <YAxis
+            dataKey="feature"
+            type="category"
+            tickLine={false}
+            tickMargin={10}
+            width={120}
+            axisLine={false}
+            tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
           />
-        </Bar>
-      </BarChart>
-    </ChartContainer>
+          <XAxis dataKey="usage" type="number" hide />
+          <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+          <Bar
+            dataKey="usage"
+            layout="vertical"
+            radius={5}
+            fill="var(--color-usage)"
+            maxBarSize={25}
+            activeBar={{
+              opacity: 0.5,
+            }}
+            // TODO: onclick explore details of the feature on different page
+            // onClick={(data) => console.info(data)}
+          >
+            <LabelList
+              dataKey="usage"
+              position="right"
+              offset={8}
+              className="fill-foreground"
+              fontSize={12}
+              formatter={(value: number) => nFormatter(value)}
+            />
+          </Bar>
+        </BarChart>
+      </ChartContainer>
+    </ScrollArea>
   )
 }

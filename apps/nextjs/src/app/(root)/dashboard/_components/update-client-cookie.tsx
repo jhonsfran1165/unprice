@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { COOKIES_APP } from "@unprice/config"
 import Cookies from "js-cookie"
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useRef } from "react"
 
 /**
  * Update the client cookie on focus tab event
@@ -16,6 +16,8 @@ export function UpdateClientCookie({
   workspaceSlug,
 }: { projectSlug: string | null; workspaceSlug: string | null }) {
   const queryClient = useQueryClient()
+  const firstRender = useRef(true)
+
   // just to make we sync the cookie with the current project and workspace
   const cookieOptions = {
     path: "/",
@@ -24,16 +26,27 @@ export function UpdateClientCookie({
     secure: process.env.NODE_ENV === "production",
   } as Cookies.CookieAttributes
 
-  const updateCookie = useCallback(() => {
-    if (
-      projectSlug !== Cookies.get(COOKIES_APP.PROJECT) ||
-      workspaceSlug !== Cookies.get(COOKIES_APP.WORKSPACE)
-    ) {
-      // when updating project/workspace cookies invalidate queries.
-      // only if the project/workspace has changed
-      queryClient.invalidateQueries()
+  const invalidateQueriesProject = useCallback(() => {
+    // skip the first render
+    if (firstRender.current) {
+      firstRender.current = false
+      return
     }
 
+    // invalidate queries when project changes
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        const queryKey0 = query.queryKey[0] as string[]
+
+        // the same user doesn't need to invalidate the workspaces query
+        if (queryKey0.includes("workspaces") || queryKey0.includes("domains")) return false
+
+        return true
+      },
+    })
+  }, [projectSlug, workspaceSlug])
+
+  const updateCookie = useCallback(() => {
     Cookies.set(COOKIES_APP.PROJECT, projectSlug ?? "", {
       ...cookieOptions,
     })
@@ -44,6 +57,7 @@ export function UpdateClientCookie({
 
   useEffect(() => {
     updateCookie()
+    invalidateQueriesProject()
 
     window.addEventListener("focus", updateCookie)
 

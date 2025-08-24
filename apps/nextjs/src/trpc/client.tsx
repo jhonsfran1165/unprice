@@ -1,6 +1,6 @@
 "use client"
 
-import { type QueryClient, QueryClientProvider, isServer } from "@tanstack/react-query"
+import { type QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { createTRPCClient, loggerLink } from "@trpc/client"
 import { createTRPCContext } from "@trpc/tanstack-react-query"
@@ -13,7 +13,7 @@ export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>()
 let browserQueryClient: QueryClient
 
 function getQueryClient() {
-  if (isServer) {
+  if (typeof window === "undefined") {
     // Server: always make a new query client
     return createQueryClient()
   }

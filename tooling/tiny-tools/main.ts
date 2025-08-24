@@ -113,28 +113,28 @@ async function main() {
   const customerEnterprise = "cus_1MVdMxZ45uJKDo5z48hYJ"
 
   // FREE plan
+  await generateData(customerFree, today)
   await generateData(customerFree, yesterday)
   await generateData(customerFree, twoDaysAgo)
   await generateData(customerFree, threeDaysAgo)
   await generateData(customerFree, fourDaysAgo)
   await generateData(customerFree, fiveDaysAgo)
-  await generateData(customerFree, today)
 
   // PRO plan
+  await generateData(customerPro, today)
   await generateData(customerPro, yesterday)
   await generateData(customerPro, twoDaysAgo)
   await generateData(customerPro, threeDaysAgo)
   await generateData(customerPro, fourDaysAgo)
   await generateData(customerPro, fiveDaysAgo)
-  await generateData(customerPro, today)
 
   // ENTERPRISE plan
+  await generateData(customerEnterprise, today)
   await generateData(customerEnterprise, yesterday)
   await generateData(customerEnterprise, twoDaysAgo)
   await generateData(customerEnterprise, threeDaysAgo)
   await generateData(customerEnterprise, fourDaysAgo)
   await generateData(customerEnterprise, fiveDaysAgo)
-  await generateData(customerEnterprise, today)
 }
 
 main()

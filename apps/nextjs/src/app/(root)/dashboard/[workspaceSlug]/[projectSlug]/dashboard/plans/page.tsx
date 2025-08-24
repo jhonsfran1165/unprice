@@ -13,8 +13,6 @@ import { PlansConversion, PlansConversionSkeleton } from "./_components/plans-co
 import PlansStats from "./_components/plans-stats"
 
 export const dynamic = "force-dynamic"
-export const revalidate = 0
-export const maxDuration = 10
 
 export default async function DashboardPlans(props: {
   params: { workspaceSlug: string; projectSlug: string }

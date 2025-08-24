@@ -137,7 +137,7 @@ export function FeaturesStats() {
             return (
               // biome-ignore lint/a11y/useButtonType: <explanation>
               <button
-                key={chart}
+                key={Math.random()}
                 data-active={activeChart === chart}
                 className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted md:border-t-0 md:border-l md:px-8 md:py-6"
                 onClick={() => setActiveChart(chart)}

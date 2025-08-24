@@ -1,6 +1,6 @@
 "use client"
 
-import { useSuspenseQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { nFormatter } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import {
@@ -9,6 +9,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@unprice/ui/chart"
+import { ScrollArea } from "@unprice/ui/scroll-area"
 import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { CodeApiSheet } from "~/components/code-api-sheet"
@@ -24,11 +25,42 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+export function VerificationsChartSkeleton({
+  isLoading,
+  error,
+}: { isLoading?: boolean; error?: string }) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center">
+      <EmptyPlaceholder className="min-h-[420px]" isLoading={isLoading}>
+        <EmptyPlaceholder.Icon>
+          <BarChart4 className="h-8 w-8" />
+        </EmptyPlaceholder.Icon>
+        <EmptyPlaceholder.Title>
+          {error ? "Unable to load data" : "No data available"}
+        </EmptyPlaceholder.Title>
+        <EmptyPlaceholder.Description>
+          {error ? error : "There is no data available for the selected interval."}
+        </EmptyPlaceholder.Description>
+        {!error && (
+          <EmptyPlaceholder.Action>
+            <CodeApiSheet defaultMethod="verifyFeature">
+              <Button size={"sm"} disabled={isLoading}>
+                <Code className="mr-2 h-4 w-4" />
+                Start verifying data
+              </Button>
+            </CodeApiSheet>
+          </EmptyPlaceholder.Action>
+        )}
+      </EmptyPlaceholder>
+    </div>
+  )
+}
+
 export function VerificationsChart() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
 
-  const { data: verifications, isLoading } = useSuspenseQuery(
+  const { data: verifications, isLoading } = useQuery(
     trpc.analytics.getVerifications.queryOptions(
       {
         intervalDays: intervalFilter.intervalDays,
@@ -39,6 +71,10 @@ export function VerificationsChart() {
     )
   )
 
+  if (!verifications || verifications.verifications.length === 0) {
+    return <VerificationsChartSkeleton isLoading={isLoading} error={verifications?.error} />
+  }
+
   const chartData = verifications.verifications.map((v) => ({
     feature: v.featureSlug,
     verifications: v.count,
@@ -47,80 +83,55 @@ export function VerificationsChart() {
     p99_latency: v.p99_latency,
   }))
 
-  if (chartData.length === 0) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center">
-        <EmptyPlaceholder className="min-h-[420px]" isLoading={isLoading}>
-          <EmptyPlaceholder.Icon>
-            <BarChart4 className="h-8 w-8" />
-          </EmptyPlaceholder.Icon>
-          <EmptyPlaceholder.Title>
-            {verifications.error ? "Unable to load data" : "No data available"}
-          </EmptyPlaceholder.Title>
-          <EmptyPlaceholder.Description>
-            {verifications.error
-              ? verifications.error
-              : "There is no data available for the selected interval."}
-          </EmptyPlaceholder.Description>
-          {!verifications.error && (
-            <EmptyPlaceholder.Action>
-              <CodeApiSheet defaultMethod="verifyFeature">
-                <Button size={"sm"} disabled={isLoading}>
-                  <Code className="mr-2 h-4 w-4" />
-                  Start verifying data
-                </Button>
-              </CodeApiSheet>
-            </EmptyPlaceholder.Action>
-          )}
-        </EmptyPlaceholder>
-      </div>
-    )
-  }
+  const maxHeight = 400
+  const height = Math.min(chartData.length * 60, maxHeight)
 
   return (
-    <ChartContainer config={chartConfig} height={chartData.length * 50} className="w-full">
-      <BarChart
-        accessibilityLayer
-        data={chartData}
-        layout="vertical"
-        margin={{
-          left: 40,
-          right: 30,
-          top: 10,
-          bottom: 10,
-        }}
-        barGap={5}
-        barCategoryGap={3}
-      >
-        <YAxis
-          dataKey="feature"
-          type="category"
-          tickLine={false}
-          tickMargin={10}
-          width={120}
-          axisLine={false}
-          tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
-        />
-        <XAxis dataKey="verifications" type="number" hide />
-        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-        <Bar
-          dataKey="verifications"
+    <ScrollArea className="h-[500px] w-full">
+      <ChartContainer config={chartConfig} height={height} className="w-full">
+        <BarChart
+          accessibilityLayer
+          data={chartData}
           layout="vertical"
-          radius={5}
-          fill="var(--color-verifications)"
-          maxBarSize={25}
-          activeBar={{ opacity: 0.5 }}
+          margin={{
+            left: 0,
+            right: 80,
+            top: 10,
+            bottom: 10,
+          }}
+          barGap={5}
+          barCategoryGap={3}
         >
-          <LabelList
-            dataKey="verifications"
-            position="right"
-            offset={8}
-            className="fill-foreground"
-            fontSize={12}
-            formatter={(value: number) => nFormatter(value)}
+          <YAxis
+            dataKey="feature"
+            type="category"
+            tickLine={false}
+            tickMargin={10}
+            width={120}
+            axisLine={false}
+            tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
           />
-        </Bar>
-      </BarChart>
-    </ChartContainer>
+          <XAxis dataKey="verifications" type="number" hide />
+          <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+          <Bar
+            dataKey="verifications"
+            layout="vertical"
+            radius={5}
+            fill="var(--color-verifications)"
+            maxBarSize={25}
+            activeBar={{ opacity: 0.5 }}
+          >
+            <LabelList
+              dataKey="verifications"
+              position="right"
+              offset={8}
+              className="fill-foreground"
+              fontSize={12}
+              formatter={(value: number) => nFormatter(value)}
+            />
+          </Bar>
+        </BarChart>
+      </ChartContainer>
+    </ScrollArea>
   )
 }
