@@ -18,6 +18,7 @@ import { NumberTicker } from "~/components/analytics/number-ticker"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { SuperLink } from "~/components/super-link"
 import { useIntervalFilter, usePageFilter } from "~/hooks/use-filter"
+import { useIntervalQueryInvalidation } from "~/hooks/use-interval-invalidation"
 import { useTRPC } from "~/trpc/client"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
@@ -112,7 +113,12 @@ export function PageVisits() {
   const [pageFilter] = usePageFilter()
   const [intervalFilter] = useIntervalFilter()
 
-  const { data: pageVisits, isLoading: isLoadingPageVisits } = useSuspenseQuery(
+  const {
+    data: pageVisits,
+    isLoading: isLoadingPageVisits,
+    isFetching,
+    dataUpdatedAt,
+  } = useSuspenseQuery(
     trpc.analytics.getPagesOverview.queryOptions(
       {
         intervalDays: intervalFilter.intervalDays,
@@ -124,6 +130,22 @@ export function PageVisits() {
       }
     )
   )
+
+  // invalidate the query when the interval changes
+  useIntervalQueryInvalidation({
+    currentInterval: intervalFilter.intervalDays,
+    dataUpdatedAt,
+    isFetching,
+    getQueryKey: (interval) => [
+      ["analytics", "getPagesOverview"],
+      {
+        input: {
+          intervalDays: interval,
+        },
+        type: "query",
+      },
+    ],
+  })
 
   const chartData = pageVisits.data
 

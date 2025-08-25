@@ -50,6 +50,8 @@ export function ChartLineRegion({
             <ChartTooltipContent
               indicator="dot"
               className="w-[180px]"
+              nameKey="region"
+              labelKey="region"
               formatter={(value, name) => (
                 <ChartTooltipNumber chartConfig={chartConfig} value={value} name={name} />
               )}

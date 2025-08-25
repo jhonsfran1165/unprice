@@ -29,6 +29,7 @@ export function prepareInterval(interval: Interval) {
         // format should be meaningful for the user depending on the interval
         dateFormat: "MMM d hh:mm",
         name: "24h" as const,
+        hotkey: "D",
       }
     }
     case "7d": {
@@ -42,6 +43,7 @@ export function prepareInterval(interval: Interval) {
         label: "last 7 days",
         dateFormat: "MMM d",
         name: "7d" as const,
+        hotkey: "W",
       }
     }
     case "30d": {
@@ -55,6 +57,7 @@ export function prepareInterval(interval: Interval) {
         label: "last 30 days",
         dateFormat: "MMM d",
         name: "30d" as const,
+        hotkey: "M",
       }
     }
     case "90d": {
@@ -68,6 +71,7 @@ export function prepareInterval(interval: Interval) {
         label: "last 90 days",
         dateFormat: "MMM d",
         name: "90d" as const,
+        hotkey: "Y",
       }
     }
   }

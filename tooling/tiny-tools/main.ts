@@ -35,6 +35,7 @@ const unprice = new Unprice({
 })
 
 async function generateData(customerId: string, date: Date) {
+  console.info(`Generating data for ${customerId} on ${date.toISOString()}`)
   const now = performance.now()
 
   const { result: data } = await unprice.customers.getEntitlements(customerId)
@@ -51,14 +52,8 @@ async function generateData(customerId: string, date: Date) {
   )!
 
   for (let i = 0; i < 100; i++) {
-    // set the date for the timestamp at a random hour + minute + second
-    const timestamp = new Date(
-      date.setHours(
-        Math.floor(Math.random() * 24),
-        Math.floor(Math.random() * 60),
-        Math.floor(Math.random() * 60)
-      )
-    ).getTime()
+    // add a random number of seconds to the date to have different timestamps in the same day
+    const timestamp = date.getTime() + Math.floor(Math.random() * 1000)
 
     // ramdom usage between 1 and 100
     const usage = Math.floor(Math.random() * 100) + 1
@@ -102,12 +97,12 @@ async function generateData(customerId: string, date: Date) {
 
 async function main() {
   const today = new Date()
-
-  const yesterday = new Date(today.setDate(today.getDate() - 3))
-  const twoDaysAgo = new Date(today.setDate(today.getDate() - 4))
-  const threeDaysAgo = new Date(today.setDate(today.getDate() - 5))
-  const fourDaysAgo = new Date(today.setDate(today.getDate() - 6))
-  const fiveDaysAgo = new Date(today.setDate(today.getDate() - 7))
+  // need to create a new date object to avoid change the original date
+  const yesterday = new Date(new Date().setDate(today.getDate() - 1))
+  const twoDaysAgo = new Date(new Date().setDate(today.getDate() - 2))
+  const threeDaysAgo = new Date(new Date().setDate(today.getDate() - 3))
+  const fourDaysAgo = new Date(new Date().setDate(today.getDate() - 4))
+  const fiveDaysAgo = new Date(new Date().setDate(today.getDate() - 5))
   const customerFree = "cus_1MeUjVxFbv8DP9X7f1UW9"
   const customerPro = "cus_1MJ7etfqD3jbZTmayncaU"
   const customerEnterprise = "cus_1MVdMxZ45uJKDo5z48hYJ"

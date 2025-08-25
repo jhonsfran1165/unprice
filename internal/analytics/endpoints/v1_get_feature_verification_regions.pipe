@@ -85,6 +85,7 @@ SQL >
         {% else %} day_intervals
         {% end %}
     LEFT JOIN feature_verification_regions_node USING interval
+    WHERE region != ''
 
 
 TYPE endpoint

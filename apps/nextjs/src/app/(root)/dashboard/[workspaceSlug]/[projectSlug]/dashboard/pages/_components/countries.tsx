@@ -15,6 +15,7 @@ import {
 import { BarChart4 } from "lucide-react"
 import { useMemo } from "react"
 import { useIntervalFilter, usePageFilter } from "~/hooks/use-filter"
+import { useIntervalQueryInvalidation } from "~/hooks/use-interval-invalidation"
 import { useTRPC } from "~/trpc/client"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
@@ -77,7 +78,7 @@ export function Countries() {
   const [intervalFilter] = useIntervalFilter()
   const [pageId] = usePageFilter()
   const trpc = useTRPC()
-  const { data, isLoading } = useSuspenseQuery(
+  const { data, isLoading, isFetching, dataUpdatedAt } = useSuspenseQuery(
     trpc.analytics.getCountryVisits.queryOptions(
       {
         intervalDays: intervalFilter.intervalDays,
@@ -89,6 +90,22 @@ export function Countries() {
       }
     )
   )
+
+  // invalidate the query when the interval changes
+  useIntervalQueryInvalidation({
+    currentInterval: intervalFilter.intervalDays,
+    dataUpdatedAt,
+    isFetching,
+    getQueryKey: (interval) => [
+      ["analytics", "getCountryVisits"],
+      {
+        input: {
+          intervalDays: interval,
+        },
+        type: "query",
+      },
+    ],
+  })
 
   // group by browser using useMemo having something like an array of { browser: "Chrome", visits: 214, hits: 140 }
   // there are multiple items with the same browser that we need to sum the visits and hits

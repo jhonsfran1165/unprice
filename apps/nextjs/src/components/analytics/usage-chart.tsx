@@ -9,11 +9,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@unprice/ui/chart"
-import { ScrollArea } from "@unprice/ui/scroll-area"
 import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useIntervalFilter } from "~/hooks/use-filter"
+import { useIntervalQueryInvalidation } from "~/hooks/use-interval-invalidation"
 import { useTRPC } from "~/trpc/client"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
@@ -58,7 +58,12 @@ export const UsageChartSkeleton = ({
 export function UsageChart() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
-  const { data: usage, isLoading } = useSuspenseQuery(
+  const {
+    data: usage,
+    isLoading,
+    dataUpdatedAt,
+    isFetching,
+  } = useSuspenseQuery(
     trpc.analytics.getUsage.queryOptions(
       {
         intervalDays: intervalFilter.intervalDays,
@@ -68,6 +73,22 @@ export function UsageChart() {
       }
     )
   )
+
+  // invalidate the query when the interval changes
+  useIntervalQueryInvalidation({
+    currentInterval: intervalFilter.intervalDays,
+    dataUpdatedAt,
+    isFetching,
+    getQueryKey: (interval) => [
+      ["analytics", "getUsage"],
+      {
+        input: {
+          intervalDays: interval,
+        },
+        type: "query",
+      },
+    ],
+  })
 
   if (isLoading || !usage || usage.usage.length === 0) {
     return <UsageChartSkeleton isLoading={isLoading} error={usage?.error} />
@@ -79,58 +100,56 @@ export function UsageChart() {
   }))
 
   const maxHeight = 400
-  const height = Math.min(chartData.length * 60, maxHeight)
+  const height = Math.min(chartData.length * 60, maxHeight) ?? 400
 
   return (
-    <ScrollArea className="h-[500px] w-full">
-      <ChartContainer config={chartConfig} height={height} className="w-full">
-        <BarChart
-          accessibilityLayer
-          data={chartData}
+    <ChartContainer config={chartConfig} height={height} className="w-full">
+      <BarChart
+        accessibilityLayer
+        data={chartData}
+        layout="vertical"
+        margin={{
+          left: 0,
+          right: 80,
+          top: 10,
+          bottom: 10,
+        }}
+        barGap={5}
+        barCategoryGap={3}
+      >
+        <YAxis
+          dataKey="feature"
+          type="category"
+          tickLine={false}
+          tickMargin={10}
+          width={120}
+          axisLine={false}
+          tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
+        />
+        <XAxis dataKey="usage" type="number" hide />
+        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+        <Bar
+          dataKey="usage"
           layout="vertical"
-          margin={{
-            left: 0,
-            right: 80,
-            top: 10,
-            bottom: 10,
+          radius={5}
+          fill="var(--color-usage)"
+          maxBarSize={25}
+          activeBar={{
+            opacity: 0.5,
           }}
-          barGap={5}
-          barCategoryGap={3}
+          // TODO: onclick explore details of the feature on different page
+          // onClick={(data) => console.info(data)}
         >
-          <YAxis
-            dataKey="feature"
-            type="category"
-            tickLine={false}
-            tickMargin={10}
-            width={120}
-            axisLine={false}
-            tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
-          />
-          <XAxis dataKey="usage" type="number" hide />
-          <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-          <Bar
+          <LabelList
             dataKey="usage"
-            layout="vertical"
-            radius={5}
-            fill="var(--color-usage)"
-            maxBarSize={25}
-            activeBar={{
-              opacity: 0.5,
-            }}
-            // TODO: onclick explore details of the feature on different page
-            // onClick={(data) => console.info(data)}
-          >
-            <LabelList
-              dataKey="usage"
-              position="right"
-              offset={8}
-              className="fill-foreground"
-              fontSize={12}
-              formatter={(value: number) => nFormatter(value)}
-            />
-          </Bar>
-        </BarChart>
-      </ChartContainer>
-    </ScrollArea>
+            position="right"
+            offset={8}
+            className="fill-foreground"
+            fontSize={12}
+            formatter={(value: number) => nFormatter(value)}
+          />
+        </Bar>
+      </BarChart>
+    </ChartContainer>
   )
 }

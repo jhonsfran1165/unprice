@@ -4,16 +4,21 @@ import * as React from "react"
 import { cn } from "./utils"
 
 const kbdVariants = cva(
-  "select-none rounded border px-1.5 py-px font-mono text-[0.7rem] font-normal shadow-sm disabled:opacity-50",
+  "select-none rounded border font-mono font-normal shadow-sm disabled:opacity-50",
   {
     variants: {
       variant: {
         default: "bg-accent text-accent-foreground",
-        outline: "bg-background text-foreground",
+        outline: "bg-background-bgSubtle text-background-text",
+      },
+      size: {
+        default: "px-1.5 py-px text-xs",
+        sm: "px-0 py-px text-[0.6rem] size-4 flex items-center justify-center",
       },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
     },
   }
 )
@@ -31,11 +36,11 @@ export interface KbdProps
 }
 
 const Kbd = React.forwardRef<HTMLUnknownElement, KbdProps>(
-  ({ abbrTitle, children, className, variant, ...props }, ref) => {
+  ({ abbrTitle, children, className, variant, size, ...props }, ref) => {
     return (
-      <kbd className={cn(kbdVariants({ variant, className }))} ref={ref} {...props}>
+      <kbd className={cn(kbdVariants({ variant, className, size }))} ref={ref} {...props}>
         {abbrTitle ? (
-          <abbr title={abbrTitle} className="no-underline">
+          <abbr title={abbrTitle} className="px-0 py-0 no-underline">
             {children}
           </abbr>
         ) : (
