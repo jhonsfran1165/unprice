@@ -63,6 +63,7 @@ export class ApiKeysService {
               defaultCurrency: true,
               isMain: true,
               isInternal: true,
+              timezone: true,
             },
             with: {
               workspace: {
@@ -295,7 +296,6 @@ export class ApiKeysService {
 
   public async rateLimit(c: Context, req: { key: string }) {
     const keyHash = await this.hash(req.key)
-    // TODO: improve this
     const limiter = c.env.RL_FREE_600_60s
     const result = await limiter.limit({ key: keyHash })
     const start = c.get("performanceStart") as number

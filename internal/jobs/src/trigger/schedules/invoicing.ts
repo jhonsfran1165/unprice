@@ -21,16 +21,13 @@ export const invoicingSchedule = schedules.task({
       where: (sub, { eq, and, lte }) => and(eq(sub.active, true), lte(sub.invoiceAt, now)),
     })
 
-    logger.info(`Found ${subscriptions.length} subscriptions for invoicing`)
+    const subscriptionsWithActivePhase = subscriptions.filter((sub) => sub.phases.length > 0)
+
+    logger.info(`Found ${subscriptionsWithActivePhase.length} subscriptions for invoicing`)
 
     // trigger the end trial task for each subscription phase
-    for (const sub of subscriptions) {
-      const phase = sub.phases[0]
-
-      if (!phase) {
-        logger.error(`No active phase found for subscription ${sub.id}, skipping`)
-        continue
-      }
+    for (const sub of subscriptionsWithActivePhase) {
+      const phase = sub.phases[0]!
 
       await invoiceTask.triggerAndWait({
         subscriptionId: sub.id,
@@ -41,7 +38,7 @@ export const invoicingSchedule = schedules.task({
     }
 
     return {
-      subscriptionIds: subscriptions.map((s) => s.id),
+      subscriptionIds: subscriptionsWithActivePhase.map((s) => s.id),
     }
   },
 })

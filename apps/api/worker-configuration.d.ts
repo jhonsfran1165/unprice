@@ -4,7 +4,6 @@
 declare namespace Cloudflare {
 	interface Env {
 		ENCRYPTION_KEY: string;
-		COOKIE_ENCRYPTION_KEY: string;
 		AUTH_SECRET: string;
 		CLOUDFLARE_ZONE_ID: string;
 		TINYBIRD_URL: string;
@@ -27,7 +26,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ENCRYPTION_KEY" | "COOKIE_ENCRYPTION_KEY" | "AUTH_SECRET" | "CLOUDFLARE_ZONE_ID" | "TINYBIRD_URL" | "EMIT_METRICS_LOGS" | "TINYBIRD_TOKEN" | "NODE_ENV" | "CLOUDFLARE_API_TOKEN" | "DRIZZLE_LOG" | "DATABASE_READ2_URL" | "VERCEL_ENV" | "EMIT_ANALYTICS" | "DATABASE_READ1_URL" | "DATABASE_URL" | "AXIOM_API_TOKEN" | "AXIOM_DATASET">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ENCRYPTION_KEY" | "AUTH_SECRET" | "CLOUDFLARE_ZONE_ID" | "TINYBIRD_URL" | "EMIT_METRICS_LOGS" | "TINYBIRD_TOKEN" | "NODE_ENV" | "CLOUDFLARE_API_TOKEN" | "DRIZZLE_LOG" | "DATABASE_READ2_URL" | "VERCEL_ENV" | "EMIT_ANALYTICS" | "DATABASE_READ1_URL" | "DATABASE_URL" | "AXIOM_API_TOKEN" | "AXIOM_DATASET">> {}
 }
 declare module "*.sql" {
 	const value: string;

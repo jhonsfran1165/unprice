@@ -263,6 +263,7 @@ export class Analytics {
       parameters: z.object({
         intervalDays: z.number().optional(),
         projectId: z.string().optional(),
+        timezone: z.string().optional(),
       }),
       data: z.object({
         date: z.coerce.date(),
@@ -312,6 +313,7 @@ export class Analytics {
       parameters: z.object({
         intervalDays: z.number().optional(),
         projectId: z.string(),
+        timezone: z.string().optional(),
         region: z.string().optional(),
         start: z.number().optional(),
         end: z.number().optional(),

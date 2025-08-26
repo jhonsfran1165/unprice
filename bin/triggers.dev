@@ -10,8 +10,11 @@ set -o pipefail # don't ignore exit codes when piping output
 set -o posix    # more strict failures in subshells
 # set -x          # enable debugging
 
-
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+export NVM_DIR="$HOME/.nvm"
+# shellcheck disable=SC1090
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
 echo "Starting up"
 
@@ -36,8 +39,11 @@ if ! command -v node &> /dev/null; then
   exit 1
 fi
 
+# start the docker compose services
+docker-compose up -d
+
 # use the correct node version
-bash -ic 'nvm use'
+nvm use
 
 # take the first parameter as the mode id if not provided, use dev
 MODE_ID=${1:-dev}
@@ -53,15 +59,25 @@ if [ "$MODE_ID" = "dev" ]; then
 
   # override tinybird host
   TB_HOST="http://localhost:7181"
-  REDIS_URL="http://localhost:8079"
-  REDIS_TOKEN="example_token"
+  # REDIS_URL="http://localhost:8079"
+  AUTH_REDIRECT_PROXY_URL="http://localhost:3100/auth"
+  # REDIS_TOKEN="example_token"
   TB_RESTARTED=$RESTART_TINYBIRD
+  UNPRICE_API_URL="http://localhost:8787"
+  # INFO: Replace with local key
+  UNPRICE_API_KEY="unprice_dev_1234567890"
+  DRIZZLE_LOG="false"
+  EMIT_METRICS_LOGS="false"
+  EMIT_ANALYTICS="true"
+  UPSTASH_REDIS_REST_URL="http://localhost:8079"
+  UPSTASH_REDIS_REST_TOKEN="unprice"
 
   # loging to tb
   cd internal/analytics
 
   # check if tinybird is running
   if [ "$RESTART_TINYBIRD" = "true" ]; then
+    TB_RESTARTED=true
     # restart tinybird
     tb local restart && tb update
   fi
@@ -72,6 +88,11 @@ if [ "$MODE_ID" = "dev" ]; then
   attempt=1
 
   while ! curl -s http://localhost:7181 > /dev/null 2>&1; do
+    if [ $attempt = 1 -a $TB_RESTARTED = "false" ]; then
+      echo "Starting Tinybird"
+      tb local start
+    fi
+
     if [ $attempt -ge $max_attempts ]; then
       echo "Tinybird failed to start after 2 minutes"
       exit 1
@@ -83,11 +104,14 @@ if [ "$MODE_ID" = "dev" ]; then
   done
 
   # We need to override on development some variables so we can work with local first tools.
-  TB_TOKEN=$(curl -s http://localhost:7181/tokens | jq -r ".workspace_admin_token")
+  # TB_TOKEN=$(curl -s http://localhost:7181/tokens | jq -r ".workspace_admin_token")
+  TB_TOKEN=$(tb --output=json info | jq .local.token | tr -d '"')
 
   # auth tb with the admin token
-  tb auth --token $TB_TOKEN --host $TB_HOST
+  echo "Authenticating Tinybird"
+  # tb auth --token $TB_TOKEN --host $TB_HOST
 
+  echo "Building Tinybird"
   if [ "$TB_RESTARTED" = true ]; then
     # build the project
     tb build
@@ -98,8 +122,11 @@ if [ "$MODE_ID" = "dev" ]; then
 
   cd ../../
 
-  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" pnpm --filter jobs run dev:trigger
+  echo "Applying migrations"
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN=$TB_TOKEN TINYBIRD_URL=$TB_HOST AUTH_REDIRECT_PROXY_URL=$AUTH_REDIRECT_PROXY_URL UNPRICE_API_URL=$UNPRICE_API_URL UNPRICE_API_KEY=$UNPRICE_API_KEY DRIZZLE_LOG=$DRIZZLE_LOG EMIT_METRICS_LOGS=$EMIT_METRICS_LOGS EMIT_ANALYTICS=$EMIT_ANALYTICS pnpm --filter db migrate:custom
 
+  echo "Starting the application"
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN=$TB_TOKEN TINYBIRD_URL=$TB_HOST AUTH_REDIRECT_PROXY_URL=$AUTH_REDIRECT_PROXY_URL UNPRICE_API_URL=$UNPRICE_API_URL UNPRICE_API_KEY=$UNPRICE_API_KEY DRIZZLE_LOG=$DRIZZLE_LOG EMIT_METRICS_LOGS=$EMIT_METRICS_LOGS EMIT_ANALYTICS=$EMIT_ANALYTICS UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL UPSTASH_REDIS_REST_TOKEN=$UPSTASH_REDIS_REST_TOKEN pnpm --filter jobs run dev:trigger
 
 elif [ "$MODE_ID" = "preview" ]; then
   # banner to show the user that we are using the preview environment
@@ -110,14 +137,24 @@ elif [ "$MODE_ID" = "preview" ]; then
   echo "########################################################"
   echo ""
 
+  TB_HOST=$(infisical secrets get TINYBIRD_URL --env=preview --path=/app --raw-value)
+  # get the admin token from infisical
+  TB_ADMIN_TOKEN=$(infisical secrets get TB_ADMIN_TOKEN --env=preview --path=/ci --raw-value)
+  NODE_ENV="preview"
+  VERCEL_ENV="preview"
+
+  # curl -X GET -H "Authorization: Bearer $TB_TOKEN" "http://localhost:7181/v0/pipes"
+  cd internal/analytics
+
   # auth tb with the admin token
-  tb auth --token $TB_ADMIN_TOKEN --host $TB_HOST
+  tb login --token $TB_ADMIN_TOKEN --host $TB_HOST
 
   cd ../../
 
   # override the token in the env
-  infisical run --env=preview --path=/ --recursive -- pnpm --filter jobs run dev:trigger
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_ADMIN_TOKEN" NODE_ENV="$NODE_ENV" VERCEL_ENV="$VERCEL_ENV" TINYBIRD_URL="$TB_HOST" pnpm run dev
 else
   echo "Invalid mode: $MODE_ID"
   exit 1
 fi
+

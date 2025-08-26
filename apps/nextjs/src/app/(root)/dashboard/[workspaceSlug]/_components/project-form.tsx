@@ -58,6 +58,9 @@ export function ProjectForm(props: {
           queryKey: trpc.projects.listByActiveWorkspace.queryKey(),
         })
 
+        // router refresh
+        router.refresh()
+
         if (props.onSuccess) {
           props.onSuccess(newProject)
         }
@@ -76,6 +79,9 @@ export function ProjectForm(props: {
         await queryClient.invalidateQueries({
           queryKey: trpc.projects.listByActiveWorkspace.queryKey(),
         })
+
+        // router refresh
+        router.refresh()
 
         if (props.onSuccess) {
           props.onSuccess(newProject)

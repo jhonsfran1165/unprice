@@ -354,6 +354,13 @@ export class EntitlementService {
         )
 
         if (revalidateErr) {
+          this.logger.error("revalidate entitlement failed", {
+            customerId: data.customerId,
+            featureSlug: data.featureSlug,
+            projectId: data.projectId,
+            error: revalidateErr.message,
+          })
+
           return { success: false, message: revalidateErr.message }
         }
 

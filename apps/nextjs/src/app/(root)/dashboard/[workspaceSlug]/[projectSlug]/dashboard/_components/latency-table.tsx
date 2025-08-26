@@ -98,7 +98,7 @@ export function LatencyTable() {
         },
         {} as Record<string, VerificationsMetricsGrouped>
       ),
-    [intervalFilter.intervalDays]
+    [intervalFilter.intervalDays, verifications.verifications.length]
   )
 
   const data = Object.values(groupedByRegion).map((region) => {

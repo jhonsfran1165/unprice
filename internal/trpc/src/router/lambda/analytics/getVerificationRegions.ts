@@ -12,14 +12,16 @@ export const getVerificationRegions = protectedProjectProcedure
   )
   .query(async (opts) => {
     const projectId = opts.ctx.project.id
+    const timezone = opts.ctx.project.timezone
     const input = opts.input
 
-    const cacheKey = `${projectId}:${input.region}:${input.intervalDays}`
+    const cacheKey = `${projectId}:${input.region}:${timezone}:${input.intervalDays}`
 
     const result = await opts.ctx.cache.getVerificationRegions.swr(cacheKey, async () => {
       const result = await opts.ctx.analytics
         .getFeaturesVerificationRegions({
           projectId,
+          timezone,
           region: input.region,
           intervalDays: input.intervalDays,
         })

@@ -15,7 +15,6 @@ export const env = createEnv({
     VERCEL_TEAM_ID: z.string(),
     VERCEL_TOKEN: z.string(),
     ENCRYPTION_KEY: z.string(),
-    COOKIE_ENCRYPTION_KEY: z.string(),
     AXIOM_API_TOKEN: z.string(),
     AXIOM_DATASET: z.string(),
   },

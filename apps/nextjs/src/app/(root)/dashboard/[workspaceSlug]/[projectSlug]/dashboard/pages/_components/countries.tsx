@@ -128,7 +128,7 @@ export function Countries() {
       },
       [] as { country: string; visits: number; hits: number }[]
     )
-  }, [pageId.pageId, intervalFilter.intervalDays])
+  }, [pageId.pageId, intervalFilter.intervalDays, data.data.length])
 
   if (isLoading || !groupedData || groupedData.length === 0) {
     return <CountriesSkeleton isLoading={isLoading} error={data.error} />

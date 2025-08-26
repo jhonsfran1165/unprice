@@ -115,7 +115,7 @@ export function VerificationsChart() {
         layout="vertical"
         margin={{
           left: 0,
-          right: 0,
+          right: 80,
           top: 10,
           bottom: 10,
         }}

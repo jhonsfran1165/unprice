@@ -51,7 +51,9 @@ export const getSubscriptions = protectedProjectProcedure
             },
           },
         },
-        invoices: true,
+        invoices: {
+          orderBy: (table, { desc }) => [desc(table.paidAt)],
+        },
       },
       where: (table, { eq, and }) => and(eq(table.id, customerId), eq(table.projectId, project.id)),
       orderBy: (table, { desc }) => [desc(table.createdAtM)],

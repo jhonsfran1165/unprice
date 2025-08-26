@@ -1,7 +1,7 @@
 NODE features_verifications_hourly_mv_node
 SQL >
     SELECT
-        toStartOfHour(fromUnixTimestamp64Milli(timestamp)) as date,
+        toStartOfHour(fromUnixTimestamp64Milli(timestamp, 'UTC')) as date,
         projectId,
         metadata['colo'] AS region,
         customerId,

@@ -25,5 +25,5 @@ SCHEMA >
 ENGINE ReplacingMergeTree
 ENGINE_IS_DELETED deleted
 ENGINE_PARTITION_KEY toYYYYMM(fromUnixTimestamp64Milli(timestamp))
-ENGINE_SORTING_KEY idempotenceKey
+ENGINE_SORTING_KEY projectId, customerId, featureSlug, idempotenceKey
 ENGINE_VER timestamp

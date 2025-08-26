@@ -56,11 +56,6 @@ export const subscriptions = pgTableProject(
     planSlug: text("plan_slug").default("FREE").notNull(),
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
 
-    // whether the subscription is locked or not
-    // this is used to avoid race conditions when multiple machines are started at the same time
-    locked: boolean("locked").notNull().default(false),
-    lockedAt: bigint("locked_at_m", { mode: "number" }),
-
     // ************ subscription important dates ************
     // current cycle dates for invoices purposes
     currentCycleStartAt: bigint("current_cycle_start_at_m", { mode: "number" }).notNull(),

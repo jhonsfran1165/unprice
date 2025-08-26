@@ -143,7 +143,7 @@ export function FeaturesStats() {
         (chartData.filter((item) => item.latency).length || 1),
       verifications: chartData.reduce((acc, curr) => acc + curr.verifications, 0),
     }),
-    [intervalFilter.intervalDays]
+    [intervalFilter.intervalDays, chartData.length]
   )
 
   if (isLoading || !chartData || chartData.length === 0) {

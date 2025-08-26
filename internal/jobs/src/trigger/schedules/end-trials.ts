@@ -24,11 +24,6 @@ export const endTrialsSchedule = schedules.task({
     for (const phase of subscriptionPhases) {
       const subscription = phase.subscription
 
-      if (subscription.locked) {
-        logger.error(`Subscription ${subscription.id} is locked, skipping`)
-        continue
-      }
-
       if (!["ending_trial", "trialing"].includes(subscription.status)) {
         logger.error(`Subscription ${subscription.id} is not trialing, skipping`)
         continue

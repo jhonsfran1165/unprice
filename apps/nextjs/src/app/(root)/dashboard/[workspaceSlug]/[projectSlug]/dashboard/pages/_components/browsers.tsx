@@ -128,7 +128,7 @@ export function Browsers() {
       },
       [] as { browser: string; visits: number; hits: number }[]
     )
-  }, [pageId.pageId, intervalFilter.intervalDays])
+  }, [pageId.pageId, intervalFilter.intervalDays, data.data.length])
 
   if (isLoading || !groupedData || groupedData.length === 0) {
     return <BrowsersSkeleton isLoading={isLoading} error={data.error} />

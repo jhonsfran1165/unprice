@@ -101,7 +101,6 @@ export const createTRPCContext = async (opts: {
     opts.req?.ip ||
     "127.0.0.1"
 
-  // TODO: add when I decide what to use instead of baselime
   const logger = env.EMIT_METRICS_LOGS
     ? new AxiomLogger({
         apiKey: env.AXIOM_API_TOKEN,

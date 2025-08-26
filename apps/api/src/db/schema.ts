@@ -70,7 +70,6 @@ export const usageRecords = pgTableProject(
     timestamp: integer().notNull(),
     createdAt: integer().notNull(),
     usage: numeric(),
-    // TODO: add schema for metadata
     metadata: text(),
     // 0 = not deleted, 1 = deleted
     deleted: integer().notNull().default(0),

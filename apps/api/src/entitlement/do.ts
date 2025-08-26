@@ -187,14 +187,15 @@ export class DurableObjectUsagelimiter extends Server {
       }
     }
 
-    if (entitlement.limit && Number(entitlement.usage) > Number(entitlement.limit)) {
-      return {
-        valid: false,
-        message: "entitlement limit exceeded",
-        deniedReason: "LIMIT_EXCEEDED",
-        entitlement,
-      }
-    }
+    // TODO: should we check the limit here? or allow overage?
+    // if (entitlement.limit && Number(entitlement.usage) > Number(entitlement.limit)) {
+    //   return {
+    //     valid: false,
+    //     message: "entitlement limit exceeded",
+    //     deniedReason: "LIMIT_EXCEEDED",
+    //     entitlement,
+    //   }
+    // }
 
     return {
       valid: true,
@@ -691,7 +692,7 @@ export class DurableObjectUsagelimiter extends Server {
                 processedCount += deletedCount
 
                 this.logger.info(
-                  `deleted ${deletedCount} verifications from do (range: ${firstId}-${lastId})`,
+                  `deleted ${deletedCount} verifications from do ${this.ctx.id.toString()} (range: ${firstId}-${lastId})`,
                   {
                     rows: total,
                     deletedCount,
@@ -699,7 +700,9 @@ export class DurableObjectUsagelimiter extends Server {
                   }
                 )
 
-                this.logger.info(`Processed ${processedCount} verifications in this batch`)
+                this.logger.info(
+                  `Processed ${processedCount} verifications in this batch from do ${this.ctx.id.toString()}`
+                )
               } else {
                 this.logger.info(
                   "the total of verifications sent to tinybird are not the same as the total of verifications in the db",
@@ -712,7 +715,7 @@ export class DurableObjectUsagelimiter extends Server {
             })
         } catch (error) {
           this.logger.error(
-            `Failed to send verifications to Tinybird from do ${error instanceof Error ? error.message : "unknown error"}`,
+            `Failed to send verifications to Tinybird from do ${this.ctx.id.toString()} ${error instanceof Error ? error.message : "unknown error"}`,
             {
               error: error instanceof Error ? JSON.stringify(error) : "unknown error",
             }
@@ -770,9 +773,12 @@ export class DurableObjectUsagelimiter extends Server {
           await this.analytics
             .ingestFeaturesUsage(deduplicatedEvents)
             .catch((e) => {
-              this.logger.error(`Failed to send ${deduplicatedEvents.length} events to Tinybird:`, {
-                error: e.message,
-              })
+              this.logger.error(
+                `Failed to send ${deduplicatedEvents.length} events to Tinybird from do ${this.ctx.id.toString()}:`,
+                {
+                  error: e.message,
+                }
+              )
               throw e
             })
             .then(async (data) => {
@@ -798,7 +804,7 @@ export class DurableObjectUsagelimiter extends Server {
                 processedCount += deletedCount
 
                 this.logger.info(
-                  `deleted ${deletedCount} usage records from do (range: ${firstId}-${lastId})`,
+                  `deleted ${deletedCount} usage records from do ${this.ctx.id.toString()} (range: ${firstId}-${lastId})`,
                   {
                     originalCount: events.length,
                     deduplicatedCount: deduplicatedEvents.length,
@@ -815,12 +821,17 @@ export class DurableObjectUsagelimiter extends Server {
                 )
               }
 
-              this.logger.info(`Processed ${processedCount} usage events in this batch`)
+              this.logger.info(
+                `Processed ${processedCount} usage events in this batch from do ${this.ctx.id.toString()}`
+              )
             })
         } catch (error) {
-          this.logger.error("Failed to send events to Tinybird:", {
-            error: error instanceof Error ? error.message : "unknown error",
-          })
+          this.logger.error(
+            `Failed to send events to Tinybird from do ${this.ctx.id.toString()}:`,
+            {
+              error: error instanceof Error ? error.message : "unknown error",
+            }
+          )
           break
         }
       }

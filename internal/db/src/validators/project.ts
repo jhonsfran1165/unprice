@@ -43,6 +43,7 @@ export const projectExtendedSelectSchema = projectSelectBaseSchema
     defaultCurrency: true,
     isMain: true,
     isInternal: true,
+    timezone: true,
   })
   .extend({
     workspace: workspaceSelectBase.pick({

@@ -320,6 +320,15 @@ export async function finalizeInvoice(payload: {
   // Calculate final invoice totals
   paymentProviderInvoiceData.status = "unpaid"
 
+  const billingPeriod =
+    env.NODE_ENV === "development"
+      ? `${new Date(invoice.cycleStartAt).toISOString()} to ${new Date(
+          invoice.cycleEndAt
+        ).toISOString()}`
+      : `${new Date(invoice.cycleStartAt).toISOString().split("T")[0]} to ${
+          new Date(invoice.cycleEndAt).toISOString().split("T")[0]
+        }`
+
   // Create new invoice
   const paymentProviderInvoice = await paymentProviderService.createInvoice({
     currency: invoice.currency,
@@ -331,9 +340,7 @@ export async function finalizeInvoice(payload: {
     customFields: [
       {
         name: "Billing Period",
-        value: `${new Date(invoice.cycleStartAt).toISOString().split("T")[0]} to ${
-          new Date(invoice.cycleEndAt).toISOString().split("T")[0]
-        }`,
+        value: billingPeriod,
       },
     ],
   })

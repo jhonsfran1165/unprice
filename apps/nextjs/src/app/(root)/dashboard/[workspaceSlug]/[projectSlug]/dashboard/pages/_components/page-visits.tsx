@@ -157,7 +157,7 @@ export function PageVisits() {
       mobile_visits: chartData.reduce((acc, curr) => acc + curr.mobile_visits, 0),
       other_visits: chartData.reduce((acc, curr) => acc + curr.other_visits, 0),
     }),
-    [intervalFilter.intervalDays, pageFilter.pageId]
+    [intervalFilter.intervalDays, pageFilter.pageId, chartData.length]
   )
 
   if (isLoadingPageVisits || !chartData || chartData.length === 0) {
