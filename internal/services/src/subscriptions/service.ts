@@ -423,7 +423,7 @@ export class SubscriptionService {
     // get the billing cycle for the subscription given the start date
     const calculatedBillingCycle = configureBillingCycleSubscription({
       currentCycleStartAt: startAtToUse,
-      trialDays: trialDaysToUse,
+      trialUnits: trialDaysToUse,
       billingConfig: {
         ...versionData.billingConfig,
         billingAnchor: billingAnchorToUse ?? 0,

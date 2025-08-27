@@ -4,7 +4,7 @@ import { invoices, subscriptions } from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import { type InvoiceType, configureBillingCycleSubscription } from "@unprice/db/validators"
 import type { Logger } from "@unprice/logging"
-import { addDays } from "date-fns"
+import { addDays, addMinutes } from "date-fns"
 import type { SubscriptionContext } from "./types"
 import { validatePaymentMethod } from "./utils"
 
@@ -80,7 +80,7 @@ export async function renewSubscription({ context }: { context: SubscriptionCont
     currentCycleStartAt: subscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping
     billingConfig: currentPhase.planVersion.billingConfig,
     endAt: currentPhase.endAt ?? undefined,
-    alignStartToDay: false,
+    alignStartToDay: false, // we pick the date as it is and align the end to the day
     alignEndToDay: true,
     alignToCalendar: true,
   })
@@ -114,7 +114,7 @@ export async function renewSubscription({ context }: { context: SubscriptionCont
 
 export async function invoiceSubscription({
   context,
-  isTrialEnding = false,
+  isTrialEnding = false, // if true, we are ending the trial, so we have to invoice the subscription depending on the whenToBill setting
 }: { context: SubscriptionContext; isTrialEnding?: boolean }): Promise<
   Partial<SubscriptionContext>
 > {
@@ -140,10 +140,12 @@ export async function invoiceSubscription({
       ? billingCycle.cycleStartMs
       : billingCycle.cycleEndMs
 
-  // only create invoice when trial is false or when trial is ending and whenToBill is pay_in_advance
+  // only create invoice when trial is false
+  // return early if the trial is ending and the whenToBill is pay_in_arrear
   if (isTrialEnding && whenToBill === "pay_in_arrear") {
     // update subscription to set the next invoice at to the end of the trial
     // update the subscription invoice information
+    // basically the trial period is over and we want to set a new period to the next invoice
     const result = await db
       .update(subscriptions)
       .set({
@@ -170,13 +172,19 @@ export async function invoiceSubscription({
   const dueAt =
     whenToBill === "pay_in_advance" ? billingCycle.cycleStartMs : billingCycle.cycleEndMs
 
+  // this help us test 5 min subscriptions in development
+  const intervalFucntion =
+    currentPhase.planVersion.billingConfig.billingInterval === "minute" ? addMinutes : addDays
+
   // calculate the grace period based on the due date
   // this is when the invoice will be considered past due after that if not paid we can end it, cancel it, etc.
-  const pastDueAt = addDays(dueAt, currentPhase.planVersion.gracePeriod).getTime()
-  // if the subscription is ending the trial, we will only charge the flat charges
-  const invoiceType = isTrialEnding ? "flat" : ("hybrid" as InvoiceType)
-  // this should happen in a transaction
+  const pastDueAt = intervalFucntion(dueAt, currentPhase.planVersion.gracePeriod).getTime()
 
+  // if the subscription is ending the trial, we will only charge the flat charges
+  // why? because the trial is over and we want to charge the flat charges in advance. Usage would be charged in the next billing period
+  const invoiceType = (isTrialEnding ? "flat" : "hybrid") as InvoiceType
+
+  // this should happen in a transaction
   const result = await db.transaction(async (tx) => {
     // Execute all operations in parallel and wait for them to complete
     const [invoice, subscriptionData] = await Promise.all([
@@ -208,7 +216,10 @@ export async function invoiceSubscription({
           currency: currentPhase.planVersion.currency,
           previousCycleStartAt: subscription.previousCycleStartAt,
           previousCycleEndAt: subscription.previousCycleEndAt,
-          metadata: {},
+          metadata: {
+            note: "Invoice drafted by the system, waiting billing",
+            reason: isTrialEnding ? "trial_ended" : undefined,
+          },
         })
         .returning()
         .then((result) => result[0]),

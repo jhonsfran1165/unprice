@@ -552,7 +552,7 @@ export class EntitlementService {
     const calculatedBillingCycle = configureBillingCycleSubscription({
       currentCycleStartAt: subscription.currentCycleStartAt,
       billingConfig: phase.planVersion.billingConfig,
-      trialDays: phase.trialDays,
+      trialUnits: phase.trialDays,
       alignStartToDay: true,
       alignEndToDay: true,
       endAt: phase.endAt ?? undefined,

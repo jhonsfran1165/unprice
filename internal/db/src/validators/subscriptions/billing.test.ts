@@ -147,7 +147,7 @@ describe("Billing Calculations", () => {
       const startMs = utcDate("2024-01-01")
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 7,
+        trialUnits: 7,
         billingConfig: {
           name: "test",
           billingInterval: "month",
@@ -171,7 +171,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 0,
+        trialUnits: 0,
         billingConfig: {
           name: "test",
           billingInterval: "onetime",
@@ -193,11 +193,11 @@ describe("configureBillingCycleSubscription", () => {
 
     it("should handle one-time payment with trial", () => {
       const startMs = utcDate("2024-01-01", "12:00:00")
-      const trialDays = 14
+      const trialUnits = 14
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays,
+        trialUnits,
         billingConfig: {
           name: "test",
           billingInterval: "onetime",
@@ -226,7 +226,7 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          trialDays: 0,
+          trialUnits: 0,
           billingConfig: {
             name: "test",
             billingInterval: "month",
@@ -247,7 +247,7 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          trialDays: 0,
+          trialUnits: 0,
           billingConfig: {
             name: "test",
             billingInterval: "month",
@@ -269,7 +269,7 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          trialDays: 0,
+          trialUnits: 0,
           billingConfig: {
             name: "test",
             billingInterval: "month",
@@ -293,7 +293,7 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          trialDays: 0,
+          trialUnits: 0,
           billingConfig: {
             name: "test",
             billingInterval: "minute",
@@ -312,14 +312,60 @@ describe("configureBillingCycleSubscription", () => {
     })
   })
 
-  describe("trial periods", () => {
-    it("should handle trial period with exact end time", () => {
-      const startMs = utcDate("2024-01-01", "15:30:00")
-      const trialDays = 7
+  describe("5-minute billing", () => {
+    it("should handle exact 5-minute cycles", () => {
+      const startMs = utcDate("2024-01-01", "12:00:00")
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays,
+        trialUnits: 0,
+        billingConfig: {
+          name: "test",
+          billingInterval: "minute",
+          billingIntervalCount: 5,
+          planType: "recurring",
+          billingAnchor: 0,
+        },
+      })
+
+      expect(result.cycleStartMs).toEqual(startMs)
+      expect(result.cycleEndMs).toEqual(utcDate("2024-01-01", "12:04:59.999"))
+      expect(result.secondsInCycle).toBe(5 * 60 - 1)
+      expect(result.billableSeconds).toBe(5 * 60 - 1)
+      expect(result.prorationFactor).toBe(1)
+    })
+
+    it("should handle exact 5-minute cycles with trial", () => {
+      const startMs = utcDate("2024-01-01", "12:00:00")
+
+      const result = configureBillingCycleSubscription({
+        currentCycleStartAt: startMs,
+        trialUnits: 2, // minutes
+        billingConfig: {
+          name: "test",
+          billingInterval: "minute",
+          billingIntervalCount: 5,
+          planType: "recurring",
+          billingAnchor: 0,
+        },
+      })
+
+      expect(result.cycleStartMs).toEqual(startMs)
+      expect(result.cycleEndMs).toEqual(utcDate("2024-01-01", "12:01:59.999"))
+      expect(result.secondsInCycle).toBe(2 * 60 - 1)
+      expect(result.billableSeconds).toBe(0)
+      expect(result.prorationFactor).toBe(0)
+    })
+  })
+
+  describe("trial periods", () => {
+    it("should handle trial period with exact end time", () => {
+      const startMs = utcDate("2024-01-01", "15:30:00")
+      const trialUnits = 7
+
+      const result = configureBillingCycleSubscription({
+        currentCycleStartAt: startMs,
+        trialUnits,
         billingConfig: {
           name: "test",
           billingInterval: "month",
@@ -346,7 +392,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 7,
+        trialUnits: 7,
         billingConfig: {
           name: "test",
           billingInterval: "month",
@@ -371,7 +417,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 0,
+        trialUnits: 0,
         billingConfig: {
           name: "test",
           billingInterval: "month",
@@ -406,7 +452,7 @@ describe("configureBillingCycleSubscription", () => {
       expect(() =>
         configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          trialDays: 0,
+          trialUnits: 0,
           billingConfig: {
             name: "test",
             billingInterval: "month",
@@ -429,7 +475,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 0,
+        trialUnits: 0,
         billingConfig: {
           name: "test",
           billingInterval: "year",
@@ -450,7 +496,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 0,
+        trialUnits: 0,
         billingConfig: {
           name: "test",
           billingInterval: "year",
@@ -471,7 +517,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 0,
+        trialUnits: 0,
         billingConfig: {
           name: "test",
           billingInterval: "year",
@@ -494,7 +540,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 0,
+        trialUnits: 0,
         billingConfig: {
           name: "test",
           billingInterval: "month",
@@ -515,7 +561,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 0,
+        trialUnits: 0,
         billingConfig: {
           name: "test",
           billingInterval: "month",
@@ -536,7 +582,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 0,
+        trialUnits: 0,
         billingConfig: {
           name: "test",
           billingInterval: "month",
@@ -560,7 +606,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 17, // Trial ends Feb 1st
+        trialUnits: 17, // Trial ends Feb 1st
         billingConfig: {
           name: "test",
           billingInterval: "month",
@@ -583,7 +629,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 14,
+        trialUnits: 14,
         billingConfig: {
           name: "test",
           billingInterval: "month",
@@ -608,7 +654,7 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        trialDays: 0,
+        trialUnits: 0,
         billingConfig: {
           name: "test",
           billingInterval: "month",
@@ -634,7 +680,7 @@ describe("billing cycle anchor handling", () => {
 
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
-      trialDays: 0,
+      trialUnits: 0,
       billingConfig: {
         name: "test",
         billingInterval: "month",
@@ -667,7 +713,7 @@ describe("billing cycle anchor handling", () => {
 
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
-      trialDays: 0,
+      trialUnits: 0,
       billingConfig: {
         name: "test",
         billingInterval: "month",
@@ -701,7 +747,7 @@ describe("billing cycle anchor handling", () => {
 
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
-      trialDays: 0,
+      trialUnits: 0,
       billingConfig: {
         name: "test",
         billingInterval: "month",
@@ -733,7 +779,7 @@ describe("billing cycle anchor handling", () => {
 
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
-      trialDays: 0,
+      trialUnits: 0,
       billingConfig: {
         name: "test",
         billingInterval: "year",
@@ -767,7 +813,7 @@ describe("billing cycle anchor handling", () => {
 
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
-      trialDays: 20,
+      trialUnits: 20,
       billingConfig: {
         name: "test",
         billingInterval: "month",

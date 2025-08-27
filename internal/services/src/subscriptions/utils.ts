@@ -64,7 +64,12 @@ export async function validatePaymentMethod({
   })
 
   if (!config) {
-    throw new Error("Payment provider config not found or not active")
+    logger.error(
+      `Payment provider config for this project ${customer.projectId} and payment provider ${paymentProvider} not found or not active`
+    )
+    throw new Error(
+      `Payment provider config for this project ${customer.projectId} and payment provider ${paymentProvider} not found or not active`
+    )
   }
 
   // Decrypt provider key
@@ -86,10 +91,16 @@ export async function validatePaymentMethod({
     await paymentProviderService.getDefaultPaymentMethodId()
 
   if (paymentMethodErr) {
+    logger.error(
+      `Payment validation failed: ${paymentMethodErr.message} for project ${customer.projectId} and payment provider ${paymentProvider}`
+    )
     throw new Error(`Payment validation failed: ${paymentMethodErr.message}`)
   }
 
   if (requiredPaymentMethod && !paymentMethodId?.paymentMethodId) {
+    logger.error(
+      `Required payment method not found for project ${customer.projectId} and payment provider ${paymentProvider}`
+    )
     throw new Error("Required payment method not found")
   }
 
