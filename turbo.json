@@ -19,11 +19,8 @@
         "!app/nextjs/.next/cache/**",
         "app/nextjs/next-env.d.ts",
         "dist/**",
-        "app/auth-proxy/.vercel/output/**",
-        "!app/auth-proxy/.vercel/cache/**",
-        "app/auth-proxy/.next/**",
-        "!app/auth-proxy/.next/cache/**",
-        ".output/**"
+        ".vercel/output/**",
+        "!.vercel/cache/**"
       ],
       "env": [
         "NEXT_PUBLIC_*",
