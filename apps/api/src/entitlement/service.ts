@@ -265,7 +265,7 @@ export class EntitlementService {
       throw entitlementsErr
     }
 
-    if (!entitlements) {
+    if (!entitlements || entitlements.length === 0) {
       throw new UnPriceCustomerError({
         code: "CUSTOMER_ENTITLEMENTS_NOT_FOUND",
         message: "customer has no entitlements",

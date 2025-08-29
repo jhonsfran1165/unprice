@@ -167,7 +167,7 @@ export class ApiKeysService {
     if (err) {
       return Err(
         new FetchError({
-          message: `unable to fetch apikey, ${err.message}`,
+          message: `unable to fetch _getApiKey, ${err.message}`,
           retry: false,
           cause: err,
         })

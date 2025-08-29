@@ -9,12 +9,12 @@ import { count, sql } from "drizzle-orm"
 import { usageRecords, verifications } from "~/db/schema"
 import type { schema } from "~/db/types"
 import type { Env } from "~/env"
+import { unpriceDb } from "~/util/db"
 import type { CanRequest, ReportUsageRequest, ReportUsageResponse } from "./interface"
 
 import { env } from "cloudflare:workers"
 
 import { UpstashRedisStore } from "@unkey/cache/stores"
-import { createConnection } from "@unprice/db"
 import type { CustomerEntitlementExtended } from "@unprice/db/validators"
 import { FetchError } from "@unprice/error"
 import { Err, Ok, type Result } from "@unprice/error"
@@ -123,13 +123,7 @@ export class DurableObjectUsagelimiter extends Server {
       waitUntil: this.ctx.waitUntil.bind(this.ctx),
       cache: cache,
       metrics: this.metrics,
-      db: createConnection({
-        env: env.NODE_ENV,
-        primaryDatabaseUrl: env.DATABASE_URL,
-        read1DatabaseUrl: env.DATABASE_READ1_URL,
-        read2DatabaseUrl: env.DATABASE_READ2_URL,
-        logger: env.DRIZZLE_LOG.toString() === "true",
-      }),
+      db: unpriceDb,
     })
 
     this.initialize()
