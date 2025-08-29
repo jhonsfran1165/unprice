@@ -25,3 +25,6 @@ SCHEMA >
 ENGINE MergeTree
 ENGINE_PARTITION_KEY toYYYYMM(fromUnixTimestamp64Milli(timestamp, 'UTC'))
 ENGINE_SORTING_KEY (timestamp, projectId, customerId, featureSlug, entitlementId)
+
+FORWARD_QUERY >
+  SELECT timestamp, createdAt, featureSlug, customerId, latency, featurePlanVersionId, requestId, projectId, entitlementId, subscriptionId, subscriptionItemId, subscriptionPhaseId, deniedReason, defaultValueOfTypeName('UInt8') AS success, metadata
