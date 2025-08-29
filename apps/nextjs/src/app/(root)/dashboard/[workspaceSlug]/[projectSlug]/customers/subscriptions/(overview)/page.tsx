@@ -76,6 +76,7 @@ export default async function PlanSubscriptionsPage({
           fallback={
             <DataTableSkeleton
               columnCount={12}
+              rowCount={1}
               searchableColumnCount={1}
               filterableColumnCount={2}
               cellWidths={[
@@ -92,7 +93,6 @@ export default async function PlanSubscriptionsPage({
                 "12rem",
                 "8rem",
               ]}
-              shrinkZero
             />
           }
         >

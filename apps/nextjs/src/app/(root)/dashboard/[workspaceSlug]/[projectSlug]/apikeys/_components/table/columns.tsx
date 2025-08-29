@@ -1,16 +1,11 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { useState } from "react"
 
 import type { RouterOutputs } from "@unprice/trpc/routes"
-import { Button } from "@unprice/ui/button"
 import { Checkbox } from "@unprice/ui/checkbox"
-import { Eye, EyeOff } from "@unprice/ui/icons"
-import { cn } from "@unprice/ui/utils"
 
 import { Typography } from "@unprice/ui/typography"
-import { CopyButton } from "~/components/copy-button"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { formatDate } from "~/lib/dates"
 import { DataTableRowActions } from "./data-table-row-actions"
@@ -53,44 +48,6 @@ export const columns: ColumnDef<ApiKey>[] = [
     enableSorting: true,
     enableHiding: false,
     enableResizing: true,
-  },
-  {
-    accessorKey: "key",
-    enableResizing: true,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Key" />,
-    cell: ({ row }) => {
-      const [show, setShow] = useState(false)
-
-      const key = row.original.key
-
-      const displayText = show ? key : "sk_live_****************"
-
-      return (
-        <div className="flex items-center justify-between space-x-2">
-          <span className={cn("font-mono", row.original.revokedAt !== null && "line-through")}>
-            {displayText}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              className="h-4 w-4 p-0 opacity-50"
-              disabled={show}
-              onClick={() => {
-                setShow(true)
-                setTimeout(() => {
-                  setShow(false)
-                }, 2000)
-              }}
-            >
-              <span className="sr-only">Toggle key visibility</span>
-              {show ? <EyeOff /> : <Eye />}
-            </Button>
-
-            <CopyButton value={key} className="size-4 opacity-50" />
-          </div>
-        </div>
-      )
-    },
   },
   {
     accessorKey: "createdAtM",

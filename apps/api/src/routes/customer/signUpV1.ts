@@ -79,7 +79,13 @@ export const registerSignUpV1 = (app: App) =>
         sessionId,
         metadata: {
           ...metadata,
-          ...stats,
+          // analytics
+          colo: stats.colo,
+          country: stats.country,
+          city: stats.city,
+          isEUCountry: stats.isEUCountry,
+          region: stats.region,
+          continent: stats.continent,
         },
       },
       projectId: key.projectId,

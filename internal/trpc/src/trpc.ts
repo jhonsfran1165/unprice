@@ -14,7 +14,7 @@ import { db } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
 import { AxiomLogger, ConsoleLogger, type Logger } from "@unprice/logging"
 import type { CacheNamespaces } from "@unprice/services/cache"
-import { CacheService } from "@unprice/services/cache"
+import { CacheService, redis } from "@unprice/services/cache"
 import { LogdrainMetrics, type Metrics, NoopMetrics } from "@unprice/services/metrics"
 import { waitUntil } from "@vercel/functions"
 import { ZodError } from "zod"
@@ -22,7 +22,6 @@ import { fromZodError } from "zod-validation-error"
 import { env } from "./env"
 import { transformer } from "./transformer"
 import { projectWorkspaceGuard } from "./utils"
-import { redis } from "./utils/upstash"
 import { workspaceGuard } from "./utils/workspace-guard"
 
 /**
@@ -37,7 +36,6 @@ import { workspaceGuard } from "./utils/workspace-guard"
 export interface CreateContextOptions {
   headers: Headers
   session: Session | null
-  apikey?: string | null
   req?: NextAuthRequest
   activeWorkspaceSlug: string
   activeProjectSlug: string
@@ -83,10 +81,7 @@ export const createTRPCContext = async (opts: {
   req?: NextAuthRequest
 }) => {
   const session = opts.session ?? (await auth())
-  const userId = session?.user?.id ?? "unknown"
-
-  const authorizationHeader = opts.headers.get("Authorization") || ""
-  const apikey = authorizationHeader.split(" ")[1]
+  const userId = session?.user?.id || "unknown"
 
   const source = opts.headers.get("unprice-request-source") || "unknown"
   const pathname = opts.req?.nextUrl.pathname || "unknown"
@@ -95,17 +90,21 @@ export const createTRPCContext = async (opts: {
   const country = opts.headers.get("x-vercel-ip-country") || "unknown"
   const userAgent = opts.headers.get("user-agent") || "unknown"
 
-  const ip =
-    opts.headers.get("x-real-ip") ||
-    opts.headers.get("x-forwarded-for") ||
-    opts.req?.ip ||
-    "127.0.0.1"
+  const ip = opts.headers.get("x-real-ip") || opts.headers.get("x-forwarded-for") || "unknown"
 
   const logger = env.EMIT_METRICS_LOGS
     ? new AxiomLogger({
         apiKey: env.AXIOM_API_TOKEN,
         requestId,
-        defaultFields: { userId, region, country, source, ip, pathname, userAgent },
+        defaultFields: {
+          userId,
+          region,
+          country,
+          source,
+          ip: ip === "::1" ? "127.0.0.1" : ip,
+          pathname,
+          userAgent,
+        },
         dataset: env.AXIOM_DATASET,
         environment: env.NODE_ENV,
         service: "trpc",
@@ -114,7 +113,14 @@ export const createTRPCContext = async (opts: {
         requestId,
         environment: env.NODE_ENV,
         service: "trpc",
-        defaultFields: { userId, region, country, source, ip, pathname },
+        defaultFields: {
+          userId,
+          region,
+          country,
+          source,
+          ip: ip === "::1" ? "127.0.0.1" : ip,
+          pathname,
+        },
       })
 
   const metrics: Metrics = env.EMIT_METRICS_LOGS
@@ -132,7 +138,7 @@ export const createTRPCContext = async (opts: {
   const upstashCacheStore =
     env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN
       ? new UpstashRedisStore({
-          redis,
+          redis: redis,
         })
       : undefined
 
@@ -152,7 +158,6 @@ export const createTRPCContext = async (opts: {
   return createInnerTRPCContext({
     session,
     ip,
-    apikey,
     headers: opts.headers,
     req: opts.req,
     activeWorkspaceSlug,

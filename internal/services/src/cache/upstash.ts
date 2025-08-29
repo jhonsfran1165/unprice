@@ -1,6 +1,6 @@
 import { Redis } from "@upstash/redis"
 
-import { env } from "#env"
+import { env } from "../../env"
 
 const LATENCY_LOGGING = env.NODE_ENV === "development"
 const ENABLE_AUTO_PIPELINING = true

@@ -55,7 +55,13 @@ export function RenameProjectForm(props: {
 
   const migrateProject = useMutation(
     trpc.analytics.migrate.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (data) => {
+        if (data.success) {
+          toastAction("success", data.message)
+        } else {
+          toastAction("error", data.message)
+        }
+
         router.refresh()
       },
     })
@@ -65,7 +71,6 @@ export function RenameProjectForm(props: {
     startTransition(() => {
       toast.promise(migrateProject.mutateAsync(), {
         loading: "Publishing...",
-        success: "Version published",
       })
     })
   }

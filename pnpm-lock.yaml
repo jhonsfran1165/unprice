@@ -759,6 +759,9 @@ importers:
       '@unprice/stripe':
         specifier: workspace:^
         version: link:../stripe
+      '@upstash/redis':
+        specifier: ^1.35.3
+        version: 1.35.3
       date-fns:
         specifier: ^3.3.1
         version: 3.6.0
@@ -869,9 +872,6 @@ importers:
       '@unprice/vercel':
         specifier: workspace:^
         version: link:../vercel
-      '@upstash/redis':
-        specifier: ^1.35.3
-        version: 1.35.3
       '@vercel/functions':
         specifier: ^1.0.2
         version: 1.6.0

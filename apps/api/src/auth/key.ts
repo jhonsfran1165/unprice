@@ -1,5 +1,6 @@
 import { SchemaError } from "@unprice/error"
 import type { Context } from "hono"
+import { endTime, startTime } from "hono/timing"
 import { UnpriceApiError } from "~/errors"
 import type { HonoEnv } from "~/hono/env"
 
@@ -17,9 +18,16 @@ export async function keyAuth(c: Context<HonoEnv>) {
   }
 
   const { apikey } = c.get("services")
+
+  // start a new timer
+  startTime(c, "verifyApiKey")
+
   const { val: key, err } = await apikey.verifyApiKey(c, {
     key: authorization,
   })
+
+  // end the timer
+  endTime(c, "verifyApiKey")
 
   if (err) {
     switch (true) {

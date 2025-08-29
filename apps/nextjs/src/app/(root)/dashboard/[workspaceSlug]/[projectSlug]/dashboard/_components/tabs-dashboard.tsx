@@ -48,7 +48,7 @@ const TabsDashboard = ({
 
   return (
     <TabNavigation variant="solid">
-      <div className="flex items-center">
+      <div className="flex items-center gap-1">
         <TabNavigationLink active={activeTab === "overview"} asChild>
           <SuperLink href={`${baseUrl}/dashboard${allParams ? `?${allParams}` : ""}`}>
             Overview{" "}

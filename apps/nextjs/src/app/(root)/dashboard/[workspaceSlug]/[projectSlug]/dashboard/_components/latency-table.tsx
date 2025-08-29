@@ -6,7 +6,7 @@ import { useMemo } from "react"
 import { DataTable } from "~/components/data-table/data-table"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { useIntervalFilter } from "~/hooks/use-filter"
-import { useIntervalQueryInvalidation } from "~/hooks/use-interval-invalidation"
+import { useQueryInvalidation } from "~/hooks/use-query-invalidation"
 import { useTRPC } from "~/trpc/client"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 import { type VerificationsMetricsGrouped, columns } from "./latency/columns"
@@ -25,6 +25,7 @@ export function LatencyTableSkeleton() {
       </div>
       <DataTableSkeleton
         columnCount={6}
+        rowCount={5}
         showDateFilterOptions={false}
         showViewOptions={true}
         searchableColumnCount={1}
@@ -54,15 +55,15 @@ export function LatencyTable() {
   )
 
   // invalidate the query when the interval changes
-  useIntervalQueryInvalidation({
-    currentInterval: intervalFilter.intervalDays,
+  useQueryInvalidation({
+    paramKey: intervalFilter.intervalDays,
     dataUpdatedAt,
     isFetching,
-    getQueryKey: (interval) => [
+    getQueryKey: (param) => [
       ["analytics", "getVerificationRegions"],
       {
         input: {
-          intervalDays: interval,
+          intervalDays: param,
         },
         type: "query",
       },

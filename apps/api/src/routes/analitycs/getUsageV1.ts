@@ -65,14 +65,8 @@ export const registerGetAnalyticsUsageV1 = (app: App) =>
 
     const now = Date.now()
 
-    // start a new timer
-    startTime(c, "keyAuth")
-
     // validate the request
     const key = await keyAuth(c)
-
-    // end the timer
-    endTime(c, "keyAuth")
 
     // start a new timer
     startTime(c, "getUsage")

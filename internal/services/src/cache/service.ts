@@ -11,6 +11,7 @@ import {
   CACHE_STALENESS_TIME_MS,
 } from "./stale-while-revalidate"
 
+// because this is instantiated as global, the map persist in memory for different requests
 const persistentMap = new Map()
 
 export type Cache = C<CacheNamespaces>
@@ -31,7 +32,7 @@ export class CacheService {
    * Initialize the cache service
    * @param extraStores - Extra stores to add to the cache
    */
-  async init(extraStores: Store<CacheNamespace, CacheNamespaces[CacheNamespace]>[]): Promise<void> {
+  init(extraStores: Store<CacheNamespace, CacheNamespaces[CacheNamespace]>[]): void {
     if (this.cache) return
 
     // emit the cache size

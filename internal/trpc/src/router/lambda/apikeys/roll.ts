@@ -12,7 +12,9 @@ export const roll = protectedProjectProcedure
   .input(z.object({ id: z.string() }))
   .output(
     z.object({
-      apikey: selectApiKeySchema,
+      apikey: selectApiKeySchema.extend({
+        key: z.string(),
+      }),
     })
   )
   .mutation(async (opts) => {
@@ -55,7 +57,7 @@ export const roll = protectedProjectProcedure
 
     const newApiKey = await opts.ctx.db
       .update(schema.apikeys)
-      .set({ key: newKey, updatedAtM: Date.now(), hash: apiKeyHash })
+      .set({ updatedAtM: Date.now(), hash: apiKeyHash })
       .where(eq(schema.apikeys.id, opts.input.id))
       .returning()
       .then((res) => res[0])
@@ -70,5 +72,5 @@ export const roll = protectedProjectProcedure
     // remove from cache
     opts.ctx.waitUntil(opts.ctx.cache.apiKeyByHash.remove(apiKey.hash))
 
-    return { apikey: newApiKey }
+    return { apikey: { ...newApiKey, key: newKey } }
   })

@@ -1,6 +1,8 @@
 import { z } from "zod"
 
 import { TRPCError } from "@trpc/server"
+import { eq } from "@unprice/db"
+import { projects } from "@unprice/db/schema"
 import { protectedProjectProcedure } from "#trpc"
 
 export const migrate = protectedProjectProcedure
@@ -8,6 +10,7 @@ export const migrate = protectedProjectProcedure
   .output(
     z.object({
       success: z.boolean(),
+      message: z.string(),
     })
   )
   .mutation(async (opts) => {
@@ -20,6 +23,22 @@ export const migrate = protectedProjectProcedure
         code: "INTERNAL_SERVER_ERROR",
         message: "Only main or internal projects can be migrated to analytics",
       })
+    }
+
+    const project = await opts.ctx.db.query.projects.findFirst({
+      where: (fields, operators) => operators.eq(fields.id, projectId),
+    })
+
+    if (!project) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Project not found",
+      })
+    }
+
+    // if the analytics data is already up to date, return
+    if (project.metadata?.analyticsUpdatedAt) {
+      return { success: true, message: "Analytics data is already up to date" }
     }
 
     // only owner can migrate
@@ -94,23 +113,67 @@ export const migrate = protectedProjectProcedure
       }
     }
 
-    // ingest the data
-    const [planVersionsData, planVersionFeaturesData, featuresData] = await Promise.all([
-      opts.ctx.analytics.ingestPlanVersions(planVersions),
-      opts.ctx.analytics.ingestPlanVersionFeatures(planVersionFeatures),
-      opts.ctx.analytics.ingestFeatures(features),
-    ])
+    try {
+      // ingest the data in parallel and batches
+      const [planVersionsData, planVersionFeaturesData, featuresData] = await Promise.all([
+        opts.ctx.analytics.ingestPlanVersions(planVersions).then((res) => {
+          // if there are any quarantined rows, throw an error
+          if (res.quarantined_rows > 0) {
+            throw new Error(
+              `Error ingestPlanVersions, ${res.quarantined_rows} rows were quarantined, check the logs for more details`
+            )
+          }
+          return res
+        }),
+        opts.ctx.analytics.ingestPlanVersionFeatures(planVersionFeatures).then((res) => {
+          // if there are any quarantined rows, throw an error
+          if (res.quarantined_rows > 0) {
+            throw new Error(
+              `Error ingestPlanVersionFeatures, ${res.quarantined_rows} rows were quarantined, check the logs for more details`
+            )
+          }
+          return res
+        }),
+        opts.ctx.analytics.ingestFeatures(features).then((res) => {
+          // if there are any quarantined rows, throw an error
+          if (res.quarantined_rows > 0) {
+            throw new Error(
+              `Error ingestFeatures, ${res.quarantined_rows} rows were quarantined, check the logs for more details`
+            )
+          }
+          return res
+        }),
+      ])
 
-    if (
-      planVersionsData.quarantined_rows > 0 ||
-      planVersionFeaturesData.quarantined_rows > 0 ||
-      featuresData.quarantined_rows > 0
-    ) {
+      if (
+        planVersionsData.quarantined_rows > 0 ||
+        planVersionFeaturesData.quarantined_rows > 0 ||
+        featuresData.quarantined_rows > 0
+      ) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error ingesting data, there were quarantined rows",
+        })
+      }
+
+      // update the project metadata
+      await opts.ctx.db
+        .update(projects)
+        .set({
+          metadata: {
+            analyticsUpdatedAt: Date.now(),
+          },
+        })
+        .where(eq(projects.id, projectId))
+
+      return { success: true, message: "Analytics data migrated successfully" }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+      opts.ctx.logger.error(errorMessage)
+
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Error ingesting data",
+        message: errorMessage,
       })
     }
-
-    return { success: true }
   })

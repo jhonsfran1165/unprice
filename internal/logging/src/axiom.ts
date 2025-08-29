@@ -1,5 +1,5 @@
 import { Axiom } from "@axiomhq/js"
-import { AxiomJSTransport, Logger as LoggerAxiom } from "@axiomhq/logging"
+import { AxiomJSTransport, ConsoleTransport, Logger as LoggerAxiom } from "@axiomhq/logging"
 import { Log, type LogSchema } from "@unprice/logs"
 import { env } from "../env"
 import type { Fields, Logger } from "./interface"
@@ -34,11 +34,17 @@ export class AxiomLogger implements Logger {
 
     this.client = new LoggerAxiom({
       transports: [
+        new ConsoleTransport({
+          prettyPrint: true,
+          logLevel: "error", // only log errors
+        }),
         new AxiomJSTransport({
           axiom: axiom,
           dataset: opts.dataset,
         }),
       ],
+    }).with({
+      ...this.defaultFields,
     })
   }
 
@@ -57,38 +63,32 @@ export class AxiomLogger implements Logger {
   public emit(message: string, fields?: Fields): void {
     this.client.info(this.marshal("info", message), {
       ...fields,
-      ...this.defaultFields,
     })
   }
   public debug(message: string, fields?: Fields): void {
     this.client.debug(this.marshal("debug", message), {
       ...fields,
-      ...this.defaultFields,
     })
   }
   public info(message: string, fields?: Fields): void {
     this.client.info(this.marshal("info", message), {
       ...fields,
-      ...this.defaultFields,
     })
   }
   public warn(message: string, fields?: Fields): void {
     this.client.warn(this.marshal("warn", message), {
       ...fields,
-      ...this.defaultFields,
     })
   }
   public error(message: string, error: unknown, fields?: Fields): void {
     this.client.error(this.marshal("error", message), {
       ...fields,
-      ...this.defaultFields,
       error,
     })
   }
   public fatal(message: string, fields?: Fields): void {
     this.client.error(this.marshal("fatal", message), {
       ...fields,
-      ...this.defaultFields,
     })
   }
 

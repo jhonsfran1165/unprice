@@ -1,8 +1,20 @@
 import { eq, relations } from "drizzle-orm"
-import { boolean, foreignKey, index, text, unique, uniqueIndex, varchar } from "drizzle-orm/pg-core"
 
+import {
+  boolean,
+  foreignKey,
+  index,
+  json,
+  text,
+  unique,
+  uniqueIndex,
+  varchar,
+} from "drizzle-orm/pg-core"
+
+import type { z } from "zod"
 import { pgTableProject } from "../utils/_table"
 import { id, timestamps, workspaceID } from "../utils/fields"
+import type { projectMetadataSchema } from "../validators/project"
 import { currencyEnum } from "./enums"
 import { workspaces } from "./workspaces"
 
@@ -23,6 +35,7 @@ export const projects = pgTableProject(
     defaultCurrency: currencyEnum("default_currency").notNull(),
     timezone: varchar("timezone", { length: 32 }).notNull(),
     contactEmail: text("contact_email").default("").notNull(),
+    metadata: json("metadata").$type<z.infer<typeof projectMetadataSchema>>(),
   },
   (table) => ({
     mainProject: uniqueIndex("main_project").on(table.isMain).where(eq(table.isMain, true)),

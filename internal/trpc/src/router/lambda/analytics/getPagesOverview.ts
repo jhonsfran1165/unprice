@@ -14,9 +14,37 @@ export const getPagesOverview = protectedProjectProcedure
   .query(async (opts) => {
     const { intervalDays, pageId } = opts.input
     const projectId = opts.ctx.project.id
+    const withAllPage = pageId === "all"
 
-    if (!pageId || pageId === "") {
+    if (!pageId) {
       return { data: [], error: "Page ID is required" }
+    }
+
+    if (withAllPage) {
+      const cacheKey = `${projectId}:all:${intervalDays}`
+      const result = await opts.ctx.cache.getPagesOverview.swr(cacheKey, async () => {
+        const result = await opts.ctx.analytics
+          .getPagesOverview({
+            intervalDays,
+            projectId,
+          })
+          .then((res) => res.data)
+
+        return result
+      })
+
+      if (result.err) {
+        opts.ctx.logger.error(result.err.message, {
+          projectId,
+          intervalDays,
+        })
+
+        return { data: [], error: result.err.message }
+      }
+
+      const data = result.val ?? []
+
+      return { data }
     }
 
     const page = await opts.ctx.db.query.pages.findFirst({

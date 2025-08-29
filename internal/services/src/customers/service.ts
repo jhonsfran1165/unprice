@@ -1,4 +1,14 @@
-import { type Database, type TransactionDatabase, and, eq, gte, isNull, lte, or } from "@unprice/db"
+import {
+  type Database,
+  type TransactionDatabase,
+  and,
+  eq,
+  gte,
+  isNull,
+  lte,
+  or,
+  sql,
+} from "@unprice/db"
 
 import type { Analytics } from "@unprice/analytics"
 import {
@@ -7,29 +17,26 @@ import {
   customers,
   features,
   planVersionFeatures,
+  projects,
   subscriptions,
 } from "@unprice/db/schema"
 import { AesGCM, newId } from "@unprice/db/utils"
-import type {
-  AggregationMethod,
-  Customer,
-  CustomerPaymentMethod,
-  CustomerSignUp,
-  PaymentProvider,
-  Plan,
-  PlanVersion,
-  Project,
+import {
+  type AggregationMethod,
+  type Customer,
+  type CustomerEntitlementExtended,
+  type CustomerPaymentMethod,
+  type CustomerSignUp,
+  type PaymentProvider,
+  type Plan,
+  type PlanVersion,
+  type Project,
+  customerEntitlementExtendedSchema,
 } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result, wrapResult } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import { env } from "../../env"
-import type {
-  CustomerCache,
-  CustomerEntitlementCache,
-  CustomerEntitlementsCache,
-  SubcriptionCache,
-  SubscriptionPhaseCache,
-} from "../cache"
+import type { CustomerCache, SubcriptionCache, SubscriptionPhaseCache } from "../cache"
 import type { Cache } from "../cache/service"
 import type { Metrics } from "../metrics"
 import { PaymentProviderService } from "../payment-provider/service"
@@ -237,6 +244,7 @@ export class CustomerService {
     return Ok(val)
   }
 
+  // validate the customer has and active subscription and is active
   public async getActiveSubscription(
     customerId: string,
     projectId: string,
@@ -273,7 +281,7 @@ export class CustomerService {
       : await retry(
           3,
           async () =>
-            this.cache.customerSubscription.swr(customerId, () =>
+            this.cache.customerSubscription.swr(`${projectId}:${customerId}`, () =>
               this.getActiveSubscriptionData({
                 customerId,
                 projectId,
@@ -373,7 +381,7 @@ export class CustomerService {
       : await retry(
           3,
           async () =>
-            this.cache.customerActivePhase.swr(`${customerId}`, () =>
+            this.cache.customerActivePhase.swr(`${projectId}:${customerId}`, () =>
               this.getActivePhaseData({
                 customerId,
                 projectId,
@@ -525,12 +533,30 @@ export class CustomerService {
     customerId: string
     projectId: string
     now: number
-  }): Promise<CustomerEntitlementsCache[] | null> {
+  }): Promise<CustomerEntitlementExtended[] | null> {
     const start = performance.now()
+
+    // For clarity in the query
+    const millisecondsInADay = 86400000
 
     // if not found in DO, then we query the db
     const entitlements = await this.db.query.customerEntitlements.findMany({
       with: {
+        customer: {
+          columns: {
+            active: true,
+          },
+        },
+        subscription: {
+          columns: {
+            active: true,
+          },
+        },
+        project: {
+          columns: {
+            enabled: true,
+          },
+        },
         featurePlanVersion: {
           columns: {
             aggregationMethod: true,
@@ -545,22 +571,19 @@ export class CustomerService {
           },
         },
       },
-      columns: {
-        id: true,
-        validFrom: true,
-        validTo: true,
-        usage: true,
-        limit: true,
-        featurePlanVersionId: true,
-        units: true,
-      },
       where: (entitlement, { and, eq, gte, lte, isNull, or }) =>
         and(
           eq(entitlement.customerId, customerId),
           eq(entitlement.projectId, projectId),
           eq(entitlement.active, true),
           lte(entitlement.validFrom, now),
-          or(isNull(entitlement.validTo), gte(entitlement.validTo, now))
+          or(
+            isNull(entitlement.validTo),
+            gte(
+              sql`${entitlement.validTo} + ${entitlement.bufferPeriodDays} * ${millisecondsInADay}`,
+              now
+            )
+          )
         ),
     })
 
@@ -579,18 +602,28 @@ export class CustomerService {
       return null
     }
 
-    const result = entitlements.map((entitlement) => ({
-      featureType: entitlement.featurePlanVersion.featureType,
-      featureSlug: entitlement.featurePlanVersion.feature.slug,
-      validFrom: entitlement.validFrom,
-      validTo: entitlement.validTo,
-      usage: entitlement.usage,
-      limit: entitlement.limit,
-      featurePlanVersionId: entitlement.featurePlanVersionId,
-      units: entitlement.units,
-      aggregationMethod: entitlement.featurePlanVersion.aggregationMethod,
-      id: entitlement.id,
-    }))
+    const result = entitlements
+      .map((entitlement) => {
+        const result = customerEntitlementExtendedSchema.safeParse({
+          ...entitlement,
+          featureSlug: entitlement.featurePlanVersion.feature.slug,
+          featureType: entitlement.featurePlanVersion.featureType,
+          aggregationMethod: entitlement.featurePlanVersion.aggregationMethod,
+          customer: entitlement.customer,
+          subscription: entitlement.subscription,
+          project: entitlement.project,
+        })
+
+        if (!result.success) {
+          this.logger.error("error parsing entitlement", {
+            error: result.error?.toString(),
+            entitlement,
+          })
+        }
+
+        return result.data
+      })
+      .filter((r) => r !== undefined)
 
     return result
   }
@@ -608,7 +641,7 @@ export class CustomerService {
       skipCache?: boolean // skip cache to force revalidation
       withLastUsage?: boolean // if true, we will get the last usage from analytics
     }
-  }): Promise<Result<CustomerEntitlementsCache[] | null, FetchError | UnPriceCustomerError>> {
+  }): Promise<Result<CustomerEntitlementExtended[] | null, FetchError | UnPriceCustomerError>> {
     // first try to get the entitlement from cache, if not found try to get it from DO,
     const { val, err } = opts?.skipCache
       ? await wrapResult(
@@ -619,20 +652,20 @@ export class CustomerService {
           }),
           (err) =>
             new FetchError({
-              message: "unable to query entitlement from db",
+              message: `unable to query entitlement from db in getEntitlementsData - ${err.message}`,
               retry: false,
               context: {
                 error: err.message,
                 url: "",
                 customerId: customerId,
-                method: "getActiveEntitlement",
+                method: "getEntitlementsData",
               },
             })
         )
       : await retry(
           3,
           async () =>
-            this.cache.customerEntitlements.swr(`${customerId}`, () =>
+            this.cache.customerEntitlements.swr(`${projectId}:${customerId}`, () =>
               this.getEntitlementsData({
                 customerId,
                 projectId,
@@ -683,21 +716,57 @@ export class CustomerService {
     opts?: {
       withLastUsage?: boolean
     }
-  }): Promise<CustomerEntitlementCache | null> {
+  }): Promise<CustomerEntitlementExtended | null> {
     const start = performance.now()
+
+    // For clarity in the query
+    const millisecondsInADay = 86400000
 
     const entitlement = await this.db
       .select({
         customerEntitlement: customerEntitlements,
         featureType: planVersionFeatures.featureType,
         aggregationMethod: planVersionFeatures.aggregationMethod,
+        customer: {
+          active: customers.active,
+        },
+        subscription: {
+          active: subscriptions.active,
+        },
+        project: {
+          enabled: projects.enabled,
+        },
       })
       .from(customerEntitlements)
       .leftJoin(
         planVersionFeatures,
-        eq(customerEntitlements.featurePlanVersionId, planVersionFeatures.id)
+        and(
+          eq(customerEntitlements.featurePlanVersionId, planVersionFeatures.id),
+          eq(customerEntitlements.projectId, planVersionFeatures.projectId)
+        )
       )
-      .leftJoin(features, eq(planVersionFeatures.featureId, features.id))
+      .leftJoin(
+        features,
+        and(
+          eq(planVersionFeatures.featureId, features.id),
+          eq(planVersionFeatures.projectId, features.projectId)
+        )
+      )
+      .leftJoin(
+        customers,
+        and(
+          eq(customerEntitlements.customerId, customers.id),
+          eq(customerEntitlements.projectId, customers.projectId)
+        )
+      )
+      .leftJoin(
+        subscriptions,
+        and(
+          eq(customerEntitlements.subscriptionId, subscriptions.id),
+          eq(customerEntitlements.projectId, subscriptions.projectId)
+        )
+      )
+      .leftJoin(projects, eq(customerEntitlements.projectId, projects.id))
       .where(
         and(
           eq(features.slug, featureSlug),
@@ -705,18 +774,27 @@ export class CustomerService {
           eq(customerEntitlements.projectId, projectId),
           eq(customerEntitlements.active, true),
           lte(customerEntitlements.validFrom, now),
-          or(isNull(customerEntitlements.validTo), gte(customerEntitlements.validTo, now))
+          or(
+            isNull(customerEntitlements.validTo),
+            gte(
+              sql`${customerEntitlements.validTo} + ${customerEntitlements.bufferPeriodDays} * ${millisecondsInADay}`,
+              now
+            )
+          )
         )
       )
       .then((e) => e[0])
       .catch((e) => {
-        this.logger.error("error getting entitlement", {
-          error: e.message,
-          customerId,
-          featureSlug,
-          projectId,
-          now,
-        })
+        this.logger.error(
+          `error getting entitlement in getEntitlementData from db - ${e.message}`,
+          {
+            error: JSON.stringify(e),
+            customerId,
+            featureSlug,
+            projectId,
+            now,
+          }
+        )
 
         throw e
       })
@@ -733,15 +811,19 @@ export class CustomerService {
       projectId,
     })
 
-    if (!entitlement || !entitlement.featureType || !entitlement.aggregationMethod) {
+    if (
+      !entitlement ||
+      !entitlement.featureType ||
+      !entitlement.aggregationMethod ||
+      !entitlement.customer?.active ||
+      !entitlement.subscription?.active ||
+      !entitlement.project?.enabled
+    ) {
       return null
     }
 
     // get the usage from analytics if the entitlement was updated more than 1 minute ago
-    if (
-      opts?.withLastUsage ||
-      entitlement.customerEntitlement.lastUsageUpdateAt < Date.now() - 60_000
-    ) {
+    if (opts?.withLastUsage) {
       const { err, val } = await this.getUsagePerFeatureFromAnalytics({
         customerId,
         projectId,
@@ -755,14 +837,17 @@ export class CustomerService {
         throw err
       }
 
-      const result = {
+      const result = customerEntitlementExtendedSchema.safeParse({
         ...entitlement.customerEntitlement,
         featureType: entitlement.featureType,
         aggregationMethod: entitlement.aggregationMethod,
+        featureSlug,
+        customer: entitlement.customer,
+        subscription: entitlement.subscription,
+        project: entitlement.project,
         usage: val.usage.toString(),
         accumulatedUsage: val.accumulatedUsage.toString(),
-        featureSlug,
-      }
+      })
 
       // update the entitlement with the new usage
       this.waitUntil(
@@ -776,7 +861,15 @@ export class CustomerService {
           .where(eq(customerEntitlements.id, entitlement.customerEntitlement.id))
       )
 
-      return result
+      if (!result.success) {
+        this.logger.error("error parsing entitlement", {
+          error: result.error?.toString(),
+          entitlement: result.data,
+        })
+        return null
+      }
+
+      return result.data
     }
 
     const result = {
@@ -784,6 +877,9 @@ export class CustomerService {
       featureType: entitlement.featureType,
       aggregationMethod: entitlement.aggregationMethod,
       featureSlug,
+      customer: entitlement.customer,
+      subscription: entitlement.subscription,
+      project: entitlement.project,
     }
 
     return result
@@ -872,7 +968,7 @@ export class CustomerService {
       skipCache?: boolean // skip cache to force revalidation
       withLastUsage?: boolean // if true, we will get the last usage from analytics
     }
-  ): Promise<Result<CustomerEntitlementCache | null, FetchError | UnPriceCustomerError>> {
+  ): Promise<Result<CustomerEntitlementExtended | null, FetchError | UnPriceCustomerError>> {
     // first try to get the entitlement from cache, if not found try to get it from DO,
     const { val, err } = opts?.skipCache
       ? await wrapResult(
@@ -884,10 +980,23 @@ export class CustomerService {
             opts: {
               withLastUsage: opts?.withLastUsage,
             },
+          }).then((res) => {
+            // reset the cache in the background
+            this.waitUntil(
+              Promise.all([
+                this.cache.customerEntitlement.remove(`${projectId}:${customerId}:${featureSlug}`),
+                this.cache.customerEntitlement.set(
+                  `${projectId}:${customerId}:${featureSlug}`,
+                  res
+                ),
+              ])
+            )
+
+            return res
           }),
           (err) =>
             new FetchError({
-              message: "unable to query entitlement from db",
+              message: `unable to query entitlement from db in getEntitlementData - ${err.message}`,
               retry: false,
               context: {
                 error: err.message,
@@ -900,12 +1009,15 @@ export class CustomerService {
       : await retry(
           3,
           async () =>
-            this.cache.customerEntitlement.swr(`${customerId}:${featureSlug}`, () =>
+            this.cache.customerEntitlement.swr(`${projectId}:${customerId}:${featureSlug}`, () =>
               this.getEntitlementData({
                 customerId,
                 featureSlug,
                 projectId,
                 now,
+                opts: {
+                  withLastUsage: opts?.withLastUsage,
+                },
               })
             ),
           (attempt, err) => {
@@ -935,7 +1047,7 @@ export class CustomerService {
       return Ok(null)
     }
 
-    // entitlement could be expired since is in cache, validate it
+    // entitlement could be expired since is in cache, validate it again
     const bufferPeriod = val.bufferPeriodDays * 24 * 60 * 60 * 1000
     const validUntil = val.validTo ? val.validTo + bufferPeriod : null
     const active = val.active

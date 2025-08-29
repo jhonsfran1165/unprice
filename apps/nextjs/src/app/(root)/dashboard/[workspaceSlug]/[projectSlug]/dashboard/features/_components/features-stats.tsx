@@ -16,7 +16,7 @@ import { BarChart3, BarChartBig } from "lucide-react"
 import { NumberTicker } from "~/components/analytics/number-ticker"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useIntervalFilter } from "~/hooks/use-filter"
-import { useIntervalQueryInvalidation } from "~/hooks/use-interval-invalidation"
+import { useQueryInvalidation } from "~/hooks/use-query-invalidation"
 import { useTRPC } from "~/trpc/client"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
@@ -115,15 +115,15 @@ export function FeaturesStats() {
   )
 
   // invalidate the query when the interval changes
-  useIntervalQueryInvalidation({
-    currentInterval: intervalFilter.intervalDays,
+  useQueryInvalidation({
+    paramKey: intervalFilter.intervalDays,
     dataUpdatedAt,
     isFetching,
-    getQueryKey: (interval) => [
+    getQueryKey: (param) => [
       ["analytics", "getFeaturesOverview"],
       {
         input: {
-          intervalDays: interval,
+          intervalDays: param,
         },
         type: "query",
       },
@@ -137,10 +137,8 @@ export function FeaturesStats() {
   const total = React.useMemo(
     () => ({
       usage: chartData.reduce((acc, curr) => acc + curr.usage, 0),
-      // latency average not sum - if nan then 0
-      latency:
-        chartData.reduce((acc, curr) => acc + curr.latency, 0) /
-        (chartData.filter((item) => item.latency).length || 1),
+      // latency show the max latency
+      latency: Math.max(...chartData.map((item) => item.latency)),
       verifications: chartData.reduce((acc, curr) => acc + curr.verifications, 0),
     }),
     [intervalFilter.intervalDays, chartData.length]

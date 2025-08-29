@@ -5,8 +5,8 @@ import { endTrialTask } from "../tasks/end-trial"
 export const endTrialsSchedule = schedules.task({
   id: "subscription.endtrials",
   // every 12 hours (UTC timezone)
-  // if dev then every 5 minutes in dev mode
-  cron: process.env.NODE_ENV === "development" ? "*/5 * * * *" : "0 */12 * * *",
+  // if dev then every 1 minute in dev mode
+  cron: process.env.NODE_ENV === "development" ? "*/1 * * * *" : "0 */12 * * *",
   run: async (payload) => {
     const now = payload.timestamp.getTime()
 

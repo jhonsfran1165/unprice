@@ -28,10 +28,10 @@ export const route = createRoute({
           description: "The feature slug",
           example: "tokens",
         }),
-        timestamp: z.number().optional().openapi({
-          description: "The timestamp of the request",
-          example: 1717852800,
-        }),
+        // timestamp: z.number().optional().openapi({
+        //   description: "The timestamp of the request",
+        //   example: 1717852800,
+        // }),
         usage: z.number().openapi({
           description: "The usage",
           example: 30,
@@ -77,8 +77,7 @@ export type ReportUsageResponse = z.infer<
 
 export const registerReportUsageV1 = (app: App) =>
   app.openapi(route, async (c) => {
-    const { customerId, featureSlug, usage, idempotenceKey, metadata, timestamp } =
-      c.req.valid("json")
+    const { customerId, featureSlug, usage, idempotenceKey, metadata } = c.req.valid("json")
     const { entitlement, customer, logger } = c.get("services")
     const stats = c.get("stats")
     const requestId = c.get("requestId")
@@ -92,8 +91,10 @@ export const registerReportUsageV1 = (app: App) =>
       featureSlug,
       usage,
       // timestamp of the record
-      timestamp: timestamp ?? Date.now(),
+      timestamp: Date.now(), // for now we report the usage at the time of the request
       idempotenceKey,
+      // short ttl for dev
+      secondsToLive: c.env.NODE_ENV === "development" ? 5 : undefined,
       projectId: key.projectId,
       requestId,
       metadata: {

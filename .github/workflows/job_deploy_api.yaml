@@ -98,6 +98,8 @@ jobs:
             ENCRYPTION_KEY
             AXIOM_API_TOKEN
             AXIOM_DATASET
+            UPSTASH_REDIS_REST_URL
+            UPSTASH_REDIS_REST_TOKEN
           vars: |
             VERSION
             NODE_ENV
@@ -124,3 +126,5 @@ jobs:
           DATABASE_READ2_URL: ${{ env.DATABASE_READ2_URL }}
           AXIOM_API_TOKEN: ${{ env.AXIOM_API_TOKEN }}
           AXIOM_DATASET: ${{ env.AXIOM_DATASET }}
+          UPSTASH_REDIS_REST_URL: ${{ env.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ env.UPSTASH_REDIS_REST_TOKEN }}

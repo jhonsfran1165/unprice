@@ -28,6 +28,7 @@ import {
 import { Err, Ok, type Result, type SchemaError } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import { getDate } from "date-fns"
+import { toZonedTime } from "date-fns-tz"
 import type { Cache } from "../cache"
 import { CustomerService } from "../customers/service"
 import type { Metrics } from "../metrics"
@@ -373,20 +374,20 @@ export class SubscriptionService {
 
     // check if payment method is required for the plan version
     const paymentMethodRequired = versionData.paymentMethodRequired
-    let trialDaysToUse = trialDays ?? versionData.trialDays ?? 0
+    const trialDaysToUse = trialDays ?? versionData.trialDays ?? 0
     let billingAnchorToUse = versionData.billingConfig.billingAnchor
     const billingIntervalToUse = versionData.billingConfig.billingInterval
+    const subscriptionTimezone = subscriptionWithPhases.timezone
 
-    // don't apply trials if the interval is not day, month or year
     if (!["year", "month", "day"].includes(billingIntervalToUse)) {
-      trialDaysToUse = 0
       // don't apply billing anchor if the interval is not day, month or year
       billingAnchorToUse = 0
     }
 
     // calculate the day of creation of the subscription
+    // important to keep in mind the timezone of the project
     if (billingAnchorToUse === "dayOfCreation") {
-      billingAnchorToUse = getDate(startAtToUse)
+      billingAnchorToUse = getDate(toZonedTime(startAtToUse, subscriptionTimezone))
     }
 
     // validate payment method is required and if not provided

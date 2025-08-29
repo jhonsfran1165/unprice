@@ -15,7 +15,7 @@ export const intervalParser = {
 }
 
 export const pageParser = {
-  pageId: parseAsString.withDefault(""),
+  pageId: parseAsString.withDefault("all"),
 }
 
 export const intervalParams = createLoader(intervalParser)

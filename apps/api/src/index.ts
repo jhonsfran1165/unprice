@@ -33,9 +33,9 @@ import { registerGetAnalyticsVerificationsV1 } from "./routes/analitycs/getVerif
 
 const app = newApp()
 
+app.use(timing())
 app.use(serveEmojiFavicon("◎"))
 
-app.use(timing())
 app.use("*", init())
 app.use("*", cors())
 

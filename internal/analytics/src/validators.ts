@@ -64,6 +64,7 @@ export const featureVerificationSchemaV1 = z.object({
   subscriptionId: z.string().nullable(),
   entitlementId: z.string(),
   deniedReason: z.string().optional(),
+  success: z.boolean(),
   timestamp: z
     .number()
     .default(Date.now())
@@ -311,6 +312,7 @@ export type PageBrowserVisits = Awaited<ReturnType<Analytics["getBrowserVisits"]
 export type PageOverview = Awaited<ReturnType<Analytics["getPagesOverview"]>>["data"]
 export type FeatureHeatmap = Awaited<ReturnType<Analytics["getFeatureHeatmap"]>>["data"]
 export type FeaturesOverview = Awaited<ReturnType<Analytics["getFeaturesOverview"]>>["data"]
+export type FeaturesUsageTotal = Awaited<ReturnType<Analytics["getFeaturesUsageTotal"]>>["data"]
 export type PlansConversion = Awaited<ReturnType<Analytics["getPlansConversion"]>>["data"]
 export type Usage = Awaited<ReturnType<Analytics["getFeaturesUsagePeriod"]>>["data"]
 export type Verifications = Awaited<ReturnType<Analytics["getFeaturesVerifications"]>>["data"]

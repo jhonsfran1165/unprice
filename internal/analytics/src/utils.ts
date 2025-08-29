@@ -76,3 +76,11 @@ export function prepareInterval(interval: Interval) {
     }
   }
 }
+
+export function preparePage(pageId: string) {
+  const isValidPage = pageId.startsWith("page_")
+  return {
+    pageId: isValidPage ? pageId : "all",
+    isSelected: !!isValidPage, // if the page is valid, it is selected
+  }
+}

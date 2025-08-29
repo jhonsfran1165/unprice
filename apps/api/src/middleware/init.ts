@@ -2,7 +2,7 @@ import { Analytics } from "@unprice/analytics"
 import { createConnection } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
 import { ConsoleLogger } from "@unprice/logging"
-import { CacheService } from "@unprice/services/cache"
+import { CacheService, redis as upstashRedis } from "@unprice/services/cache"
 import { CustomerService } from "@unprice/services/customers"
 import { LogdrainMetrics, NoopMetrics } from "@unprice/services/metrics"
 import type { Metrics } from "@unprice/services/metrics"
@@ -12,14 +12,14 @@ import { EntitlementService } from "~/entitlement/service"
 import type { HonoEnv } from "~/hono/env"
 import { ApiProjectService } from "~/project"
 
-import { CloudflareStore } from "@unkey/cache/stores"
+import { UpstashRedisStore } from "@unkey/cache/stores"
 import { SubscriptionService } from "@unprice/services/subscriptions"
 import { endTime, startTime } from "hono/timing"
 
 /**
  * These maps persist between worker executions and are used for caching
  */
-// const rlMap = new Map()
+const hashCache = new Map()
 
 /**
  * workerId and isolateCreatedAt are used to track the lifetime of the worker
@@ -108,18 +108,26 @@ export function init(): MiddlewareHandler<HonoEnv> {
       emitMetrics
     )
 
-    const cloudflareCacheStore =
-      c.env.CLOUDFLARE_ZONE_ID && c.env.CLOUDFLARE_API_TOKEN
-        ? new CloudflareStore({
-            cloudflareApiKey: c.env.CLOUDFLARE_API_TOKEN,
-            zoneId: c.env.CLOUDFLARE_ZONE_ID,
-            domain: "cache.unprice.dev",
-            cacheBuster: "v2",
+    // const cloudflareCacheStore =
+    //   c.env.CLOUDFLARE_ZONE_ID && c.env.CLOUDFLARE_API_TOKEN
+    //     ? new CloudflareStore({
+    //         cloudflareApiKey: c.env.CLOUDFLARE_API_TOKEN,
+    //         zoneId: c.env.CLOUDFLARE_ZONE_ID,
+    //         domain: "cache.unprice.dev",
+    //         cacheBuster: "v2",
+    //       })
+    //     : undefined
+
+    // redis seems to be faster than cloudflare
+    const upstashCacheStore =
+      c.env.UPSTASH_REDIS_REST_URL && c.env.UPSTASH_REDIS_REST_TOKEN
+        ? new UpstashRedisStore({
+            redis: upstashRedis,
           })
         : undefined
 
     // register the cloudflare store if it is configured
-    await cacheService.init(cloudflareCacheStore ? [cloudflareCacheStore] : [])
+    await cacheService.init(upstashCacheStore ? [upstashCacheStore] : [])
 
     const cache = cacheService.getCache()
 
@@ -190,6 +198,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       db,
       waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
       customer,
+      stats: c.get("stats"),
+      hashCache,
     })
 
     endTime(c, "initEntitlement")
@@ -219,6 +229,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       metrics,
       db,
       waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      hashCache,
     })
 
     endTime(c, "initApikey")
@@ -237,11 +248,14 @@ export function init(): MiddlewareHandler<HonoEnv> {
       customer,
     })
 
+    startTime(c, "emitInitMetrics")
     // emit the init event
     metrics.emit({
       metric: "metric.init",
       duration: performance.now() - performanceStart,
     })
+
+    endTime(c, "emitInitMetrics")
 
     try {
       await next()

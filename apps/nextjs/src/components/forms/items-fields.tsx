@@ -26,6 +26,7 @@ import {
   calculateFreeUnits,
   calculatePricePerFeature,
   createDefaultSubscriptionConfig,
+  getBillingCycleMessage,
 } from "@unprice/db/validators"
 import type { RouterOutputs } from "@unprice/trpc/routes"
 import { Button } from "@unprice/ui/button"
@@ -57,6 +58,7 @@ import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PriceFeature } from "~/components/forms/price-feature"
 import { PricingItem } from "~/components/forms/pricing-item"
 import { PropagationStopper } from "~/components/prevent-propagation"
+import { capitalize } from "~/lib/capitalize"
 
 type PlanVersionFeaturesResponse =
   RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]["planFeatures"][0]
@@ -242,7 +244,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                   versionAddons.get(itemConfig.featurePlanId)
 
                 // if the feature is hidden, don't show it
-                if (!feature || feature.hidden) return null
+                if (!feature) return null
 
                 // if the units are not set, use the minimum units
                 const units =
@@ -338,12 +340,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                       )}
                     </TableCell>
                     <TableCell className="flex h-16 items-center justify-end gap-1 pr-1">
-                      <PriceFeature
-                        selectedPlanVersion={selectedPlanVersion!}
-                        quantity={units || 0}
-                        feature={feature}
-                        type="total"
-                      />
+                      <PriceFeature quantity={units || 0} feature={feature} type="total" />
                       {isSubscriptionTypeAddons && isDelete.get(itemConfig.featurePlanId) && (
                         <div className="flex flex-row items-center">
                           <Button
@@ -402,7 +399,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
 
               <TableRow className="border-t border-b text-muted-foreground">
                 <TableCell colSpan={2} className="h-10 gap-1 pl-1 text-left font-semibold">
-                  Total per {selectedPlanVersion?.billingConfig.billingInterval}
+                  {capitalize(getBillingCycleMessage(selectedPlanVersion?.billingConfig!).message)}
                 </TableCell>
                 <TableCell colSpan={1} className="h-10 text-right text-xs">
                   {displayTotalPrice}

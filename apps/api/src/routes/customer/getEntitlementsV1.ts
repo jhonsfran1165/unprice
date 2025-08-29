@@ -1,4 +1,5 @@
 import { createRoute } from "@hono/zod-openapi"
+import { endTime, startTime } from "hono/timing"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent } from "stoker/openapi/helpers"
 
@@ -47,12 +48,18 @@ export const registerGetEntitlementsV1 = (app: App) =>
     // validate the request
     const key = await keyAuth(c)
 
+    // start a new timer
+    startTime(c, "getEntitlements")
+
     // validate usage from db
     const result = await entitlement.getEntitlements({
       customerId,
       projectId: key.projectId,
       now: Date.now(),
     })
+
+    // end the timer
+    endTime(c, "getEntitlements")
 
     return c.json(result, HttpStatusCodes.OK)
   })

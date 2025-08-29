@@ -86,13 +86,20 @@ async function generateData(customerId: string, date: Date) {
 
     if (randomFeatureSlug) {
       // verify the usage
-      await unprice.customers.can({
+      const result = await unprice.customers.can({
         customerId,
         featureSlug: randomFeatureSlug,
         timestamp,
       })
 
-      console.info(`Usage ${usage} verified for ${randomFeatureSlug}`)
+      if (result.result?.success) {
+        console.info(`Verification ${randomFeatureSlug} verified for ${customerId}`)
+      } else {
+        console.error(
+          `Verification for ${randomFeatureSlug} and ${customerId} cannot be used`,
+          result.result?.message
+        )
+      }
     }
   }
 

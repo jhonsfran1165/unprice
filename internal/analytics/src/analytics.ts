@@ -32,6 +32,7 @@ export class Analytics {
         ? new Tinybird({ token: opts.tinybirdToken, baseUrl: opts.tinybirdUrl })
         : new NoopTinybird()
 
+    // TODO: implement delete endpoint https://www.tinybird.co/docs/api-reference/datasource-api#delete--v0-datasources-(.+)
     this.writeClient =
       opts.tinybirdProxy && opts.emit
         ? new Tinybird({

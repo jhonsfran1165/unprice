@@ -13,7 +13,7 @@ import { BarChart4, Code } from "lucide-react"
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useIntervalFilter } from "~/hooks/use-filter"
-import { useIntervalQueryInvalidation } from "~/hooks/use-interval-invalidation"
+import { useQueryInvalidation } from "~/hooks/use-query-invalidation"
 import { useTRPC } from "~/trpc/client"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
@@ -75,15 +75,15 @@ export function UsageChart() {
   )
 
   // invalidate the query when the interval changes
-  useIntervalQueryInvalidation({
-    currentInterval: intervalFilter.intervalDays,
+  useQueryInvalidation({
+    paramKey: intervalFilter.intervalDays,
     dataUpdatedAt,
     isFetching,
-    getQueryKey: (interval) => [
+    getQueryKey: (param) => [
       ["analytics", "getUsage"],
       {
         input: {
-          intervalDays: interval,
+          intervalDays: param,
         },
         type: "query",
       },

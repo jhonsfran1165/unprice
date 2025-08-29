@@ -15,7 +15,7 @@ import {
 import { Ellipsis } from "@unprice/ui/icons"
 
 import { useMutation } from "@tanstack/react-query"
-import { toastAction } from "~/lib/toast"
+import { toast } from "~/lib/toast"
 import { useTRPC } from "~/trpc/client"
 
 interface DataTableRowActionsProps<TData> {
@@ -30,7 +30,6 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const revokeApiKeys = useMutation(
     trpc.apikeys.revoke.mutationOptions({
       onSuccess: () => {
-        toastAction("saved")
         router.refresh()
       },
     })
@@ -39,7 +38,6 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const rollApiKey = useMutation(
     trpc.apikeys.roll.mutationOptions({
       onSuccess: () => {
-        toastAction("success")
         router.refresh()
       },
     })
@@ -47,17 +45,33 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
 
   function onRevokeKey() {
     startTransition(() => {
-      void revokeApiKeys.mutateAsync({
-        ids: [apikey.id],
-      })
+      toast.promise(
+        revokeApiKeys.mutateAsync({
+          ids: [apikey.id],
+        }),
+        {
+          loading: "Revoking key...",
+          success: "Key revoked",
+        }
+      )
     })
   }
 
   function onRollKey() {
     startTransition(() => {
-      void rollApiKey.mutateAsync({
-        id: apikey.id,
-      })
+      toast.promise(
+        rollApiKey
+          .mutateAsync({
+            id: apikey.id,
+          })
+          .then((data) => {
+            navigator.clipboard.writeText(data.apikey.key)
+          }),
+        {
+          loading: "Rolling key...",
+          success: "Key rolled, your new key is been copied to your clipboard",
+        }
+      )
     })
   }
 

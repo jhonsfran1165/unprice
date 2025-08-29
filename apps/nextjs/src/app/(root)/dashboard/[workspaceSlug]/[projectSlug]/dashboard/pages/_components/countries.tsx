@@ -15,7 +15,7 @@ import {
 import { BarChart4 } from "lucide-react"
 import { useMemo } from "react"
 import { useIntervalFilter, usePageFilter } from "~/hooks/use-filter"
-import { useIntervalQueryInvalidation } from "~/hooks/use-interval-invalidation"
+import { useQueryInvalidation } from "~/hooks/use-query-invalidation"
 import { useTRPC } from "~/trpc/client"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
@@ -57,14 +57,14 @@ export function CountriesSkeleton({
           <EmptyPlaceholder.Title>
             {error
               ? "Ups, something went wrong"
-              : pageFilter.pageId === ""
+              : !pageFilter.isSelected
                 ? "No page selected"
                 : "No data available"}
           </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
             {error
               ? error
-              : pageFilter.pageId === ""
+              : !pageFilter.isSelected
                 ? "Please select a page to see countries visits."
                 : `There is no countries visits available for the ${intervalFilter.label}.`}
           </EmptyPlaceholder.Description>
@@ -76,31 +76,33 @@ export function CountriesSkeleton({
 
 export function Countries() {
   const [intervalFilter] = useIntervalFilter()
-  const [pageId] = usePageFilter()
+  const [pageFilter] = usePageFilter()
+
   const trpc = useTRPC()
   const { data, isLoading, isFetching, dataUpdatedAt } = useSuspenseQuery(
     trpc.analytics.getCountryVisits.queryOptions(
       {
         intervalDays: intervalFilter.intervalDays,
-        page_id: pageId.pageId,
+        page_id: pageFilter.pageId,
       },
       {
-        enabled: pageId.pageId !== "",
+        enabled: pageFilter.isSelected,
         staleTime: ANALYTICS_STALE_TIME,
       }
     )
   )
 
   // invalidate the query when the interval changes
-  useIntervalQueryInvalidation({
-    currentInterval: intervalFilter.intervalDays,
+  useQueryInvalidation({
+    paramKey: intervalFilter.intervalDays,
     dataUpdatedAt,
     isFetching,
-    getQueryKey: (interval) => [
+    getQueryKey: (param) => [
       ["analytics", "getCountryVisits"],
       {
         input: {
-          intervalDays: interval,
+          intervalDays: param,
+          pageId: pageFilter.pageId,
         },
         type: "query",
       },
@@ -128,7 +130,7 @@ export function Countries() {
       },
       [] as { country: string; visits: number; hits: number }[]
     )
-  }, [pageId.pageId, intervalFilter.intervalDays, data.data.length])
+  }, [pageFilter.pageId, intervalFilter.intervalDays, data.data.length])
 
   if (isLoading || !groupedData || groupedData.length === 0) {
     return <CountriesSkeleton isLoading={isLoading} error={data.error} />

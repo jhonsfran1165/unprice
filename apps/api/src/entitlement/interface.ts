@@ -1,6 +1,6 @@
 import {
   billingConfigSchema,
-  customerEntitlementsSchema,
+  customerEntitlementExtendedSchema,
   deniedReasonSchema,
   featureSelectBaseSchema,
   planVersionFeatureSelectBaseSchema,
@@ -42,6 +42,8 @@ export const canResponseSchema = z.object({
   deniedReason: deniedReasonSchema.optional(),
   cacheHit: z.boolean().optional(),
   remaining: z.number().optional(),
+  limit: z.number().optional(),
+  usage: z.number().optional(),
 })
 export type CanResponse = z.infer<typeof canResponseSchema>
 
@@ -51,11 +53,13 @@ export const reportUsageResponseSchema = z.object({
   limit: z.number().optional(),
   usage: z.number().optional(),
   notifyUsage: z.boolean().optional(),
+  deniedReason: deniedReasonSchema.optional(),
+  cacheHit: z.boolean().optional(),
 })
 export type ReportUsageResponse = z.infer<typeof reportUsageResponseSchema>
 
 export const getEntitlementsResponseSchema = z.object({
-  entitlements: customerEntitlementsSchema.array(),
+  entitlements: customerEntitlementExtendedSchema.array(),
 })
 
 export type GetEntitlementsResponse = z.infer<typeof getEntitlementsResponseSchema>

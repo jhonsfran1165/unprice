@@ -7,10 +7,10 @@ import { migrate } from "drizzle-orm/neon-serverless/migrator"
 import { env } from "../env"
 
 async function main() {
-  await migrate(db, { migrationsFolder: "src/migrations" })
-
   const start = Date.now()
-  console.info("⏳ Running migrations...")
+  console.info("⏳ Running migrations for environment:", env.NODE_ENV)
+
+  await migrate(db, { migrationsFolder: "src/migrations" })
 
   let userExists = await db.query.users
     .findFirst({
@@ -182,13 +182,15 @@ async function main() {
 
   // create api key for the user
   if (env.UNPRICE_API_KEY) {
+    // generate hash of the key
+    const apiKeyHash = await hashStringSHA256(env.UNPRICE_API_KEY)
     // find the api key for the project
     const apiKey = await db.query.apikeys.findFirst({
       where: (fields, operators) =>
         operators.and(
           operators.eq(fields.projectId, project.id),
           operators.eq(fields.isRoot, true),
-          operators.eq(fields.key, env.UNPRICE_API_KEY!)
+          operators.eq(fields.hash, apiKeyHash)
         ),
     })
 
@@ -201,7 +203,6 @@ async function main() {
         .values({
           id: newId("apikey"),
           name: "unprice",
-          key: env.UNPRICE_API_KEY,
           hash: apiKeyHash,
           projectId: project.id,
           isRoot: true,

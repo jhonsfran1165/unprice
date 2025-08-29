@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_projects" ADD COLUMN "metadata" json;

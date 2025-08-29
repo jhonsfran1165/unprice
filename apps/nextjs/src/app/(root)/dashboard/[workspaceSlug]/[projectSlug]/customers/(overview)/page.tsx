@@ -84,7 +84,6 @@ export default async function ProjectUsersPage(props: {
               showViewOptions={true}
               searchableColumnCount={1}
               cellWidths={["10rem", "30rem", "20rem", "20rem", "20rem", "20rem", "12rem", "8rem"]}
-              shrinkZero
             />
           }
         >

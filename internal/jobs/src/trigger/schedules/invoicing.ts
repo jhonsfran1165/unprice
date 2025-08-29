@@ -5,8 +5,8 @@ import { invoiceTask } from "../tasks/invoice"
 export const invoicingSchedule = schedules.task({
   id: "subscriptionPhase.invoicing",
   // every 12 hours (UTC timezone)
-  // if dev then every 5 minutes in dev mode
-  cron: process.env.NODE_ENV === "development" ? "*/5 * * * *" : "0 */12 * * *",
+  // if dev then every 1 minute in dev mode
+  cron: process.env.NODE_ENV === "development" ? "*/1 * * * *" : "0 */12 * * *",
   run: async (payload) => {
     const now = payload.timestamp.getTime()
 
@@ -26,6 +26,8 @@ export const invoicingSchedule = schedules.task({
     logger.info(`Found ${subscriptionsWithActivePhase.length} subscriptions for invoicing`)
 
     // trigger the end trial task for each subscription phase
+    // TODO: check the DO is updating the entitlements when they are finished.
+    // for instance if the cronjob hasn't run in the last 2 months and the subscription is monthly, we need to invoice 2 times.
     for (const sub of subscriptionsWithActivePhase) {
       const phase = sub.phases[0]!
 

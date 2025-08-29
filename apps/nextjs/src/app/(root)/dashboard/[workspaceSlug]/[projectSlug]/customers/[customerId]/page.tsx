@@ -172,7 +172,6 @@ export default async function CustomerPage({
                   "12rem",
                   "8rem",
                 ]}
-                shrinkZero
               />
             }
           >

@@ -16,7 +16,6 @@ export const apikeys = pgTableProject(
     revokedAt: bigint("revoked_at_m", { mode: "number" }),
     isRoot: boolean("is_root").notNull().default(false),
     name: text("name").notNull(),
-    key: text("key").notNull(),
     hash: text("hash").notNull().default(""),
   },
   (table) => ({
@@ -24,7 +23,6 @@ export const apikeys = pgTableProject(
       columns: [table.id, table.projectId],
       name: "pk_apikeys",
     }),
-    key: uniqueIndex("key").on(table.key),
     hash: uniqueIndex("hash").on(table.hash),
   })
 )

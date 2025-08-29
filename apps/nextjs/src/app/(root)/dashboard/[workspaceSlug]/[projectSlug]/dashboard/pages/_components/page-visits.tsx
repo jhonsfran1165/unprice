@@ -18,7 +18,7 @@ import { NumberTicker } from "~/components/analytics/number-ticker"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { SuperLink } from "~/components/super-link"
 import { useIntervalFilter, usePageFilter } from "~/hooks/use-filter"
-import { useIntervalQueryInvalidation } from "~/hooks/use-interval-invalidation"
+import { useQueryInvalidation } from "~/hooks/use-query-invalidation"
 import { useTRPC } from "~/trpc/client"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
@@ -84,18 +84,18 @@ export function PageVisitsSkeleton({
           <EmptyPlaceholder.Title>
             {error
               ? "Ups, something went wrong"
-              : pageFilter.pageId === ""
+              : !pageFilter.isSelected
                 ? "No page selected"
                 : "No data available for this page"}
           </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
             {error
               ? error
-              : pageFilter.pageId === ""
+              : !pageFilter.isSelected
                 ? "Please select a page to see page views."
                 : `There is no data available for the ${intervalFilter.label}.`}
           </EmptyPlaceholder.Description>
-          {pageFilter.pageId === "" && (
+          {!pageFilter.isSelected && (
             <EmptyPlaceholder.Action>
               <SuperLink href={`${basePath}/pages`} className="mt-2 w-full">
                 <Button size={"sm"}>Create a page</Button>
@@ -125,22 +125,23 @@ export function PageVisits() {
         pageId: pageFilter.pageId,
       },
       {
-        enabled: pageFilter.pageId !== "",
+        enabled: pageFilter.isSelected,
         staleTime: ANALYTICS_STALE_TIME,
       }
     )
   )
 
   // invalidate the query when the interval changes
-  useIntervalQueryInvalidation({
-    currentInterval: intervalFilter.intervalDays,
+  useQueryInvalidation({
+    paramKey: intervalFilter.intervalDays,
     dataUpdatedAt,
     isFetching,
-    getQueryKey: (interval) => [
+    getQueryKey: (param) => [
       ["analytics", "getPagesOverview"],
       {
         input: {
-          intervalDays: interval,
+          intervalDays: param,
+          pageId: pageFilter.pageId,
         },
         type: "query",
       },

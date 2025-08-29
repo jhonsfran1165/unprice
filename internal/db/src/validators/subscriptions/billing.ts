@@ -187,7 +187,7 @@ export function configureBillingCycleSubscription({
 
 function validateAnchor(interval: BillingInterval, anchor: BillingAnchor): number {
   if (anchor === "dayOfCreation") {
-    // TODO: date of creation should be in the time zone of the subscription not UTC
+    // INFO: this will return the date in the UTC timezone
     return new Date().getUTCDate() // get the date the subscription was created
   }
 

@@ -5,8 +5,8 @@ import { finilizeTask } from "../tasks/finilize"
 
 export const billingSchedule = schedules.task({
   id: "subscriptionPhase.billing",
-  // if dev then every 5 minutes in dev mode
-  cron: process.env.NODE_ENV === "development" ? "*/5 * * * *" : "0 */12 * * *",
+  // if dev then every 1 minute in dev mode
+  cron: process.env.NODE_ENV === "development" ? "*/1 * * * *" : "0 */12 * * *",
   run: async (payload) => {
     const now = payload.timestamp.getTime()
 
