@@ -1,4 +1,5 @@
 import { Analytics } from "@unprice/analytics"
+import { createConnection } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
 import { ConsoleLogger } from "@unprice/logging"
 import { CacheService, redis as upstashRedis } from "@unprice/services/cache"
@@ -14,7 +15,6 @@ import { ApiProjectService } from "~/project"
 import { UpstashRedisStore } from "@unkey/cache/stores"
 import { SubscriptionService } from "@unprice/services/subscriptions"
 import { endTime, startTime } from "hono/timing"
-import { unpriceDb } from "~/util/db"
 
 /**
  * These maps persist between worker executions and are used for caching
@@ -136,6 +136,14 @@ export function init(): MiddlewareHandler<HonoEnv> {
     // start a new timer
     startTime(c, "initDb")
 
+    const db = createConnection({
+      env: c.env.NODE_ENV,
+      primaryDatabaseUrl: c.env.DATABASE_URL,
+      read1DatabaseUrl: c.env.DATABASE_READ1_URL,
+      read2DatabaseUrl: c.env.DATABASE_READ2_URL,
+      logger: c.env.DRIZZLE_LOG.toString() === "true",
+    })
+
     endTime(c, "initDb")
 
     // start a new timer
@@ -158,7 +166,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
       cache,
       metrics,
-      db: unpriceDb,
+      db,
     })
 
     endTime(c, "initCustomer")
@@ -170,7 +178,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       logger,
       analytics,
       cache,
-      db: unpriceDb,
+      db,
       waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
       metrics,
     })
@@ -187,7 +195,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       metrics,
       analytics,
       cache,
-      db: unpriceDb,
+      db,
       waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
       customer,
       stats: c.get("stats"),
@@ -205,7 +213,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       logger,
       metrics,
       waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
-      db: unpriceDb,
+      db,
       requestId,
     })
 
@@ -219,7 +227,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       analytics,
       logger,
       metrics,
-      db: unpriceDb,
+      db,
       waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
       hashCache,
     })
@@ -236,7 +244,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       logger,
       metrics,
       apikey,
-      db: unpriceDb,
+      db,
       customer,
     })
 

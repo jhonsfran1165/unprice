@@ -1,7 +1,8 @@
 {
   "name": "api",
   "scripts": {
-    "deploy": "wrangler deploy",
+    "deploy:preview": "wrangler deploy --env preview",
+    "deploy:prod": "wrangler deploy --env prod",
     "dev": "sh dev.sh",
     "dev:wrangler": "wrangler dev -e dev",
     "start": "wrangler dev -e dev",

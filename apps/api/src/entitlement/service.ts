@@ -179,6 +179,7 @@ export class EntitlementService {
     return `${data.customerId}:${data.featureSlug}:${data.projectId}`
   }
 
+  // TODO: return the proper API error with Result
   public async can(data: CanRequest): Promise<CanResponse> {
     const key = this.getHashKey(data)
     const cached = this.hashCache.get(key)
@@ -245,13 +246,15 @@ export class EntitlementService {
     return result
   }
 
-  public async getEntitlements(req: GetEntitlementsRequest): Promise<GetEntitlementsResponse> {
+  public async getEntitlements(
+    req: GetEntitlementsRequest
+  ): Promise<Result<GetEntitlementsResponse, UnPriceCustomerError | FetchError>> {
     const { customerId, projectId, now } = req
 
     const { err: subscriptionErr } = await this.validateSubscription(customerId, projectId)
 
     if (subscriptionErr) {
-      throw subscriptionErr
+      return Err(subscriptionErr)
     }
 
     const { err: entitlementsErr, val: entitlements } =
@@ -262,14 +265,16 @@ export class EntitlementService {
       })
 
     if (entitlementsErr) {
-      throw entitlementsErr
+      return Err(entitlementsErr)
     }
 
     if (!entitlements || entitlements.length === 0) {
-      throw new UnPriceCustomerError({
-        code: "CUSTOMER_ENTITLEMENTS_NOT_FOUND",
-        message: "customer has no entitlements",
-      })
+      return Err(
+        new UnPriceCustomerError({
+          code: "CUSTOMER_ENTITLEMENTS_NOT_FOUND",
+          message: "customer has no entitlements",
+        })
+      )
     }
 
     // get the entitlements from the DO
@@ -286,9 +291,9 @@ export class EntitlementService {
       })
     }
 
-    return {
+    return Ok({
       entitlements,
-    }
+    })
   }
 
   public async getUsage(req: GetUsageRequest): Promise<GetUsageResponse> {

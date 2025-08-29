@@ -3,6 +3,7 @@ import { DefaultLogger } from "drizzle-orm"
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
 import { withReplicas } from "drizzle-orm/pg-core"
 import ws from "ws"
+import type { Database } from "."
 import * as schema from "./schema"
 
 export type ConnectionDatabaseOptions = {
@@ -13,7 +14,15 @@ export type ConnectionDatabaseOptions = {
   logger: boolean
 }
 
-export function createConnection(opts: ConnectionDatabaseOptions) {
+// use singleton pattern to avoid creating multiple connections
+let db: Database | null = null
+
+export function createConnection(opts: ConnectionDatabaseOptions): Database {
+  // if the db is already created, return it
+  if (db) {
+    return db as Database
+  }
+
   if (opts.env === "development") {
     // only for development when using node 20
     neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket : ws
@@ -65,10 +74,10 @@ export function createConnection(opts: ConnectionDatabaseOptions) {
     }
   )
 
-  const db =
+  db =
     opts.env === "production" && opts.read1DatabaseUrl && opts.read2DatabaseUrl
       ? withReplicas(primary, [read1, read2])
       : withReplicas(primary, [primary])
 
-  return db
+  return db as Database
 }
