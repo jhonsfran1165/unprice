@@ -118,6 +118,7 @@ const handler = {
       const parsedEnv = createRuntimeEnv(
         env as unknown as Record<string, string | number | boolean>
       )
+
       return app.fetch(req, parsedEnv, executionCtx)
     } catch (error) {
       new ConsoleLogger({

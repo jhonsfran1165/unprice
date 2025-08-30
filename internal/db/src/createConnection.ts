@@ -41,6 +41,11 @@ export function createConnection(opts: ConnectionDatabaseOptions): Database {
     connectionString: opts.primaryDatabaseUrl,
     connectionTimeoutMillis: 30000,
     keepAlive: true,
+    // Add connection retry logic
+    maxUses: 7500,
+    idleTimeoutMillis: 30000,
+    // Increase statement timeout for complex queries
+    queryTimeout: 60000,
   }
 
   const logger = opts.logger ? new DefaultLogger() : false
@@ -76,7 +81,7 @@ export function createConnection(opts: ConnectionDatabaseOptions): Database {
   )
 
   db =
-    opts.env === "production" && opts.read1DatabaseUrl && opts.read2DatabaseUrl
+    opts.env === "production" && opts.read1DatabaseUrl !== "" && opts.read2DatabaseUrl !== ""
       ? withReplicas(primary, [read1, read2])
       : withReplicas(primary, [primary])
 

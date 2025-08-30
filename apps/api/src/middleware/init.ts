@@ -119,28 +119,12 @@ export function init(): MiddlewareHandler<HonoEnv> {
           })
         : undefined
 
-    // redis seems to be slower than cloudflare
-    // const upstashCacheStore =
-    //   c.env.UPSTASH_REDIS_REST_URL && c.env.UPSTASH_REDIS_REST_TOKEN
-    //     ? new UpstashRedisStore({
-    //         redis: createRedis({
-    //           token: c.env.UPSTASH_REDIS_REST_TOKEN,
-    //           url: c.env.UPSTASH_REDIS_REST_URL,
-    //           latencyLogging: c.env.NODE_ENV === "development",
-    //         }),
-    //       })
-    //     : undefined
-
     const stores = []
+
     // push the cloudflare store first to hit it first
     if (cloudflareCacheStore) {
       stores.push(cloudflareCacheStore)
     }
-
-    // // push the upstash store last to hit it last
-    // if (upstashCacheStore) {
-    //   stores.push(upstashCacheStore)
-    // }
 
     // register the cloudflare store if it is configured
     cacheService.init(stores)
@@ -158,7 +142,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
       read1DatabaseUrl: c.env.DATABASE_READ1_URL,
       read2DatabaseUrl: c.env.DATABASE_READ2_URL,
       logger: c.env.DRIZZLE_LOG,
-      singleton: true,
+      singleton: false,
     })
 
     endTime(c, "initDb")

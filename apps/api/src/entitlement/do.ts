@@ -56,7 +56,7 @@ export class DurableObjectUsagelimiter extends Server {
   // debounce delay for the broadcast events
   private readonly DEBOUNCE_DELAY = 1000 * 1 // 1 second
   // update period for the entitlements for invalidation
-  private readonly UPDATE_PERIOD = 1000 * 5 // 5 mins
+  private readonly UPDATE_PERIOD = 1000 * 60 * 24 // 24 hours
 
   // hibernate the do when no websocket nor connections are active
   static options = {
@@ -121,6 +121,7 @@ export class DurableObjectUsagelimiter extends Server {
         read1DatabaseUrl: env.DATABASE_READ1_URL,
         read2DatabaseUrl: env.DATABASE_READ2_URL,
         logger: env.DRIZZLE_LOG,
+        singleton: false, // Don't use singleton for hibernating DOs
       }),
     })
 
@@ -265,7 +266,7 @@ export class DurableObjectUsagelimiter extends Server {
         }
       }
 
-      // revalidate in background is found in the first time and should refresh
+      // revalidate in background is found in the first time but should refresh
       this.ctx.waitUntil(
         this.revalidateEntitlement({
           customerId,
@@ -279,13 +280,6 @@ export class DurableObjectUsagelimiter extends Server {
     // if the entitlement doesn't need to be refreshed
     // and the entitlement is not found, return an error
     if (!entitlement?.id) {
-      this.logger.error("entitlement not found", {
-        entitlementId: entitlement?.id,
-        featureSlug: featureSlug,
-        customerId: customerId,
-        projectId: projectId,
-        now: now,
-      })
       return Err(
         new FetchError({
           message: "entitlement not found",
@@ -296,14 +290,6 @@ export class DurableObjectUsagelimiter extends Server {
 
     // placeholder is used to avoid spamming the db with requests when entitlement is not found
     if (entitlement?.id === "placeholder") {
-      this.logger.error("entitlement is a placeholder", {
-        entitlementId: entitlement?.id,
-        featureSlug: featureSlug,
-        customerId: customerId,
-        projectId: projectId,
-        now: now,
-      })
-
       return Err(
         new FetchError({
           message: `DO: Entitlement not found, entitlement will be refreshed in ${Math.round(
