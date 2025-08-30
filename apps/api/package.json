@@ -10,17 +10,17 @@
     "type-check": "gentypes && tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "20.11.24",
+    "@types/node": "20.19.11",
     "@unprice/tsconfig": "workspace:^",
-    "drizzle-kit": "^0.30.5",
-    "typescript": "^5.3.3",
-    "wrangler": "4.12.0"
+    "drizzle-kit": "^0.31.4",
+    "typescript": "^5.9.2",
+    "wrangler": "4.33.1"
   },
   "dependencies": {
-    "@auth/core": "^0.34.1",
-    "@hono/zod-openapi": "^0.19.2",
-    "@scalar/hono-api-reference": "^0.7.2",
-    "@t3-oss/env-core": "^0.12.0",
+    "@auth/core": "^0.40.0",
+    "@hono/zod-openapi": "^0.19.10",
+    "@scalar/hono-api-reference": "^0.9.16",
+    "@t3-oss/env-core": "^0.13.8",
     "@unkey/cache": "^1.5.0",
     "@unprice/analytics": "workspace:^",
     "@unprice/config": "workspace:^",
@@ -30,12 +30,12 @@
     "@unprice/logs": "workspace:^",
     "@unprice/metrics": "workspace:^",
     "@unprice/services": "workspace:^",
-    "drizzle-orm": "^0.42.0",
-    "hono": "^4.7.4",
-    "hono-party": "^0.0.6",
-    "partyserver": "^0.0.65",
-    "stoker": "^1.4.2",
-    "ua-parser-js": "^2.0.3",
-    "zod": "^3.24.2"
+    "drizzle-orm": "^0.44.5",
+    "hono": "^4.9.5",
+    "hono-party": "^0.0.15",
+    "partyserver": "^0.0.73",
+    "stoker": "^1.4.3",
+    "ua-parser-js": "^2.0.4",
+    "zod": "^3.25.76"
   }
 }
