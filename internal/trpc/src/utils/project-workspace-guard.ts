@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server"
 
 import type { ProjectExtended, User, WorkspaceRole } from "@unprice/db/validators"
 
-import { db } from "@unprice/db"
 import { createProjectWorkspaceGuardQuery } from "@unprice/db/queries"
 import type { Context } from "#trpc"
+import { db } from "./db"
 
 interface ProjectGuardType {
   project: ProjectExtended

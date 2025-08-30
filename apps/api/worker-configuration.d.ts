@@ -12,15 +12,15 @@ declare namespace Cloudflare {
 		NODE_ENV: string;
 		CLOUDFLARE_API_TOKEN: string;
 		DRIZZLE_LOG: string;
-		DATABASE_READ2_URL: string;
+		DATABASE_READ2_URL?: string;
 		VERCEL_ENV: string;
 		EMIT_ANALYTICS: string;
-		DATABASE_READ1_URL: string;
+		DATABASE_READ1_URL?: string;
 		DATABASE_URL: string;
 		AXIOM_API_TOKEN: string;
 		AXIOM_DATASET: string;
-		UPSTASH_REDIS_REST_URL: string;
-		UPSTASH_REDIS_REST_TOKEN: string;
+		UPSTASH_REDIS_REST_URL?: string;
+		UPSTASH_REDIS_REST_TOKEN?: string;
 	}
 }
 interface Env extends Cloudflare.Env {}

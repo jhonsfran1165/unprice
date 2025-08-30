@@ -1,7 +1,7 @@
 "use server"
 
-import { db } from "@unprice/db"
 import { unstable_cache } from "next/cache"
+import { db } from "./db"
 
 export async function getPageData(domain: string) {
   const getCachedPage = unstable_cache(

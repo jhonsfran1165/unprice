@@ -980,19 +980,6 @@ export class CustomerService {
             opts: {
               withLastUsage: opts?.withLastUsage,
             },
-          }).then((res) => {
-            // reset the cache in the background
-            this.waitUntil(
-              Promise.all([
-                this.cache.customerEntitlement.remove(`${projectId}:${customerId}:${featureSlug}`),
-                this.cache.customerEntitlement.set(
-                  `${projectId}:${customerId}:${featureSlug}`,
-                  res
-                ),
-              ])
-            )
-
-            return res
           }),
           (err) =>
             new FetchError({
@@ -1045,6 +1032,14 @@ export class CustomerService {
 
     if (!val) {
       return Ok(null)
+    }
+
+    // if the entitlement is found, and the cache is skipped, update the cache
+    // this is important to avoid stale data
+    if (opts?.skipCache) {
+      this.waitUntil(
+        this.cache.customerEntitlement.set(`${projectId}:${customerId}:${featureSlug}`, val)
+      )
     }
 
     // entitlement could be expired since is in cache, validate it again

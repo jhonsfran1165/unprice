@@ -18,6 +18,14 @@ export const env = createEnv({
         return v === "true"
       })
       .pipe(z.boolean()),
+    DRIZZLE_LOG: z
+      .string()
+      .optional()
+      .default("true")
+      .transform((v) => {
+        return v === "true"
+      })
+      .pipe(z.boolean()),
   },
   runtimeEnv: process.env,
   skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",

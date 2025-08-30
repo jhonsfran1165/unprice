@@ -179,7 +179,6 @@ export class EntitlementService {
     return `${data.customerId}:${data.featureSlug}:${data.projectId}`
   }
 
-  // TODO: return the proper API error with Result
   public async can(data: CanRequest): Promise<CanResponse> {
     const key = this.getHashKey(data)
     const cached = this.hashCache.get(key)
@@ -188,7 +187,7 @@ export class EntitlementService {
     // only for request that are denied.
     // we don't use the normal swr cache here because it doesn't make sense to call
     // the cache layer, the idea is to speed up the next request
-    if (cached) {
+    if (cached && env.NODE_ENV === "production") {
       const result = JSON.parse(cached) as CanResponse
 
       // TODO: we could still send the verification event to the DO
@@ -216,8 +215,9 @@ export class EntitlementService {
         ? `${data.idempotenceKey}`
         : `${data.idempotenceKey}:${data.timestamp}`
 
+    const cacheKey = `${data.customerId}:${data.featureSlug}:${data.projectId}:${idempotentKey}`
     // Fast path: check if the event has already been sent to the DO
-    const { val: sent } = await this.cache.idempotentRequestUsageByHash.get(idempotentKey)
+    const { val: sent } = await this.cache.idempotentRequestUsageByHash.get(cacheKey)
 
     // if the usage is already sent, return the result
     if (sent) {
@@ -240,21 +240,19 @@ export class EntitlementService {
       // cache the result for the next time
       // update the cache with the new usage so we can check limit in the next request
       // without calling the DO again
-      Promise.all([this.cache.idempotentRequestUsageByHash.set(idempotentKey, result)])
+      Promise.all([this.cache.idempotentRequestUsageByHash.set(cacheKey, result)])
     )
 
     return result
   }
 
-  public async getEntitlements(
-    req: GetEntitlementsRequest
-  ): Promise<Result<GetEntitlementsResponse, UnPriceCustomerError | FetchError>> {
+  public async getEntitlements(req: GetEntitlementsRequest): Promise<GetEntitlementsResponse> {
     const { customerId, projectId, now } = req
 
     const { err: subscriptionErr } = await this.validateSubscription(customerId, projectId)
 
     if (subscriptionErr) {
-      return Err(subscriptionErr)
+      throw subscriptionErr
     }
 
     const { err: entitlementsErr, val: entitlements } =
@@ -265,16 +263,14 @@ export class EntitlementService {
       })
 
     if (entitlementsErr) {
-      return Err(entitlementsErr)
+      throw entitlementsErr
     }
 
     if (!entitlements || entitlements.length === 0) {
-      return Err(
-        new UnPriceCustomerError({
-          code: "CUSTOMER_ENTITLEMENTS_NOT_FOUND",
-          message: "customer has no entitlements",
-        })
-      )
+      throw new UnPriceCustomerError({
+        code: "CUSTOMER_ENTITLEMENTS_NOT_FOUND",
+        message: "customer has no entitlements",
+      })
     }
 
     // get the entitlements from the DO
@@ -291,9 +287,9 @@ export class EntitlementService {
       })
     }
 
-    return Ok({
+    return {
       entitlements,
-    })
+    }
   }
 
   public async getUsage(req: GetUsageRequest): Promise<GetUsageResponse> {

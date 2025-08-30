@@ -21,11 +21,13 @@ export class CacheService {
   private context: Context
   private metrics: Metrics
   private readonly emitMetrics: boolean
+  private isInitialized: boolean
 
   constructor(context: Context, metrics: Metrics, emitMetrics: boolean) {
     this.context = context
     this.metrics = metrics
     this.emitMetrics = emitMetrics
+    this.isInitialized = false
   }
 
   /**
@@ -33,7 +35,7 @@ export class CacheService {
    * @param extraStores - Extra stores to add to the cache
    */
   init(extraStores: Store<CacheNamespace, CacheNamespaces[CacheNamespace]>[]): void {
-    if (this.cache) return
+    if (this.isInitialized || this.cache) return
 
     // emit the cache size
     this.metrics.emit({
@@ -57,7 +59,7 @@ export class CacheService {
     // push the memory first to hit it first
     stores.push(memory)
 
-    // push the extra stores
+    // push the extra stores in the same order as the extraStores
     stores.push(...extraStores)
 
     const metricsMiddleware = withMetrics(this.metrics)
@@ -164,15 +166,18 @@ export class CacheService {
         }
       ),
     })
+
+    this.isInitialized = true
   }
 
   /**
    * Get the cache
    */
   getCache(): Cache {
-    if (!this.cache) {
+    if (!this.isInitialized || !this.cache) {
       throw new Error("Cache not initialized. Call init() first.")
     }
+
     return this.cache
   }
 }

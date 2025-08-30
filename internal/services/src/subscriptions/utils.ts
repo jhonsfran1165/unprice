@@ -18,7 +18,7 @@ import type { Logger } from "@unprice/logging"
 import { env } from "../../env"
 import { PaymentProviderService } from "../payment-provider"
 
-import { db } from "@unprice/db"
+import { db } from "../utils/db"
 import { UnPriceSubscriptionError } from "./errors"
 
 interface ValidatePaymentMethodResult {

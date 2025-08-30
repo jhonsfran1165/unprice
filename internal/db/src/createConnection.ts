@@ -12,21 +12,22 @@ export type ConnectionDatabaseOptions = {
   read1DatabaseUrl?: string
   read2DatabaseUrl?: string
   logger: boolean
+  singleton?: boolean
 }
+
+// only for development when using node 20
+neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket : ws
 
 // use singleton pattern to avoid creating multiple connections
 let db: Database | null = null
 
 export function createConnection(opts: ConnectionDatabaseOptions): Database {
   // if the db is already created, return it
-  if (db) {
+  if (db && opts.singleton) {
     return db as Database
   }
 
   if (opts.env === "development") {
-    // only for development when using node 20
-    neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket : ws
-
     neonConfig.wsProxy = (host) => {
       return `${host}:5433/v1?address=db:5432`
     }

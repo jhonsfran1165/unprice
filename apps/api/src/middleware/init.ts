@@ -2,7 +2,7 @@ import { Analytics } from "@unprice/analytics"
 import { createConnection } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
 import { ConsoleLogger } from "@unprice/logging"
-import { CacheService, redis as upstashRedis } from "@unprice/services/cache"
+import { CacheService } from "@unprice/services/cache"
 import { CustomerService } from "@unprice/services/customers"
 import { LogdrainMetrics, NoopMetrics } from "@unprice/services/metrics"
 import type { Metrics } from "@unprice/services/metrics"
@@ -12,7 +12,7 @@ import { EntitlementService } from "~/entitlement/service"
 import type { HonoEnv } from "~/hono/env"
 import { ApiProjectService } from "~/project"
 
-import { UpstashRedisStore } from "@unkey/cache/stores"
+import { CloudflareStore } from "@unkey/cache/stores"
 import { SubscriptionService } from "@unprice/services/subscriptions"
 import { endTime, startTime } from "hono/timing"
 
@@ -84,7 +84,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
 
     // start a new timer
     startTime(c, "initMetrics")
-    const emitMetrics = c.env.EMIT_METRICS_LOGS.toString() === "true"
+    const emitMetrics = c.env.EMIT_METRICS_LOGS
 
     const metrics: Metrics = emitMetrics
       ? new LogdrainMetrics({
@@ -102,32 +102,48 @@ export function init(): MiddlewareHandler<HonoEnv> {
 
     const cacheService = new CacheService(
       {
-        waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
       },
       metrics,
       emitMetrics
     )
 
-    // const cloudflareCacheStore =
-    //   c.env.CLOUDFLARE_ZONE_ID && c.env.CLOUDFLARE_API_TOKEN
-    //     ? new CloudflareStore({
-    //         cloudflareApiKey: c.env.CLOUDFLARE_API_TOKEN,
-    //         zoneId: c.env.CLOUDFLARE_ZONE_ID,
-    //         domain: "cache.unprice.dev",
-    //         cacheBuster: "v2",
-    //       })
-    //     : undefined
-
-    // redis seems to be faster than cloudflare
-    const upstashCacheStore =
-      c.env.UPSTASH_REDIS_REST_URL && c.env.UPSTASH_REDIS_REST_TOKEN
-        ? new UpstashRedisStore({
-            redis: upstashRedis,
+    const cloudflareCacheStore =
+      c.env.CLOUDFLARE_ZONE_ID && c.env.CLOUDFLARE_API_TOKEN
+        ? new CloudflareStore({
+            cloudflareApiKey: c.env.CLOUDFLARE_API_TOKEN,
+            zoneId: c.env.CLOUDFLARE_ZONE_ID,
+            domain: "cache.unprice.dev",
+            cacheBuster: "v2",
           })
         : undefined
 
+    // redis seems to be slower than cloudflare
+    // const upstashCacheStore =
+    //   c.env.UPSTASH_REDIS_REST_URL && c.env.UPSTASH_REDIS_REST_TOKEN
+    //     ? new UpstashRedisStore({
+    //         redis: createRedis({
+    //           token: c.env.UPSTASH_REDIS_REST_TOKEN,
+    //           url: c.env.UPSTASH_REDIS_REST_URL,
+    //           latencyLogging: c.env.NODE_ENV === "development",
+    //         }),
+    //       })
+    //     : undefined
+
+    const stores = []
+    // push the cloudflare store first to hit it first
+    if (cloudflareCacheStore) {
+      stores.push(cloudflareCacheStore)
+    }
+
+    // // push the upstash store last to hit it last
+    // if (upstashCacheStore) {
+    //   stores.push(upstashCacheStore)
+    // }
+
     // register the cloudflare store if it is configured
-    await cacheService.init(upstashCacheStore ? [upstashCacheStore] : [])
+    cacheService.init(stores)
 
     const cache = cacheService.getCache()
 
@@ -141,7 +157,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       primaryDatabaseUrl: c.env.DATABASE_URL,
       read1DatabaseUrl: c.env.DATABASE_READ1_URL,
       read2DatabaseUrl: c.env.DATABASE_READ2_URL,
-      logger: c.env.DRIZZLE_LOG.toString() === "true",
+      logger: c.env.DRIZZLE_LOG,
+      singleton: true,
     })
 
     endTime(c, "initDb")
@@ -150,7 +167,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
     startTime(c, "initAnalytics")
 
     const analytics = new Analytics({
-      emit: Boolean(c.env.EMIT_ANALYTICS),
+      emit: c.env.EMIT_ANALYTICS,
       tinybirdToken: c.env.TINYBIRD_TOKEN,
       tinybirdUrl: c.env.TINYBIRD_URL,
     })
@@ -163,7 +180,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
     const customer = new CustomerService({
       logger,
       analytics,
-      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
       cache,
       metrics,
       db,
@@ -179,7 +197,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       analytics,
       cache,
       db,
-      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
       metrics,
     })
 
@@ -196,7 +215,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       analytics,
       cache,
       db,
-      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
       customer,
       stats: c.get("stats"),
       hashCache,
@@ -212,7 +232,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       analytics,
       logger,
       metrics,
-      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
       db,
       requestId,
     })
@@ -228,7 +249,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       logger,
       metrics,
       db,
-      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
       hashCache,
     })
 
@@ -248,14 +270,11 @@ export function init(): MiddlewareHandler<HonoEnv> {
       customer,
     })
 
-    startTime(c, "emitInitMetrics")
     // emit the init event
     metrics.emit({
       metric: "metric.init",
       duration: performance.now() - performanceStart,
     })
-
-    endTime(c, "emitInitMetrics")
 
     try {
       await next()

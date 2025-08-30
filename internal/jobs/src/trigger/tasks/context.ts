@@ -1,9 +1,9 @@
 import { Analytics } from "@unprice/analytics"
-import { db } from "@unprice/db"
 import { ConsoleLogger } from "@unprice/logging"
 import { CacheService } from "@unprice/services/cache"
 import { NoopMetrics } from "@unprice/services/metrics"
 import { env } from "../../env"
+import { db } from "../db"
 
 export const createContext = async ({
   taskId,
@@ -20,6 +20,7 @@ export const createContext = async ({
     api: string
   }
 }) => {
+  // don't register any stores - only memory
   const cache = new CacheService(
     {
       waitUntil: () => {},
@@ -28,7 +29,7 @@ export const createContext = async ({
     false
   )
 
-  await cache.init([])
+  cache.init([])
 
   const tinybird = new Analytics({
     emit: true,

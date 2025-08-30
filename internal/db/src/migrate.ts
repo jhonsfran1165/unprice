@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm"
-import { db } from "./index"
+import { createConnection } from "./createConnection"
 import * as schema from "./schema"
 import { hashStringSHA256, newId } from "./utils"
 
@@ -9,6 +9,15 @@ import { env } from "../env"
 async function main() {
   const start = Date.now()
   console.info("⏳ Running migrations for environment:", env.NODE_ENV)
+
+  const db = createConnection({
+    env: env.NODE_ENV,
+    primaryDatabaseUrl: env.DATABASE_URL,
+    read1DatabaseUrl: env.DATABASE_READ1_URL,
+    read2DatabaseUrl: env.DATABASE_READ2_URL,
+    logger: env.DRIZZLE_LOG && env.DRIZZLE_LOG.toString() === "true",
+    singleton: true,
+  })
 
   await migrate(db, { migrationsFolder: "src/migrations" })
 

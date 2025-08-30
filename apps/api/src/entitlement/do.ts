@@ -12,14 +12,12 @@ import type { Env } from "~/env"
 import type { CanRequest, ReportUsageRequest, ReportUsageResponse } from "./interface"
 
 import { env } from "cloudflare:workers"
-
-import { UpstashRedisStore } from "@unkey/cache/stores"
 import { createConnection } from "@unprice/db"
 import type { CustomerEntitlementExtended } from "@unprice/db/validators"
 import { FetchError } from "@unprice/error"
 import { Err, Ok, type Result } from "@unprice/error"
 import { ConsoleLogger, type Logger } from "@unprice/logging"
-import { CacheService, redis as upstashRedis } from "@unprice/services/cache"
+import { CacheService } from "@unprice/services/cache"
 import {
   CustomerService,
   type DenyReason,
@@ -51,14 +49,14 @@ export class DurableObjectUsagelimiter extends Server {
   private metrics: Metrics
   // customer service
   private customerService: CustomerService
-  // Default ttl for the usage records
+  // Default ttl for the usage records and verifications
   private readonly MS_TTL = 1000 * 30 // 30 secs
   // Debounce delay for the broadcast
   private lastBroadcastTime = 0
-  // debounce delay for the broadcast
+  // debounce delay for the broadcast events
   private readonly DEBOUNCE_DELAY = 1000 * 1 // 1 second
-  // update period for the entitlements
-  private readonly UPDATE_PERIOD = 1000 * 60 * 5 // 5 mins
+  // update period for the entitlements for invalidation
+  private readonly UPDATE_PERIOD = 1000 * 5 // 5 mins
 
   // hibernate the do when no websocket nor connections are active
   static options = {
@@ -71,7 +69,7 @@ export class DurableObjectUsagelimiter extends Server {
     this.db = drizzle(ctx.storage, { logger: false })
 
     this.analytics = new Analytics({
-      emit: env.EMIT_ANALYTICS.toString() === "true",
+      emit: env.EMIT_ANALYTICS,
       tinybirdToken: env.TINYBIRD_TOKEN,
       tinybirdUrl: env.TINYBIRD_URL,
     })
@@ -85,7 +83,7 @@ export class DurableObjectUsagelimiter extends Server {
       },
     })
 
-    const emitMetrics = env.EMIT_METRICS_LOGS.toString() === "true"
+    const emitMetrics = env.EMIT_METRICS_LOGS
 
     this.metrics = emitMetrics
       ? new LogdrainMetrics({
@@ -98,29 +96,23 @@ export class DurableObjectUsagelimiter extends Server {
 
     this.cache = new CacheService(
       {
-        waitUntil: this.ctx.waitUntil.bind(this.ctx),
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        waitUntil: (promise: Promise<any>) => this.ctx.waitUntil(promise),
       },
       this.metrics,
       emitMetrics
     )
 
-    // redis seems to be faster than cloudflare
-    const upstashCacheStore =
-      env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN
-        ? new UpstashRedisStore({
-            redis: upstashRedis,
-          })
-        : undefined
-
-    // register the cloudflare store if it is configured
-    this.cache.init(upstashCacheStore ? [upstashCacheStore] : [])
+    // don't register any stores - only memory
+    this.cache.init([])
 
     const cache = this.cache.getCache()
 
     this.customerService = new CustomerService({
       logger: this.logger,
       analytics: this.analytics,
-      waitUntil: this.ctx.waitUntil.bind(this.ctx),
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => this.ctx.waitUntil(promise),
       cache: cache,
       metrics: this.metrics,
       db: createConnection({
@@ -128,7 +120,7 @@ export class DurableObjectUsagelimiter extends Server {
         primaryDatabaseUrl: env.DATABASE_URL,
         read1DatabaseUrl: env.DATABASE_READ1_URL,
         read2DatabaseUrl: env.DATABASE_READ2_URL,
-        logger: env.DRIZZLE_LOG.toString() === "true",
+        logger: env.DRIZZLE_LOG,
       }),
     })
 
@@ -163,6 +155,7 @@ export class DurableObjectUsagelimiter extends Server {
 
         this.initialized = true
       } catch (e) {
+        // all the initialization happens in a try catch to avoid crashing the do
         this.logger.error("error initializing do", {
           error: e instanceof Error ? e.message : "unknown error",
         })
@@ -175,11 +168,6 @@ export class DurableObjectUsagelimiter extends Server {
   }
 
   private async getConfig(): Promise<UsageLimiterConfig> {
-    if (!this.initialized) {
-      // initialize if not initialized
-      this.initialize()
-    }
-
     const config = (await this.ctx.storage.get("config")) as UsageLimiterConfig
 
     // clean the config from undefined entitlements
@@ -227,7 +215,7 @@ export class DurableObjectUsagelimiter extends Server {
     return config.entitlements
   }
 
-  // this is a simple way to control when to refresh the entitlements
+  // this is a simple way to revalidate the entitlement
   public async getEntitlement({
     customerId,
     projectId,
@@ -246,59 +234,58 @@ export class DurableObjectUsagelimiter extends Server {
     // get the config
     const config = await this.getConfig()
     // get the entitlement from the config
-    const entitlement = config.entitlements.find((e) => e.featureSlug === featureSlug)
+    let entitlement = config.entitlements.find((e) => e.featureSlug === featureSlug)
     // if the last update is more than UPDATE_PERIOD, refresh the entitlements
-    const shouldRefresh = entitlement
-      ? now - entitlement.lastUsageUpdateAt > this.UPDATE_PERIOD
+    const timeToRefresh = entitlement
+      ? entitlement.lastUsageUpdateAt + this.UPDATE_PERIOD - now < 0
       : true
+    const shouldRefresh = timeToRefresh || opts?.forceRefresh
 
-    if (shouldRefresh || opts?.forceRefresh) {
-      // get the entitlements from the db
-      const { err, val } = await this.customerService.getActiveEntitlement(
-        customerId,
-        featureSlug,
-        projectId,
-        now,
-        {
-          skipCache: true, // skip cache to force revalidation
-          withLastUsage: true, // we need the last usage to calculate the new usage
-        }
-      )
-
-      if (err) {
-        this.logger.error("error getting entitlement from do", {
-          error: err.message,
+    // to improve performance allow this request to return the entitlement that already exists in the DO
+    // and update the entitlement in the DO in the background
+    // basically stale while revalidate pattern
+    if (shouldRefresh) {
+      // if the entitlement is not found in the first time or is a placeholder, revalidate it
+      if (!entitlement?.id || entitlement?.id === "placeholder") {
+        const { err, val } = await this.revalidateEntitlement({
+          customerId,
+          projectId,
+          featureSlug,
+          now,
         })
-        return Err(err)
+
+        // if there is an error, return the error
+        if (err) {
+          return Err(err)
+        }
+
+        // if the entitlement is found, assign it to the entitlement
+        if (val) {
+          entitlement = val
+        }
       }
 
-      if (!val) {
-        // if the entitlement is not found we want to keep a placeholder
-        // so in future request don't spam the db
-        const placeholderEntitlement = {
-          id: "placeholder",
-          featureSlug: featureSlug,
-          lastUsageUpdateAt: now,
-        } as CustomerEntitlementExtended
-
-        await this.updateEntitlement(placeholderEntitlement)
-
-        return Err(
-          new FetchError({
-            message: "entitlement not found",
-            retry: false,
-          })
-        )
-      }
-
-      // update the config
-      await this.updateEntitlement(val)
-
-      // return the entitlement
-      return Ok(val)
+      // revalidate in background is found in the first time and should refresh
+      this.ctx.waitUntil(
+        this.revalidateEntitlement({
+          customerId,
+          projectId,
+          featureSlug,
+          now,
+        })
+      )
     }
 
+    // if the entitlement doesn't need to be refreshed
+    // and the entitlement is not found, return an error
     if (!entitlement?.id) {
+      this.logger.error("entitlement not found", {
+        entitlementId: entitlement?.id,
+        featureSlug: featureSlug,
+        customerId: customerId,
+        projectId: projectId,
+        now: now,
+      })
       return Err(
         new FetchError({
           message: "entitlement not found",
@@ -307,18 +294,81 @@ export class DurableObjectUsagelimiter extends Server {
       )
     }
 
+    // placeholder is used to avoid spamming the db with requests when entitlement is not found
     if (entitlement?.id === "placeholder") {
+      this.logger.error("entitlement is a placeholder", {
+        entitlementId: entitlement?.id,
+        featureSlug: featureSlug,
+        customerId: customerId,
+        projectId: projectId,
+        now: now,
+      })
+
       return Err(
         new FetchError({
           message: `DO: Entitlement not found, entitlement will be refreshed in ${Math.round(
-            (entitlement.lastUsageUpdateAt + this.UPDATE_PERIOD - Date.now()) / 1000
+            (entitlement.lastUsageUpdateAt + this.UPDATE_PERIOD - now) / 1000
           )} seconds`,
           retry: false,
         })
       )
     }
 
+    // if the entitlement is found, return the entitlement
     return Ok(entitlement)
+  }
+
+  // this is a simple way to revalidate the entitlement
+  public async revalidateEntitlement({
+    customerId,
+    projectId,
+    featureSlug,
+    now,
+  }: {
+    customerId: string
+    projectId: string
+    featureSlug: string
+    now: number
+  }): Promise<Result<CustomerEntitlementExtended, FetchError | UnPriceCustomerError>> {
+    // get the entitlement from the db
+    const { err, val } = await this.customerService.getActiveEntitlement(
+      customerId,
+      featureSlug,
+      projectId,
+      now,
+      {
+        skipCache: false, // INPORTANT: we don't skip cache here because we only have in memory cache
+        // basically if the entitlement in not found in memory we will query the db
+        // SET TO TRUE IF YOU ADD ANOTHER CACHE LAYER!!
+        withLastUsage: true, // we need the last usage to calculate the new usage
+      }
+    )
+
+    if (err) {
+      this.logger.error("error getting entitlement from do", {
+        error: err.message,
+      })
+      return Err(err)
+    }
+
+    if (!val) {
+      // if the entitlement is not found we want to keep a placeholder
+      // so in future request don't spam the db
+      const placeholderEntitlement = {
+        id: "placeholder",
+        featureSlug: featureSlug,
+        lastUsageUpdateAt: now,
+      } as CustomerEntitlementExtended
+
+      await this.updateEntitlement(placeholderEntitlement)
+
+      return Ok(placeholderEntitlement)
+    }
+
+    // update the config
+    await this.updateEntitlement(val)
+
+    return Ok(val)
   }
 
   async _migrate() {
@@ -495,6 +545,9 @@ export class DurableObjectUsagelimiter extends Server {
     // first initialize the do
     this.initialize()
 
+    // i need to know the latency of the request
+    const startLatency = performance.now()
+
     // get the entitlement
     const { err, val: entitlement } = await this.getEntitlement({
       customerId: data.customerId,
@@ -502,6 +555,8 @@ export class DurableObjectUsagelimiter extends Server {
       featureSlug: data.featureSlug,
       now: data.timestamp,
     })
+    const endLatency = performance.now()
+    console.info(`getEntitlement latency: ${endLatency - startLatency}ms`)
 
     if (err) {
       return {

@@ -10,11 +10,10 @@ import type { Session } from "@unprice/auth/server"
 import { auth } from "@unprice/auth/server"
 import { COOKIES_APP } from "@unprice/config"
 import type { Database, TransactionDatabase } from "@unprice/db"
-import { db } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
 import { AxiomLogger, ConsoleLogger, type Logger } from "@unprice/logging"
 import type { CacheNamespaces } from "@unprice/services/cache"
-import { CacheService, redis } from "@unprice/services/cache"
+import { CacheService, createRedis } from "@unprice/services/cache"
 import { LogdrainMetrics, type Metrics, NoopMetrics } from "@unprice/services/metrics"
 import { waitUntil } from "@vercel/functions"
 import { ZodError } from "zod"
@@ -22,6 +21,7 @@ import { fromZodError } from "zod-validation-error"
 import { env } from "./env"
 import { transformer } from "./transformer"
 import { projectWorkspaceGuard } from "./utils"
+import { db } from "./utils/db"
 import { workspaceGuard } from "./utils/workspace-guard"
 
 /**
@@ -138,11 +138,15 @@ export const createTRPCContext = async (opts: {
   const upstashCacheStore =
     env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN
       ? new UpstashRedisStore({
-          redis: redis,
+          redis: createRedis({
+            token: env.UPSTASH_REDIS_REST_TOKEN,
+            url: env.UPSTASH_REDIS_REST_URL,
+            latencyLogging: env.NODE_ENV === "development",
+          }),
         })
       : undefined
 
-  await cacheService.init(upstashCacheStore ? [upstashCacheStore] : [])
+  cacheService.init(upstashCacheStore ? [upstashCacheStore] : [])
 
   const cache = cacheService.getCache()
 

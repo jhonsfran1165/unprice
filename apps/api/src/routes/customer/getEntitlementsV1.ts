@@ -1,14 +1,11 @@
 import { createRoute } from "@hono/zod-openapi"
 import { endTime, startTime } from "hono/timing"
-import { FetchError } from "node_modules/@unprice/error/src/errors/fetch-error"
-import { UnPriceCustomerError } from "node_modules/@unprice/services/src/customers/errors"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent } from "stoker/openapi/helpers"
 
 import { z } from "zod"
 import { keyAuth } from "~/auth/key"
 import { getEntitlementsResponseSchema } from "~/entitlement/interface"
-import { UnpriceApiError } from "~/errors/http"
 import { openApiErrorResponses } from "~/errors/openapi-responses"
 import type { App } from "~/hono/app"
 
@@ -55,7 +52,7 @@ export const registerGetEntitlementsV1 = (app: App) =>
     startTime(c, "getEntitlements")
 
     // validate usage from db
-    const { val: entitlements, err } = await entitlement.getEntitlements({
+    const result = await entitlement.getEntitlements({
       customerId,
       projectId: key.projectId,
       now: Date.now(),
@@ -64,21 +61,5 @@ export const registerGetEntitlementsV1 = (app: App) =>
     // end the timer
     endTime(c, "getEntitlements")
 
-    // TODO: important to return the proper API error
-    if (err) {
-      switch (true) {
-        case err instanceof UnPriceCustomerError:
-          throw new UnpriceApiError({
-            code: "BAD_REQUEST",
-            message: err.message,
-          })
-        case err instanceof FetchError:
-          throw new UnpriceApiError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: err.message,
-          })
-      }
-    }
-
-    return c.json(entitlements, HttpStatusCodes.OK)
+    return c.json(result, HttpStatusCodes.OK)
   })

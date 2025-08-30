@@ -118,7 +118,8 @@ jobs:
           EMIT_METRICS_LOGS: ${{ env.EMIT_METRICS_LOGS }}
           EMIT_ANALYTICS: ${{ env.EMIT_ANALYTICS }}
           VERSION: ${{ env.VERSION }}
-          NODE_ENV: ${{ env.NODE_ENV }}
+          # always deploy in production mode
+          NODE_ENV: production
           DRIZZLE_LOG: ${{ env.DRIZZLE_LOG }}
           VERCEL_ENV: ${{ env.VERCEL_ENV }}
           ENCRYPTION_KEY: ${{ env.ENCRYPTION_KEY }}

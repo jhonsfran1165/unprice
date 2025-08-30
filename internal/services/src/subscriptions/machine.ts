@@ -15,7 +15,7 @@ import {
   setup,
 } from "xstate"
 
-import { db } from "@unprice/db"
+import { db } from "../utils/db"
 import { UnPriceMachineError } from "./errors"
 
 import { logTransition, sendCustomerNotification, updateSubscription } from "./actions"
