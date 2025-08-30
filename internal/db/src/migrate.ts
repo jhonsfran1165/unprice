@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm"
-import { db } from "./index"
+import { createConnection } from "./createConnection"
 import * as schema from "./schema"
 import { hashStringSHA256, newId } from "./utils"
 
@@ -7,10 +7,19 @@ import { migrate } from "drizzle-orm/neon-serverless/migrator"
 import { env } from "../env"
 
 async function main() {
-  await migrate(db, { migrationsFolder: "src/migrations" })
-
   const start = Date.now()
-  console.info("⏳ Running migrations...")
+  console.info("⏳ Running migrations for environment:", env.NODE_ENV)
+
+  const db = createConnection({
+    env: env.NODE_ENV,
+    primaryDatabaseUrl: env.DATABASE_URL,
+    read1DatabaseUrl: env.DATABASE_READ1_URL,
+    read2DatabaseUrl: env.DATABASE_READ2_URL,
+    logger: env.DRIZZLE_LOG,
+    singleton: true,
+  })
+
+  await migrate(db, { migrationsFolder: "src/migrations" })
 
   let userExists = await db.query.users
     .findFirst({
@@ -182,13 +191,15 @@ async function main() {
 
   // create api key for the user
   if (env.UNPRICE_API_KEY) {
+    // generate hash of the key
+    const apiKeyHash = await hashStringSHA256(env.UNPRICE_API_KEY)
     // find the api key for the project
     const apiKey = await db.query.apikeys.findFirst({
       where: (fields, operators) =>
         operators.and(
           operators.eq(fields.projectId, project.id),
           operators.eq(fields.isRoot, true),
-          operators.eq(fields.key, env.UNPRICE_API_KEY!)
+          operators.eq(fields.hash, apiKeyHash)
         ),
     })
 
@@ -201,7 +212,6 @@ async function main() {
         .values({
           id: newId("apikey"),
           name: "unprice",
-          key: env.UNPRICE_API_KEY,
           hash: apiKeyHash,
           projectId: project.id,
           isRoot: true,

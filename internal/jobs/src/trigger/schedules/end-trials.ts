@@ -1,12 +1,12 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
-import { db } from "@unprice/db"
+import { db } from "../db"
 import { endTrialTask } from "../tasks/end-trial"
 
 export const endTrialsSchedule = schedules.task({
   id: "subscription.endtrials",
   // every 12 hours (UTC timezone)
-  // if dev then every 5 minutes in dev mode
-  cron: process.env.NODE_ENV === "development" ? "*/5 * * * *" : "0 */12 * * *",
+  // if dev then every 1 minute in dev mode
+  cron: process.env.NODE_ENV === "development" ? "*/1 * * * *" : "0 */12 * * *",
   run: async (payload) => {
     const now = payload.timestamp.getTime()
 
@@ -23,11 +23,6 @@ export const endTrialsSchedule = schedules.task({
     // trigger the end trial task for each subscription phase
     for (const phase of subscriptionPhases) {
       const subscription = phase.subscription
-
-      if (subscription.locked) {
-        logger.error(`Subscription ${subscription.id} is locked, skipping`)
-        continue
-      }
 
       if (!["ending_trial", "trialing"].includes(subscription.status)) {
         logger.error(`Subscription ${subscription.id} is not trialing, skipping`)

@@ -2,6 +2,8 @@ import { createRoute } from "@hono/zod-openapi"
 import * as HttpStatusCodes from "stoker/http-status-codes"
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers"
 
+import { endTime } from "hono/timing"
+import { startTime } from "hono/timing"
 import { z } from "zod"
 import { keyAuth } from "~/auth/key"
 import { UnpriceApiError } from "~/errors/http"
@@ -33,6 +35,7 @@ export const route = createRoute({
       z.object({
         success: z.boolean(),
         message: z.string().optional(),
+        slugs: z.array(z.string()).optional(),
       }),
       "The result of the reset entitlements"
     ),
@@ -55,8 +58,14 @@ export const registerResetEntitlementsV1 = (app: App) =>
     // validate the request
     const key = await keyAuth(c)
 
+    // start a timer
+    startTime(c, "resetEntitlements")
+
     // delete the customer from the DO
     const result = await entitlement.resetEntitlements(customerId, key.projectId)
+
+    // end the timer
+    endTime(c, "resetEntitlements")
 
     if (!result.success) {
       throw new UnpriceApiError({

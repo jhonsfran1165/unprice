@@ -6,7 +6,7 @@ import { Ok } from "@unprice/error"
 import type { ConsoleLogger } from "@unprice/logging"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { db } from "@unprice/db"
+import { db } from "../utils/db"
 import { SubscriptionMachine } from "./machine"
 
 // Mock environment variables

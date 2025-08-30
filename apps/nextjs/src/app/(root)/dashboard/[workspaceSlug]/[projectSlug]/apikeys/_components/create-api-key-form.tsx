@@ -16,13 +16,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@unprice/ui/form"
-import { Calendar as CalendarIcon } from "@unprice/ui/icons"
+import { Calendar as CalendarIcon, Eye, EyeOff } from "@unprice/ui/icons"
 import { Input } from "@unprice/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 
 import { useMutation } from "@tanstack/react-query"
+import { cn } from "@unprice/ui/utils"
+import { motion } from "framer-motion"
 import { useParams, useSearchParams } from "next/navigation"
 import { revalidateAppPath } from "~/actions/revalidate"
+import { CopyButton } from "~/components/copy-button"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
@@ -36,6 +39,8 @@ export default function CreateApiKeyForm(props: {
 }) {
   const trpc = useTRPC()
 
+  const [show, setShow] = useState(false)
+  const [key, setKey] = useState<string | null>(null)
   const params = useParams()
   const searchParams = useSearchParams()
 
@@ -59,15 +64,20 @@ export default function CreateApiKeyForm(props: {
 
   const create = useMutation(
     trpc.apikeys.create.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (data) => {
         toastAction("success")
-        form.reset()
-        props.setDialogOpen?.(false)
-        props.onSuccess?.("")
-        revalidateAppPath(`/${workspaceSlug}/${projectSlug}/apikeys`, "page")
+        setKey(data.apikey.key ?? null)
       },
     })
   )
+
+  const resetForm = () => {
+    setKey(null)
+    form.reset()
+    props.setDialogOpen?.(false)
+    props.onSuccess?.("")
+    revalidateAppPath(`/${workspaceSlug}/${projectSlug}/apikeys`, "page")
+  }
 
   return (
     <Form {...form}>
@@ -75,6 +85,38 @@ export default function CreateApiKeyForm(props: {
         onSubmit={form.handleSubmit(async (data: CreateApiKey) => await create.mutateAsync(data))}
         className="space-y-6"
       >
+        {key && (
+          <motion.div
+            className="flex items-center justify-between space-x-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <span className={cn("font-mono")}>
+              {show
+                ? key
+                : `${key.split("_")[0]}_${key.split("_")[1]}_${key.split("_")[2]!.replace(/./g, "*")}`}
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                className="h-4 w-4 p-0 opacity-50"
+                disabled={show}
+                onClick={() => {
+                  setShow(true)
+                  setTimeout(() => {
+                    setShow(false)
+                  }, 2000)
+                }}
+              >
+                <span className="sr-only">Toggle key visibility</span>
+                {show ? <EyeOff /> : <Eye />}
+              </Button>
+
+              <CopyButton value={key} className="size-4 opacity-50" onClick={resetForm} />
+            </div>
+          </motion.div>
+        )}
         <div className="space-y-8">
           <FormField
             control={form.control}

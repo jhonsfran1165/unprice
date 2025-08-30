@@ -104,7 +104,7 @@ export const canInvoice = (input: { context: SubscriptionContext }): boolean => 
   return false
 }
 
-export const currentPhaseNull = (input: { context: SubscriptionContext }): boolean => {
+export const isCurrentPhaseNull = (input: { context: SubscriptionContext }): boolean => {
   const currentPhase = input.context.currentPhase
 
   return !currentPhase?.id

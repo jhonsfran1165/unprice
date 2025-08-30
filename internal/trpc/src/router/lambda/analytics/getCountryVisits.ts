@@ -16,7 +16,7 @@ export const getCountryVisits = protectedProjectProcedure
     const { intervalDays, page_id } = opts.input
     const projectId = opts.ctx.project.id
 
-    if (!page_id || page_id === "") {
+    if (!page_id || page_id === "_" || page_id === "") {
       return { data: [], error: "Page ID is required" }
     }
 

@@ -15,6 +15,7 @@ import { CreditCard, Settings, User } from "@unprice/ui/icons"
 import { Kbd } from "@unprice/ui/kbd"
 import { cn } from "@unprice/ui/utils"
 import { useParams, useRouter } from "next/navigation"
+import { useHotkeys } from "react-hotkeys-hook"
 
 export function SearchTool({
   className,
@@ -25,6 +26,9 @@ export function SearchTool({
   const router = useRouter()
   const params = useParams()
 
+  // handle hotkeys
+  useHotkeys("meta+k", () => setOpen((open) => !open))
+
   const workspaceSlug = params.workspaceSlug as string
 
   const basepath = `/${workspaceSlug ?? ""}`
@@ -33,18 +37,6 @@ export function SearchTool({
     setOpen(false)
     router.push(`${basepath}${path}`)
   }
-
-  React.useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && e.metaKey) {
-        e.preventDefault()
-        setOpen((open) => !open)
-      }
-    }
-
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [])
 
   return (
     <div className={cn(className)}>

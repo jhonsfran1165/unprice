@@ -9,13 +9,14 @@ import { Copy } from "lucide-react"
 interface CopyButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   value: string
   src?: string
+  onClick?: () => void
 }
 
 async function copyToClipboardWithMeta(value: string, _meta?: Record<string, unknown>) {
   navigator.clipboard.writeText(value)
 }
 
-export function CopyButton({ value, className, src, ...props }: CopyButtonProps) {
+export function CopyButton({ value, className, src, onClick, ...props }: CopyButtonProps) {
   const [hasCopied, setHasCopied] = React.useState(false)
 
   React.useEffect(() => {
@@ -33,6 +34,7 @@ export function CopyButton({ value, className, src, ...props }: CopyButtonProps)
           component: src,
         })
         setHasCopied(true)
+        onClick?.()
       }}
       {...props}
     >

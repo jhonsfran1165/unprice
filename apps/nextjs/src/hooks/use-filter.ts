@@ -1,5 +1,5 @@
 "use client"
-import { prepareInterval } from "@unprice/analytics"
+import { prepareInterval, preparePage } from "@unprice/analytics"
 import { useQueryStates } from "nuqs"
 import { useMemo } from "react"
 import { intervalParser, pageParser } from "~/lib/searchParams"
@@ -15,7 +15,7 @@ export function useIntervalFilter() {
 
   const parsedInterval = useMemo(() => {
     return prepareInterval(intervalFilter.intervalFilter)
-  }, [intervalFilter])
+  }, [intervalFilter.intervalFilter])
 
   return [parsedInterval, setIntervalFilter] as const
 }
@@ -29,5 +29,9 @@ export function usePageFilter() {
     throttleMs: 1000, // throttle the query state changes to 1 second
   })
 
-  return [pageFilter, setPageFilter] as const
+  const parsedPage = useMemo(() => {
+    return preparePage(pageFilter.pageId)
+  }, [pageFilter.pageId])
+
+  return [parsedPage, setPageFilter] as const
 }

@@ -3,7 +3,7 @@ import * as z from "zod"
 
 export const env = createEnv({
   shared: {
-    NODE_ENV: z.enum(["development", "production", "test", "preview"]).default("development"),
+    NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
   },
   server: {
@@ -16,8 +16,8 @@ export const env = createEnv({
       })
       .pipe(z.boolean()),
     DATABASE_URL: z.string().min(1).url(),
-    DATABASE_READ1_URL: z.string().optional(),
-    DATABASE_READ2_URL: z.string().optional(),
+    DATABASE_READ1_URL: z.string().optional().default(""),
+    DATABASE_READ2_URL: z.string().optional().default(""),
     UNPRICE_API_KEY: z.string().optional(),
   },
   runtimeEnv: process.env,

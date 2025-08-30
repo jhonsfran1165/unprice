@@ -1,6 +1,6 @@
 import { partyserverMiddleware } from "hono-party"
 import { cors } from "hono/cors"
-import type { Env } from "~/env"
+import { type Env, createRuntimeEnv } from "~/env"
 import { newApp } from "~/hono/app"
 import { init } from "~/middleware/init"
 
@@ -27,15 +27,16 @@ import { registerGetFeaturesV1 } from "./routes/project/getFeaturesV1"
 
 import { env } from "cloudflare:workers"
 import { getToken } from "@auth/core/jwt"
+import { ConsoleLogger } from "@unprice/logging"
 import { timing } from "hono/timing"
 import { registerGetAnalyticsUsageV1 } from "./routes/analitycs/getUsageV1"
 import { registerGetAnalyticsVerificationsV1 } from "./routes/analitycs/getVerificationsV1"
 
 const app = newApp()
 
+app.use(timing())
 app.use(serveEmojiFavicon("◎"))
 
-app.use(timing())
 app.use("*", init())
 app.use("*", cors())
 
@@ -113,7 +114,27 @@ registerGetAnalyticsVerificationsV1(app)
 // Export handler
 const handler = {
   fetch: (req: Request, env: Env, executionCtx: ExecutionContext) => {
-    return app.fetch(req, env, executionCtx)
+    try {
+      const parsedEnv = createRuntimeEnv(
+        env as unknown as Record<string, string | number | boolean>
+      )
+
+      return app.fetch(req, parsedEnv, executionCtx)
+    } catch (error) {
+      new ConsoleLogger({
+        requestId: "",
+        environment: env.NODE_ENV,
+        service: "api",
+      }).fatal(`BAD_ENVIRONMENT: ${error instanceof Error ? error.message : "Unknown error"}`)
+      return Response.json(
+        {
+          code: "BAD_ENVIRONMENT",
+          message: "Some environment variables are missing or are invalid",
+          errors: error instanceof Error ? error.message : "Unknown error",
+        },
+        { status: 500 }
+      )
+    }
   },
 } satisfies ExportedHandler<Env>
 

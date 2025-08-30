@@ -1,9 +1,10 @@
-import { and, db, eq } from "@unprice/db"
+import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import type { User } from "@unprice/db/validators"
 import { BaseError, Err, Ok, type Result, SchemaError } from "@unprice/error"
 import bcrypt from "bcryptjs"
+import { db } from "./db"
 
 export class UnPriceAuthError extends BaseError {
   public readonly retry = false

@@ -4,6 +4,7 @@ import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown } from "lucide-react"
 import * as React from "react"
 
+import { Kbd } from "./kbd"
 import { cn } from "./utils"
 
 const Select = SelectPrimitive.Root
@@ -74,27 +75,41 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName
 
 interface SelectItemProps extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> {
   description?: string
+  shortcut?: string
 }
 
 const SelectItem = React.forwardRef<React.ElementRef<typeof SelectPrimitive.Item>, SelectItemProps>(
-  ({ className, children, description, ...props }, ref) => (
+  ({ className, children, description, shortcut, ...props }, ref) => (
     <SelectPrimitive.Item
       ref={ref}
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        className
+        "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        className,
+        {
+          "pl-9": shortcut && shortcut.length > 0,
+        }
       )}
       {...props}
     >
-      <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <span className="absolute right-2 flex size-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
           <Check className="h-4 w-4" />
         </SelectPrimitive.ItemIndicator>
       </span>
 
+      {shortcut && shortcut.length > 0 && (
+        <span className="absolute left-2 flex items-center justify-center">
+          <Kbd abbrTitle={shortcut.at(0)} variant="outline">
+            {shortcut.at(0)}
+          </Kbd>
+        </span>
+      )}
+
       <div className="flex flex-col">
         <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-        {description && <span className="text-muted-foreground text-xs">{description}</span>}
+        {description && (
+          <span className="line-clamp-1 text-muted-foreground text-xs">{description}</span>
+        )}
       </div>
     </SelectPrimitive.Item>
   )

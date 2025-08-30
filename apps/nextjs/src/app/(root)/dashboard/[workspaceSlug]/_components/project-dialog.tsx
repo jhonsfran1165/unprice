@@ -27,10 +27,9 @@ export function ProjectDialog({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-h-screen overflow-y-scroll">
+      <DialogContent className="max-h-[80vh] overflow-y-scroll">
         <DialogHeader>
           <DialogTitle>Project Form</DialogTitle>
-
           <DialogDescription>Modify the project details below.</DialogDescription>
         </DialogHeader>
 

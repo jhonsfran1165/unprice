@@ -18,7 +18,7 @@ export class ApiKeysService {
   private readonly metrics: Metrics
   private readonly logger: Logger
   private readonly analytics: Analytics
-  private readonly hashCache = new Map<string, string>()
+  private hashCache: Map<string, string>
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   private readonly waitUntil: (promise: Promise<any>) => void
   private readonly db: Database
@@ -31,6 +31,7 @@ export class ApiKeysService {
     db: Database
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     waitUntil: (promise: Promise<any>) => void
+    hashCache: Map<string, string>
   }) {
     this.cache = opts.cache
     this.metrics = opts.metrics
@@ -38,6 +39,7 @@ export class ApiKeysService {
     this.logger = opts.logger
     this.db = opts.db
     this.waitUntil = opts.waitUntil
+    this.hashCache = opts.hashCache
   }
 
   private async hash(key: string): Promise<string> {
@@ -46,6 +48,8 @@ export class ApiKeysService {
       return cached
     }
     const hash = await hashStringSHA256(key)
+    // we don't want to use swr here as it doesn't make sense to do a network call to the cache if there is miss
+    // only improve a little bit of latency when hitting the same isolate in cloudflare
     this.hashCache.set(key, hash)
     return hash
   }
@@ -63,6 +67,7 @@ export class ApiKeysService {
               defaultCurrency: true,
               isMain: true,
               isInternal: true,
+              timezone: true,
             },
             with: {
               workspace: {
@@ -81,7 +86,6 @@ export class ApiKeysService {
         columns: {
           id: true,
           projectId: true,
-          key: true,
           expiresAt: true,
           revokedAt: true,
           hash: true,
@@ -128,7 +132,7 @@ export class ApiKeysService {
     const keyHash = await this.hash(req.key)
 
     if (opts?.skipCache) {
-      this.logger.info("force skipping cache", {
+      this.logger.info("force skipping cache for _getApiKey", {
         keyHash,
       })
     }
@@ -152,7 +156,7 @@ export class ApiKeysService {
           3,
           async () => this.cache.apiKeyByHash.swr(keyHash, (h) => this.getData(h)),
           (attempt, err) => {
-            this.logger.warn("Failed to fetch key data, retrying...", {
+            this.logger.warn("Failed to fetch key data, retrying... _getApiKey", {
               hash: keyHash,
               attempt,
               error: err.message,
@@ -163,7 +167,7 @@ export class ApiKeysService {
     if (err) {
       return Err(
         new FetchError({
-          message: `unable to fetch apikey, ${err.message}`,
+          message: `unable to fetch _getApiKey, ${err.message}`,
           retry: false,
           cause: err,
         })
@@ -180,7 +184,7 @@ export class ApiKeysService {
     }
 
     // rate limit the apikey
-    const result = await this.rateLimit(c, { key: req.key })
+    const result = await this.rateLimit(c, { keyHash: keyHash })
 
     if (!result) {
       return Err(
@@ -190,6 +194,7 @@ export class ApiKeysService {
         })
       )
     }
+
     return Ok(data)
   }
 
@@ -293,26 +298,30 @@ export class ApiKeysService {
     }
   }
 
-  public async rateLimit(c: Context, req: { key: string }) {
-    const keyHash = await this.hash(req.key)
-    // TODO: improve this
+  public async rateLimit(c: Context, req: { keyHash: string }) {
+    // TODO: change this for PRO and FREE plans
     const limiter = c.env.RL_FREE_600_60s
-    const result = await limiter.limit({ key: keyHash })
+    const result = await limiter.limit({ key: req.keyHash })
+
     const start = c.get("performanceStart") as number
     const workspaceId = c.get("workspaceId") as string
 
     if (result.success) {
       // emit metrics
-      this.metrics.emit({
-        metric: "metric.ratelimit",
-        workspaceId,
-        identifier: keyHash,
-        latency: performance.now() - start,
-        mode: "cloudflare",
-        success: result.success,
-        error: !result.success,
-        source: "cloudflare",
-      })
+      this.waitUntil(
+        Promise.all([
+          this.metrics.emit({
+            metric: "metric.ratelimit",
+            workspaceId,
+            identifier: req.keyHash,
+            latency: performance.now() - start,
+            mode: "cloudflare",
+            success: result.success,
+            error: !result.success,
+            source: "cloudflare",
+          }),
+        ])
+      )
     }
 
     return result.success

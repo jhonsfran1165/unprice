@@ -18,6 +18,7 @@ import { NumberTicker } from "~/components/analytics/number-ticker"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { SuperLink } from "~/components/super-link"
 import { useIntervalFilter, usePageFilter } from "~/hooks/use-filter"
+import { useQueryInvalidation } from "~/hooks/use-query-invalidation"
 import { useTRPC } from "~/trpc/client"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
@@ -83,18 +84,18 @@ export function PageVisitsSkeleton({
           <EmptyPlaceholder.Title>
             {error
               ? "Ups, something went wrong"
-              : pageFilter.pageId === ""
+              : !pageFilter.isSelected
                 ? "No page selected"
                 : "No data available for this page"}
           </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
             {error
               ? error
-              : pageFilter.pageId === ""
+              : !pageFilter.isSelected
                 ? "Please select a page to see page views."
                 : `There is no data available for the ${intervalFilter.label}.`}
           </EmptyPlaceholder.Description>
-          {pageFilter.pageId === "" && (
+          {!pageFilter.isSelected && (
             <EmptyPlaceholder.Action>
               <SuperLink href={`${basePath}/pages`} className="mt-2 w-full">
                 <Button size={"sm"}>Create a page</Button>
@@ -112,18 +113,40 @@ export function PageVisits() {
   const [pageFilter] = usePageFilter()
   const [intervalFilter] = useIntervalFilter()
 
-  const { data: pageVisits, isLoading: isLoadingPageVisits } = useSuspenseQuery(
+  const {
+    data: pageVisits,
+    isLoading: isLoadingPageVisits,
+    isFetching,
+    dataUpdatedAt,
+  } = useSuspenseQuery(
     trpc.analytics.getPagesOverview.queryOptions(
       {
         intervalDays: intervalFilter.intervalDays,
         pageId: pageFilter.pageId,
       },
       {
-        enabled: pageFilter.pageId !== "",
+        enabled: pageFilter.isSelected,
         staleTime: ANALYTICS_STALE_TIME,
       }
     )
   )
+
+  // invalidate the query when the interval changes
+  useQueryInvalidation({
+    paramKey: intervalFilter.intervalDays,
+    dataUpdatedAt,
+    isFetching,
+    getQueryKey: (param) => [
+      ["analytics", "getPagesOverview"],
+      {
+        input: {
+          intervalDays: param,
+          pageId: pageFilter.pageId,
+        },
+        type: "query",
+      },
+    ],
+  })
 
   const chartData = pageVisits.data
 
@@ -135,7 +158,7 @@ export function PageVisits() {
       mobile_visits: chartData.reduce((acc, curr) => acc + curr.mobile_visits, 0),
       other_visits: chartData.reduce((acc, curr) => acc + curr.other_visits, 0),
     }),
-    [intervalFilter.intervalDays, pageFilter.pageId]
+    [intervalFilter.intervalDays, pageFilter.pageId, chartData.length]
   )
 
   if (isLoadingPageVisits || !chartData || chartData.length === 0) {

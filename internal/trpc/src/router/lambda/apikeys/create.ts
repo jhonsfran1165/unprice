@@ -12,7 +12,9 @@ export const create = protectedProjectProcedure
   .input(createApiKeySchema)
   .output(
     z.object({
-      apikey: selectApiKeySchema,
+      apikey: selectApiKeySchema.extend({
+        key: z.string(),
+      }),
     })
   )
   .mutation(async (opts) => {
@@ -54,7 +56,6 @@ export const create = protectedProjectProcedure
       .values({
         id: apiKeyId,
         name: name,
-        key: apiKey,
         hash: apiKeyHash,
         expiresAt: expiresAt,
         projectId: project.id,
@@ -90,5 +91,5 @@ export const create = protectedProjectProcedure
       })
     )
 
-    return { apikey: newApiKey }
+    return { apikey: { ...newApiKey, key: apiKey } }
   })

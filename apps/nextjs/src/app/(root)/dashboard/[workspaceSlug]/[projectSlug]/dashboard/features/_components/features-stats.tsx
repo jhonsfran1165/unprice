@@ -16,7 +16,9 @@ import { BarChart3, BarChartBig } from "lucide-react"
 import { NumberTicker } from "~/components/analytics/number-ticker"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useIntervalFilter } from "~/hooks/use-filter"
+import { useQueryInvalidation } from "~/hooks/use-query-invalidation"
 import { useTRPC } from "~/trpc/client"
+import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
 export const description = "An interactive bar chart"
 
@@ -61,7 +63,7 @@ export function FeaturesStatsSkeleton({
             return (
               // biome-ignore lint/a11y/useButtonType: <explanation>
               <button
-                key={chart}
+                key={Math.random()}
                 className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted md:border-t-0 md:border-l md:px-8 md:py-6"
               >
                 <span className="line-clamp-1 text-muted-foreground text-xs">
@@ -96,11 +98,37 @@ export function FeaturesStats() {
   const [intervalFilter] = useIntervalFilter()
   const trpc = useTRPC()
 
-  const { data: featuresOverview, isLoading } = useSuspenseQuery(
-    trpc.analytics.getFeaturesOverview.queryOptions({
-      intervalDays: intervalFilter.intervalDays,
-    })
+  const {
+    data: featuresOverview,
+    isLoading,
+    dataUpdatedAt,
+    isFetching,
+  } = useSuspenseQuery(
+    trpc.analytics.getFeaturesOverview.queryOptions(
+      {
+        intervalDays: intervalFilter.intervalDays,
+      },
+      {
+        staleTime: ANALYTICS_STALE_TIME,
+      }
+    )
   )
+
+  // invalidate the query when the interval changes
+  useQueryInvalidation({
+    paramKey: intervalFilter.intervalDays,
+    dataUpdatedAt,
+    isFetching,
+    getQueryKey: (param) => [
+      ["analytics", "getFeaturesOverview"],
+      {
+        input: {
+          intervalDays: param,
+        },
+        type: "query",
+      },
+    ],
+  })
 
   const chartData = featuresOverview.data
 
@@ -109,13 +137,11 @@ export function FeaturesStats() {
   const total = React.useMemo(
     () => ({
       usage: chartData.reduce((acc, curr) => acc + curr.usage, 0),
-      // latency average not sum - if nan then 0
-      latency:
-        chartData.reduce((acc, curr) => acc + curr.latency, 0) /
-        (chartData.filter((item) => item.latency).length || 1),
+      // latency show the max latency
+      latency: Math.max(...chartData.map((item) => item.latency)),
       verifications: chartData.reduce((acc, curr) => acc + curr.verifications, 0),
     }),
-    [intervalFilter.intervalDays]
+    [intervalFilter.intervalDays, chartData.length]
   )
 
   if (isLoading || !chartData || chartData.length === 0) {

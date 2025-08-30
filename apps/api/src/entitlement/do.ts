@@ -5,35 +5,58 @@ import { migrate } from "drizzle-orm/durable-sqlite/migrator"
 import migrations from "../../drizzle/migrations"
 
 import { Analytics } from "@unprice/analytics"
-import { count, eq, lte, sql } from "drizzle-orm"
-import { entitlements, usageRecords, verifications } from "~/db/schema"
-import type { Entitlement, NewEntitlement, schema } from "~/db/types"
+import { count, sql } from "drizzle-orm"
+import { usageRecords, verifications } from "~/db/schema"
+import type { schema } from "~/db/types"
 import type { Env } from "~/env"
 import type { CanRequest, ReportUsageRequest, ReportUsageResponse } from "./interface"
 
 import { env } from "cloudflare:workers"
+import { createConnection } from "@unprice/db"
+import type { CustomerEntitlementExtended } from "@unprice/db/validators"
+import { FetchError } from "@unprice/error"
+import { Err, Ok, type Result } from "@unprice/error"
 import { ConsoleLogger, type Logger } from "@unprice/logging"
-import type { DenyReason } from "@unprice/services/customers"
+import { CacheService } from "@unprice/services/cache"
+import {
+  CustomerService,
+  type DenyReason,
+  type UnPriceCustomerError,
+} from "@unprice/services/customers"
+import { LogdrainMetrics, type Metrics, NoopMetrics } from "@unprice/services/metrics"
+
+interface UsageLimiterConfig {
+  entitlements: CustomerEntitlementExtended[]
+}
 
 // This durable object takes care of handling the usage of every feature per customer.
 // It is used to validate the usage of a feature and to report the usage to tinybird.
 export class DurableObjectUsagelimiter extends Server {
+  // if the do is initialized
   private initialized = false
   // once the durable object is initialized we can avoid
   // querying the db for usage on each request
-  private featuresUsage: Map<string, Entitlement> = new Map()
+  private featuresUsage: Map<string, CustomerEntitlementExtended> = new Map()
   // internal database of the do
   private db: DrizzleSqliteDODatabase<typeof schema>
   // tinybird analytics
   private analytics: Analytics
   // logger
   private logger: Logger
-  // Default ttl for the usage records
+  // cache
+  private cache: CacheService
+  // metrics
+  private metrics: Metrics
+  // customer service
+  private customerService: CustomerService
+  // Default ttl for the usage records and verifications
   private readonly MS_TTL = 1000 * 30 // 30 secs
   // Debounce delay for the broadcast
   private lastBroadcastTime = 0
-  // debounce delay for the broadcast
+  // debounce delay for the broadcast events
   private readonly DEBOUNCE_DELAY = 1000 * 1 // 1 second
+  // update period for the entitlements for invalidation
+  private readonly UPDATE_PERIOD = 1000 * 60 * 24 // 24 hours
 
   // hibernate the do when no websocket nor connections are active
   static options = {
@@ -46,7 +69,7 @@ export class DurableObjectUsagelimiter extends Server {
     this.db = drizzle(ctx.storage, { logger: false })
 
     this.analytics = new Analytics({
-      emit: env.EMIT_ANALYTICS.toString() === "true",
+      emit: env.EMIT_ANALYTICS,
       tinybirdToken: env.TINYBIRD_TOKEN,
       tinybirdUrl: env.TINYBIRD_URL,
     })
@@ -55,12 +78,62 @@ export class DurableObjectUsagelimiter extends Server {
       requestId: this.ctx.id.toString(),
       service: "usagelimiter",
       environment: env.NODE_ENV,
+      defaultFields: {
+        durableObjectId: this.ctx.id.toString(),
+      },
+    })
+
+    const emitMetrics = env.EMIT_METRICS_LOGS
+
+    this.metrics = emitMetrics
+      ? new LogdrainMetrics({
+          requestId: this.ctx.id.toString(),
+          environment: env.NODE_ENV,
+          logger: this.logger,
+          service: "usagelimiter",
+        })
+      : new NoopMetrics()
+
+    this.cache = new CacheService(
+      {
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        waitUntil: (promise: Promise<any>) => this.ctx.waitUntil(promise),
+      },
+      this.metrics,
+      emitMetrics
+    )
+
+    // don't register any stores - only memory
+    this.cache.init([])
+
+    const cache = this.cache.getCache()
+
+    this.customerService = new CustomerService({
+      logger: this.logger,
+      analytics: this.analytics,
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => this.ctx.waitUntil(promise),
+      cache: cache,
+      metrics: this.metrics,
+      db: createConnection({
+        env: env.NODE_ENV,
+        primaryDatabaseUrl: env.DATABASE_URL,
+        read1DatabaseUrl: env.DATABASE_READ1_URL,
+        read2DatabaseUrl: env.DATABASE_READ2_URL,
+        logger: env.DRIZZLE_LOG,
+        singleton: false, // Don't use singleton for hibernating DOs
+      }),
     })
 
     this.initialize()
   }
 
   async initialize() {
+    // if already initialized, return
+    if (this.initialized) {
+      return
+    }
+
     // block concurrency while initializing
     this.ctx.blockConcurrencyWhile(async () => {
       // all happen in a try catch to avoid crashing the do
@@ -68,39 +141,220 @@ export class DurableObjectUsagelimiter extends Server {
         // migrate first
         await this._migrate()
 
-        this.initialized = true
+        // save the config in the do storage
+        const config = await this.getConfig()
 
-        const now = Date.now()
-
-        // get the usage for the customer for every feature
-        const entitlementsDO = await this.db
-          .select()
-          .from(entitlements)
-          .where(lte(entitlements.validFrom, now))
-          .catch((e) => {
-            this.logger.error("error getting entitlements from do", {
-              error: e.message,
-            })
-
-            return []
-          })
-
-        // entitlement are revalidated on each request when needed
-        if (entitlementsDO.length === 0) return
+        // get the entitlements from the db
+        // we save the entitlements in the do to avoid querying the db for each request
+        // then we update the entitlements every UPDATE_PERIOD
+        const entitlements = config.entitlements
 
         // user can't have the same feature slug for different entitlements
-        entitlementsDO.forEach((e) => {
+        entitlements.forEach((e) => {
           this.featuresUsage.set(e.featureSlug, e)
         })
+
+        this.initialized = true
       } catch (e) {
+        // all the initialization happens in a try catch to avoid crashing the do
         this.logger.error("error initializing do", {
           error: e instanceof Error ? e.message : "unknown error",
         })
 
         this.featuresUsage.clear()
         this.initialized = false
+        this.ctx.storage.delete("config")
       }
     })
+  }
+
+  private async getConfig(): Promise<UsageLimiterConfig> {
+    const config = (await this.ctx.storage.get("config")) as UsageLimiterConfig
+
+    // clean the config from undefined entitlements
+    return {
+      ...config,
+      entitlements: config?.entitlements?.filter((e) => e?.id !== undefined) ?? [],
+    }
+  }
+
+  private async updateConfig(config: UsageLimiterConfig) {
+    if (!this.initialized) {
+      // initialize if not initialized
+      this.initialize()
+    }
+
+    const cleanConfig = {
+      ...config,
+      entitlements: config.entitlements.filter((e) => e?.id !== undefined),
+    }
+
+    await this.ctx.storage.put("config", cleanConfig)
+  }
+
+  private async updateEntitlement(entitlement: CustomerEntitlementExtended) {
+    const config = await this.getConfig()
+    const entitlements = config.entitlements.filter(
+      (e) => e.featureSlug !== entitlement.featureSlug
+    )
+    entitlements.push({
+      ...entitlement,
+      lastUsageUpdateAt: Date.now(),
+    })
+
+    // update the config
+    await this.updateConfig({ entitlements })
+
+    // update the state
+    this.ctx.blockConcurrencyWhile(async () => {
+      this.featuresUsage.set(entitlement.featureSlug, entitlement)
+    })
+  }
+
+  public async getEntitlements(): Promise<CustomerEntitlementExtended[]> {
+    const config = await this.getConfig()
+    return config.entitlements
+  }
+
+  // this is a simple way to revalidate the entitlement
+  public async getEntitlement({
+    customerId,
+    projectId,
+    featureSlug,
+    now,
+    opts,
+  }: {
+    customerId: string
+    projectId: string
+    featureSlug: string
+    now: number
+    opts?: {
+      forceRefresh?: boolean
+    }
+  }): Promise<Result<CustomerEntitlementExtended, FetchError | UnPriceCustomerError>> {
+    // get the config
+    const config = await this.getConfig()
+    // get the entitlement from the config
+    let entitlement = config.entitlements.find((e) => e.featureSlug === featureSlug)
+    // if the last update is more than UPDATE_PERIOD, refresh the entitlements
+    const timeToRefresh = entitlement
+      ? entitlement.lastUsageUpdateAt + this.UPDATE_PERIOD - now < 0
+      : true
+    const shouldRefresh = timeToRefresh || opts?.forceRefresh
+
+    // to improve performance allow this request to return the entitlement that already exists in the DO
+    // and update the entitlement in the DO in the background
+    // basically stale while revalidate pattern
+    if (shouldRefresh) {
+      // if the entitlement is not found in the first time or is a placeholder, revalidate it
+      if (!entitlement?.id || entitlement?.id === "placeholder") {
+        const { err, val } = await this.revalidateEntitlement({
+          customerId,
+          projectId,
+          featureSlug,
+          now,
+        })
+
+        // if there is an error, return the error
+        if (err) {
+          return Err(err)
+        }
+
+        // if the entitlement is found, assign it to the entitlement
+        if (val) {
+          entitlement = val
+        }
+      }
+
+      // revalidate in background is found in the first time but should refresh
+      this.ctx.waitUntil(
+        this.revalidateEntitlement({
+          customerId,
+          projectId,
+          featureSlug,
+          now,
+        })
+      )
+    }
+
+    // if the entitlement doesn't need to be refreshed
+    // and the entitlement is not found, return an error
+    if (!entitlement?.id) {
+      return Err(
+        new FetchError({
+          message: "entitlement not found",
+          retry: false,
+        })
+      )
+    }
+
+    // placeholder is used to avoid spamming the db with requests when entitlement is not found
+    if (entitlement?.id === "placeholder") {
+      return Err(
+        new FetchError({
+          message: `DO: Entitlement not found, entitlement will be refreshed in ${Math.round(
+            (entitlement.lastUsageUpdateAt + this.UPDATE_PERIOD - now) / 1000
+          )} seconds`,
+          retry: false,
+        })
+      )
+    }
+
+    // if the entitlement is found, return the entitlement
+    return Ok(entitlement)
+  }
+
+  // this is a simple way to revalidate the entitlement
+  public async revalidateEntitlement({
+    customerId,
+    projectId,
+    featureSlug,
+    now,
+  }: {
+    customerId: string
+    projectId: string
+    featureSlug: string
+    now: number
+  }): Promise<Result<CustomerEntitlementExtended, FetchError | UnPriceCustomerError>> {
+    // get the entitlement from the db
+    const { err, val } = await this.customerService.getActiveEntitlement(
+      customerId,
+      featureSlug,
+      projectId,
+      now,
+      {
+        skipCache: false, // INPORTANT: we don't skip cache here because we only have in memory cache
+        // basically if the entitlement in not found in memory we will query the db
+        // SET TO TRUE IF YOU ADD ANOTHER CACHE LAYER!!
+        withLastUsage: true, // we need the last usage to calculate the new usage
+      }
+    )
+
+    if (err) {
+      this.logger.error("error getting entitlement from do", {
+        error: err.message,
+      })
+      return Err(err)
+    }
+
+    if (!val) {
+      // if the entitlement is not found we want to keep a placeholder
+      // so in future request don't spam the db
+      const placeholderEntitlement = {
+        id: "placeholder",
+        featureSlug: featureSlug,
+        lastUsageUpdateAt: now,
+      } as CustomerEntitlementExtended
+
+      await this.updateEntitlement(placeholderEntitlement)
+
+      return Ok(placeholderEntitlement)
+    }
+
+    // update the config
+    await this.updateEntitlement(val)
+
+    return Ok(val)
   }
 
   async _migrate() {
@@ -116,17 +370,8 @@ export class DurableObjectUsagelimiter extends Server {
     }
   }
 
-  private isInitialized() {
-    if (!this.initialized) {
-      return {
-        valid: false,
-        message: "DO not initialized",
-      }
-    }
-
-    return { valid: true, message: "DO initialized" }
-  }
-
+  // when connected through websocket we can broadcast events to the client
+  // realtime events are used to debug events in unprice dashboard
   async broadcastEvents(data: {
     customerId: string
     featureSlug: string
@@ -150,30 +395,54 @@ export class DurableObjectUsagelimiter extends Server {
     }
   }
 
-  private isValidEntitlement(featureSlug: string): {
+  private isValidEntitlement(
+    entitlement: CustomerEntitlementExtended,
+    opts: { allowOverage?: boolean }
+  ): {
     valid: boolean
     message: string
-    entitlement?: Entitlement
     deniedReason?: DenyReason
+    limit?: number
+    usage?: number
   } {
-    const { valid, message } = this.isInitialized()
-
-    if (!valid) {
-      return { valid, message }
-    }
-
-    const entitlement = this.featuresUsage.get(featureSlug)
-
-    if (!entitlement) {
+    // check if all the DO is initialized
+    if (!this.initialized) {
       return {
         valid: false,
-        message: "DO: Entitlement not found for this customer",
-        deniedReason: "ENTITLEMENT_NOT_FOUND",
+        message: "DO not initialized",
+      }
+    }
+
+    if (entitlement.project.enabled === false) {
+      return {
+        valid: false,
+        message: "DO: Project is disabled",
+        deniedReason: "PROJECT_DISABLED",
+      }
+    }
+
+    if (entitlement.customer.active === false) {
+      return {
+        valid: false,
+        message: "DO: Customer is disabled",
+        deniedReason: "CUSTOMER_DISABLED",
+      }
+    }
+
+    if (entitlement.subscription.active === false) {
+      return {
+        valid: false,
+        message: "DO: Subscription is disabled",
+        deniedReason: "SUBSCRIPTION_DISABLED",
       }
     }
 
     const now = Date.now()
-    // check if the entitlement has expired
+
+    // check if the entitlement has expired with a buffer period in days
+    // buffer period is used to avoid race conditions when the entitlement is updated
+    // and the customer is still using the feature
+    // this will generate overage of course, but it's better than not having it
     const validUntil = entitlement.validTo
       ? entitlement.validTo + entitlement.bufferPeriodDays * 24 * 60 * 60 * 1000
       : null
@@ -183,23 +452,25 @@ export class DurableObjectUsagelimiter extends Server {
         valid: false,
         message: "entitlement expired",
         deniedReason: "ENTITLEMENT_EXPIRED",
-        entitlement,
       }
     }
 
-    if (entitlement.limit && Number(entitlement.usage) > Number(entitlement.limit)) {
+    // check if the entitlement has a limit and the usage is greater than the limit
+    const checkLimitResult = this.checkLimit(entitlement, opts)
+
+    if (!checkLimitResult.success) {
       return {
         valid: false,
-        message: "entitlement limit exceeded",
-        deniedReason: "LIMIT_EXCEEDED",
-        entitlement,
+        message: checkLimitResult.message,
+        deniedReason: checkLimitResult.deniedReason,
+        limit: Number(checkLimitResult.limit),
+        usage: Number(checkLimitResult.usage),
       }
     }
 
     return {
       valid: true,
       message: "entitlement is valid",
-      entitlement,
     }
   }
 
@@ -250,143 +521,89 @@ export class DurableObjectUsagelimiter extends Server {
       })
   }
 
-  async can(data: CanRequest): Promise<{
+  public async can(data: CanRequest): Promise<{
     success: boolean
     message: string
     deniedReason?: DenyReason
+    limit?: number
+    usage?: number
   }> {
-    // first get the entitlement
-    const { valid, message, entitlement, deniedReason } = this.isValidEntitlement(data.featureSlug)
+    // first initialize the do
+    this.initialize()
 
-    if (!entitlement) {
+    // i need to know the latency of the request
+    const startLatency = performance.now()
+
+    // get the entitlement
+    const { err, val: entitlement } = await this.getEntitlement({
+      customerId: data.customerId,
+      projectId: data.projectId,
+      featureSlug: data.featureSlug,
+      now: data.timestamp,
+    })
+    const endLatency = performance.now()
+    console.info(`getEntitlement latency: ${endLatency - startLatency}ms`)
+
+    if (err) {
       return {
         success: false,
-        message: "DO: Entitlement not found for this customer",
+        message: err.message,
         deniedReason: "ENTITLEMENT_NOT_FOUND",
       }
     }
 
+    // first get the entitlement
+    const { valid, message, deniedReason, limit, usage } = this.isValidEntitlement(entitlement, {
+      allowOverage: false, // for verification we don't allow overage
+    })
+
+    // ensure the alarm is set so we can send usage to tinybird periodically
     await this.ensureAlarmIsSet(data.secondsToLive)
 
-    const performanceStart = data.performanceStart ?? 0
-
-    if (!valid) {
-      // insert async verification
-      this.ctx.waitUntil(
-        Promise.all([
-          // broadcast the event to the project notify about the denied reason
-          this.broadcastEvents({
-            customerId: data.customerId,
-            featureSlug: data.featureSlug,
-            type: "can",
-            success: valid,
-            deniedReason: deniedReason,
-          }),
-          // insert verification
-          this.insertVerification(
-            {
-              entitlementId: entitlement.entitlementId,
-              customerId: data.customerId,
-              projectId: data.projectId,
-              featureSlug: data.featureSlug,
-              requestId: data.requestId,
-              metadata: data.metadata ? JSON.stringify(data.metadata) : null,
-              featurePlanVersionId: entitlement.featurePlanVersionId,
-              subscriptionItemId: entitlement.subscriptionItemId,
-              subscriptionPhaseId: entitlement.subscriptionPhaseId,
-              subscriptionId: entitlement.subscriptionId,
-            },
-            data,
-            performance.now() - performanceStart,
-            deniedReason
-          ),
-        ])
-      )
-
-      return {
-        success: false,
-        message: message,
-        deniedReason: deniedReason,
-      }
-    }
-
-    if (!valid) {
-      // insert async verification and broadcast the event
-      this.ctx.waitUntil(
-        Promise.all([
-          // broadcast the event
-          this.broadcastEvents({
-            featureSlug: data.featureSlug,
-            customerId: data.customerId,
-            type: "can",
-            success: valid,
-            deniedReason: deniedReason,
-          }),
-          // insert verification
-          this.insertVerification(
-            {
-              entitlementId: entitlement.entitlementId,
-              customerId: data.customerId,
-              projectId: data.projectId,
-              featureSlug: data.featureSlug,
-              requestId: data.requestId,
-              metadata: data.metadata ? JSON.stringify(data.metadata) : null,
-              featurePlanVersionId: entitlement.featurePlanVersionId,
-              subscriptionItemId: entitlement.subscriptionItemId,
-              subscriptionPhaseId: entitlement.subscriptionPhaseId,
-              subscriptionId: entitlement.subscriptionId,
-            },
-            data,
-            performance.now() - performanceStart,
-            deniedReason
-          ),
-        ])
-      )
-
-      return {
-        success: false,
-        message,
-        deniedReason,
-      }
-    }
-
-    // at this point we basically validate the user has access to the feature
-    const result = this.checkLimit(entitlement)
-
-    // insert verification
-    this.ctx.waitUntil(
-      Promise.all([
-        // insert verification
-        this.insertVerification(
-          {
-            entitlementId: entitlement.entitlementId,
-            customerId: data.customerId,
-            projectId: data.projectId,
-            featureSlug: data.featureSlug,
-            requestId: data.requestId,
-            metadata: JSON.stringify(data.metadata),
-            featurePlanVersionId: entitlement.featurePlanVersionId,
-            subscriptionItemId: entitlement.subscriptionItemId,
-            subscriptionPhaseId: entitlement.subscriptionPhaseId,
-            subscriptionId: entitlement.subscriptionId,
-          },
-          data,
-          performance.now() - performanceStart,
-          result.deniedReason
-        ),
-      ])
+    // insert verification this is zero latency
+    const verification = await this.insertVerification(
+      {
+        entitlementId: entitlement.id,
+        customerId: data.customerId,
+        projectId: data.projectId,
+        featureSlug: data.featureSlug,
+        requestId: data.requestId,
+        metadata: JSON.stringify(data.metadata),
+        featurePlanVersionId: entitlement.featurePlanVersionId,
+        subscriptionItemId: entitlement.subscriptionItemId,
+        subscriptionPhaseId: entitlement.subscriptionPhaseId,
+        subscriptionId: entitlement.subscriptionId,
+      },
+      data,
+      performance.now() - data.performanceStart,
+      deniedReason
     )
 
+    if (!verification?.id) {
+      return {
+        success: false,
+        message: "error inserting verification from do, please try again later",
+        deniedReason: "ERROR_INSERTING_VERIFICATION_DO",
+      }
+    }
+
     return {
-      success: result.success,
-      message: result.message,
-      deniedReason: result.deniedReason,
+      success: valid,
+      message: message,
+      deniedReason: deniedReason,
+      limit: Number(limit),
+      usage: Number(usage),
     }
   }
 
-  private checkLimit(entitlement: Entitlement): {
+  private checkLimit(
+    entitlement: CustomerEntitlementExtended,
+    opts: { allowOverage?: boolean }
+  ): {
     success: boolean
     message: string
+    limit?: number
+    usage?: number
     deniedReason?: DenyReason
   } {
     switch (entitlement.featureType) {
@@ -399,46 +616,75 @@ export class DurableObjectUsagelimiter extends Server {
         const hitLimit = limit ? Number(usage) > Number(limit) : false
 
         if (hitLimit) {
-          return { success: false, message: "limit exceeded", deniedReason: "LIMIT_EXCEEDED" }
+          if (opts.allowOverage) {
+            return {
+              success: true,
+              message: "limit exceeded, but overage is allowed",
+              limit: Number(limit),
+              usage: Number(usage),
+            }
+          }
+
+          return {
+            success: false,
+            message: "limit exceeded",
+            deniedReason: "LIMIT_EXCEEDED",
+            limit: Number(limit),
+            usage: Number(usage),
+          }
         }
 
-        return { success: true, message: "can" }
+        return { success: true, message: "can", limit: Number(limit), usage: Number(usage) }
       }
     }
   }
 
-  async reportUsage(data: ReportUsageRequest): Promise<ReportUsageResponse> {
-    // first get the entitlement
-    const { valid, message, entitlement } = this.isValidEntitlement(data.featureSlug)
+  public async reportUsage(data: ReportUsageRequest): Promise<ReportUsageResponse> {
+    // first initialize the do
+    this.initialize()
 
-    if (!entitlement) {
+    // first get the entitlement
+    const { err, val: entitlement } = await this.getEntitlement({
+      customerId: data.customerId,
+      projectId: data.projectId,
+      featureSlug: data.featureSlug,
+      now: data.timestamp,
+    })
+
+    if (err) {
       return {
         success: false,
-        message: "ENTITLEMENT_NOT_FOUND",
+        message: err.message,
+        deniedReason: "ENTITLEMENT_NOT_FOUND",
       }
     }
 
-    // TODO: send analytics event??
+    const { valid, message, deniedReason } = this.isValidEntitlement(entitlement, {
+      allowOverage: true, // for reporting usage we allow overage
+    })
+
+    // if the entitlement is not valid, we return an error
+    // why? because we don't want to report usage for invalid entitlements, simply
+    // as for verification we want to report the verification event even if the entitlement is invalid
     if (!valid) {
       return {
         success: false,
-        message,
+        message: message,
+        deniedReason: deniedReason,
       }
     }
 
-    // TODO: send analytics event??
     // if the use is negative but the entitlement aggregationMethod is not in sum or sum_all
     // we need to return an error
-    if (
-      Number(entitlement.usage) < 0 &&
-      !["sum", "sum_all"].includes(entitlement.aggregationMethod)
-    ) {
+    if (Number(data.usage) < 0 && !["sum", "sum_all"].includes(entitlement.aggregationMethod)) {
       return {
         success: false,
         message: `Usage cannot be negative when the feature type is not sum or sum_all, got ${entitlement.aggregationMethod}. This will disturb aggregations.`,
+        deniedReason: "INCORRECT_USAGE_REPORTING",
       }
     }
 
+    // ensure the alarm is set so we can send usage to tinybird periodically
     await this.ensureAlarmIsSet(data.secondsToLive)
 
     // insert usage into db
@@ -453,7 +699,7 @@ export class DurableObjectUsagelimiter extends Server {
         requestId: data.requestId,
         projectId: data.projectId,
         featurePlanVersionId: entitlement.featurePlanVersionId,
-        entitlementId: entitlement.entitlementId,
+        entitlementId: entitlement.id,
         subscriptionItemId: entitlement.subscriptionItemId,
         subscriptionPhaseId: entitlement.subscriptionPhaseId,
         subscriptionId: entitlement.subscriptionId,
@@ -472,20 +718,29 @@ export class DurableObjectUsagelimiter extends Server {
         return result?.[0] ?? null
       })
 
-    // TODO: send analytics event??
-    if (!usageRecord) {
+    if (!usageRecord?.id) {
       return {
         success: false,
         message: "error inserting usage from do, please try again later",
+        deniedReason: "ERROR_INSERTING_USAGE_DO",
       }
     }
 
+    // after validating, we set the usage and agregate it to the DO state for the next request.
+    // keep in mind that database calls are 0 latency because of the Durable Object
+    // we keep the agregated state in a map to avoid having to query the db for each request
     const result = await this.setUsage(entitlement, data.usage)
 
-    // return usage
-    return result
+    return {
+      success: result.success,
+      message: result.message,
+      notifyUsage: result.notifyUsage,
+      usage: result.usage,
+      limit: result.limit,
+    }
   }
 
+  // instead of creating a cron job alarm we set and alarm on every request
   private async ensureAlarmIsSet(secondsToLive?: number): Promise<void> {
     // we set alarms to send usage to tinybird periodically
     // this would avoid having too many events in the db as well
@@ -494,6 +749,7 @@ export class DurableObjectUsagelimiter extends Server {
 
     // there is a default ttl for the usage records
     // alternatively we can use the secondsToLive from the request
+    // this can be usefull if we want to support realtime usage reporting for some clients
     const nextAlarm = secondsToLive ? now + secondsToLive * 1000 : now + this.MS_TTL
 
     // if there is no alarm set one given the ttl
@@ -507,7 +763,7 @@ export class DurableObjectUsagelimiter extends Server {
     }
   }
 
-  private calculateNewUsage(entitlement: Entitlement, usage: number) {
+  private calculateNewUsage(entitlement: CustomerEntitlementExtended, usage: number) {
     const aggregation = entitlement.aggregationMethod
     const currentUsage = Number(entitlement.usage)
     const accumulatedUsage = Number(entitlement.accumulatedUsage)
@@ -533,7 +789,7 @@ export class DurableObjectUsagelimiter extends Server {
   }
 
   private async setUsage(
-    entitlement: Entitlement,
+    entitlement: CustomerEntitlementExtended,
     usage: number
   ): Promise<{
     success: boolean
@@ -542,7 +798,7 @@ export class DurableObjectUsagelimiter extends Server {
     usage?: number
     limit?: number
   }> {
-    const threshold = 80 // notify when the usage is 80% or more
+    const threshold = 90 // notify when the usage is 90% or more
     const limit = entitlement.limit ? Number(entitlement.limit) : undefined
 
     let message = ""
@@ -580,37 +836,18 @@ export class DurableObjectUsagelimiter extends Server {
       }
     }
 
-    this.featuresUsage.set(entitlement.featureSlug, {
-      ...entitlement,
-      usage: newUsage.toString(),
+    // update the featuresUsage map with block concurrency
+    this.ctx.blockConcurrencyWhile(async () => {
+      this.featuresUsage.set(entitlement.featureSlug, {
+        ...entitlement,
+        usage: newUsage.toString(),
+      })
     })
 
-    // update the entitlement in the db
-    const updatedEntitlement = await this.db
-      .update(entitlements)
-      .set({
-        usage: newUsage.toString(),
-        lastUsageUpdateAt: Date.now(),
-      })
-      .where(eq(entitlements.id, entitlement.id))
-      .returning()
-      .catch((e) => {
-        this.logger.error("error updating entitlement", {
-          error: e.message,
-        })
-
-        return null
-      })
-      .then((result) => {
-        return result?.[0] ?? null
-      })
-
-    if (!updatedEntitlement) {
-      return {
-        success: false,
-        message: "error updating entitlement",
-      }
-    }
+    // reset everything in the config from the map which is the source of truth
+    await this.updateConfig({
+      entitlements: Array.from(this.featuresUsage.values()),
+    })
 
     return { success: true, message, notifyUsage, usage: newUsage, limit }
   }
@@ -623,7 +860,7 @@ export class DurableObjectUsagelimiter extends Server {
     console.info("onConnect")
   }
 
-  async sendVerificationsToTinybird() {
+  private async sendVerificationsToTinybird() {
     // Process events in batches to avoid memory issues
     const BATCH_SIZE = 500
     let processedCount = 0
@@ -659,6 +896,7 @@ export class DurableObjectUsagelimiter extends Server {
             latency: event.latency ? Number(event.latency) : 0,
             requestId: event.requestId,
             featurePlanVersionId: event.featurePlanVersionId,
+            success: event.success === 1,
           }))
 
           await this.analytics
@@ -666,6 +904,8 @@ export class DurableObjectUsagelimiter extends Server {
             .catch((e) => {
               this.logger.error(`Failed in ingestFeaturesVerification from do ${e.message}`, {
                 error: JSON.stringify(e),
+                customerId: transformedEvents[0]?.customerId,
+                projectId: transformedEvents[0]?.projectId,
               })
               throw e
             })
@@ -691,7 +931,7 @@ export class DurableObjectUsagelimiter extends Server {
                 processedCount += deletedCount
 
                 this.logger.info(
-                  `deleted ${deletedCount} verifications from do (range: ${firstId}-${lastId})`,
+                  `deleted ${deletedCount} verifications from do ${this.ctx.id.toString()} (range: ${firstId}-${lastId})`,
                   {
                     rows: total,
                     deletedCount,
@@ -699,22 +939,32 @@ export class DurableObjectUsagelimiter extends Server {
                   }
                 )
 
-                this.logger.info(`Processed ${processedCount} verifications in this batch`)
+                this.logger.info(
+                  `Processed ${processedCount} verifications in this batch from do ${this.ctx.id.toString()}`,
+                  {
+                    customerId: transformedEvents[0]?.customerId,
+                    projectId: transformedEvents[0]?.projectId,
+                  }
+                )
               } else {
                 this.logger.info(
                   "the total of verifications sent to tinybird are not the same as the total of verifications in the db",
                   {
                     total,
                     expected: verificationEvents.length,
+                    customerId: transformedEvents[0]?.customerId,
+                    projectId: transformedEvents[0]?.projectId,
                   }
                 )
               }
             })
         } catch (error) {
           this.logger.error(
-            `Failed to send verifications to Tinybird from do ${error instanceof Error ? error.message : "unknown error"}`,
+            `Failed to send verifications to Tinybird from do ${this.ctx.id.toString()} ${error instanceof Error ? error.message : "unknown error"}`,
             {
               error: error instanceof Error ? JSON.stringify(error) : "unknown error",
+              customerId: verificationEvents[0]?.customerId,
+              projectId: verificationEvents[0]?.projectId,
             }
           )
           break
@@ -726,7 +976,7 @@ export class DurableObjectUsagelimiter extends Server {
     }
   }
 
-  async sendUsageToTinybird() {
+  private async sendUsageToTinybird() {
     // Process events in batches to avoid memory issues
     const BATCH_SIZE = 500
     let processedCount = 0
@@ -770,9 +1020,14 @@ export class DurableObjectUsagelimiter extends Server {
           await this.analytics
             .ingestFeaturesUsage(deduplicatedEvents)
             .catch((e) => {
-              this.logger.error(`Failed to send ${deduplicatedEvents.length} events to Tinybird:`, {
-                error: e.message,
-              })
+              this.logger.error(
+                `Failed to send ${deduplicatedEvents.length} events to Tinybird from do ${this.ctx.id.toString()}:`,
+                {
+                  error: e.message,
+                  customerId: deduplicatedEvents[0]?.customerId,
+                  projectId: deduplicatedEvents[0]?.projectId,
+                }
+              )
               throw e
             })
             .then(async (data) => {
@@ -798,7 +1053,7 @@ export class DurableObjectUsagelimiter extends Server {
                 processedCount += deletedCount
 
                 this.logger.info(
-                  `deleted ${deletedCount} usage records from do (range: ${firstId}-${lastId})`,
+                  `deleted ${deletedCount} usage records from do ${this.ctx.id.toString()} (range: ${firstId}-${lastId})`,
                   {
                     originalCount: events.length,
                     deduplicatedCount: deduplicatedEvents.length,
@@ -811,16 +1066,29 @@ export class DurableObjectUsagelimiter extends Server {
                   {
                     total,
                     expected: deduplicatedEvents.length,
+                    customerId: deduplicatedEvents[0]?.customerId,
+                    projectId: deduplicatedEvents[0]?.projectId,
                   }
                 )
               }
 
-              this.logger.info(`Processed ${processedCount} usage events in this batch`)
+              this.logger.info(
+                `Processed ${processedCount} usage events in this batch from do ${this.ctx.id.toString()}`,
+                {
+                  customerId: deduplicatedEvents[0]?.customerId,
+                  projectId: deduplicatedEvents[0]?.projectId,
+                }
+              )
             })
         } catch (error) {
-          this.logger.error("Failed to send events to Tinybird:", {
-            error: error instanceof Error ? error.message : "unknown error",
-          })
+          this.logger.error(
+            `Failed to send events to Tinybird from do ${this.ctx.id.toString()}:`,
+            {
+              error: error instanceof Error ? error.message : "unknown error",
+              customerId: deduplicatedEvents[0]?.customerId,
+              projectId: deduplicatedEvents[0]?.projectId,
+            }
+          )
           break
         }
       }
@@ -843,24 +1111,23 @@ export class DurableObjectUsagelimiter extends Server {
   }
 
   // resetDO the do used when the customer is signed out
-  async resetDO(): Promise<{
+  public async resetDO(): Promise<{
     success: boolean
     message: string
     slugs?: string[]
   }> {
-    if (!this.initialized) {
-      return {
-        success: false,
-        message: "DO not initialized",
-      }
-    }
+    // initialize the do
+    this.initialize()
 
+    // send the current usage and verifications to tinybird
+    await this.sendUsageToTinybird()
+    await this.sendVerificationsToTinybird()
+
+    let slugs: string[] = []
+
+    // we are setting the state so better do it inside a block concurrency
     return this.ctx.blockConcurrencyWhile(async () => {
-      // send the current usage and verifications to tinybird
-      await this.sendUsageToTinybird()
-      await this.sendVerificationsToTinybird()
-
-      // check if the are events in the db
+      // check if the are events in the db this should be 0 latency
       const events = await this.db
         .select({
           count: count(),
@@ -875,14 +1142,13 @@ export class DurableObjectUsagelimiter extends Server {
         .from(verifications)
         .then((e) => e[0])
 
-      const slugs = await this.db
-        .select({
-          featureSlug: entitlements.featureSlug,
-        })
-        .from(entitlements)
-
       // if there are no events, delete the do
       if (events?.count === 0 && verification_events?.count === 0) {
+        // get the entitlements from the db
+        const entitlements = await this.getEntitlements()
+        // get the slugs from the entitlements
+        slugs = entitlements.map((e) => e.featureSlug)
+
         await this.ctx.storage.deleteAll()
         this.initialized = false
       } else {
@@ -895,100 +1161,8 @@ export class DurableObjectUsagelimiter extends Server {
       return {
         success: true,
         message: "DO deleted",
-        slugs: slugs.map((e) => e.featureSlug),
+        slugs,
       }
-    })
-  }
-
-  async getEntitlement(featureSlug: string): Promise<Entitlement | null> {
-    if (!this.initialized) {
-      this.initialize()
-    }
-
-    // get entitlement from db
-    const entitlement = await this.db
-      .select()
-      .from(entitlements)
-      .where(eq(entitlements.featureSlug, featureSlug))
-      .then((e) => e?.[0] ?? null)
-
-    if (!entitlement) {
-      return null
-    }
-
-    return entitlement
-  }
-
-  async setEntitlement(entitlement: NewEntitlement) {
-    if (!this.initialized) {
-      this.initialize()
-    }
-
-    this.ctx.blockConcurrencyWhile(async () => {
-      try {
-        // find the entitlement by entitlementId
-        const existingEntitlement = await this.db
-          .select()
-          .from(entitlements)
-          .where(eq(entitlements.entitlementId, entitlement.entitlementId))
-          .then((e) => e?.[0] ?? null)
-
-        if (existingEntitlement) {
-          // update the entitlement
-          const result = await this.db
-            .update(entitlements)
-            .set(entitlement)
-            .where(eq(entitlements.id, existingEntitlement.id))
-            .returning()
-            .catch((e) => {
-              this.logger.error("error setting entitlement from do", {
-                error: e.message,
-              })
-
-              return null
-            })
-            .then((e) => e?.[0] ?? null)
-
-          if (!result) {
-            return
-          }
-
-          this.featuresUsage.set(entitlement.featureSlug, result)
-        } else {
-          const result = await this.db
-            .insert(entitlements)
-            .values(entitlement)
-            .returning()
-            .catch((e) => {
-              this.logger.error("error setting entitlement from do", {
-                error: e.message,
-              })
-
-              return null
-            })
-            .then((e) => e?.[0] ?? null)
-
-          if (!result) {
-            return
-          }
-
-          this.featuresUsage.set(entitlement.featureSlug, result)
-        }
-      } catch (error) {
-        this.logger.error("error setting entitlement from do", {
-          error: error instanceof Error ? error.message : "unknown error",
-        })
-      }
-    })
-  }
-
-  async getEntitlements(): Promise<Entitlement[]> {
-    if (!this.initialized) {
-      this.initialize()
-    }
-
-    return this.ctx.blockConcurrencyWhile(async () => {
-      return this.db.select().from(entitlements)
     })
   }
 }

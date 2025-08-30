@@ -52,7 +52,6 @@ export default async function DashboardOverview(props: {
     trpc.analytics.getVerificationRegions.queryOptions(
       {
         intervalDays: interval.intervalDays,
-        region: "All",
       },
       {
         staleTime: ANALYTICS_STALE_TIME,
@@ -69,6 +68,9 @@ export default async function DashboardOverview(props: {
       <HydrateClient>
         <Suspense fallback={<OverviewStatsSkeleton isLoading={true} />}>
           <OverviewStats />
+        </Suspense>
+        <Suspense fallback={<LatencyTableSkeleton />}>
+          <LatencyTable />
         </Suspense>
         <AnalyticsCard
           className="w-full"
@@ -90,9 +92,6 @@ export default async function DashboardOverview(props: {
             },
           ]}
         />
-        <Suspense fallback={<LatencyTableSkeleton />}>
-          <LatencyTable />
-        </Suspense>
       </HydrateClient>
     </DashboardShell>
   )

@@ -70,14 +70,8 @@ export const registerGetAnalyticsVerificationsV1 = (app: App) =>
     const { analytics, logger, customer, entitlement, db } = c.get("services")
     const requestId = c.get("requestId")
 
-    // start a new timer
-    startTime(c, "keyAuth")
-
     // validate the request
     const key = await keyAuth(c)
-
-    // end the timer
-    endTime(c, "keyAuth")
 
     // start a new timer
     startTime(c, "getVerifications")

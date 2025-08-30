@@ -14,13 +14,15 @@ export const getFeaturesOverview = protectedProjectProcedure
   .query(async (opts) => {
     const { intervalDays } = opts.input
     const projectId = opts.ctx.project.id
+    const timezone = opts.ctx.project.timezone
 
-    const cacheKey = `${projectId}:${intervalDays}`
+    const cacheKey = `${projectId}:${timezone}:${intervalDays}`
     const result = await opts.ctx.cache.getFeaturesOverview.swr(cacheKey, async () => {
       const result = await opts.ctx.analytics
         .getFeaturesOverview({
           projectId,
           intervalDays,
+          timezone,
         })
         .then((res) => res.data)
 

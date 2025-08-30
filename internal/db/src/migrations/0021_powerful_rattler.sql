@@ -1,0 +1,2 @@
+CREATE INDEX "valid_from_index" ON "unprice_customer_entitlements" USING btree ("valid_from");--> statement-breakpoint
+CREATE INDEX "valid_to_index" ON "unprice_customer_entitlements" USING btree ("valid_to");

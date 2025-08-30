@@ -5,26 +5,21 @@ TAGS "verifications"
 
 NODE day_intervals
 SQL >
-
     %
     WITH
         toStartOfDay(
-            toDateTime64(today() - {{ Int32(intervalDays) }}, 3),
-            {{ String(timezone, 'UTC') }}
+            toTimeZone(toDateTime64(now() - INTERVAL {{ Int32(intervalDays) }} DAY, 3), {{ String(timezone, 'UTC') }})
         ) AS start,
         toStartOfDay(
-            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 3),
-            {{ String(timezone, 'UTC') }}
+            toTimeZone(toDateTime64(now() + INTERVAL 1 DAY, 3), {{ String(timezone, 'UTC') }})
         ) AS end
     SELECT
         arrayJoin(
             arrayMap(
-                x -> toDateTime64(toStartOfDay(toDateTime64(x, 3), {{ String(timezone, 'UTC') }}), 3),
-                range(toUInt32(start), toUInt32(end + 86400),
-                86400
+                x -> toStartOfDay(toTimeZone(toDateTime64(x, 3), {{ String(timezone, 'UTC') }})),
+                range(toUInt32(toTimeZone(start, 'UTC')), toUInt32(toTimeZone(end, 'UTC')) + 86400, 86400)
             )
-        )
-    ) as interval
+        ) as interval
 
 
 NODE hour_intervals
@@ -32,18 +27,18 @@ SQL >
     %
     WITH
         toStartOfHour(
-            toDateTime64(timestampAdd(today(), INTERVAL - {{ Int32(intervalDays, 1) }} DAY), 3),
-            {{ String(timezone, 'UTC') }}
+            toTimeZone(toDateTime64(now() - INTERVAL {{ Int32(intervalDays, 1) }} DAY, 3), {{ String(timezone, 'UTC') }})
         ) AS start,
         toStartOfHour(
-            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 3),
-            {{ String(timezone, 'UTC') }}
+            toTimeZone(toDateTime64(now() + INTERVAL 1 DAY, 3), {{ String(timezone, 'UTC') }})
         ) AS end
     SELECT
         arrayJoin(
-            arrayMap(x -> toDateTime64(x, 3), range(toUInt32(start), toUInt32(end + 3600), 3600)
-        )
-    ) as interval
+            arrayMap(
+                x -> toStartOfHour(toTimeZone(toDateTime64(x, 3), {{ String(timezone, 'UTC') }})),
+                range(toUInt32(toTimeZone(start, 'UTC')), toUInt32(toTimeZone(end, 'UTC')) + 3600, 3600)
+            )
+        ) as interval
 
 
 NODE feature_verification_regions_node
@@ -51,26 +46,26 @@ SQL >
     %
     SELECT
         {% if Int32(intervalDays) == 1 %}
-            toStartOfHour(date, {{ String(timezone, 'UTC') }}) as interval,
+            toStartOfHour(fromUnixTimestamp64Milli(timestamp, {{ String(timezone, 'UTC') }})) as interval,
         {% else %}
-            toStartOfDay(date, {{ String(timezone, 'UTC') }}) as interval,
+            toStartOfDay(fromUnixTimestamp64Milli(timestamp, {{ String(timezone, 'UTC') }})) as interval,
         {% end %}
-        region,
-        countMerge(count) AS count,
-        quantileTDigestMerge(0.50)(p50_latency) AS p50_latency,
-        quantileTDigestMerge(0.95)(p95_latency) AS p95_latency,
-        quantileTDigestMerge(0.99)(p99_latency) AS p99_latency
-    FROM unprice_feature_verifications_hourly_mv
+        metadata['colo'] AS region,
+        count() AS count,
+        round(quantile(0.50)(latency), 2) AS p50_latency,
+        round(quantile(0.95)(latency), 2) AS p95_latency,
+        round(quantile(0.99)(latency), 2) AS p99_latency
+    FROM unprice_feature_verifications
     WHERE
-        1 = 1
-        AND projectId = {{ String(projectId) }}
+        region != '' AND
+        projectId = {{ String(projectId) }}
         {% if defined(region) %}
             AND region = {{ String(region) }}
         {% end %}
         {% if defined(intervalDays) %}
-            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
+            AND fromUnixTimestamp64Milli(timestamp) >= toStartOfDay(toTimeZone(now(), {{ String(timezone, 'UTC') }}) - INTERVAL {{ Int32(intervalDays) }} DAY)
         {% else %}
-            AND date >= toStartOfDay(today() - 7)
+            AND fromUnixTimestamp64Milli(timestamp) >= toStartOfDay(toTimeZone(now(), {{ String(timezone, 'UTC') }}) - INTERVAL 7 DAY)
         {% end %}
     GROUP BY interval, region
     ORDER BY interval, region
@@ -79,12 +74,18 @@ SQL >
 NODE timeserie_feature_verification_regions
 SQL >
     %
-    SELECT formatDateTime(interval, '%FT%T.000%z') as date, region, count, p50_latency, p95_latency, p99_latency
+    SELECT
+        formatDateTime(interval, '%FT%T.000%z') as date,
+        region,
+        count,
+        p50_latency,
+        p95_latency,
+        p99_latency
     FROM
         {% if Int32(intervalDays) == 1 %} hour_intervals
         {% else %} day_intervals
         {% end %}
     LEFT JOIN feature_verification_regions_node USING interval
-
+    WHERE region != ''
 
 TYPE endpoint

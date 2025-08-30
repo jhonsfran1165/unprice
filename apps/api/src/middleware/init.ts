@@ -19,7 +19,7 @@ import { endTime, startTime } from "hono/timing"
 /**
  * These maps persist between worker executions and are used for caching
  */
-// const rlMap = new Map()
+const hashCache = new Map()
 
 /**
  * workerId and isolateCreatedAt are used to track the lifetime of the worker
@@ -84,7 +84,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
 
     // start a new timer
     startTime(c, "initMetrics")
-    const emitMetrics = c.env.EMIT_METRICS_LOGS.toString() === "true"
+    const emitMetrics = c.env.EMIT_METRICS_LOGS
 
     const metrics: Metrics = emitMetrics
       ? new LogdrainMetrics({
@@ -102,7 +102,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
 
     const cacheService = new CacheService(
       {
-        waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
       },
       metrics,
       emitMetrics
@@ -118,8 +119,15 @@ export function init(): MiddlewareHandler<HonoEnv> {
           })
         : undefined
 
+    const stores = []
+
+    // push the cloudflare store first to hit it first
+    if (cloudflareCacheStore) {
+      stores.push(cloudflareCacheStore)
+    }
+
     // register the cloudflare store if it is configured
-    await cacheService.init(cloudflareCacheStore ? [cloudflareCacheStore] : [])
+    cacheService.init(stores)
 
     const cache = cacheService.getCache()
 
@@ -133,7 +141,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       primaryDatabaseUrl: c.env.DATABASE_URL,
       read1DatabaseUrl: c.env.DATABASE_READ1_URL,
       read2DatabaseUrl: c.env.DATABASE_READ2_URL,
-      logger: c.env.DRIZZLE_LOG.toString() === "true",
+      logger: c.env.DRIZZLE_LOG,
+      singleton: false,
     })
 
     endTime(c, "initDb")
@@ -142,7 +151,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
     startTime(c, "initAnalytics")
 
     const analytics = new Analytics({
-      emit: Boolean(c.env.EMIT_ANALYTICS),
+      emit: c.env.EMIT_ANALYTICS,
       tinybirdToken: c.env.TINYBIRD_TOKEN,
       tinybirdUrl: c.env.TINYBIRD_URL,
     })
@@ -155,7 +164,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
     const customer = new CustomerService({
       logger,
       analytics,
-      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
       cache,
       metrics,
       db,
@@ -171,7 +181,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       analytics,
       cache,
       db,
-      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
       metrics,
     })
 
@@ -188,8 +199,11 @@ export function init(): MiddlewareHandler<HonoEnv> {
       analytics,
       cache,
       db,
-      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
       customer,
+      stats: c.get("stats"),
+      hashCache,
     })
 
     endTime(c, "initEntitlement")
@@ -202,7 +216,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
       analytics,
       logger,
       metrics,
-      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
       db,
       requestId,
     })
@@ -218,7 +233,9 @@ export function init(): MiddlewareHandler<HonoEnv> {
       logger,
       metrics,
       db,
-      waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      waitUntil: (promise: Promise<any>) => c.executionCtx.waitUntil(promise),
+      hashCache,
     })
 
     endTime(c, "initApikey")

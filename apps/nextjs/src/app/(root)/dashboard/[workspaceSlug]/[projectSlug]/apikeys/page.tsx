@@ -41,10 +41,9 @@ export default async function ApiKeysPage(props: {
         fallback={
           <DataTableSkeleton
             columnCount={5}
-            cellWidths={["10rem", "40rem", "12rem", "12rem", "8rem"]}
+            cellWidths={["10rem", "40rem", "12rem", "8rem"]}
             showDateFilterOptions
             showViewOptions
-            shrinkZero
           />
         }
       >

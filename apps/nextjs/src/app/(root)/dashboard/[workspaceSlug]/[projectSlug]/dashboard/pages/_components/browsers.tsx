@@ -15,6 +15,7 @@ import {
 import { BarChart4 } from "lucide-react"
 import { useMemo } from "react"
 import { useIntervalFilter, usePageFilter } from "~/hooks/use-filter"
+import { useQueryInvalidation } from "~/hooks/use-query-invalidation"
 import { useTRPC } from "~/trpc/client"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
@@ -56,14 +57,14 @@ export function BrowsersSkeleton({
           <EmptyPlaceholder.Title>
             {error
               ? "Ups, something went wrong"
-              : pageFilter.pageId === ""
+              : !pageFilter.isSelected
                 ? "No page selected"
                 : "No data available"}
           </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
             {error
               ? error
-              : pageFilter.pageId === ""
+              : !pageFilter.isSelected
                 ? "Please select a page to see browser visits."
                 : `There is no browser visits available for the ${intervalFilter.label}.`}
           </EmptyPlaceholder.Description>
@@ -75,20 +76,38 @@ export function BrowsersSkeleton({
 
 export function Browsers() {
   const [intervalFilter] = useIntervalFilter()
-  const [pageId] = usePageFilter()
+  const [pageFilter] = usePageFilter()
+
   const trpc = useTRPC()
-  const { data, isLoading } = useSuspenseQuery(
+  const { data, isLoading, isFetching, dataUpdatedAt } = useSuspenseQuery(
     trpc.analytics.getBrowserVisits.queryOptions(
       {
         intervalDays: intervalFilter.intervalDays,
-        page_id: pageId.pageId,
+        page_id: pageFilter.pageId,
       },
       {
-        enabled: pageId.pageId !== "",
+        enabled: pageFilter.isSelected,
         staleTime: ANALYTICS_STALE_TIME,
       }
     )
   )
+
+  // invalidate the query when the interval changes
+  useQueryInvalidation({
+    paramKey: intervalFilter.intervalDays,
+    dataUpdatedAt,
+    isFetching,
+    getQueryKey: (param) => [
+      ["analytics", "getBrowserVisits"],
+      {
+        input: {
+          intervalDays: param,
+          pageId: pageFilter.pageId,
+        },
+        type: "query",
+      },
+    ],
+  })
 
   // group by browser using useMemo having something like an array of { browser: "Chrome", visits: 214, hits: 140 }
   // there are multiple items with the same browser that we need to sum the visits and hits
@@ -111,7 +130,7 @@ export function Browsers() {
       },
       [] as { browser: string; visits: number; hits: number }[]
     )
-  }, [pageId.pageId, intervalFilter.intervalDays])
+  }, [pageFilter.pageId, intervalFilter.intervalDays, data.data.length])
 
   if (isLoading || !groupedData || groupedData.length === 0) {
     return <BrowsersSkeleton isLoading={isLoading} error={data.error} />

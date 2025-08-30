@@ -245,7 +245,7 @@ importers:
         specifier: ^1.0.12
         version: 1.2.0(next@14.2.32)(react@18.3.1)
       '@vercel/toolbar':
-        specifier: ^0.1.36
+        specifier: ^0.1.38
         version: 0.1.38(@vercel/analytics@1.5.0)(@vercel/speed-insights@1.2.0)(next@14.2.32)(react-dom@18.3.1)(react@18.3.1)
       class-variance-authority:
         specifier: ^0.7.0
@@ -322,6 +322,9 @@ importers:
       react-hook-form:
         specifier: ^7.51.0
         version: 7.62.0(react@18.3.1)
+      react-hotkeys-hook:
+        specifier: ^5.1.0
+        version: 5.1.0(react-dom@18.3.1)(react@18.3.1)
       react-is:
         specifier: 18.3.1
         version: 18.3.1
@@ -756,6 +759,9 @@ importers:
       '@unprice/stripe':
         specifier: workspace:^
         version: link:../stripe
+      '@upstash/redis':
+        specifier: ^1.35.3
+        version: 1.35.3
       date-fns:
         specifier: ^3.3.1
         version: 3.6.0
@@ -866,9 +872,6 @@ importers:
       '@unprice/vercel':
         specifier: workspace:^
         version: link:../vercel
-      '@upstash/redis':
-        specifier: ^1.35.3
-        version: 1.35.3
       '@vercel/functions':
         specifier: ^1.0.2
         version: 1.6.0
@@ -18019,6 +18022,16 @@ packages:
       react: ^16.8.0 || ^17 || ^18 || ^19
     dependencies:
       react: 18.3.1
+
+  /react-hotkeys-hook@5.1.0(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-GCNGXjBzV9buOS3REoQFmSmE4WTvBhYQ0YrAeeMZI83bhXg3dRWsLHXDutcVDdEjwJqJCxk5iewWYX5LtFUd7g==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+    dev: false
 
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}

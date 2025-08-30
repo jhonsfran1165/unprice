@@ -53,6 +53,16 @@ export function PageFilter({
       </SelectTrigger>
       <SelectContent className="w-44">
         {isLoading && <Skeleton className="h-9 w-full" />}
+        <SelectItem value="all" key="all">
+          <div className="flex items-start gap-3">
+            <div className="grid gap-0.5">
+              <p className="line-clamp-1 font-medium text-xs">All pages</p>
+              <p className="line-clamp-1 text-muted-foreground text-xs" data-description>
+                All pages are selected
+              </p>
+            </div>
+          </div>
+        </SelectItem>
         {pages?.pages.map((page) => (
           <SelectItem value={page.id} key={page.id}>
             <div className="flex items-start gap-3">

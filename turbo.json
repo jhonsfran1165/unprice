@@ -19,11 +19,8 @@
         "!app/nextjs/.next/cache/**",
         "app/nextjs/next-env.d.ts",
         "dist/**",
-        "app/auth-proxy/.vercel/output/**",
-        "!app/auth-proxy/.vercel/cache/**",
-        "app/auth-proxy/.next/**",
-        "!app/auth-proxy/.next/cache/**",
-        ".output/**"
+        ".vercel/output/**",
+        "!.vercel/cache/**"
       ],
       "env": [
         "NEXT_PUBLIC_*",
@@ -44,7 +41,6 @@
         "TINYBIRD_TOKEN",
         "RESEND_API_KEY",
         "TINYBIRD_URL",
-        "COOKIE_ENCRYPTION_KEY",
         "UNPRICE_API_KEY",
         "UNPRICE_API_URL",
         "FLAGS_SECRET",
@@ -82,7 +78,6 @@
         "EMIT_METRICS_LOGS",
         "NEXT_PUBLIC_APP_DOMAIN",
         "NEXT_PUBLIC_VERCEL_ENV",
-        "COOKIE_ENCRYPTION_KEY",
         "ENCRYPTION_KEY",
         "CLOUDFLARE_API_TOKEN",
         "CLOUDFLARE_ZONE_ID",

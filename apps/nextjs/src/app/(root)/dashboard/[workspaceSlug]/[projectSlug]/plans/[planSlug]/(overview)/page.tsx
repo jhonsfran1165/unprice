@@ -128,7 +128,6 @@ export default async function PlanPage({
                 "12rem",
                 "8rem",
               ]}
-              shrinkZero
             />
           }
         >

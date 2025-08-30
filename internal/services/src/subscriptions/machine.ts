@@ -15,18 +15,18 @@ import {
   setup,
 } from "xstate"
 
-import { db } from "@unprice/db"
+import { db } from "../utils/db"
 import { UnPriceMachineError } from "./errors"
 
 import { logTransition, sendCustomerNotification, updateSubscription } from "./actions"
 import {
   canInvoice,
   canRenew,
-  currentPhaseNull,
   hasValidPaymentMethod,
   isAlreadyInvoiced,
   isAlreadyRenewed,
   isAutoRenewEnabled,
+  isCurrentPhaseNull,
   isTrialExpired,
 } from "./guards"
 import { invoiceSubscription, loadSubscription, renewSubscription } from "./invokes"
@@ -42,7 +42,7 @@ import type {
 /**
  * Subscription Manager
  *
- * Handles subscription lifecycle management using a state machine.
+ * Handles subscription lifecycle using a state machine.
  * Supports trials, billing cycles, and plan changes.
  *
  * States:
@@ -148,7 +148,7 @@ export class SubscriptionMachine {
         isAlreadyRenewed: isAlreadyRenewed,
         isAutoRenewEnabled: isAutoRenewEnabled,
         isAlreadyInvoiced: isAlreadyInvoiced,
-        currentPhaseNull: currentPhaseNull,
+        isCurrentPhaseNull: isCurrentPhaseNull,
       },
       actions: {
         logStateTransition: ({ context, event }) =>
@@ -189,7 +189,7 @@ export class SubscriptionMachine {
               logger: this.logger,
             }),
             onDone: {
-              target: "restored",
+              target: "restored", // transitional state that will be used to determine the next state
               actions: [
                 assign({
                   now: ({ event }) => event.output.now,
@@ -216,11 +216,14 @@ export class SubscriptionMachine {
           description: "Subscription error, it will throw an error as a final state",
           type: "final",
           entry: ({ context, event }) => {
+            // log the error
             this.logger.error(context.error?.message ?? "Unknown error", {
               subscriptionId: this.subscriptionId,
+              customerId: context.customer.id,
+              currentPhaseId: context.currentPhase?.id,
               projectId: this.projectId,
               now: this.now,
-              event,
+              event: JSON.stringify(event),
             })
 
             // throw an error to be caught by the machine
@@ -295,19 +298,15 @@ export class SubscriptionMachine {
             },
           ],
         },
-        // TODO:implement the idle state
-        idle: {
-          tags: ["subscription", "loading"],
-          description: "Subscription is idle",
-        },
         trialing: {
           tags: ["subscription", "trialing"],
-          description: "Subscription is trialing",
+          description: "Subscription is trialing, meaning is waiting for the trial to end",
           on: {
+            // first possible event is the trial ending
             TRIAL_END: [
               {
-                guard: "currentPhaseNull",
-                target: "error",
+                guard: "isCurrentPhaseNull", // verify that the subscription has a current phase
+                target: "error", // if the subscription has no current phase, throw an error
                 actions: assign({
                   error: () => ({
                     message: "Subscription has no active phase",
@@ -315,26 +314,34 @@ export class SubscriptionMachine {
                 }),
               },
               {
-                guard: and(["isTrialExpired", "hasValidPaymentMethod"]),
-                target: "ending_trial",
+                guard: and(["isTrialExpired", "hasValidPaymentMethod"]), // verify that the trial has expired and the payment method is valid
+                target: "ending_trial", // if the trial has expired and the payment method is valid, transition to the ending_trial state
                 actions: "logStateTransition",
               },
               {
-                target: "error",
+                target: "error", // if the trial has not expired or the payment method is invalid, throw an error
                 actions: assign({
                   error: ({ context }) => {
-                    const trialEndAt = context.currentPhase?.trialEndsAt
+                    const trialEndAt = context.currentPhase?.trialEndsAt! // the state machine already verified that the subscription has a current phase
+                    const trialEndAtDate = new Date(trialEndAt).toLocaleString()
 
-                    if (!trialEndAt) {
+                    const isExpired = isTrialExpired({ context })
+                    const isPaymentMethodValid = hasValidPaymentMethod({ context })
+
+                    if (!isExpired) {
                       return {
-                        message: "Subscription has no active phase",
+                        message: `Cannot end trial, dates are not due yet at ${trialEndAtDate}`,
                       }
                     }
 
-                    const trialEndAtDate = new Date(trialEndAt).toLocaleString()
+                    if (!isPaymentMethodValid) {
+                      return {
+                        message: `Cannot end trial, payment method is invalid at ${trialEndAtDate}`,
+                      }
+                    }
 
                     return {
-                      message: `Cannot end trial, dates are not due yet or payment method is invalid at ${trialEndAtDate}`,
+                      message: `Cannot end trial, dates are not due yet and payment method is invalid at ${trialEndAtDate}`,
                     }
                   },
                 }),
@@ -347,8 +354,9 @@ export class SubscriptionMachine {
           },
         },
         ending_trial: {
+          // ending trial is particular because we have to invoice the subscription depending on the whenToBill setting
           tags: ["subscription", "trialing"],
-          description: "Ending the trial invoice the subscription",
+          description: "Ending the trial, invoice the subscription",
           invoke: {
             id: "invoiceSubscription",
             src: "invoiceSubscription",
@@ -357,6 +365,7 @@ export class SubscriptionMachine {
               target: "invoiced",
               actions: [
                 assign({
+                  // update the subscription in the machine context from the event output
                   subscription: ({ event, context }) => {
                     if (event.output.subscription) {
                       return event.output.subscription
@@ -366,7 +375,7 @@ export class SubscriptionMachine {
                   },
                 }),
                 "logStateTransition",
-                "notifyCustomer",
+                "notifyCustomer", // for important actions like this, we notify the customer
               ],
             },
             onError: {
@@ -433,7 +442,7 @@ export class SubscriptionMachine {
           on: {
             RENEW: [
               {
-                guard: "currentPhaseNull",
+                guard: "isCurrentPhaseNull",
                 target: "error",
                 actions: assign({
                   error: () => ({
@@ -447,12 +456,12 @@ export class SubscriptionMachine {
                 actions: "logStateTransition",
               },
               {
-                guard: and(["canRenew", "isAutoRenewEnabled"]),
+                guard: and(["canRenew", "isAutoRenewEnabled"]), // only renew if the subscription can be renewed and auto renew is enabled
                 target: "renewing",
                 actions: "logStateTransition",
               },
               {
-                guard: not("isAutoRenewEnabled"),
+                guard: not("isAutoRenewEnabled"), // if auto renew is disabled, expire the subscription
                 target: "expired",
                 actions: "logStateTransition",
               },
@@ -462,8 +471,23 @@ export class SubscriptionMachine {
                   error: ({ context }) => {
                     const renewAt = new Date(context.subscription.renewAt).toLocaleString()
 
+                    const renew = canRenew({ context })
+                    const autoRenew = isAutoRenewEnabled({ context })
+
+                    if (!autoRenew) {
+                      return {
+                        message: `Cannot renew subscription, auto renew is disabled at ${renewAt}`,
+                      }
+                    }
+
+                    if (!renew) {
+                      return {
+                        message: `Cannot renew subscription, subscription is not due to be renewed at ${renewAt}`,
+                      }
+                    }
+
                     return {
-                      message: `Cannot renew subscription, dates are not due yet or payment method is invalid at ${renewAt}`,
+                      message: `Cannot renew subscription, dates are not due yet at ${renewAt} and auto renew is disabled`,
                     }
                   },
                 }),
@@ -473,7 +497,7 @@ export class SubscriptionMachine {
         },
         renewing: {
           tags: ["subscription", "renewing"],
-          description: "Renewing the subscription, update billing dates",
+          description: "Renewing the subscription, update billing dates for the next cycle",
           invoke: {
             id: "renewSubscription",
             src: "renewSubscription",
@@ -530,7 +554,7 @@ export class SubscriptionMachine {
               actions: [
                 "logStateTransition",
                 ({ event }) => {
-                  // notify the customer or admin
+                  // TODO: notify the customer or admin
                   console.info("Payment failed", event)
                 },
               ],
@@ -544,14 +568,14 @@ export class SubscriptionMachine {
               actions: [
                 "logStateTransition",
                 ({ event }) => {
-                  // notify the customer or admin
+                  // TODO: notify the customer or admin
                   console.info("Invoice failed", event)
                 },
               ],
             },
             INVOICE: [
               {
-                guard: "currentPhaseNull",
+                guard: "isCurrentPhaseNull",
                 target: "error",
                 actions: assign({
                   error: () => ({
@@ -575,6 +599,21 @@ export class SubscriptionMachine {
                   error: ({ context }) => {
                     const invoiceAt = new Date(context.subscription.invoiceAt).toLocaleString()
 
+                    const invoice = canInvoice({ context })
+                    const validPaymentMethod = hasValidPaymentMethod({ context })
+
+                    if (!invoice) {
+                      return {
+                        message: `Cannot invoice subscription, subscription is not due to be invoiced at ${invoiceAt}`,
+                      }
+                    }
+
+                    if (!validPaymentMethod) {
+                      return {
+                        message: `Cannot invoice subscription, payment method is invalid at ${invoiceAt}`,
+                      }
+                    }
+
                     return {
                       message: `Cannot invoice subscription, payment method is invalid or subscription is not due to be invoiced at ${invoiceAt}`,
                     }
@@ -597,6 +636,7 @@ export class SubscriptionMachine {
               actions: [
                 "logStateTransition",
                 ({ event }) => {
+                  // TODO: notify the customer or admin
                   console.info("Payment failed", event)
                 },
               ],
@@ -606,6 +646,7 @@ export class SubscriptionMachine {
               actions: [
                 "logStateTransition",
                 ({ event }) => {
+                  // TODO: notify the customer or admin
                   console.info("Invoice failed", event)
                 },
               ],
@@ -620,7 +661,7 @@ export class SubscriptionMachine {
             },
             INVOICE: [
               {
-                guard: "currentPhaseNull",
+                guard: "isCurrentPhaseNull",
                 target: "error",
                 actions: assign({
                   error: () => ({
@@ -643,6 +684,11 @@ export class SubscriptionMachine {
               },
             ],
           },
+        },
+        // TODO: implement the rest of the states as they become relevant
+        idle: {
+          tags: ["subscription", "loading"],
+          description: "Subscription is idle, meaning is waiting for an event to happen",
         },
         canceling: {
           tags: ["subscription", "ending"],

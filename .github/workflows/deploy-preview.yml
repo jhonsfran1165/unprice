@@ -78,7 +78,8 @@ jobs:
           pnpm migrate:custom
         env:
           VERCEL_ENV: preview
-          NODE_ENV: development
+          NODE_ENV: production
+          DRIZZLE_LOG: "true"
           DATABASE_URL: ${{ steps.create-branch.outputs.db_url_with_pooler }}
 
       - name: commit migrations
@@ -210,7 +211,7 @@ jobs:
           vercel-token: ${{ env.VERCEL_TOKEN }} # Required
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID }} #Required
-          # always prod because the auth proxy link has to be stable
+          # auth proxy is always prod because it doesn't change anything
           vercel-args: '--prod --env VERCEL_ENV=production --env NODE_ENV=production --build-env NODE_ENV=production'
           working-directory: ./
 

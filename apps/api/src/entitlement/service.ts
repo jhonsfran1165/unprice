@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers"
 import type { Analytics } from "@unprice/analytics"
+import type { Stats } from "@unprice/analytics/utils"
 import type { Database } from "@unprice/db"
 import {
   calculateFlatPricePlan,
@@ -10,8 +11,8 @@ import {
 } from "@unprice/db/validators"
 import { Err, type FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import type { Cache, CustomerEntitlementCache, SubcriptionCache } from "@unprice/services/cache"
-import type { CustomerService, DenyReason } from "@unprice/services/customers"
+import type { Cache, SubcriptionCache } from "@unprice/services/cache"
+import type { CustomerService } from "@unprice/services/customers"
 import { UnPriceCustomerError } from "@unprice/services/customers"
 import type { Metrics } from "@unprice/services/metrics"
 import type { DurableObjectProject } from "~/project/do"
@@ -38,9 +39,9 @@ export class EntitlementService {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   private readonly waitUntil: (promise: Promise<any>) => void
   private readonly customerService: CustomerService
-
-  // TODO: add in memory cache for overused entitlements
-  // https://github.com/unkeyed/unkey/blob/main/apps/api/src/pkg/ratelimit/do_client.ts#L31
+  private readonly stats: Stats
+  private readonly requestId: string
+  private hashCache: Map<string, string>
 
   constructor(opts: {
     namespace: DurableObjectNamespace<DurableObjectUsagelimiter>
@@ -50,11 +51,13 @@ export class EntitlementService {
     logger: Logger
     metrics: Metrics
     analytics: Analytics
+    hashCache: Map<string, string>
     cache: Cache
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     waitUntil: (promise: Promise<any>) => void
     db: Database
     customer: CustomerService
+    stats: Stats
   }) {
     this.namespace = opts.namespace
     this.logger = opts.logger
@@ -65,13 +68,26 @@ export class EntitlementService {
     this.waitUntil = opts.waitUntil
     this.customerService = opts.customer
     this.projectNamespace = opts.projectNamespace
+    this.stats = opts.stats
+    this.requestId = opts.requestId
+    this.hashCache = opts.hashCache
   }
 
-  // TODO: add jurisdiction to the stub
+  // for EU countries we have to keep the stub in the EU namespace
   private getStub(
     name: string,
     locationHint?: DurableObjectLocationHint
   ): DurableObjectStub<DurableObjectUsagelimiter> {
+    // jurisdiction is only available in production
+    if (this.stats.isEUCountry && env.NODE_ENV === "production") {
+      const euSubnamespace = this.namespace.jurisdiction("eu")
+      const euStub = euSubnamespace.get(euSubnamespace.idFromName(name), {
+        locationHint,
+      })
+
+      return euStub
+    }
+
     return this.namespace.get(this.namespace.idFromName(name), {
       locationHint,
     })
@@ -82,103 +98,23 @@ export class EntitlementService {
     return `${customerId}`
   }
 
-  private async getActiveEntitlementFromDO(
-    customerId: string,
-    featureSlug: string
-  ): Promise<Result<CustomerEntitlementCache | null, FetchError | UnPriceCustomerError>> {
-    const durableObject = this.getStub(this.getDurableObjectCustomerId(customerId))
-    const entitlement = await durableObject.getEntitlement(featureSlug)
-
-    if (!entitlement) {
-      return Ok(null)
-    }
-
-    const { id, entitlementId, ...rest } = entitlement
-
-    return Ok({
-      ...rest,
-      id: entitlementId,
-      active: entitlement.active === 1,
-      realtime: entitlement.realtime === 1,
-      isCustom: entitlement.isCustom === 1,
-      units: entitlement.units,
-      metadata: entitlement.metadata ? JSON.parse(entitlement.metadata) : null,
-    })
-  }
-
-  private async getEntitlementsFromDO(
-    customerId: string
-  ): Promise<Result<CustomerEntitlementCache[] | null, FetchError | UnPriceCustomerError>> {
-    const durableObject = this.getStub(this.getDurableObjectCustomerId(customerId))
-    const entitlements = await durableObject.getEntitlements()
-
-    if (!entitlements) {
-      return Ok(null)
-    }
-
-    return Ok(
-      entitlements.map((entitlement) => ({
-        ...entitlement,
-        id: entitlement.entitlementId,
-        active: entitlement.active === 1,
-        realtime: entitlement.realtime === 1,
-        isCustom: entitlement.isCustom === 1,
-        metadata: entitlement.metadata ? JSON.parse(entitlement.metadata) : null,
-      }))
-    )
-  }
-
-  public async revalidateEntitlement(
-    customerId: string,
-    featureSlug: string,
-    projectId: string,
-    now: number
-  ): Promise<Result<CustomerEntitlementCache | null, FetchError | UnPriceCustomerError>> {
-    const { err: entitlementErr, val: entitlement } =
-      await this.customerService.getActiveEntitlement(customerId, featureSlug, projectId, now, {
-        skipCache: true, // skip cache to force revalidation
-        withLastUsage: true, // get the last usage from analytics
-      })
-
-    if (entitlementErr) {
-      return Err(entitlementErr)
-    }
-
-    if (!entitlement) {
-      return Ok(null)
-    }
-
-    const durableObject = this.getStub(this.getDurableObjectCustomerId(customerId))
-
-    const { id, ...rest } = entitlement
-
-    const data = {
-      ...rest,
-      entitlementId: id,
-      metadata: JSON.stringify(rest.metadata),
-      isCustom: rest.isCustom ? 1 : 0,
-      active: rest.active ? 1 : 0,
-      realtime: rest.realtime ? 1 : 0,
-    }
-
-    await durableObject.setEntitlement(data)
-
-    return Ok({
-      ...rest,
-      id,
-      active: data.active === 1,
-      realtime: data.realtime === 1,
-      isCustom: data.isCustom === 1,
-    })
-  }
-
+  /*
+   * This is used to validate the subscription of the customer
+   * It's used to check if the customer has an active subscription
+   * @param customerId - The id of the customer
+   * @param projectId - The id of the project
+   * @returns The subscription of the customer
+   */
   private async validateSubscription(
     customerId: string,
-    projectId: string
+    projectId: string,
+    opts?: {
+      skipCache?: boolean
+    }
   ): Promise<Result<SubcriptionCache, FetchError | UnPriceCustomerError>> {
     const { err: subscriptionErr, val: subscription } =
       await this.customerService.getActiveSubscription(customerId, projectId, {
-        skipCache: false,
+        skipCache: opts?.skipCache ?? false,
       })
 
     if (subscriptionErr) {
@@ -203,227 +139,111 @@ export class EntitlementService {
   ): Promise<{
     success: boolean
     message: string
+    slugs?: string[]
   }> {
-    const { err: subscriptionErr } = await this.validateSubscription(customerId, projectId)
+    // get last subscription details before resetting the DO
+    const { err: subscriptionErr } = await this.validateSubscription(customerId, projectId, {
+      skipCache: true,
+    })
 
     if (subscriptionErr) {
-      return { success: false, message: subscriptionErr.message }
+      return { success: false, message: subscriptionErr.message, slugs: [] }
     }
 
     const durableObject = this.getStub(this.getDurableObjectCustomerId(customerId))
-
     const result = await durableObject.resetDO()
 
     if (!result.success) {
-      return { success: false, message: result.message }
+      return { success: false, message: result.message, slugs: result.slugs ?? [] }
     }
 
-    const keys = result.slugs?.map((slug) => `${customerId}:${slug}`)
+    // cache keys to remove
+    const keys = result.slugs?.map((slug) => `${projectId}:${customerId}:${slug}`)
 
     // delete the cache
     this.waitUntil(
       Promise.all([
         this.cache.customerEntitlement.remove(keys ?? []),
-        this.cache.customerSubscription.remove(customerId),
+        this.cache.customerSubscription.remove(`${projectId}:${customerId}`),
       ])
     )
 
-    return { success: true, message: "customer object deleted" }
+    return {
+      success: true,
+      message: "customer DO deleted",
+      slugs: result.slugs ?? [],
+    }
   }
 
-  // broadcast the event to the project
-  private async broadcastEvent(
-    projectId: string,
-    event: {
-      customerId: string
-      featureSlug: string
-      type: "can" | "reportUsage"
-      success: boolean
-      deniedReason?: DenyReason
-      usage?: number
-      limit?: number
-      notifyUsage?: boolean
-    }
-  ) {
-    const projectDurableObject = this.projectNamespace.get(
-      this.projectNamespace.idFromName(projectId)
-    )
-    projectDurableObject.broadcastEvents(event)
+  private getHashKey(data: CanRequest): string {
+    return `${data.customerId}:${data.featureSlug}:${data.projectId}`
   }
 
   public async can(data: CanRequest): Promise<CanResponse> {
-    const { err: subscriptionErr } = await this.validateSubscription(
-      data.customerId,
-      data.projectId
-    )
+    const key = this.getHashKey(data)
+    const cached = this.hashCache.get(key)
 
-    if (subscriptionErr) {
-      return {
-        success: false,
-        message: subscriptionErr.message,
-        deniedReason: subscriptionErr.code as CanResponse["deniedReason"],
-      }
+    // if we hit the same isolate we can return the cached result
+    // only for request that are denied.
+    // we don't use the normal swr cache here because it doesn't make sense to call
+    // the cache layer, the idea is to speed up the next request
+    if (cached && env.NODE_ENV === "production") {
+      const result = JSON.parse(cached) as CanResponse
+
+      // TODO: we could still send the verification event to the DO
+      return { ...result, cacheHit: true }
     }
 
     // after this point we can report the verification event
     const durableObject = this.getStub(this.getDurableObjectCustomerId(data.customerId))
 
+    // this is the most expensive call in terms of latency
     const result = await durableObject.can(data)
 
-    if (result.deniedReason === "ENTITLEMENT_NOT_FOUND") {
-      // revalidate the entitlement
-      const { err: revalidateErr } = await this.revalidateEntitlement(
-        data.customerId,
-        data.featureSlug,
-        data.projectId,
-        data.timestamp // active entitlement actual timestamp
-      )
-
-      if (revalidateErr) {
-        return {
-          success: false,
-          message: revalidateErr.message,
-          deniedReason: "ENTITLEMENT_NOT_FOUND",
-        }
-      }
-
-      // broadcast the event to the project with waitUntil
-      this.waitUntil(
-        this.broadcastEvent(data.projectId, {
-          customerId: data.customerId,
-          featureSlug: data.featureSlug,
-          type: "can",
-          success: result.success,
-          deniedReason: result.deniedReason,
-        })
-      )
-
-      // try again
-      return await durableObject.can(data)
+    // in extreme cases we hit in memory cache for the same isolate, speeding up the next request
+    if (!result.success && result.deniedReason) {
+      this.hashCache.set(this.getHashKey(data), JSON.stringify(result))
     }
-
-    // broadcast the event to the project with waitUntil
-    this.waitUntil(
-      this.broadcastEvent(data.projectId, {
-        customerId: data.customerId,
-        featureSlug: data.featureSlug,
-        type: "can",
-        success: result.success,
-        deniedReason: result.deniedReason,
-      })
-    )
 
     return result
   }
 
   public async reportUsage(data: ReportUsageRequest): Promise<ReportUsageResponse> {
-    try {
-      const { err: subscriptionErr } = await this.validateSubscription(
-        data.customerId,
-        data.projectId
-      )
+    // in dev we use the idempotence key and timestamp to deduplicate reuse the same key for the same request
+    const idempotentKey =
+      env.NODE_ENV === "production"
+        ? `${data.idempotenceKey}`
+        : `${data.idempotenceKey}:${data.timestamp}`
 
-      if (subscriptionErr) {
-        return { success: false, message: subscriptionErr.message }
-      }
+    const cacheKey = `${data.customerId}:${data.featureSlug}:${data.projectId}:${idempotentKey}`
+    // Fast path: check if the event has already been sent to the DO
+    const { val: sent } = await this.cache.idempotentRequestUsageByHash.get(cacheKey)
 
-      // in dev we use the idempotence key and timestamp to deduplicate reuse the same key for the same request
-      const idempotentKey =
-        env.NODE_ENV === "production"
-          ? `${data.idempotenceKey}`
-          : `${data.idempotenceKey}:${data.timestamp}`
+    // if the usage is already sent, return the result
+    if (sent) {
+      return { ...sent, cacheHit: true }
+    }
 
-      // Fast path: check if the event has already been sent to the DO
-      const { val: sent } = await this.cache.idempotentRequestUsageByHash.get(idempotentKey)
-
-      // if the usage is already sent, return the result
-      if (sent) {
-        return sent
-      }
-
-      const durableObject = this.getStub(this.getDurableObjectCustomerId(data.customerId))
-      const result = await durableObject.reportUsage(data)
-
-      if (result.message === "ENTITLEMENT_NOT_FOUND") {
-        // revalidate the entitlement
-        const { err: revalidateErr } = await this.revalidateEntitlement(
-          data.customerId,
-          data.featureSlug,
-          data.projectId,
-          data.timestamp // active entitlement actual timestamp
-        )
-
-        if (revalidateErr) {
-          return { success: false, message: revalidateErr.message }
-        }
-
-        // try again
-        const result = await durableObject.reportUsage(data)
-
-        const response = {
-          success: result.success,
-          message: result.message,
-          limit: Number(result.limit),
-          usage: Number(result.usage),
-          notifyUsage: result.notifyUsage,
-        }
-
-        this.waitUntil(
-          // cache the result for the next time
-          // update the cache with the new usage so we can check limit in the next request
-          // without calling the DO again
-          Promise.all([
-            this.cache.idempotentRequestUsageByHash.set(idempotentKey, response),
-            this.broadcastEvent(data.projectId, {
-              customerId: data.customerId,
-              featureSlug: data.featureSlug,
-              type: "reportUsage",
-              success: result.success,
-              usage: Number(data.usage),
-              limit: Number(result.limit),
-              notifyUsage: result.notifyUsage,
-            }),
-          ])
-        )
-
-        return response
-      }
-
-      const response = {
+    const durableObject = this.getStub(this.getDurableObjectCustomerId(data.customerId))
+    const result = await durableObject.reportUsage(data).then((result) => {
+      return {
         success: result.success,
         message: result.message,
         limit: Number(result.limit),
         usage: Number(result.usage),
         notifyUsage: result.notifyUsage,
+        deniedReason: result.deniedReason,
       }
+    })
 
-      this.waitUntil(
-        // cache the result for the next time
-        // update the cache with the new usage so we can check limit in the next request
-        // without calling the DO again
-        Promise.all([
-          this.cache.idempotentRequestUsageByHash.set(idempotentKey, response),
-          this.broadcastEvent(data.projectId, {
-            customerId: data.customerId,
-            featureSlug: data.featureSlug,
-            type: "reportUsage",
-            success: result.success,
-            usage: Number(result.usage),
-            limit: Number(result.limit),
-            notifyUsage: result.notifyUsage,
-          }),
-        ])
-      )
+    this.waitUntil(
+      // cache the result for the next time
+      // update the cache with the new usage so we can check limit in the next request
+      // without calling the DO again
+      Promise.all([this.cache.idempotentRequestUsageByHash.set(cacheKey, result)])
+    )
 
-      return response
-    } catch (e) {
-      console.error("usagelimit failed", {
-        customerId: data.customerId,
-        error: (e as Error).message,
-      })
-      return { success: false, message: "usage limit failed" }
-    } finally {
-    }
+    return result
   }
 
   public async getEntitlements(req: GetEntitlementsRequest): Promise<GetEntitlementsResponse> {
@@ -446,7 +266,7 @@ export class EntitlementService {
       throw entitlementsErr
     }
 
-    if (!entitlements) {
+    if (!entitlements || entitlements.length === 0) {
       throw new UnPriceCustomerError({
         code: "CUSTOMER_ENTITLEMENTS_NOT_FOUND",
         message: "customer has no entitlements",
@@ -454,7 +274,8 @@ export class EntitlementService {
     }
 
     // get the entitlements from the DO
-    const { val: entitlementsDO } = await this.getEntitlementsFromDO(customerId)
+    const durableObject = this.getStub(this.getDurableObjectCustomerId(customerId))
+    const entitlementsDO = await durableObject.getEntitlements()
 
     if (entitlementsDO) {
       // set the usage from the DO to the entitlements
@@ -519,7 +340,8 @@ export class EntitlementService {
     }
 
     // get the entitlements from the DO
-    const { val: entitlementsDO } = await this.getEntitlementsFromDO(customerId)
+    const durableObject = this.getStub(this.getDurableObjectCustomerId(customerId))
+    const entitlementsDO = await durableObject.getEntitlements()
 
     if (entitlementsDO) {
       // set the usage from the DO to the entitlements
@@ -545,7 +367,7 @@ export class EntitlementService {
     const calculatedBillingCycle = configureBillingCycleSubscription({
       currentCycleStartAt: subscription.currentCycleStartAt,
       billingConfig: phase.planVersion.billingConfig,
-      trialDays: phase.trialDays,
+      trialUnits: phase.trialDays,
       alignStartToDay: true,
       alignEndToDay: true,
       endAt: phase.endAt ?? undefined,

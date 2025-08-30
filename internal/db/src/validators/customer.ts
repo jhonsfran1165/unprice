@@ -244,19 +244,15 @@ export const customerEntitlementExtendedSchema = customerEntitlementSchema.exten
   featureType: typeFeatureSchema,
   aggregationMethod: aggregationMethodSchema,
   featureSlug: z.string(),
-})
-
-export const customerEntitlementsSchema = customerEntitlementExtendedSchema.pick({
-  featureSlug: true,
-  validFrom: true,
-  validTo: true,
-  featureType: true,
-  usage: true,
-  limit: true,
-  featurePlanVersionId: true,
-  aggregationMethod: true,
-  units: true,
-  id: true,
+  customer: z.object({
+    active: z.boolean(),
+  }),
+  subscription: z.object({
+    active: z.boolean(),
+  }),
+  project: z.object({
+    enabled: z.boolean(),
+  }),
 })
 
 export const customerPaymentMethodSchema = z.object({
@@ -277,5 +273,4 @@ export type CustomerSetUp = z.infer<typeof customerSetUpSchema>
 export type CustomerEntitlement = z.infer<typeof customerEntitlementSchema>
 export type InsertCustomerEntitlement = z.infer<typeof customerEntitlementInsertSchema>
 export type CustomerEntitlementExtended = z.infer<typeof customerEntitlementExtendedSchema>
-export type CustomerEntitlementsExtended = z.infer<typeof customerEntitlementsSchema>
 export type CustomerPaymentMethod = z.infer<typeof customerPaymentMethodSchema>

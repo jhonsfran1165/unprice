@@ -72,7 +72,6 @@ export default function Loading() {
             "12rem",
             "8rem",
           ]}
-          shrinkZero
         />
       </div>
     </DashboardShell>

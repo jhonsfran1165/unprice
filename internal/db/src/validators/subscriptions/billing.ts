@@ -2,6 +2,15 @@ import { addDays, addMinutes, addMonths, addYears, differenceInSeconds, endOfMon
 import type { BillingConfig } from "../../validators"
 import type { BillingAnchor, BillingInterval } from "../shared"
 
+// map of the interval to the add function
+export const intervalMapFunction = {
+  minute: addMinutes,
+  day: addDays,
+  month: addMonths,
+  year: addYears,
+  onetime: (d: Date, _: number) => d,
+}
+
 interface BillingCycleResult {
   cycleStartMs: number // UTC timestamp in milliseconds
   cycleEndMs: number // UTC timestamp in milliseconds
@@ -99,7 +108,7 @@ export function getBillingCycleMessage(billingConfig: BillingConfig): {
 }
 
 export function configureBillingCycleSubscription({
-  trialDays = 0,
+  trialUnits = 0,
   currentCycleStartAt,
   billingConfig,
   endAt,
@@ -107,7 +116,7 @@ export function configureBillingCycleSubscription({
   alignEndToDay = true,
   alignToCalendar = true,
 }: {
-  trialDays?: number
+  trialUnits?: number
   currentCycleStartAt: number
   billingConfig: BillingConfig
   endAt?: number
@@ -116,8 +125,14 @@ export function configureBillingCycleSubscription({
   alignToCalendar?: boolean
 }): BillingCycleResult {
   // Handle trial period
-  if (trialDays > 0) {
-    const trialEndsAtMs = currentCycleStartAt + trialDays * 24 * 60 * 60 * 1000 - 1
+  if (trialUnits > 0) {
+    // handle trial for minute based intervals
+    const millisecondsInCycle =
+      billingConfig.billingInterval === "minute" ? 60 * 1000 : 24 * 60 * 60 * 1000
+    const millisecondsInTrial = trialUnits * millisecondsInCycle
+    // add to the start date, the trial days milliseconds and subtract 1 millisecond to avoid overlapping
+    const trialEndsAtMs = currentCycleStartAt + millisecondsInTrial - 1 // -1 comes from the millisecondsInCycle we are counting the whole day
+    // end date happens when there is a specific end date for the subscription
     const effectiveEndMs = endAt ? Math.min(trialEndsAtMs, endAt) : trialEndsAtMs
 
     if (currentCycleStartAt > effectiveEndMs) {
@@ -154,9 +169,9 @@ export function configureBillingCycleSubscription({
     return {
       cycleStartMs: interval.start,
       // onetime is forever
-      cycleEndMs: new Date("9999-12-31T23:59:59.999Z").getTime(),
+      cycleEndMs: new Date("9999-12-31T23:59:59.999Z").getTime(), // max date in the future
       secondsInCycle: Number.POSITIVE_INFINITY,
-      prorationFactor: 1,
+      prorationFactor: 1, // proration factor is 1 because the subscription is onetime
       billableSeconds: Number.POSITIVE_INFINITY,
     }
   }
@@ -172,7 +187,8 @@ export function configureBillingCycleSubscription({
 
 function validateAnchor(interval: BillingInterval, anchor: BillingAnchor): number {
   if (anchor === "dayOfCreation") {
-    return new Date().getUTCDate()
+    // INFO: this will return the date in the UTC timezone
+    return new Date().getUTCDate() // get the date the subscription was created
   }
 
   if (interval === "month") {
@@ -183,6 +199,7 @@ function validateAnchor(interval: BillingInterval, anchor: BillingAnchor): numbe
     // For years, anchor should be 1-12, if greater use 12
     return Math.min(Math.max(1, anchor), 12)
   }
+
   return anchor
 }
 
@@ -231,6 +248,8 @@ function alignPeriodBoundary(date: Date, alignToDay: boolean, isEnd: boolean): D
   return result
 }
 
+// calculate the next interval for a subscription
+// given its billing config and the current cycle start date
 export function calculateNextInterval(
   startDate: number,
   billingConfig: BillingConfig,
@@ -253,17 +272,10 @@ export function calculateNextInterval(
   const date = new Date(startDate)
   let endDate: Date
 
-  const intervalMap = {
-    minute: addMinutes,
-    day: addDays,
-    month: addMonths,
-    year: addYears,
-    onetime: (d: Date) => d,
-  }
-
   const { billingInterval, billingIntervalCount, billingAnchor } = billingConfig
 
-  const addFunction = intervalMap[billingInterval]
+  const addFunction = intervalMapFunction[billingInterval]
+
   if (!addFunction) {
     throw new Error(`Unsupported interval: ${billingInterval}`)
   }

@@ -18,7 +18,7 @@ import type { Logger } from "@unprice/logging"
 import { env } from "../../env"
 import { PaymentProviderService } from "../payment-provider"
 
-import { db } from "@unprice/db"
+import { db } from "../utils/db"
 import { UnPriceSubscriptionError } from "./errors"
 
 interface ValidatePaymentMethodResult {
@@ -64,7 +64,12 @@ export async function validatePaymentMethod({
   })
 
   if (!config) {
-    throw new Error("Payment provider config not found or not active")
+    logger.error(
+      `Payment provider config for this project ${customer.projectId} and payment provider ${paymentProvider} not found or not active`
+    )
+    throw new Error(
+      `Payment provider config for this project ${customer.projectId} and payment provider ${paymentProvider} not found or not active`
+    )
   }
 
   // Decrypt provider key
@@ -86,10 +91,16 @@ export async function validatePaymentMethod({
     await paymentProviderService.getDefaultPaymentMethodId()
 
   if (paymentMethodErr) {
+    logger.error(
+      `Payment validation failed: ${paymentMethodErr.message} for project ${customer.projectId} and payment provider ${paymentProvider}`
+    )
     throw new Error(`Payment validation failed: ${paymentMethodErr.message}`)
   }
 
   if (requiredPaymentMethod && !paymentMethodId?.paymentMethodId) {
+    logger.error(
+      `Required payment method not found for project ${customer.projectId} and payment provider ${paymentProvider}`
+    )
     throw new Error("Required payment method not found")
   }
 
@@ -320,6 +331,15 @@ export async function finalizeInvoice(payload: {
   // Calculate final invoice totals
   paymentProviderInvoiceData.status = "unpaid"
 
+  const billingPeriod =
+    env.NODE_ENV === "development"
+      ? `${new Date(invoice.cycleStartAt).toISOString()} to ${new Date(
+          invoice.cycleEndAt
+        ).toISOString()}`
+      : `${new Date(invoice.cycleStartAt).toISOString().split("T")[0]} to ${
+          new Date(invoice.cycleEndAt).toISOString().split("T")[0]
+        }`
+
   // Create new invoice
   const paymentProviderInvoice = await paymentProviderService.createInvoice({
     currency: invoice.currency,
@@ -331,9 +351,7 @@ export async function finalizeInvoice(payload: {
     customFields: [
       {
         name: "Billing Period",
-        value: `${new Date(invoice.cycleStartAt).toISOString().split("T")[0]} to ${
-          new Date(invoice.cycleEndAt).toISOString().split("T")[0]
-        }`,
+        value: billingPeriod,
       },
     ],
   })

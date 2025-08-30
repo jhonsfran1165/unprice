@@ -32,6 +32,7 @@ export class Analytics {
         ? new Tinybird({ token: opts.tinybirdToken, baseUrl: opts.tinybirdUrl })
         : new NoopTinybird()
 
+    // TODO: implement delete endpoint https://www.tinybird.co/docs/api-reference/datasource-api#delete--v0-datasources-(.+)
     this.writeClient =
       opts.tinybirdProxy && opts.emit
         ? new Tinybird({
@@ -263,6 +264,7 @@ export class Analytics {
       parameters: z.object({
         intervalDays: z.number().optional(),
         projectId: z.string().optional(),
+        timezone: z.string().optional(),
       }),
       data: z.object({
         date: z.coerce.date(),
@@ -312,6 +314,7 @@ export class Analytics {
       parameters: z.object({
         intervalDays: z.number().optional(),
         projectId: z.string(),
+        timezone: z.string().optional(),
         region: z.string().optional(),
         start: z.number().optional(),
         end: z.number().optional(),

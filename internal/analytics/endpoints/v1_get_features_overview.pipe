@@ -2,29 +2,23 @@ TOKEN "web-apps" READ
 
 TAGS "verifications,usage"
 
-
 NODE day_intervals
 SQL >
-
     %
     WITH
         toStartOfDay(
-            toDateTime64(today() - {{ Int32(intervalDays) }}, 1),
-            {{ String(timezone, 'UTC') }}
+            toTimeZone(toDateTime64(now() - INTERVAL {{ Int32(intervalDays) }} DAY, 3), {{ String(timezone, 'UTC') }})
         ) AS start,
         toStartOfDay(
-            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 1),
-            {{ String(timezone, 'UTC') }}
+            toTimeZone(toDateTime64(now() + INTERVAL 1 DAY, 3), {{ String(timezone, 'UTC') }})
         ) AS end
     SELECT
         arrayJoin(
             arrayMap(
-                x -> toDateTime64(toStartOfDay(toDateTime64(x, 1), {{ String(timezone, 'UTC') }}), 1),
-                range(toUInt32(start), toUInt32(end + 86400),
-                86400
+                x -> toStartOfDay(toTimeZone(toDateTime64(x, 3), {{ String(timezone, 'UTC') }})),
+                range(toUInt32(toTimeZone(start, 'UTC')), toUInt32(toTimeZone(end, 'UTC')) + 86400, 86400)
             )
-        )
-    ) as interval
+        ) as interval
 
 
 NODE hour_intervals
@@ -32,18 +26,18 @@ SQL >
     %
     WITH
         toStartOfHour(
-            toDateTime64(timestampAdd(today(), INTERVAL - {{ Int32(intervalDays, 1) }} DAY), 1),
-            {{ String(timezone, 'UTC') }}
+            toTimeZone(toDateTime64(now() - INTERVAL {{ Int32(intervalDays, 1) }} DAY, 3), {{ String(timezone, 'UTC') }})
         ) AS start,
         toStartOfHour(
-            toDateTime64(timestampAdd(today(), INTERVAL + 1 DAY), 1),
-            {{ String(timezone, 'UTC') }}
+            toTimeZone(toDateTime64(now() + INTERVAL 1 DAY, 3), {{ String(timezone, 'UTC') }})
         ) AS end
     SELECT
         arrayJoin(
-            arrayMap(x -> toDateTime64(x, 1), range(toUInt32(start), toUInt32(end + 3600), 3600)
-        )
-    ) as interval
+            arrayMap(
+                x -> toStartOfHour(toTimeZone(toDateTime64(x, 3), {{ String(timezone, 'UTC') }})),
+                range(toUInt32(toTimeZone(start, 'UTC')), toUInt32(toTimeZone(end, 'UTC')) + 3600, 3600)
+            )
+        ) as interval
 
 
 NODE feature_verifications_node
@@ -51,21 +45,22 @@ SQL >
     %
     SELECT
         {% if Int32(intervalDays) == 1 %}
-            toStartOfHour(date, {{ String(timezone, 'UTC') }}) as interval,
+            toStartOfHour(toTimeZone(date, {{ String(timezone, 'UTC') }})) as interval,
         {% else %}
-            toStartOfDay(date, {{ String(timezone, 'UTC') }}) as interval,
+            toStartOfDay(toTimeZone(date, {{ String(timezone, 'UTC') }})) as interval,
         {% end %}
         projectId,
         countMerge(count) AS count,
         quantileTDigestMerge(0.99)(p99_latency) AS p99_latency
     FROM unprice_feature_verifications_hourly_mv
     WHERE
-        1 = 1
-        {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
+        {% if defined(projectId) %}
+            projectId = {{ String(projectId) }} AND
+        {% end %}
         {% if defined(intervalDays) %}
-            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
+            date >= toStartOfDay(toTimeZone(now(), {{ String(timezone, 'UTC') }}) - INTERVAL {{ Int32(intervalDays) }} DAY)
         {% else %}
-            AND date >= toStartOfDay(today() - 7)
+            date >= toStartOfDay(toTimeZone(now(), {{ String(timezone, 'UTC') }}) - INTERVAL 7 DAY)
         {% end %}
     GROUP BY interval, projectId
 
@@ -75,21 +70,22 @@ SQL >
     %
     SELECT
         {% if Int32(intervalDays) == 1 %}
-            toStartOfHour(date, {{ String(timezone, 'UTC') }}) as interval,
+            toStartOfHour(toTimeZone(date, {{ String(timezone, 'UTC') }})) as interval,
         {% else %}
-            toStartOfDay(date, {{ String(timezone, 'UTC') }}) as interval,
+            toStartOfDay(toTimeZone(date, {{ String(timezone, 'UTC') }})) as interval,
         {% end %}
         projectId,
         countMerge(count) AS count,
         sumMerge(sum) AS sum
     FROM unprice_feature_usage_hourly_mv
     WHERE
-        1 = 1
-        {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
+        {% if defined(projectId) %}
+            projectId = {{ String(projectId) }} AND
+        {% end %}
         {% if defined(intervalDays) %}
-            AND date >= toStartOfDay(today() - {{ Int32(intervalDays) }})
+            date >= toStartOfDay(toTimeZone(now(), {{ String(timezone, 'UTC') }}) - INTERVAL {{ Int32(intervalDays) }} DAY)
         {% else %}
-            AND date >= toStartOfDay(today() - 7)
+            date >= toStartOfDay(toTimeZone(now(), {{ String(timezone, 'UTC') }}) - INTERVAL 7 DAY)
         {% end %}
     GROUP BY interval, projectId
 
@@ -98,18 +94,22 @@ SQL >
     %
     SELECT
         verifications.interval AS interval,
-        verifications.projectId AS project_id,
-        verifications.p99_latency AS latency,
-        verifications.count AS verifications,
-        usage.sum AS usage
+        coalesce(verifications.projectId, usage.projectId) AS project_id,
+        coalesce(verifications.p99_latency, 0) AS latency,
+        coalesce(verifications.count, 0) AS verifications,
+        coalesce(usage.sum, 0) AS usage
     FROM feature_verifications_node as verifications
-    JOIN feature_usage_total_node as usage ON verifications.interval = usage.interval AND verifications.projectId = usage.projectId
+    LEFT JOIN feature_usage_total_node as usage ON verifications.interval = usage.interval AND verifications.projectId = usage.projectId
 
 
 NODE timeserie_feature_overview
 SQL >
     %
-    SELECT formatDateTime(interval, '%FT%T.000%z') as date, latency, verifications, usage
+    SELECT
+        formatDateTime(interval, '%FT%T.000%z') as date,
+        latency,
+        verifications,
+        usage
     FROM
         {% if Int32(intervalDays) == 1 %} hour_intervals
         {% else %} day_intervals

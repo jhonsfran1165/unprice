@@ -1,4 +1,4 @@
-import { prepareInterval } from "@unprice/analytics"
+import { prepareInterval, preparePage } from "@unprice/analytics"
 import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
 import { IntervalFilter } from "~/components/analytics/interval-filter"
@@ -24,41 +24,40 @@ export default async function DashboardPages(props: {
   const pageFilter = pageParams(props.searchParams)
 
   const interval = prepareInterval(intervalFilter.intervalFilter)
+  const page = preparePage(pageFilter.pageId)
 
-  if (pageFilter.pageId !== "") {
-    batchPrefetch([
-      trpc.analytics.getPagesOverview.queryOptions(
-        {
-          intervalDays: interval.intervalDays,
-          pageId: pageFilter.pageId,
-        },
-        {
-          enabled: pageFilter.pageId !== "",
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      ),
-      trpc.analytics.getCountryVisits.queryOptions(
-        {
-          intervalDays: interval.intervalDays,
-          page_id: pageFilter.pageId,
-        },
-        {
-          enabled: pageFilter.pageId !== "",
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      ),
-      trpc.analytics.getBrowserVisits.queryOptions(
-        {
-          intervalDays: interval.intervalDays,
-          page_id: pageFilter.pageId,
-        },
-        {
-          enabled: pageFilter.pageId !== "",
-          staleTime: ANALYTICS_STALE_TIME,
-        }
-      ),
-    ])
-  }
+  batchPrefetch([
+    trpc.analytics.getPagesOverview.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+        pageId: page.pageId,
+      },
+      {
+        staleTime: ANALYTICS_STALE_TIME,
+        enabled: page.isSelected,
+      }
+    ),
+    trpc.analytics.getCountryVisits.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+        page_id: page.pageId,
+      },
+      {
+        staleTime: ANALYTICS_STALE_TIME,
+        enabled: page.isSelected,
+      }
+    ),
+    trpc.analytics.getBrowserVisits.queryOptions(
+      {
+        intervalDays: interval.intervalDays,
+        page_id: page.pageId,
+      },
+      {
+        staleTime: ANALYTICS_STALE_TIME,
+        enabled: page.isSelected,
+      }
+    ),
+  ])
 
   return (
     <DashboardShell>
@@ -70,28 +69,16 @@ export default async function DashboardPages(props: {
         </div>
       </div>
       <HydrateClient>
-        {pageFilter.pageId !== "" ? (
-          <Suspense fallback={<PageVisitsSkeleton isLoading={true} />}>
-            <PageVisits />
-          </Suspense>
-        ) : (
-          <PageVisitsSkeleton isLoading={false} />
-        )}
+        <Suspense fallback={<PageVisitsSkeleton isLoading={true} />}>
+          <PageVisits />
+        </Suspense>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {pageFilter.pageId !== "" ? (
-            <Suspense fallback={<BrowsersSkeleton isLoading={true} />}>
-              <Browsers />
-            </Suspense>
-          ) : (
-            <BrowsersSkeleton isLoading={false} />
-          )}
-          {pageFilter.pageId !== "" ? (
-            <Suspense fallback={<CountriesSkeleton isLoading={true} />}>
-              <Countries />
-            </Suspense>
-          ) : (
-            <CountriesSkeleton isLoading={false} />
-          )}
+          <Suspense fallback={<BrowsersSkeleton isLoading={true} />}>
+            <Browsers />
+          </Suspense>
+          <Suspense fallback={<CountriesSkeleton isLoading={true} />}>
+            <Countries />
+          </Suspense>
         </div>
       </HydrateClient>
     </DashboardShell>

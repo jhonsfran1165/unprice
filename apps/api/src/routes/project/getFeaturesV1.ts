@@ -36,9 +36,6 @@ export const registerGetFeaturesV1 = (app: App) =>
   app.openapi(route, async (c) => {
     const { project } = c.get("services")
 
-    // start a new timer
-    startTime(c, "keyAuth")
-
     // validate the request
     const key = await keyAuth(c)
 
@@ -48,9 +45,6 @@ export const registerGetFeaturesV1 = (app: App) =>
         message: "Invalid API key",
       })
     }
-
-    // end the timer
-    endTime(c, "keyAuth")
 
     // start a new timer
     startTime(c, "getFeatures")

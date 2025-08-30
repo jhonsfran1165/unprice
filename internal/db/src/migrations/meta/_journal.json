@@ -127,6 +127,34 @@
       "when": 1754307967033,
       "tag": "0017_far_the_fallen",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1756286693719,
+      "tag": "0018_green_smiling_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1756379119296,
+      "tag": "0019_amazing_norman_osborn",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1756385360081,
+      "tag": "0020_absurd_moira_mactaggert",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1756413313035,
+      "tag": "0021_powerful_rattler",
+      "breakpoints": true
     }
   ]
 }

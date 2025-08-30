@@ -96,17 +96,6 @@ export const customerEntitlements = pgTableProject(
     type: typeFeatureVersionEnum("type").notNull().default("feature"),
     // ****************** end defaults from plan version features ******************
 
-    // // Phase dates when the entitlement starts and ends
-    // startAt: bigint("start_at", { mode: "number" }).notNull(),
-    // endAt: bigint("end_at", { mode: "number" }),
-
-    // // current billing cycle start and end dates used to revalidate and reset the usage
-    // currentCycleStartAt: bigint("current_cycle_start_at", { mode: "number" }).notNull(),
-    // currentCycleEndAt: bigint("current_cycle_end_at", { mode: "number" }).notNull(),
-    // // days of grace period to allow the customer to use the feature after the end of the cycle
-    // // this is used to avoid overage charges also give us a windows to revalidate the entitlement when the subscription renew is triggered
-    // gracePeriod: integer("grace_period").notNull().default(1),
-
     // normally represent the current billing cycle start and end dates
     // but for custom entitlements can be different, for instance if the customer has a custom entitlement for 1000 users
     // for 1 year.
@@ -136,6 +125,9 @@ export const customerEntitlements = pgTableProject(
     }>(),
   },
   (table) => ({
+    // create index to improve performace in date range queries
+    validFrom: index("valid_from_index").on(table.validFrom),
+    validTo: index("valid_to_index").on(table.validTo),
     primary: primaryKey({
       columns: [table.id, table.projectId],
       name: "pk_customer_entitlement",

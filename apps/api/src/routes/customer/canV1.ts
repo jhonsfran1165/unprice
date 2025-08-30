@@ -30,10 +30,10 @@ export const route = createRoute({
           description: "The feature slug",
           example: "tokens",
         }),
-        timestamp: z.number().optional().openapi({
-          description: "The timestamp of the request",
-          example: 1717852800,
-        }),
+        // timestamp: z.number().optional().openapi({
+        //   description: "The timestamp of the request",
+        //   example: 1717852800,
+        // }),
         metadata: z
           .record(z.string(), z.string())
           .openapi({
@@ -63,20 +63,14 @@ export type CanResponse = z.infer<
 
 export const registerCanV1 = (app: App) =>
   app.openapi(route, async (c) => {
-    const { customerId, featureSlug, metadata, timestamp } = c.req.valid("json")
+    const { customerId, featureSlug, metadata } = c.req.valid("json")
     const { entitlement, customer, logger } = c.get("services")
     const stats = c.get("stats")
     const requestId = c.get("requestId")
     const performanceStart = c.get("performanceStart")
 
-    // start a new timer
-    startTime(c, "keyAuth")
-
     // validate the request
     const key = await keyAuth(c)
-
-    // end the timer
-    endTime(c, "keyAuth")
 
     // start a new timer
     startTime(c, "can")
@@ -87,10 +81,10 @@ export const registerCanV1 = (app: App) =>
       featureSlug,
       projectId: key.projectId,
       requestId,
-      performanceStart: performanceStart,
+      performanceStart,
       // short ttl for dev
       secondsToLive: c.env.NODE_ENV === "development" ? 5 : undefined,
-      timestamp: timestamp ?? Date.now(),
+      timestamp: Date.now(), // for now we report the usage at the time of the request
       metadata: {
         ...metadata,
         ip: stats.ip,

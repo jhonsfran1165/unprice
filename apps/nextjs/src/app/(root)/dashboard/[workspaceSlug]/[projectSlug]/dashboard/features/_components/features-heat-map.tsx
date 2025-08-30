@@ -19,6 +19,7 @@ import { BarChart, HelpCircle } from "lucide-react"
 import { CodeApiSheet } from "~/components/code-api-sheet"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useIntervalFilter } from "~/hooks/use-filter"
+import { useQueryInvalidation } from "~/hooks/use-query-invalidation"
 import { useTRPC } from "~/trpc/client"
 import { ANALYTICS_STALE_TIME } from "~/trpc/shared"
 
@@ -43,6 +44,8 @@ export const FeatureUsageHeatmapSkeleton = ({
   isLoading,
   error,
 }: { isLoading?: boolean; error?: string }) => {
+  const [intervalFilter] = useIntervalFilter()
+
   return (
     <EmptyPlaceholder isLoading={isLoading}>
       <EmptyPlaceholder.Icon>
@@ -52,7 +55,7 @@ export const FeatureUsageHeatmapSkeleton = ({
         {error ? "Ups, something went wrong" : "No Data"}
       </EmptyPlaceholder.Title>
       <EmptyPlaceholder.Description>
-        {error ? error : "There is no data available. Please try again later."}
+        {error ? error : `There is no data available for the ${intervalFilter.label}.`}
       </EmptyPlaceholder.Description>
       <EmptyPlaceholder.Action>
         <CodeApiSheet defaultMethod="verifyFeature">
@@ -68,18 +71,39 @@ export const FeatureUsageHeatmapSkeleton = ({
 
 export function FeatureUsageHeatmapContent() {
   const trpc = useTRPC()
-  const [{ intervalDays }] = useIntervalFilter()
+  const [intervalFilter] = useIntervalFilter()
 
-  const { data: featureUsageEvents, isLoading } = useSuspenseQuery(
+  const {
+    data: featureUsageEvents,
+    isLoading,
+    dataUpdatedAt,
+    isFetching,
+  } = useSuspenseQuery(
     trpc.analytics.getFeatureHeatmap.queryOptions(
       {
-        intervalDays: intervalDays,
+        intervalDays: intervalFilter.intervalDays,
       },
       {
         staleTime: ANALYTICS_STALE_TIME,
       }
     )
   )
+
+  // invalidate the query when the interval changes
+  useQueryInvalidation({
+    paramKey: intervalFilter.intervalDays,
+    dataUpdatedAt,
+    isFetching,
+    getQueryKey: (param) => [
+      ["analytics", "getFeatureHeatmap"],
+      {
+        input: {
+          intervalDays: param,
+        },
+        type: "query",
+      },
+    ],
+  })
 
   // Get unique plans and features
   const plans = [...new Set(featureUsageEvents.data.map((event) => event.plan_slug))]

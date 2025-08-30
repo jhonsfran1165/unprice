@@ -89,6 +89,6 @@ export function formatMoney(amount: string, currencyCode = "USD") {
     style: "currency",
     currency: currencyCode,
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 3,
   }).format(Number.parseFloat(amount))
 }

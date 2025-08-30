@@ -35,8 +35,8 @@ export default eventHandler((event) =>
         profile: (p) => ({
           id: p.id.toString(),
           email: p.email,
-          name: p.name,
           image: p.image,
+          name: p.name,
         }),
       }),
     ],

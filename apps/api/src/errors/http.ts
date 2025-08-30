@@ -1,4 +1,6 @@
 import { z } from "@hono/zod-openapi"
+import { FetchError } from "@unprice/error"
+import { UnPriceCustomerError } from "@unprice/services/customers"
 import type { Context } from "hono"
 import { HTTPException } from "hono/http-exception"
 import type { ContentfulStatusCode, StatusCode } from "hono/utils/http-status"
@@ -200,6 +202,34 @@ export function handleError(err: Error, c: Context<HonoEnv>): Response {
         },
       },
       { status: err.status }
+    )
+  }
+
+  if (err instanceof FetchError) {
+    return c.json<z.infer<typeof ErrorSchema>>(
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: err.message,
+          docs: "https://docs.unprice.dev/api-reference/errors/code/INTERNAL_SERVER_ERROR",
+          requestId: c.get("requestId"),
+        },
+      },
+      { status: 500 }
+    )
+  }
+
+  if (err instanceof UnPriceCustomerError) {
+    return c.json<z.infer<typeof ErrorSchema>>(
+      {
+        error: {
+          code: "BAD_REQUEST",
+          message: err.message,
+          docs: "https://docs.unprice.dev/api-reference/errors/code/BAD_REQUEST",
+          requestId: c.get("requestId"),
+        },
+      },
+      { status: 400 }
     )
   }
 
