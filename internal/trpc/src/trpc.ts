@@ -150,7 +150,7 @@ export const createTRPCContext = async (opts: {
 
   const cache = cacheService.getCache()
 
-  // this comes from the cookies or headers of the request
+  // this comes from the cookiesxa or headers of the request
   const activeWorkspaceSlug =
     opts.req?.cookies.get(COOKIES_APP.WORKSPACE)?.value ??
     opts.headers.get(COOKIES_APP.WORKSPACE) ??

@@ -3,7 +3,7 @@ import * as z from "zod"
 
 export const env = createEnv({
   shared: {
-    NODE_ENV: z.enum(["development", "production", "test", "preview"]).default("development"),
+    NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
   },
   server: {
@@ -11,14 +11,6 @@ export const env = createEnv({
     AXIOM_DATASET: z.string(),
     // transform the string to a boolean
     EMIT_METRICS_LOGS: z
-      .string()
-      .optional()
-      .default("true")
-      .transform((v) => {
-        return v === "true"
-      })
-      .pipe(z.boolean()),
-    DRIZZLE_LOG: z
       .string()
       .optional()
       .default("true")

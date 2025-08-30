@@ -15,7 +15,7 @@ async function main() {
     primaryDatabaseUrl: env.DATABASE_URL,
     read1DatabaseUrl: env.DATABASE_READ1_URL,
     read2DatabaseUrl: env.DATABASE_READ2_URL,
-    logger: env.DRIZZLE_LOG && env.DRIZZLE_LOG.toString() === "true",
+    logger: env.DRIZZLE_LOG,
     singleton: true,
   })
 
